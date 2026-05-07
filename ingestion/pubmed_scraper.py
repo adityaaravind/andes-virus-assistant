@@ -16,7 +16,7 @@ SEARCH_QUERY = (
     '"MV Hondius"[Title/Abstract] OR '
     '"hantavirus outbreak"[Title/Abstract] OR '
     '"hantavirus cruise ship"[Title/Abstract] OR '
-    '"hantavirus 2025"[Title/Abstract]'
+    '"hantavirus 2026"[Title/Abstract]'
 )
 MAX_RESULTS = 300
 

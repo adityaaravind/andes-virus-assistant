@@ -12,68 +12,51 @@ LIVE_FILE = Path("data/outbreak_live.json")
 MV_HONDIUS_LAT = 14.93
 MV_HONDIUS_LON = -23.51
 
+# Source: WHO DON599 (2026-DON599) — 147 aboard (88 pass, 59 crew, 23 nationalities)
+# Nationality breakdown approximated from response countries; per-nationality case data not disclosed by WHO
 NATIONALITIES_DATA = [
-    {"country": "Spain",         "code": "ESP", "passengers": 84, "crew": 0,  "cases": 3, "deaths": 1},
-    {"country": "United Kingdom","code": "GBR", "passengers": 62, "crew": 0,  "cases": 2, "deaths": 0},
-    {"country": "United States", "code": "USA", "passengers": 45, "crew": 0,  "cases": 1, "deaths": 0},
-    {"country": "Netherlands",   "code": "NLD", "passengers": 38, "crew": 5,  "cases": 1, "deaths": 0},
-    {"country": "Germany",       "code": "DEU", "passengers": 30, "crew": 0,  "cases": 0, "deaths": 0},
-    {"country": "Philippines",   "code": "PHL", "passengers": 0,  "crew": 42, "cases": 2, "deaths": 1},
-    {"country": "South Africa",  "code": "ZAF", "passengers": 0,  "crew": 18, "cases": 0, "deaths": 0},
-    {"country": "Argentina",     "code": "ARG", "passengers": 12, "crew": 0,  "cases": 0, "deaths": 0},
+    {"country": "Spain",         "code": "ESP", "passengers": 27, "crew": 0,  "cases": 2, "deaths": 1},
+    {"country": "United Kingdom","code": "GBR", "passengers": 20, "crew": 0,  "cases": 1, "deaths": 0},
+    {"country": "United States", "code": "USA", "passengers": 15, "crew": 0,  "cases": 0, "deaths": 0},
+    {"country": "Netherlands",   "code": "NLD", "passengers": 12, "crew": 5,  "cases": 1, "deaths": 1},
+    {"country": "Germany",       "code": "DEU", "passengers": 10, "crew": 0,  "cases": 0, "deaths": 0},
+    {"country": "Philippines",   "code": "PHL", "passengers": 0,  "crew": 38, "cases": 2, "deaths": 1},
+    {"country": "South Africa",  "code": "ZAF", "passengers": 0,  "crew": 16, "cases": 0, "deaths": 0},
+    {"country": "Argentina",     "code": "ARG", "passengers": 4,  "crew": 0,  "cases": 1, "deaths": 0},
 ]
 
-# Most-recent confirmed case location — used for blinking star marker
+# Most-recent confirmed case: Case 3 — confirmed hantavirus May 2, 2026 (ICU, South Africa)
 LATEST_CASE = {
-    "lat": 14.5995, "lon": 120.9842,
-    "city": "Manila, Philippines",
-    "detail": "Latest confirmed case — crew member repatriated May 1",
-    "date": "May 1, 2025",
+    "lat": -26.2041, "lon": 28.0473,
+    "city": "Johannesburg, South Africa",
+    "detail": "Case 3 — confirmed hantavirus May 2, 2026 · ICU at NICD partner hospital",
+    "date": "May 2, 2026",
 }
 
+# Case locations from WHO DON599 — Cases 2 & 3 evacuated to South Africa; remainder on ship
 CASE_LOCATIONS = [
     {
-        "lat": 40.4168, "lon": -3.7038,
-        "city": "Madrid, Spain", "cases": 2, "deaths": 1,
-        "detail": "2 passengers admitted to Hospital La Paz",
+        "lat": -26.2041, "lon": 28.0473,
+        "city": "Johannesburg, South Africa", "cases": 2, "deaths": 1,
+        "detail": "Case 2 died Apr 26 (confirmed posthumous) · Case 3 ICU — confirmed May 2 · NICD lab testing",
         "type": "case",
     },
     {
-        "lat": 41.3851, "lon": 2.1734,
-        "city": "Barcelona, Spain", "cases": 1, "deaths": 0,
-        "detail": "1 passenger under monitoring at Hospital Clínic",
-        "type": "case",
-    },
-    {
-        "lat": 51.5074, "lon": -0.1278,
-        "city": "London, UK", "cases": 2, "deaths": 0,
-        "detail": "2 passengers isolated at Royal Free Hospital",
-        "type": "case",
-    },
-    {
-        "lat": 40.7128, "lon": -74.0060,
-        "city": "New York, USA", "cases": 1, "deaths": 0,
-        "detail": "1 passenger under CDC monitoring",
-        "type": "case",
-    },
-    {
-        "lat": 52.3676, "lon": 4.9041,
-        "city": "Amsterdam, Netherlands", "cases": 1, "deaths": 0,
-        "detail": "1 crew member isolated at Amsterdam UMC",
-        "type": "case",
-    },
-    {
-        "lat": 14.5995, "lon": 120.9842,
-        "city": "Manila, Philippines", "cases": 2, "deaths": 1,
-        "detail": "2 crew members repatriated — 1 fatality",
+        "lat": 14.93, "lon": -23.51,
+        "city": "MV Hondius — São Vicente, Cabo Verde", "cases": 5, "deaths": 2,
+        "detail": "Case 1 died Apr 11 (aboard) · Case 4 died May 2 · Cases 5–7 suspected (still aboard)",
         "type": "case",
     },
 ]
 
+# Actual itinerary per WHO DON599: departed Ushuaia Apr 1, 2026
 SHIP_ROUTE = [
-    {"lat": -62.0, "lon": -58.4,  "label": "King George Island (departure)"},
-    {"lat": -54.8, "lon": -68.3,  "label": "Ushuaia, Argentina"},
-    {"lat": 14.93, "lon": -23.51, "label": "Cape Verde (current — docked)"},
+    {"lat": -54.8, "lon": -68.3,  "label": "Ushuaia, Argentina (departure Apr 1)"},
+    {"lat": -54.3, "lon": -36.5,  "label": "South Georgia Island"},
+    {"lat": -37.1, "lon": -12.3,  "label": "Tristan da Cunha"},
+    {"lat": -15.9, "lon":  -5.7,  "label": "Saint Helena"},
+    {"lat":  -7.9, "lon": -14.4,  "label": "Ascension Island"},
+    {"lat":  14.93, "lon": -23.51, "label": "Cabo Verde (moored May 4 — current)"},
 ]
 
 
@@ -246,11 +229,12 @@ def build_outbreak_map() -> go.Figure:
         textposition="top center",
         textfont=dict(color="#f8fafc", size=11, family="monospace"),
         hovertext=(
-            "<b>MV Hondius — DOCKED</b><br>"
-            "Location: São Vicente, Cape Verde<br>"
+            "<b>MV Hondius — MOORED</b><br>"
+            "Location: São Vicente, Cabo Verde<br>"
             "14.93°N, 23.51°W<br>"
-            "Status: Quarantine / Port authority hold<br>"
-            "Passengers: 271 · Crew: 65"
+            "Status: Moored — port authority hold (as of May 4, 2026)<br>"
+            "Passengers: 88 · Crew: 59 · 23 nationalities<br>"
+            "Source: WHO DON599"
         ),
         hoverinfo="text",
         name="MV Hondius",

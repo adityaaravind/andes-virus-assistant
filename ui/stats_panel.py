@@ -11,24 +11,25 @@ import streamlit as st
 
 LIVE_FILE = Path("data/outbreak_live.json")
 
-# Hardcoded baseline — auto-overridden by outbreak_live.json when scraper finds updates
+# Hardcoded baseline (WHO DON599, as of 2026-05-04) — auto-overridden by outbreak_live.json
 OUTBREAK_DATA: dict[str, Any] = {
-    "confirmed_cases": 9,
-    "deaths": 2,
-    "nationalities": 8,
-    "ship_status": "Docked — Cape Verde",
-    "last_updated": "2025-05-01",
-    "case_fatality_rate": 22.2,
+    "confirmed_cases": 7,
+    "deaths": 3,
+    "nationalities": 23,
+    "ship_status": "Moored — Cabo Verde",
+    "last_updated": "2026-05-04",
+    "case_fatality_rate": 42.9,
 }
 
+# Timeline built from WHO DON599 (2026-DON599)
 CASE_TIMELINE = [
-    {"date": "2025-04-15", "cases": 1, "label": "First case confirmed"},
-    {"date": "2025-04-18", "cases": 2, "label": "Second case"},
-    {"date": "2025-04-21", "cases": 4, "label": "Cluster identified"},
-    {"date": "2025-04-24", "cases": 6, "label": "Ship diverted"},
-    {"date": "2025-04-27", "cases": 7, "label": "Quarantine declared"},
-    {"date": "2025-04-30", "cases": 8, "label": "WHO notified"},
-    {"date": "2025-05-01", "cases": 9, "label": "Current total"},
+    {"date": "2026-04-06", "cases": 1, "label": "Case 1 — first symptom onset (male)"},
+    {"date": "2026-04-11", "cases": 1, "label": "Case 1 dies aboard — no lab testing"},
+    {"date": "2026-04-15", "cases": 2, "label": "Case 2 — close contact of Case 1"},
+    {"date": "2026-04-26", "cases": 2, "label": "Case 2 dies in South Africa (confirmed posthumous)"},
+    {"date": "2026-04-28", "cases": 3, "label": "Case 4 — symptom onset"},
+    {"date": "2026-05-02", "cases": 4, "label": "Case 3 confirmed hantavirus (ICU S. Africa); Case 4 dies"},
+    {"date": "2026-05-04", "cases": 7, "label": "WHO reports 7 total (2 confirmed + 5 suspected)"},
 ]
 
 
@@ -130,7 +131,7 @@ def render_stats_panel() -> None:
 
 def render_timeline_chart() -> None:
     st.markdown("#### Case Progression")
-    st.caption("Apr–May 2025 initial outbreak on MV Hondius · timeline shows confirmed case progression from first detection")
+    st.caption("Apr–May 2026 outbreak on MV Hondius · WHO DON599 · timeline shows case progression from first symptom onset")
     fig = build_timeline_chart()
     st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
     stats = get_outbreak_stats()

@@ -31,7 +31,7 @@ ANDES_FIXED = {
     "growth_rate":   1.08,
 }
 
-FIRST_CASE_DATE = datetime(2025, 4, 15)
+FIRST_CASE_DATE = datetime(2026, 4, 6)
 
 RISK_THRESHOLDS = [
     (0,  20,  "#22c55e", "LOW",      "Contained — limited P2P transmission"),
@@ -224,7 +224,7 @@ def render_pandemic_risk_panel() -> None:
           ">
             <span style="color:#94a3b8;font-size:0.77rem;">
               📅 Day <b style="color:#f8fafc;">{risk['days']}</b>
-              <span style="color:#475569;"> since Apr 15, 2025 (outbreak began)</span>
+              <span style="color:#475569;"> since Apr 6, 2026 (first symptom onset — WHO DON599)</span>
             </span>
             <span style="color:#94a3b8;font-size:0.77rem;">
               🦠 Cases: <b style="color:#ef4444;">{cases}</b>

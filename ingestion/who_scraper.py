@@ -47,12 +47,14 @@ def _find_pdf_links() -> list[dict[str, str]]:
 
     candidate_pages = [
         WHO_DISEASE_URL,
+        # WHO DON599 — confirmed 2026 hantavirus MV Hondius outbreak report
+        "https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON599",
         "https://www.who.int/news-room/fact-sheets/detail/hantavirus-pulmonary-syndrome",
-        "https://www.who.int/emergencies/disease-outbreak-news/item/2025-DON-hantavirus",
+        # WHO OData outbreaks API (may populate as outbreak progresses)
+        "https://www.who.int/api/news/outbreaks",
         # Broader search pages for any recent DON reports
         "https://www.who.int/emergencies/disease-outbreak-news?sf_Status=Active",
         "https://www.who.int/csr/don/en/",
-        "https://www.who.int/news/item/search?sf_text=hantavirus",
     ]
 
     for page_url in candidate_pages:
