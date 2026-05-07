@@ -11,20 +11,28 @@ from PIL import Image, ImageDraw, ImageFont
 from ui.stats_panel import OUTBREAK_DATA, CASE_TIMELINE
 from ui.map_panel import NATIONALITIES_DATA
 
-# ── Font paths ────────────────────────────────────────────────────────────────
-_FONT_DIR = Path("/usr/share/fonts/truetype/inter-zorin-os")
+# ── Font paths — bundled in assets/fonts/ for cloud deployment ───────────────
+_ASSET_FONT_DIR  = Path(__file__).parent.parent / "assets" / "fonts"
+_SYSTEM_FONT_DIR = Path("/usr/share/fonts/truetype/inter-zorin-os")
+_FONT_DIR        = _ASSET_FONT_DIR if _ASSET_FONT_DIR.exists() else _SYSTEM_FONT_DIR
+
 _FONTS: dict[str, Path] = {
-    "black":     _FONT_DIR / "Inter-Black.ttf",
-    "bold":      _FONT_DIR / "Inter-Bold.ttf",
-    "semibold":  _FONT_DIR / "Inter-SemiBold.ttf",
-    "medium":    _FONT_DIR / "Inter-Medium.ttf",
-    "regular":   _FONT_DIR / "Inter-Regular.ttf",
-    "light":     _FONT_DIR / "Inter-Light.ttf",
+    "black":    _FONT_DIR / "Inter-Black.ttf",
+    "bold":     _FONT_DIR / "Inter-Bold.ttf",
+    "semibold": _FONT_DIR / "Inter-SemiBold.ttf",
+    "medium":   _FONT_DIR / "Inter-Medium.ttf",
+    "regular":  _FONT_DIR / "Inter-Regular.ttf",
+    "light":    _FONT_DIR / "Inter-Light.ttf",
 }
+
 
 def _font(style: str, size: int) -> ImageFont.FreeTypeFont:
     path = _FONTS.get(style, _FONTS["regular"])
-    return ImageFont.truetype(str(path), size)
+    try:
+        return ImageFont.truetype(str(path), size)
+    except (OSError, IOError):
+        # Final fallback — PIL default bitmap font (no custom styling)
+        return ImageFont.load_default()
 
 # ── Palette ───────────────────────────────────────────────────────────────────
 BG      = (0,   0,   0)        # true black
