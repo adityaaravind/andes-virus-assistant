@@ -9,25 +9,17 @@ from pathlib import Path
 from typing import Any
 
 from alerts.notifier import dispatch, send_ntfy
+from alerts.persistent_kv import kv_get, kv_set
 
-SUBS_FILE         = Path("data/alert_subscriptions.json")
-HISTORY_FILE      = Path("data/alert_history.jsonl")
-DEFAULT_STATE_FILE = Path("data/default_alert_state.json")
+HISTORY_FILE = Path("data/alert_history.jsonl")
 
 
 def load_subscriptions() -> list[dict[str, Any]]:
-    SUBS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    if not SUBS_FILE.exists():
-        return []
-    try:
-        return json.loads(SUBS_FILE.read_text())
-    except Exception:
-        return []
+    return kv_get("subscriptions", [])
 
 
 def save_subscriptions(subs: list[dict[str, Any]]) -> None:
-    SUBS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    SUBS_FILE.write_text(json.dumps(subs, indent=2))
+    kv_set("subscriptions", subs)
 
 
 def add_subscription(sub: dict[str, Any]) -> None:
@@ -54,18 +46,11 @@ def _log_alert(title: str, message: str) -> None:
 
 
 def _load_default_state() -> dict[str, Any]:
-    DEFAULT_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
-    if DEFAULT_STATE_FILE.exists():
-        try:
-            return json.loads(DEFAULT_STATE_FILE.read_text())
-        except Exception:
-            pass
-    return {}
+    return kv_get("default_alert_state", {})
 
 
 def _save_default_state(state: dict[str, Any]) -> None:
-    DEFAULT_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
-    DEFAULT_STATE_FILE.write_text(json.dumps(state, indent=2))
+    kv_set("default_alert_state", state)
 
 
 def _build_alerts(current: dict[str, Any], last: dict[str, Any],
