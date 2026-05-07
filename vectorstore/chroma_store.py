@@ -9,6 +9,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Force pure-Python protobuf — C extension breaks on Python 3.14 with chromadb's opentelemetry chain
+os.environ.setdefault("PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION", "python")
+
 COLLECTION_NAME = "andes_virus_research"
 DEFAULT_PERSIST_DIR = "./vectorstore/db"
 DEFAULT_K = 6
