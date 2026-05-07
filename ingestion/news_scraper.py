@@ -18,7 +18,6 @@ RSS_FEEDS = [
     {"url": "https://www.who.int/rss-feeds/news-english.xml",                                    "source": "WHO",              "credibility": 1.00},
     {"url": "https://www.paho.org/en/rss.xml",                                                   "source": "PAHO",             "credibility": 1.00},
     {"url": "https://www.cidrap.umn.edu/rss.xml",                                                "source": "CIDRAP",           "credibility": 0.95},
-    {"url": "https://www.ecdc.europa.eu/en/rss.xml",                                             "source": "ECDC",             "credibility": 0.95},
 
     # Outbreak-specific
     {"url": "https://outbreaknewstoday.com/feed/",                                               "source": "Outbreak News",    "credibility": 0.88},
@@ -75,12 +74,6 @@ def scrape_all_feeds() -> list[dict[str, Any]]:
             articles.extend(_parse_feed(feed_config, seen_urls))
         except Exception:
             continue
-
-    # GDELT — free, no key, global news intelligence
-    try:
-        articles.extend(_scrape_gdelt(seen_urls))
-    except Exception:
-        pass
 
     # EuropePMC — research papers on hantavirus 2026
     try:
