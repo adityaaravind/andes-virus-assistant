@@ -102,8 +102,8 @@ def render_stats_panel() -> None:
     else:
         st.markdown(
             '<span style="color:#f59e0b;font-size:0.7rem;font-weight:700;font-family:monospace;'
-            'letter-spacing:0.05em;">⏸ CASE COUNTS — MANUALLY UPDATED · last: '
-            + stats["last_updated"] + '</span>',
+            'letter-spacing:0.05em;">⏸ CASE COUNTS — LAST VERIFIED: '
+            + stats["last_updated"] + ' · awaiting live update</span>',
             unsafe_allow_html=True,
         )
 
@@ -130,11 +130,12 @@ def render_stats_panel() -> None:
 
 def render_timeline_chart() -> None:
     st.markdown("#### Case Progression")
+    st.caption("Apr–May 2025 initial outbreak on MV Hondius · timeline shows confirmed case progression from first detection")
     fig = build_timeline_chart()
     st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
     stats = get_outbreak_stats()
     st.caption(
         f"CFR: {stats['case_fatality_rate']}% · "
-        f"Last updated: {stats['last_updated']} · "
-        "Case counts refresh every 15 min"
+        f"Last verified: {stats['last_updated']} · "
+        "Auto-updates every 15 min from live feeds"
     )

@@ -223,7 +223,8 @@ def render_pandemic_risk_panel() -> None:
             border-top:1px solid #1b2e45;padding-top:0.7rem;
           ">
             <span style="color:#94a3b8;font-size:0.77rem;">
-              📅 Day <b style="color:#f8fafc;">{risk['days']}</b> of outbreak
+              📅 Day <b style="color:#f8fafc;">{risk['days']}</b>
+              <span style="color:#475569;"> since Apr 15, 2025 (outbreak began)</span>
             </span>
             <span style="color:#94a3b8;font-size:0.77rem;">
               🦠 Cases: <b style="color:#ef4444;">{cases}</b>

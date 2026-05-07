@@ -25,6 +25,15 @@ def _load_streamlit_secrets() -> None:
 
 _load_streamlit_secrets()
 
+
+def _ensure_data_dirs() -> None:
+    """Create runtime data dirs if missing (needed on Streamlit Cloud cold starts)."""
+    for d in ("data", "vectorstore/db"):
+        Path(d).mkdir(parents=True, exist_ok=True)
+
+
+_ensure_data_dirs()
+
 # ---------------------------------------------------------------------------
 # Background ingestion scheduler (runs once per process, not per Streamlit
 # session — module-level lock prevents duplicate schedulers on hot-reload)
