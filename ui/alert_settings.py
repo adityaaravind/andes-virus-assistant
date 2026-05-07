@@ -32,18 +32,40 @@ def render_alert_settings() -> None:
             f'<p style="color:#ef4444;font-size:0.72rem;font-weight:700;margin:0 0 0.3rem;'
             f'text-transform:uppercase;letter-spacing:0.05em;">📡 Official Alert Channel</p>'
             f'<p style="color:#f1f5f9;font-size:0.78rem;margin:0 0 0.5rem;">'
-            f'Subscribe once — receive all outbreak alerts automatically.</p>'
-            f'<div style="display:flex;gap:0.4rem;flex-wrap:wrap;">'
-            f'<a href="{ntfy_web}" target="_blank" rel="noopener" style="'
-            f'background:#ef4444;color:#fff;border-radius:6px;padding:0.35rem 0.8rem;'
-            f'font-size:0.72rem;font-weight:700;text-decoration:none;display:inline-block;">'
-            f'🌐 Subscribe (browser)</a>'
-            f'<a href="{ntfy_mobile}" style="'
-            f'background:rgba(239,68,68,0.2);color:#ef4444;border:1px solid #ef444466;'
-            f'border-radius:6px;padding:0.35rem 0.8rem;'
-            f'font-size:0.72rem;font-weight:700;text-decoration:none;display:inline-block;">'
-            f'📱 Open in ntfy app</a>'
-            f'</div>'
+            f'Subscribe once — receive all outbreak alerts automatically.</p>',
+            unsafe_allow_html=True,
+        )
+
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("🔔 Subscribe to Push Alerts", type="primary", use_container_width=True):
+                st.session_state["show_subscribe_info"] = True
+
+        with col2:
+            if st.button("📱 Mobile App", use_container_width=True):
+                st.session_state["show_mobile_info"] = True
+
+        if st.session_state.get("show_subscribe_info"):
+            st.info(f"""
+            **To receive push notifications:**
+            1. **Browser**: Visit {ntfy_web} and click "Subscribe"
+            2. **Mobile**: Install ntfy app, add topic: `{DEFAULT_TOPIC}`
+            3. **Desktop**: Install ntfy desktop app, subscribe to topic
+
+            You'll get instant alerts when outbreak conditions change.
+            """)
+
+        if st.session_state.get("show_mobile_info"):
+            st.info(f"""
+            **Mobile Setup:**
+            1. Download **ntfy** app (Android/iOS)
+            2. Tap "+" and enter: `{DEFAULT_TOPIC}`
+            3. Enable notifications in phone settings
+
+            Topic: `{DEFAULT_TOPIC}`
+            """)
+
+        st.markdown(
             f'<p style="color:#475569;font-size:0.65rem;margin:0.4rem 0 0;font-family:monospace;">'
             f'Topic: {DEFAULT_TOPIC}</p>'
             f'</div>',

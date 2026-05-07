@@ -29,7 +29,7 @@ NATIONALITIES_DATA = [
 LATEST_CASE = {
     "lat": -26.2041, "lon": 28.0473,
     "city": "Johannesburg, South Africa",
-    "detail": "Case 3 — confirmed hantavirus May 2, 2026 · ICU at NICD partner hospital",
+    "detail": "Case 3 — confirmed hantavirus May 2, 2026 · ICU (intensive care) at NICD partner hospital",
     "date": "May 2, 2026",
 }
 
@@ -38,7 +38,7 @@ CASE_LOCATIONS = [
     {
         "lat": -26.2041, "lon": 28.0473,
         "city": "Johannesburg, South Africa", "cases": 2, "deaths": 1,
-        "detail": "Case 2 died Apr 26 (confirmed posthumous) · Case 3 ICU — confirmed May 2 · NICD lab testing",
+        "detail": "Case 2 died Apr 26 (confirmed posthumous) · Case 3 ICU (intensive care) — confirmed May 2 · NICD lab testing",
         "type": "case",
     },
     {

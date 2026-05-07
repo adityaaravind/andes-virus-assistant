@@ -115,7 +115,7 @@ def _build_gauge(score: float, color: str) -> go.Figure:
 
 @st.cache_data(ttl=300, show_spinner=False)
 def _build_comparison_bars(risk: dict[str, Any]) -> go.Figure:
-    metrics = ["Transmission\nRisk", "Geographic\nSpread", "Growth\nRate", "CFR\nSeverity"]
+    metrics = ["Transmission\nRisk", "Geographic\nSpread", "Growth\nRate", "CFR\n(Fatality Rate)"]
     andes   = [risk["transmission"], risk["spread"], risk["growth"], risk["severity"]]
     covid   = [95, 72, 88, 46]
 
@@ -233,12 +233,12 @@ def render_pandemic_risk_panel() -> None:
               🌍 Countries: <b style="color:#f8fafc;">{countries}</b>
             </span>
             <span style="color:#94a3b8;font-size:0.77rem;">
-              📈 R₀ est.: <b style="color:#f59e0b;">{ANDES_FIXED['r0']}</b>
+              📈 R₀ (reproduction rate): <b style="color:#f59e0b;">{ANDES_FIXED['r0']}</b>
               <span style="color:#475569;"> vs COVID </span>
               <b style="color:#ef4444;">{COVID_EARLY['r0']}</b>
             </span>
             <span style="color:#94a3b8;font-size:0.77rem;">
-              💀 CFR: <b style="color:#ef4444;">{ANDES_FIXED['cfr_pct']}%</b>
+              💀 CFR (case fatality rate): <b style="color:#ef4444;">{ANDES_FIXED['cfr_pct']}%</b>
               <span style="color:#475569;"> vs COVID </span>
               <b style="color:#f59e0b;">{COVID_EARLY['cfr_pct']}%</b>
             </span>
@@ -289,14 +289,14 @@ def render_pandemic_risk_panel() -> None:
             <p style="color:#22c55e;font-size:0.72rem;font-weight:700;margin:0;">✓ LOWER RISK THAN COVID</p>
             <p style="color:#94a3b8;font-size:0.73rem;margin:0.2rem 0 0;">
               No airborne transmission. P2P spread requires close contact.
-              R₀ {ANDES_FIXED['r0']} vs COVID {COVID_EARLY['r0']}.
+              R₀ (reproduction rate) {ANDES_FIXED['r0']} vs COVID {COVID_EARLY['r0']}.
             </p>
           </div>
           <div style="background:rgba(245,158,11,0.08);border:1px solid #f59e0b44;
                       border-radius:8px;padding:0.6rem 0.8rem;">
             <p style="color:#f59e0b;font-size:0.72rem;font-weight:700;margin:0;">⚠ HIGH SEVERITY</p>
             <p style="color:#94a3b8;font-size:0.73rem;margin:0.2rem 0 0;">
-              CFR {ANDES_FIXED['cfr_pct']}% vs COVID {COVID_EARLY['cfr_pct']}%.
+              CFR (case fatality rate) {ANDES_FIXED['cfr_pct']}% vs COVID {COVID_EARLY['cfr_pct']}%.
               No approved antiviral treatment. Hospital mortality high.
             </p>
           </div>

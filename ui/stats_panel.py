@@ -28,8 +28,8 @@ CASE_TIMELINE = [
     {"date": "2026-04-15", "cases": 2, "label": "Case 2 — close contact of Case 1"},
     {"date": "2026-04-26", "cases": 2, "label": "Case 2 dies in South Africa (confirmed posthumous)"},
     {"date": "2026-04-28", "cases": 3, "label": "Case 4 — symptom onset"},
-    {"date": "2026-05-02", "cases": 4, "label": "Case 3 confirmed hantavirus (ICU S. Africa); Case 4 dies"},
-    {"date": "2026-05-04", "cases": 7, "label": "WHO reports 7 total (2 confirmed + 5 suspected)"},
+    {"date": "2026-05-02", "cases": 4, "label": "Case 3 confirmed hantavirus (ICU intensive care, S. Africa); Case 4 dies"},
+    {"date": "2026-05-04", "cases": 7, "label": "WHO (World Health Org) reports 7 total (2 confirmed + 5 suspected)"},
 ]
 
 
