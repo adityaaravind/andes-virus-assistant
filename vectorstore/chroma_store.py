@@ -4,8 +4,6 @@ from __future__ import annotations
 import os
 from typing import Any
 
-import chromadb
-from chromadb.config import Settings
 from dotenv import load_dotenv
 
 
@@ -16,7 +14,15 @@ DEFAULT_PERSIST_DIR = "./vectorstore/db"
 DEFAULT_K = 6
 
 
-def get_client() -> chromadb.PersistentClient:
+def _chromadb():
+    """Lazy import — avoids crash on Python 3.14 where opentelemetry/protobuf breaks at import."""
+    import chromadb
+    from chromadb.config import Settings
+    return chromadb, Settings
+
+
+def get_client():
+    chromadb, Settings = _chromadb()
     persist_dir = os.getenv("CHROMA_PERSIST_DIR", DEFAULT_PERSIST_DIR)
     os.makedirs(persist_dir, exist_ok=True)
     return chromadb.PersistentClient(
@@ -25,7 +31,7 @@ def get_client() -> chromadb.PersistentClient:
     )
 
 
-def get_collection(client: chromadb.PersistentClient | None = None) -> chromadb.Collection:
+def get_collection(client=None):
     if client is None:
         client = get_client()
     return client.get_or_create_collection(
