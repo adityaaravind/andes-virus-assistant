@@ -1,15 +1,16 @@
-"""Alert subscription UI — ntfy.sh + email, configurable thresholds."""
+"""Alert subscription UI — OneSignal browser push + email, configurable thresholds."""
 from __future__ import annotations
 
 import os
 from typing import Any
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 from alerts.alert_manager import add_subscription, get_alert_history, load_subscriptions
-from alerts.notifier import send_ntfy, send_email
+from alerts.notifier import send_onesignal, send_email
 
-DEFAULT_TOPIC = os.getenv("NTFY_DEFAULT_TOPIC", "")
+ONESIGNAL_APP_ID = os.getenv("ONESIGNAL_APP_ID", "")
 
 
 def render_alert_settings() -> None:
@@ -22,52 +23,75 @@ def render_alert_settings() -> None:
         unsafe_allow_html=True,
     )
 
-    # ── Official broadcast channel ────────────────────────────────────────────
-    if DEFAULT_TOPIC:
-        ntfy_web   = f"https://ntfy.sh/{DEFAULT_TOPIC}"
-        ntfy_mobile = f"ntfy://{DEFAULT_TOPIC}"
+    # ── OneSignal browser push notifications ─────────────────────────────────
+    if ONESIGNAL_APP_ID:
         st.markdown(
             f'<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);'
             f'border-radius:8px;padding:0.7rem 0.8rem;margin-bottom:0.7rem;">'
             f'<p style="color:#ef4444;font-size:0.72rem;font-weight:700;margin:0 0 0.3rem;'
-            f'text-transform:uppercase;letter-spacing:0.05em;">📡 Official Alert Channel</p>'
+            f'text-transform:uppercase;letter-spacing:0.05em;">📡 Browser Push Alerts</p>'
             f'<p style="color:#f1f5f9;font-size:0.78rem;margin:0 0 0.5rem;">'
-            f'Subscribe once — receive all outbreak alerts automatically.</p>',
+            f'Get instant outbreak alerts directly in your browser — no app download needed.</p>',
             unsafe_allow_html=True,
         )
 
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("🔔 Subscribe to Push Alerts", type="primary", use_container_width=True):
-                st.session_state["show_subscribe_info"] = True
+        # OneSignal integration
+        onesignal_html = f"""
+        <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+        <script>
+          window.OneSignalDeferred = window.OneSignalDeferred || [];
+          OneSignalDeferred.push(function(OneSignal) {{
+            OneSignal.init({{
+              appId: "{ONESIGNAL_APP_ID}",
+              safari_web_id: "web.onesignal.auto.{ONESIGNAL_APP_ID}",
+              notifyButton: {{
+                enable: false
+              }}
+            }});
 
-        with col2:
-            if st.button("📱 Mobile App", use_container_width=True):
-                st.session_state["show_mobile_info"] = True
+            // Custom subscribe button
+            window.subscribeToNotifications = function() {{
+              OneSignal.showSlidedownPrompt().then(function() {{
+                OneSignal.getNotificationPermission().then(function(permission) {{
+                  if (permission === 'granted') {{
+                    document.getElementById('onesignal-status').innerHTML =
+                      '<span style="color:#22c55e;">✅ Subscribed to outbreak alerts!</span>';
+                  }}
+                }});
+              }});
+            }};
 
-        if st.session_state.get("show_subscribe_info"):
-            st.info(f"""
-            **To receive push notifications:**
-            1. **Browser**: Visit {ntfy_web} and click "Subscribe"
-            2. **Mobile**: Install ntfy app, add topic: `{DEFAULT_TOPIC}`
-            3. **Desktop**: Install ntfy desktop app, subscribe to topic
+            // Check current subscription status
+            OneSignal.getNotificationPermission().then(function(permission) {{
+              const statusEl = document.getElementById('onesignal-status');
+              if (permission === 'granted') {{
+                statusEl.innerHTML = '<span style="color:#22c55e;">✅ Already subscribed</span>';
+              }} else if (permission === 'denied') {{
+                statusEl.innerHTML = '<span style="color:#ef4444;">❌ Notifications blocked — please enable in browser settings</span>';
+              }} else {{
+                statusEl.innerHTML = '<span style="color:#f59e0b;">⏸ Click button below to subscribe</span>';
+              }}
+            }});
+          }});
+        </script>
+        <div style="text-align:center;margin:0.8rem 0;">
+          <button onclick="subscribeToNotifications()" style="
+            background:#ef4444;color:#fff;border:none;border-radius:8px;
+            padding:0.8rem 1.5rem;font-size:0.9rem;font-weight:700;
+            cursor:pointer;transition:all 0.2s ease;">
+            🔔 Enable Browser Notifications
+          </button>
+          <p id="onesignal-status" style="margin:0.5rem 0 0;font-size:0.75rem;color:#94a3b8;">
+            Loading subscription status...
+          </p>
+        </div>
+        """
 
-            You'll get instant alerts when outbreak conditions change.
-            """)
-
-        if st.session_state.get("show_mobile_info"):
-            st.info(f"""
-            **Mobile Setup:**
-            1. Download **ntfy** app (Android/iOS)
-            2. Tap "+" and enter: `{DEFAULT_TOPIC}`
-            3. Enable notifications in phone settings
-
-            Topic: `{DEFAULT_TOPIC}`
-            """)
+        components.html(onesignal_html, height=150)
 
         st.markdown(
             f'<p style="color:#475569;font-size:0.65rem;margin:0.4rem 0 0;font-family:monospace;">'
-            f'Topic: {DEFAULT_TOPIC}</p>'
+            f'Powered by OneSignal · App ID: {ONESIGNAL_APP_ID[:8]}...</p>'
             f'</div>',
             unsafe_allow_html=True,
         )

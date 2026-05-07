@@ -21,7 +21,8 @@ load_dotenv()
 def _load_streamlit_secrets() -> None:
     try:
         for key in ("OPENAI_API_KEY", "CHROMA_PERSIST_DIR", "NEWS_REFRESH_INTERVAL_HOURS",
-                    "QDRANT_URL", "QDRANT_API_KEY", "NTFY_DEFAULT_TOPIC", "APP_PASSWORD"):
+                    "QDRANT_URL", "QDRANT_API_KEY", "ONESIGNAL_APP_ID", "ONESIGNAL_REST_API_KEY",
+                    "NTFY_DEFAULT_TOPIC", "APP_PASSWORD"):
             if not os.getenv(key) and key in st.secrets:
                 os.environ[key] = st.secrets[key]
     except Exception:
