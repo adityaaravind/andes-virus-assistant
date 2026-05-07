@@ -1,8 +1,12 @@
 """Andes Virus Research Assistant — main Streamlit application."""
 from __future__ import annotations
 
-import logging
+# Must be set before ANY import that touches protobuf/grpc (chromadb, opentelemetry, etc.)
+# Fixes crash on Python 3.14 where protobuf C extension is incompatible.
 import os
+os.environ.setdefault("PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION", "python")
+
+import logging
 import threading
 from pathlib import Path
 from typing import Any
