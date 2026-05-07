@@ -295,7 +295,7 @@ def _render_setup_warning() -> None:
 def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
     from ui.source_panel import render_source_panel
     from ui.alert_settings import render_alert_settings
-    from vectorstore.chroma_store import get_stats
+    from vectorstore.store import get_stats
 
     with st.sidebar:
         st.markdown(
