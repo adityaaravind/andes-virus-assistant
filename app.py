@@ -366,69 +366,45 @@ def main() -> None:
         from streamlit_autorefresh import st_autorefresh
         st_autorefresh(interval=15 * 60 * 1000, key="stats_refresh")
 
-        _render_header()
+        # ── Compact Header ──
+        col_title, col_status = st.columns([4, 1])
+        with col_title:
+            st.markdown(
+                "<h1 style='margin:0;'>🧬 Andes Virus Research Assistant</h1>"
+                "<p style='color:var(--gray-300); font-size:0.85rem; margin:0;'>"
+                "MV Hondius Hantavirus Outbreak · Intelligence Dashboard</p>",
+                unsafe_allow_html=True
+            )
+        with col_status:
+            st.markdown(
+                "<div style='text-align:right;'><span class='outbreak-badge'>OUTBREAK ACTIVE</span></div>",
+                unsafe_allow_html=True
+            )
+        
         st.divider()
 
-        # ── WHAT IS THIS? — Introduction Panel ──────────────────────────────────
-        st.markdown(
-            """
-            <style>
-            .intro-grid {
-                display: grid;
-                grid-template-columns: 3fr 1fr;
-                gap: 1rem;
-                align-items: center;
-                margin-bottom: 1rem;
-            }
-            .feature-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 1rem;
-                margin-bottom: 1rem;
-            }
-            @media (max-width: 768px) {
-                .intro-grid, .feature-grid {
-                    grid-template-columns: 1fr;
-                }
-            }
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
-
-        intro_html = f"""
-<div class="intro-grid">
-<div><h2 style="margin:0;">🚨 <b>LIVE OUTBREAK INTELLIGENCE SYSTEM</b></h2></div>
-<div style='background: #f59e0b22; border: 2px solid #f59e0b; border-radius: 12px; padding: 0.5rem 1rem; text-align: center;'>
-<p style='color: #f59e0b; font-size: 1.4rem; font-weight: 900; margin: 0; font-family: monospace;'>HANTAVIRUS</p>
-<p style='color: #94a3b8; font-size: 0.65rem; margin: 0;'>Andes Virus Strain</p>
-</div>
-</div>
-"""
-        st.markdown(intro_html, unsafe_allow_html=True)
-
-        st.error("🦠 **ACTIVE: MV Hondius Hantavirus Outbreak**\n\nThis AI assistant tracks the ongoing Andes virus outbreak linked to the cruise ship MV Hondius. Real-time monitoring of cases, deaths, and geographic spread across multiple countries.")
-
-        # Manual wrap for feature boxes to ensure grid control
-        st.markdown('<div class="feature-grid">', unsafe_allow_html=True)
-        col_features, col_usage = st.columns(2)
-        with col_features:
-            st.success("""
-            **🔍 What This Tool Does**
-            - Real-time case tracking & mortality analysis
-            - AI-powered research assistant
-            - Live news monitoring from WHO, CDC, Reuters
-            - Pandemic risk assessment & geographic mapping
-            """)
-        with col_usage:
-            st.info("""
-            **💡 How To Use**
-            - Scroll down to see live outbreak statistics
-            - Ask questions in the research assistant chat
-            - Check the map for geographic spread patterns
-            - Enable alerts in sidebar for outbreak updates
-            """)
-        st.markdown('</div>', unsafe_allow_html=True)
+        # ── Information Panels ──
+        feat_col, use_col = st.columns(2)
+        with feat_col:
+            st.markdown(
+                "<div class='panel-card'>"
+                "<h3 style='margin:0 0 0.5rem 0;'>🔍 Intelligence Summary</h3>"
+                "<p style='font-size:0.8rem; color:var(--gray-100); line-height:1.4; margin:0;'>"
+                "Real-time case tracking, AI evidence review, and live news monitoring "
+                "from WHO, CDC, and major scientific journals.</p>"
+                "</div>",
+                unsafe_allow_html=True
+            )
+        with use_col:
+            st.markdown(
+                "<div class='panel-card'>"
+                "<h3 style='margin:0 0 0.5rem 0;'>💡 Navigation</h3>"
+                "<p style='font-size:0.8rem; color:var(--gray-100); line-height:1.4; margin:0;'>"
+                "Scroll for live metrics and maps. Use the AI chat below to query the "
+                "latest research or outbreak data.</p>"
+                "</div>",
+                unsafe_allow_html=True
+            )
 
         st.warning("⚠️ **NOT MEDICAL ADVICE** • For emergencies contact local health authorities")
 

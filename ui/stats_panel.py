@@ -149,8 +149,7 @@ def render_stats_panel() -> None:
     for icon, value, label in cards:
         cards_html += (
             f'<div class="stat-card">'
-            f'<div style="font-size:1.4rem;">{icon}</div>'
-            f'<div class="stat-value">{value}</div>'
+            f'<div class="stat-value">{icon} {value}</div>'
             f'<div class="stat-label">{label}</div>'
             f'</div>'
         )

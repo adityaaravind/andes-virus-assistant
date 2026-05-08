@@ -137,27 +137,22 @@ def _card_html(art: dict[str, Any]) -> str:
     cred_pct = int(art["credibility"] * 100)
     cred_color = "#22c55e" if cred_pct >= 90 else "#f59e0b" if cred_pct >= 70 else "#94a3b8"
     title = art["title"].replace('"', "&quot;").replace("<", "&lt;").replace(">", "&gt;")
-    summary = art["summary"].replace("<", "&lt;").replace(">", "&gt;")
 
-    # Single-line HTML — prevents Streamlit markdown treating indented lines as code blocks
+    # Compact single-line design
     return (
-        f'<div style="background:{s["bg"]};border:1px solid {s["border"]}44;border-top:3px solid {s["border"]};'
-        f'border-radius:10px;padding:0.9rem 1rem;min-height:150px;box-shadow:0 4px 20px {s["glow"]};'
-        f'display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.1rem;">'
-        f'<div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;">'
-        f'<span style="background:{s["badge_bg"]};color:{s["badge_fg"]};font-size:0.68rem;font-weight:700;'
-        f'letter-spacing:0.06em;padding:2px 8px;border-radius:20px;text-transform:uppercase;white-space:nowrap;">'
-        f'{s["icon"]} {art["source"]}</span>'
-        f'<span style="color:#475569;font-size:0.68rem;white-space:nowrap;">{art["date"]}</span>'
+        f'<div style="background:rgba(255,255,255,0.02);border:1px solid rgba(148,163,184,0.1);'
+        f'border-left:3px solid {s["border"]};'
+        f'border-radius:6px;padding:0.6rem 0.75rem;display:flex;flex-direction:column;gap:0.3rem;">'
+        f'<div style="display:flex;justify-content:space-between;align-items:center;">'
+        f'<span style="color:{s["border"]};font-size:0.6rem;font-weight:800;'
+        f'text-transform:uppercase;letter-spacing:0.05em;">{art["source"]}</span>'
+        f'<span style="color:#475569;font-size:0.6rem;">{art["date"]}</span>'
         f'</div>'
-        f'<a href="{art["url"]}" target="_blank" rel="noopener" class="headline-link" style="text-decoration:none;'
-        f'color:#f1f5f9;font-size:0.87rem;font-weight:600;line-height:1.35;">{title}</a>'
-        f'<p style="color:#94a3b8;font-size:0.75rem;line-height:1.4;margin:0;flex:1;">{summary}</p>'
-        f'<div style="display:flex;align-items:center;gap:0.4rem;">'
-        f'<div style="flex:1;height:3px;background:#1b2e45;border-radius:2px;">'
-        f'<div style="width:{cred_pct}%;height:100%;background:{cred_color};border-radius:2px;"></div>'
-        f'</div>'
-        f'<span style="color:{cred_color};font-size:0.65rem;">{cred_pct}% credibility</span>'
+        f'<a href="{art["url"]}" target="_blank" style="text-decoration:none;'
+        f'color:#f1f5f9;font-size:0.8rem;font-weight:600;line-height:1.3;">{title}</a>'
+        f'<div style="display:flex;align-items:center;gap:0.3rem;margin-top:2px;">'
+        f'<div style="width:20px;height:2px;background:{cred_color};opacity:0.6;"></div>'
+        f'<span style="color:{cred_color};font-size:0.55rem;font-weight:700;">{cred_pct}% trust</span>'
         f'</div>'
         f'</div>'
     )
@@ -202,12 +197,13 @@ def render_news_ticker() -> None:
 
     # Scrollable news container
     scrollable_html = """
-<div style="height:600px;overflow-y:auto;border:1px solid rgba(148,163,184,0.2);
-border-radius:12px;padding:1rem;background:rgba(15,23,42,0.3);
-scrollbar-width:thin;scrollbar-color:rgba(148,163,184,0.5) transparent;">
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-gap:1rem;margin-bottom:1rem;">
-""".replace("\n", "").strip()
+    <div style="height:450px;overflow-y:auto;border:1px solid rgba(148,163,184,0.1);
+    border-radius:12px;padding:0.75rem;background:rgba(15,23,42,0.2);
+    scrollbar-width:thin;scrollbar-color:rgba(148,163,184,0.3) transparent;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:0.75rem;margin-bottom:1rem;">
+    """
+.replace("\n", "").strip()
 
     for art in articles:
         scrollable_html += _card_html(art)

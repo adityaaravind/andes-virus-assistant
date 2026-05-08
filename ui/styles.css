@@ -1,13 +1,11 @@
-/* Andes Virus Research Assistant v1.0 — Design System */
+/* Andes Virus Research Assistant v1.0 — Design System Overhaul */
 
-/* ── Variables ── */
 :root {
   --navy:         #0d1b2a;
   --navy-mid:     #1b2e45;
   --navy-light:   #243b55;
   --teal:         #00b4d8;
   --teal-light:   #48cae4;
-  --teal-dark:    #0077b6;
   --white:        #f8fafc;
   --gray-100:     #e2e8f0;
   --gray-300:     #94a3b8;
@@ -15,350 +13,89 @@
   --red-alert:    #ef4444;
   --green-ok:     #22c55e;
   --amber:        #f59e0b;
-  --purple:       #a78bfa;
-  --who-color:    #22c55e;
-  --pubmed-color: #3b82f6;
-  --news-color:   #eab308;
-  --wiki-color:   #94a3b8;
-
-  --glow-teal:    0 0 20px rgba(0,180,216,0.18);
-  --glow-red:     0 0 20px rgba(239,68,68,0.18);
-  --glow-green:   0 0 20px rgba(34,197,94,0.18);
-  --border-subtle: rgba(0,180,216,0.2);
 }
 
-/* ── App background ── */
 .stApp {
-  background: linear-gradient(160deg, var(--navy) 0%, #0a1628 40%, var(--navy-mid) 100%);
+  background: radial-gradient(circle at top, #0f1e30 0%, var(--navy) 100%);
   color: var(--white);
 }
 
 .main .block-container {
-  padding-top: 1rem;
-  max-width: 1400px;
+  padding: 1.5rem 2rem;
+  max-width: 1200px;
+}
+
+/* ── Typography ── */
+h1 { font-size: 1.6rem !important; font-weight: 800 !important; letter-spacing: -0.02em !important; }
+h2 { font-size: 1.2rem !important; font-weight: 700 !important; color: var(--gray-100) !important; }
+h3 { font-size: 1rem !important; font-weight: 700 !important; }
+
+/* ── Stat Cards (Ultra Compact) ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.8rem;
+  margin: 1rem 0;
+}
+.stat-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(148,163,184,0.1);
+  border-radius: 8px;
+  padding: 0.7rem;
+  text-align: left;
+  transition: all 0.2s;
+}
+.stat-card:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(0,180,216,0.3);
+}
+.stat-card .stat-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--white);
+  font-family: monospace;
+}
+.stat-card .stat-label {
+  font-size: 0.62rem;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
+/* ── Panels ── */
+.panel-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(148,163,184,0.08);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+/* ── Indicators ── */
+@keyframes live-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.live-dot {
+  display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green-ok); animation: live-blink 1.5s infinite;
+}
+.live-label { color: var(--green-ok); font-size: 0.65rem; font-weight: 800; font-family: monospace; }
+
+.outbreak-badge {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 6px; padding: 2px 8px; font-size: 0.65rem;
+  font-weight: 800; color: var(--red-alert);
 }
 
 /* ── Sidebar ── */
 [data-testid="stSidebar"] {
-  background: linear-gradient(180deg, #0f1e30 0%, var(--navy-mid) 100%) !important;
-  border-right: 1px solid var(--navy-light);
-}
-[data-testid="stSidebar"] .stMarkdown { color: var(--gray-100); }
-
-/* ── Dividers ── */
-hr {
-  border-color: var(--navy-light) !important;
-  margin: 1rem 0 !important;
-}
-
-/* ── Live indicator dot ── */
-@keyframes live-blink {
-  0%, 100% { opacity: 1; box-shadow: 0 0 6px #22c55e; }
-  50%       { opacity: 0.25; box-shadow: none; }
-}
-.live-dot {
-  display: inline-block;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #22c55e;
-  margin-right: 5px;
-  vertical-align: middle;
-  animation: live-blink 1.4s ease-in-out infinite;
-}
-.live-label {
-  color: #22c55e;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  font-family: monospace;
-  vertical-align: middle;
-}
-
-/* ── Stat cards ── */
-.stat-card {
-  background: linear-gradient(135deg, var(--navy-light) 0%, rgba(13,27,42,0.9) 100%);
-  border: 1px solid var(--border-subtle);
-  border-top: 3px solid var(--teal);
-  border-radius: 12px;
-  padding: 1.2rem 1rem;
-  text-align: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-}
-.stat-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--glow-teal), 0 8px 24px rgba(0,0,0,0.4);
-  border-color: var(--teal);
-}
-.stat-card .stat-value {
-  font-size: 2.2rem;
-  font-weight: 800;
-  color: var(--teal);
-  line-height: 1.1;
-  font-family: monospace;
-  text-shadow: 0 0 12px rgba(0,180,216,0.4);
-}
-.stat-card .stat-label {
-  font-size: 0.78rem;
-  color: var(--gray-300);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-top: 0.35rem;
-}
-
-/* ── Panel cards (generic) ── */
-.panel-card {
-  background: linear-gradient(135deg, rgba(13,27,42,0.95) 0%, rgba(27,46,69,0.95) 100%);
-  border: 1px solid rgba(0,180,216,0.2);
-  border-top: 3px solid var(--teal);
-  border-radius: 12px;
-  padding: 1.2rem 1.4rem;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-  margin-bottom: 0.8rem;
-}
-
-/* ── Outbreak status badge ── */
-.outbreak-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid var(--red-alert);
-  border-radius: 20px;
-  padding: 0.3rem 0.9rem;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--red-alert);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  box-shadow: 0 0 12px rgba(239,68,68,0.2);
-}
-.outbreak-badge .dot {
-  width: 8px; height: 8px;
-  background: var(--red-alert);
-  border-radius: 50%;
-  animation: pulse 1.5s ease-in-out infinite;
-}
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%       { opacity: 0.4; transform: scale(1.4); }
-}
-
-/* ── Chat bubbles ── */
-.chat-user-bubble {
-  background: linear-gradient(135deg, var(--teal-dark) 0%, #005f8a 100%);
-  color: var(--white);
-  border: 1px solid rgba(0,180,216,0.3);
-  border-radius: 18px 18px 4px 18px;
-  padding: 0.8rem 1.1rem;
-  max-width: 85%;
-  margin-left: auto;
-  margin-bottom: 0.8rem;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
-}
-.chat-assistant-bubble {
-  background: linear-gradient(135deg, var(--navy-light) 0%, rgba(13,27,42,0.95) 100%);
-  color: var(--white);
-  border: 1px solid rgba(0,180,216,0.2);
-  border-left: 3px solid var(--teal);
-  border-radius: 4px 18px 18px 18px;
-  padding: 0.9rem 1.1rem;
-  max-width: 90%;
-  margin-bottom: 0.8rem;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
-}
-
-/* ── Inline citation ── */
-.citation-link {
-  display: inline-block;
-  background: var(--teal-dark);
-  color: var(--white);
-  border-radius: 4px;
-  padding: 0 4px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  vertical-align: super;
-  text-decoration: none;
-}
-
-/* ── Typing indicator ── */
-.typing-indicator {
-  display: flex; gap: 5px; padding: 0.6rem 1rem; align-items: center;
-}
-.typing-indicator span {
-  width: 8px; height: 8px;
-  background: var(--teal);
-  border-radius: 50%;
-  animation: bounce 1.2s ease-in-out infinite;
-}
-.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes bounce {
-  0%, 80%, 100% { transform: translateY(0); }
-  40%           { transform: translateY(-8px); }
-}
-
-/* ── Source cards ── */
-.source-card {
-  background: linear-gradient(135deg, var(--navy-light) 0%, rgba(13,27,42,0.9) 100%);
-  border: 1px solid rgba(0,180,216,0.15);
-  border-radius: 10px;
-  padding: 0.8rem;
-  margin-bottom: 0.6rem;
-  border-left: 3px solid var(--teal);
-  font-size: 0.85rem;
-  transition: box-shadow 0.2s;
-}
-.source-card:hover { box-shadow: var(--glow-teal); }
-.source-card.who     { border-left-color: var(--who-color); }
-.source-card.pubmed  { border-left-color: var(--pubmed-color); }
-.source-card.news    { border-left-color: var(--news-color); }
-.source-card.wiki    { border-left-color: var(--wiki-color); }
-
-.source-badge {
-  display: inline-block;
-  border-radius: 6px;
-  padding: 2px 8px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-.badge-who    { background: rgba(34,197,94,0.2);   color: var(--who-color); }
-.badge-pubmed { background: rgba(59,130,246,0.2);  color: var(--pubmed-color); }
-.badge-news   { background: rgba(234,179,8,0.2);   color: var(--news-color); }
-.badge-wiki   { background: rgba(148,163,184,0.2); color: var(--wiki-color); }
-
-/* ── Starter question buttons ── */
-.starter-btn {
-  background: linear-gradient(135deg, var(--navy-light), rgba(13,27,42,0.9));
-  border: 1px solid var(--border-subtle);
-  border-radius: 10px;
-  padding: 0.6rem 0.9rem;
-  color: var(--teal-light);
-  font-size: 0.85rem;
-  cursor: pointer;
-  text-align: left;
-  width: 100%;
-  transition: all 0.15s ease;
-}
-.starter-btn:hover {
-  border-color: var(--teal);
-  box-shadow: var(--glow-teal);
-  transform: translateY(-1px);
-}
-
-/* ── Streamlit component overrides ── */
-.stTextInput input,
-.stChatInput textarea,
-.stNumberInput input,
-.stSelectbox > div > div {
-  background: var(--navy-light) !important;
-  color: var(--white) !important;
-  border-color: var(--border-subtle) !important;
-  border-radius: 10px !important;
-}
-.stTextInput input:focus,
-.stChatInput textarea:focus {
-  border-color: var(--teal) !important;
-  box-shadow: 0 0 0 2px rgba(0,180,216,0.2) !important;
-}
-
-/* ── Buttons ── */
-.stButton > button {
-  background: linear-gradient(135deg, var(--teal-dark) 0%, #005f8a 100%) !important;
-  color: var(--white) !important;
-  border: 1px solid rgba(0,180,216,0.4) !important;
-  border-radius: 10px !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.02em !important;
-  transition: all 0.15s ease !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
-}
-.stButton > button:hover {
-  background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%) !important;
-  box-shadow: var(--glow-teal), 0 4px 12px rgba(0,0,0,0.3) !important;
-  transform: translateY(-1px) !important;
-}
-
-/* Download buttons */
-.stDownloadButton > button {
-  background: linear-gradient(135deg, rgba(27,46,69,0.9) 0%, rgba(13,27,42,0.95) 100%) !important;
-  border: 1px solid var(--border-subtle) !important;
-  color: var(--teal-light) !important;
-  border-radius: 10px !important;
-  font-weight: 600 !important;
-  transition: all 0.15s ease !important;
-}
-.stDownloadButton > button:hover {
-  border-color: var(--teal) !important;
-  box-shadow: var(--glow-teal) !important;
-  transform: translateY(-1px) !important;
-}
-
-/* ── Expanders ── */
-.streamlit-expanderHeader {
-  background: linear-gradient(135deg, var(--navy-light), rgba(13,27,42,0.9)) !important;
-  border: 1px solid var(--border-subtle) !important;
-  border-radius: 10px !important;
-  color: var(--teal-light) !important;
-  font-weight: 600 !important;
-  transition: box-shadow 0.2s !important;
-}
-.streamlit-expanderHeader:hover {
-  box-shadow: var(--glow-teal) !important;
-  border-color: var(--teal) !important;
-}
-.streamlit-expanderContent {
-  background: rgba(13,27,42,0.5) !important;
-  border: 1px solid var(--border-subtle) !important;
-  border-top: none !important;
-  border-radius: 0 0 10px 10px !important;
-}
-
-/* ── Alerts / info boxes ── */
-.stAlert {
-  border-radius: 10px !important;
-  border-left-width: 4px !important;
-}
-
-/* ── Metrics ── */
-[data-testid="stMetricValue"] {
-  color: var(--teal) !important;
-  font-family: monospace !important;
-  font-weight: 800 !important;
-}
-
-/* ── Plotly transparent ── */
-.js-plotly-plot .plotly .bg { fill: transparent !important; }
-
-/* ── Checkboxes ── */
-.stCheckbox label { color: var(--gray-100) !important; font-size: 0.85rem; }
-
-/* ── Footer ── */
-.app-footer {
-  text-align: center;
-  color: var(--gray-500);
-  font-size: 0.75rem;
-  padding: 1.2rem 0 0.5rem;
-  border-top: 1px solid var(--navy-light);
-  margin-top: 2rem;
+  background-color: #08111e !important;
+  border-right: 1px solid rgba(148,163,184,0.1);
 }
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
-  .main .block-container { padding-left: 0.5rem; padding-right: 0.5rem; }
-  .stat-card { padding: 1rem 0.6rem; }
-  .stat-card .stat-value { font-size: 1.6rem; }
-  .stat-card .stat-label { font-size: 0.65rem; }
-  .stats-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.6rem; }
-  .chat-user-bubble, .chat-assistant-bubble { max-width: 98%; padding: 0.7rem 0.9rem; }
+  .main .block-container { padding: 1rem 0.8rem; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
   h1 { font-size: 1.3rem !important; }
-  h2 { font-size: 1.1rem !important; }
-  .outbreak-badge { padding: 0.2rem 0.6rem; font-size: 0.7rem; }
 }

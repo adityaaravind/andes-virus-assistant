@@ -182,38 +182,24 @@ def render_pandemic_risk_panel() -> None:
     import textwrap
     anim = "pulse-risk 1.8s ease-in-out infinite" if risk["overall"] >= 40 else "none"
     header_html = f"""
-<div style="background:linear-gradient(135deg,rgba(13,27,42,0.95) 0%,rgba(27,46,69,0.95) 100%);
-border:2px solid {color}88; border-radius:16px; padding:1.4rem 1.8rem 1rem;
+<div style="background:rgba(255,255,255,0.02);border:1px solid {color}44; border-radius:12px; padding:1.2rem;
 margin-bottom:1rem; position:relative; overflow:hidden;">
-<div style="position:absolute;top:0;left:0;right:0;height:4px;
-background:linear-gradient(90deg,{color},{color}44,{color}); animation:{anim};"></div>
-<div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
-<div style="flex:1;min-width:200px;">
-<p style="color:{color};font-size:1.55rem;font-weight:800;
-letter-spacing:0.06em;margin:0;font-family:monospace;
-text-shadow:0 0 20px {color}88;">⚠ CHANCES OF GLOBAL PANDEMIC</p>
-<p style="color:#94a3b8;font-size:0.82rem;margin:0.2rem 0 0;">
-Andes Virus · MV Hondius Outbreak · Live Assessment
-&nbsp;&nbsp;<span class="live-dot" style="width:7px;height:7px;"></span>
-<span class="live-label">LIVE ASSESSMENT</span>
-</p>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+<div>
+<p style="color:{color};font-size:0.75rem;font-weight:800;letter-spacing:0.1em;margin:0;font-family:monospace;">
+GLOBAL PANDEMIC RISK ASSESSMENT</p>
+<h2 style="margin:0.2rem 0 0;font-size:1.8rem !important;font-weight:900;color:white !important;">{label}</h2>
 </div>
-<div style="background:{color}22;border:2px solid {color};
-border-radius:12px;padding:0.5rem 1.4rem;text-align:center;">
-<p style="color:{color};font-size:1.8rem;font-weight:900;margin:0;font-family:monospace;">{label}</p>
-<p style="color:#94a3b8;font-size:0.72rem;margin:0;">{desc}</p>
+<div style="background:{color}22;border:1px solid {color}44;border-radius:8px;padding:0.4rem 1rem;text-align:right;">
+<p style="color:{color};font-size:0.65rem;font-weight:800;margin:0;">SCORE: {risk['overall']}%</p>
+<p style="color:#94a3b8;font-size:0.6rem;margin:0;">{desc}</p>
 </div>
 </div>
-<div style="display:flex;gap:1.5rem;margin-top:0.9rem;flex-wrap:wrap;
-border-top:1px solid #1b2e45;padding-top:0.7rem;">
-<span style="color:#94a3b8;font-size:0.77rem;">📅 Day <b style="color:#f8fafc;">{risk['days']}</b>
-<span style="color:#475569;"> since Apr 6, 2026 (first symptom onset)</span></span>
-<span style="color:#94a3b8;font-size:0.77rem;">🦠 Cases: <b style="color:#ef4444;">{cases}</b></span>
-<span style="color:#94a3b8;font-size:0.77rem;">🌍 Countries: <b style="color:#f8fafc;">{countries}</b></span>
-<span style="color:#94a3b8;font-size:0.77rem;">📈 R₀: <b style="color:#f59e0b;">{ANDES_FIXED['r0']}</b>
-<span style="color:#475569;"> vs COVID </span><b style="color:#ef4444;">{COVID_EARLY['r0']}</b></span>
-<span style="color:#94a3b8;font-size:0.77rem;">💀 CFR: <b style="color:#ef4444;">{ANDES_FIXED['cfr_pct']}%</b>
-<span style="color:#475569;"> vs COVID </span><b style="color:#f59e0b;">{COVID_EARLY['cfr_pct']}%</b></span>
+<div style="display:flex;gap:1.2rem;margin-top:1rem;flex-wrap:wrap;border-top:1px solid rgba(148,163,184,0.1);padding-top:0.6rem;">
+<span style="color:#94a3b8;font-size:0.7rem;">📅 Day <b style="color:white;">{risk['days']}</b></span>
+<span style="color:#94a3b8;font-size:0.7rem;">🧪 Cases: <b style="color:white;">{cases}</b></span>
+<span style="color:#94a3b8;font-size:0.7rem;">📈 R₀: <b style="color:white;">{ANDES_FIXED['r0']}</b></span>
+<span style="color:#94a3b8;font-size:0.7rem;">💀 CFR: <b style="color:white;">{ANDES_FIXED['cfr_pct']}%</b></span>
 </div>
 </div>
 <style>
