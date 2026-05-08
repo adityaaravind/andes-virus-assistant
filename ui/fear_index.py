@@ -11,11 +11,11 @@ from typing import Any
 FEAR_DATA_FILE = Path("data/fear_votes.json")
 
 FEAR_LEVELS = {
-    1: {"label": "CALM", "desc": "Not worried", "color": "#22c55e"},
-    2: {"label": "CONCERNED", "desc": "Slightly worried", "color": "#f59e0b"},
-    3: {"label": "WORRIED", "desc": "Moderately fearful", "color": "#ef4444"},
-    4: {"label": "FEARFUL", "desc": "Very worried", "color": "#dc2626"},
-    5: {"label": "PANICKED", "desc": "Extremely fearful", "color": "#991b1b"},
+    1: {"label": "calm", "desc": "Not worried", "color": "#22c55e"},
+    2: {"label": "concerned", "desc": "Slightly worried", "color": "#f59e0b"},
+    3: {"label": "worried", "desc": "Moderately fearful", "color": "#ef4444"},
+    4: {"label": "fearful", "desc": "Very worried", "color": "#dc2626"},
+    5: {"label": "panicked", "desc": "Extremely fearful", "color": "#991b1b"},
 }
 
 
@@ -99,58 +99,39 @@ def render_fear_index() -> None:
         for v in data.get("votes", [])
     )
 
-    # Complete card as single HTML block with embedded Streamlit buttons
+    # Fear index card header
     st.markdown(
         f"""
-        <div style="
-            background: linear-gradient(135deg,rgba(13,27,42,0.95) 0%,rgba(27,46,69,0.95) 100%);
-            border: 2px solid {color}88;
-            border-radius: 16px;
-            padding: 1.4rem 1.8rem 1rem;
-            margin-bottom: 1rem;
-            position: relative;
-            min-height: 400px;
-        ">
-            <div style="
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 4px;
-                background: linear-gradient(90deg,{color},{color}44,{color});
-                border-radius: 16px 16px 0 0;
-            "></div>
-
-            <div style="text-align:center;margin-bottom:1rem;padding-top:0.5rem;">
-                <p style="
-                    color:{color};font-size:1.55rem;font-weight:800;
-                    letter-spacing:0.06em;margin:0 0 0.5rem;font-family:monospace;
-                    text-shadow:0 0 20px {color}88;
-                  ">😰 PUBLIC FEAR INDEX</p>
-                <p style="color:#94a3b8;font-size:0.82rem;margin:0.2rem 0 0.8rem;">
+        <div style="background: linear-gradient(135deg,rgba(13,27,42,0.95) 0%,rgba(27,46,69,0.95) 100%);
+                    border: 2px solid {color}88; border-radius: 16px; padding: 1.4rem 1.8rem 1rem; margin-bottom: 1rem;
+                    position: relative; min-height: 400px;">
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px;
+                       background: linear-gradient(90deg,{color},{color}44,{color}); border-radius: 16px 16px 0 0;"></div>
+            <div style="text-align:center; margin-bottom:1rem; padding-top:0.5rem;">
+                <p style="color:{color}; font-size:1.55rem; font-weight:800; letter-spacing:0.06em;
+                         margin:0 0 0.5rem; font-family:monospace; text-shadow:0 0 20px {color}88;">
+                    😰 PUBLIC FEAR INDEX
+                </p>
+                <p style="color:#94a3b8; font-size:0.82rem; margin:0.2rem 0 0.8rem;">
                     Community sentiment · Real-time voting · {vote_count} total votes
                 </p>
-                <div style="
-                  background:{color}22;border:2px solid {color};
-                  border-radius:12px;padding:0.5rem 1.4rem;display:inline-block;
-                ">
-                  <p style="color:{color};font-size:1.8rem;font-weight:900;margin:0;font-family:monospace;">{label}</p>
-                  <p style="color:#94a3b8;font-size:0.72rem;margin:0;">{desc}</p>
+                <div style="background:{color}22; border:2px solid {color}; border-radius:12px;
+                           padding:0.5rem 1.4rem; display:inline-block;">
+                    <p style="color:{color}; font-size:1.8rem; font-weight:900; margin:0; font-family:monospace;">{label.upper()}</p>
+                    <p style="color:#94a3b8; font-size:0.72rem; margin:0;">{desc}</p>
                 </div>
             </div>
-
             <div style="margin-bottom:1rem;">
-                <div style="display:flex;align-items:center;gap:0.5rem;">
-                  <span style="color:#94a3b8;font-size:0.75rem;">Fear Level:</span>
-                  <div style="flex:1;height:8px;background:#1b2e45;border-radius:4px;position:relative;">
-                    <div style="width:{avg_fear/5*100}%;height:100%;background:{color};border-radius:4px;"></div>
-                  </div>
-                  <span style="color:{color};font-size:0.75rem;font-weight:600;">{avg_fear:.1f}/5</span>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <span style="color:#94a3b8; font-size:0.75rem;">Fear Level:</span>
+                    <div style="flex:1; height:8px; background:#1b2e45; border-radius:4px; position:relative;">
+                        <div style="width:{avg_fear/5*100}%; height:100%; background:{color}; border-radius:4px;"></div>
+                    </div>
+                    <span style="color:{color}; font-size:0.75rem; font-weight:600;">{avg_fear:.1f}/5</span>
                 </div>
             </div>
-
-            <div style="border-top:1px solid #1b2e45;padding-top:0.7rem;">
-                <p style="color:#94a3b8;font-size:0.85rem;margin:0 0 0.8rem;">How do you feel about the outbreak?</p>
+            <div style="border-top:1px solid #1b2e45; padding-top:0.7rem;">
+                <p style="color:#94a3b8; font-size:0.85rem; margin:0 0 0.8rem;">How do you feel about the outbreak?</p>
             </div>
         </div>
         """,
