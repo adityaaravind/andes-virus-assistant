@@ -257,49 +257,32 @@ def render_fear_index() -> None:
 
     # Voting buttons section below the visualization
     if not user_voted_today:
-        st.markdown(
-            f"""
+        st.markdown(textwrap.dedent(f"""
             <style>
             .vote-buttons .stButton > button {{
-                height: 45px !important;
-                font-size: 0.8rem !important;
-                font-weight: 600 !important;
-                padding: 0.6rem 1rem !important;
-                margin: 0.2rem 0 !important;
+                height: 45px !important; font-size: 0.8rem !important; font-weight: 600 !important;
+                padding: 0.6rem 1rem !important; margin: 0.2rem 0 !important;
                 background: linear-gradient(135deg, rgba(13,27,42,0.8) 0%, rgba(27,46,69,0.8) 100%) !important;
-                border: 1px solid {color}44 !important;
-                border-radius: 8px !important;
-                color: {color} !important;
+                border: 1px solid {color}44 !important; border-radius: 8px !important; color: {color} !important;
                 transition: all 0.2s ease !important;
             }}
             .vote-buttons .stButton > button:hover {{
                 background: linear-gradient(135deg, {color}15 0%, {color}25 100%) !important;
-                border-color: {color} !important;
-                transform: translateY(-1px) !important;
+                border-color: {color} !important; transform: translateY(-1px) !important;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
             }}
             </style>
             <div class="vote-buttons">
-            """,
-            unsafe_allow_html=True,
-        )
+        """).strip(), unsafe_allow_html=True)
 
-        st.markdown(
-            f'<p style="color:#94a3b8; font-size:0.85rem; margin:0.5rem 0 0.8rem;">How do you feel about the outbreak?</p>',
-            unsafe_allow_html=True,
-        )
+        st.markdown(f'<p style="color:#94a3b8; font-size:0.85rem; margin:0.5rem 0 0.8rem;">How do you feel about the outbreak?</p>', unsafe_allow_html=True)
 
         # First row: calm, concerned, worried
         cols1 = st.columns(3)
         for i, level in enumerate([1, 2, 3]):
             info = FEAR_LEVELS[level]
             with cols1[i]:
-                if st.button(
-                    info['label'].upper(),
-                    key=f"vote_{level}",
-                    use_container_width=True,
-                    help=info['desc']
-                ):
+                if st.button(info['label'].upper(), key=f"vote_{level}", use_container_width=True, help=info['desc']):
                     _save_fear_vote(level, user_id)
                     st.success(f"✅ Voted: {info['label']}")
                     st.rerun()
@@ -309,24 +292,16 @@ def render_fear_index() -> None:
         for i, level in enumerate([4, 5]):
             info = FEAR_LEVELS[level]
             with cols2[i + 1]:
-                if st.button(
-                    info['label'].upper(),
-                    key=f"vote_{level}",
-                    use_container_width=True,
-                    help=info['desc']
-                ):
+                if st.button(info['label'].upper(), key=f"vote_{level}", use_container_width=True, help=info['desc']):
                     _save_fear_vote(level, user_id)
                     st.success(f"✅ Voted: {info['label']}")
                     st.rerun()
 
         st.markdown('</div>', unsafe_allow_html=True)
     else:
-        st.markdown(
-            f"""
+        st.markdown(textwrap.dedent("""
             <div style="background:rgba(34,197,94,0.08); border:1px solid #22c55e44; border-radius:8px; padding:0.8rem; margin-top:1rem;">
                 <p style="color:#22c55e; font-size:0.8rem; margin:0;">✓ Thanks for participating! Your vote has been recorded.</p>
                 <p style="color:#94a3b8; font-size:0.75rem; margin:0.2rem 0 0;">Outbreak sentiment tracking helps researchers understand public response and information gaps.</p>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        """).strip(), unsafe_allow_html=True)
