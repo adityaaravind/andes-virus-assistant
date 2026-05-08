@@ -125,8 +125,30 @@ def render_faq_panel(chain: Any) -> None:
                 if answer is None:
                     with st.spinner("Fetching answer…"):
                         try:
-                            res    = chain.query(item["q"]) if chain else {}
-                            answer = res.get("answer", "No answer available — check API key.")
+                            if chain is None:
+                                # Force rebuild chain if None
+                                from rag.chain import build_chain
+                                chain = build_chain()
+
+                            res = chain.query(item["q"])
+                            answer = res.get("answer", "No answer available.")
+
+                            # If answer is the generic "insufficient information" message, try to get fallback
+                            if "I don't have sufficient information" in answer:
+                                from vectorstore.store import similarity_search
+                                from processing.embedder import _huggingface_embed
+
+                                # Direct search fallback
+                                try:
+                                    emb = _huggingface_embed([item["q"]])[0]
+                                    results = similarity_search(emb, k=2)
+                                    if results:
+                                        answer = f"Based on available research:\n\n{results[0].get('text', '')[:400]}..."
+                                    else:
+                                        answer = "Vector store appears to be empty. Data may need to be reloaded."
+                                except Exception:
+                                    answer = "Unable to search knowledge base. System may need restart."
+
                         except Exception as e:
                             answer = f"Error: {e}"
                     st.session_state.setdefault("faq_cache", {})[key] = answer
