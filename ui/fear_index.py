@@ -161,21 +161,22 @@ def render_fear_index() -> None:
             unsafe_allow_html=True,
         )
 
-        # Mobile-friendly voting buttons - use 2 rows for better mobile experience
+        # Compact voting buttons
         st.markdown("""
         <style>
         .stButton > button {
-            height: 80px !important;
-            font-size: 0.9rem !important;
-            font-weight: 700 !important;
+            height: 50px !important;
+            font-size: 0.75rem !important;
+            font-weight: 600 !important;
             white-space: normal !important;
-            line-height: 1.2 !important;
+            line-height: 1.1 !important;
+            padding: 0.5rem !important;
         }
         @media (max-width: 768px) {
             .stButton > button {
-                height: 90px !important;
-                font-size: 1rem !important;
-                padding: 1rem !important;
+                height: 55px !important;
+                font-size: 0.8rem !important;
+                padding: 0.6rem !important;
             }
         }
         </style>
@@ -187,10 +188,11 @@ def render_fear_index() -> None:
             info = FEAR_LEVELS[level]
             with cols1[i]:
                 if st.button(
-                    f"{level} • {info['label']}\n{info['desc']}",
+                    f"{level} • {info['label']}",
                     key=f"fear_vote_{level}",
                     use_container_width=True,
-                    type="secondary"
+                    type="secondary",
+                    help=info['desc']
                 ):
                     _save_fear_vote(level, user_id)
                     st.success(f"✅ Voted: {info['label']}")
@@ -202,10 +204,11 @@ def render_fear_index() -> None:
             with cols2[i]:
                 info = FEAR_LEVELS[level]
                 if st.button(
-                    f"{level} • {info['label']}\n{info['desc']}",
+                    f"{level} • {info['label']}",
                     key=f"fear_vote_{level}",
                     use_container_width=True,
-                    type="secondary"
+                    type="secondary",
+                    help=info['desc']
                 ):
                     _save_fear_vote(level, user_id)
                     st.success(f"✅ Voted: {info['label']}")
