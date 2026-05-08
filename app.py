@@ -419,13 +419,18 @@ def main() -> None:
     chain = _init_rag_chain()
 
     from ui.pandemic_risk import render_pandemic_risk_panel
+    from ui.fear_index import render_fear_index
     from ui.news_ticker import render_news_ticker
     from ui.stats_panel import render_stats_panel, render_timeline_chart
     from ui.map_panel import render_map_panel
     from ui.journalist_tools import render_journalist_tools
 
-    # ── PANDEMIC RISK — first thing user sees ────────────────────────────────
-    render_pandemic_risk_panel()
+    # ── PANDEMIC RISK & FEAR INDEX — side by side ────────────────────────────
+    col_risk, col_fear = st.columns([1, 1])
+    with col_risk:
+        render_pandemic_risk_panel()
+    with col_fear:
+        render_fear_index()
     st.divider()
 
     # ── Live news ────────────────────────────────────────────────────────────
