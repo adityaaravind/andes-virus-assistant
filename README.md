@@ -1,103 +1,93 @@
 # 🧬 Andes Virus Research Assistant
 
-RAG-powered Streamlit app for journalists, health workers, and the public to query
-the MV Hondius hantavirus outbreak with cited, AI-generated answers.
+**Real-time AI Outbreak Intelligence for the MV Hondius Hantavirus Incident.**
 
-## Stack
+The Andes Virus Research Assistant is a RAG-powered (Retrieval-Augmented Generation) dashboard and AI assistant designed to track the ongoing hantavirus outbreak linked to the cruise ship MV Hondius. It provides journalists, health workers, and researchers with cited, evidence-based answers derived from official health reports, peer-reviewed literature, and live news.
 
-- **LLM:** OpenAI GPT-4o-mini (falls back to HuggingFace offline)
-- **Embeddings:** OpenAI text-embedding-3-small (fallback: all-MiniLM-L6-v2)
-- **Vector store:** ChromaDB (persistent, local)
-- **Data sources:** PubMed, WHO PDFs, RSS news, Wikipedia
-- **UI:** Streamlit — chat, map, stats, source panel
+---
 
-## Setup
+## 🚀 Key Features
 
-### 1. Install dependencies
+-   **🤖 AI Research Assistant:** Ask complex questions and get answers cited with original sources (WHO, CDC, PubMed).
+-   **🗺️ Live Outbreak Map:** Interactive global tracking of cases by nationality and geographic spread.
+-   **📡 Real-Time News Ticker:** Monitored feeds from WHO, CDC, Reuters, and BBC—updated every 15 minutes.
+-   **📈 Pandemic Risk & Fear Index:** Blended sentiment analysis from global media and community voting.
+-   **📊 Outbreak Analytics:** Detailed statistics on case counts, mortality rates, and source credibility.
 
+---
+
+## 🛠️ The Tech Stack
+
+-   **Frontend:** Streamlit (Custom Navy/Teal Design System)
+-   **AI Engine:** LangChain + OpenAI GPT-4o-mini
+-   **Embeddings:** OpenAI `text-embedding-3-small` (Fallback: HuggingFace `all-MiniLM-L6-v2`)
+-   **Vector Database:** Qdrant Cloud (Production) / ChromaDB (Local)
+-   **Persistence:** Persistent Analytics & Sentiment tracking via Qdrant Key-Value store.
+
+---
+
+## ⚙️ Quick Start
+
+### 1. Prerequisites
+- Python 3.9+
+- An OpenAI API Key (for the best AI performance)
+- [Optional] A free Qdrant Cloud cluster (for persistent data on Streamlit Cloud)
+
+### 2. Installation
 ```bash
+# Clone the repository
+git clone https://github.com/adityaaravind/andes-virus-assistant.git
+cd andes-virus-assistant
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Configure environment
-
+### 3. Configuration
+Copy the example environment file and add your keys:
 ```bash
 cp .env.example .env
-# Edit .env and add your OpenAI API key:
+# Edit .env and add:
 # OPENAI_API_KEY=sk-...
+# QDRANT_URL=... (optional)
 ```
 
-### 3. Run data ingestion
-
-Fetches PubMed abstracts, WHO documents, news articles, and Wikipedia — chunks,
-embeds, and stores everything in ChromaDB.
-
+### 4. Ingest Data
+Run the ingestion pipeline to build your local knowledge base. This fetches data from PubMed, WHO, Wikipedia, and Live News.
 ```bash
 python scripts/ingest_all.py
 ```
 
-Expected output: ~500–2000 chunks indexed depending on data availability.
-
-### 4. Launch the app
-
+### 5. Launch
 ```bash
 streamlit run app.py
 ```
 
-Open `http://localhost:8501` in your browser.
+---
 
-## Architecture
+## 📚 Data Sources & Credibility
 
-```
-andes-virus-assistant/
-├── app.py                    # Main Streamlit entry point
-├── ingestion/
-│   ├── pubmed_scraper.py     # BioPython Entrez API
-│   ├── who_scraper.py        # WHO PDF downloader
-│   ├── pdf_parser.py         # pdfplumber text extraction
-│   ├── news_scraper.py       # RSS feed scraper
-│   └── wikipedia_loader.py   # MediaWiki REST API
-├── processing/
-│   ├── chunker.py            # RecursiveCharacterTextSplitter
-│   ├── embedder.py           # OpenAI / HuggingFace embeddings
-│   └── metadata_tagger.py    # Credibility scoring
-├── vectorstore/
-│   └── chroma_store.py       # ChromaDB wrapper
-├── rag/
-│   ├── chain.py              # LangChain RAG chain
-│   ├── retriever.py          # Similarity + credibility re-ranking
-│   ├── prompt_templates.py   # System + human prompts
-│   └── citation_formatter.py # Source card formatting
-├── scripts/
-│   └── ingest_all.py         # Full ingestion orchestrator
-└── ui/
-    ├── chat_panel.py         # Chat interface
-    ├── source_panel.py       # Sidebar citation cards
-    ├── map_panel.py          # Plotly choropleth map
-    ├── stats_panel.py        # Metrics + timeline chart
-    └── styles.css            # Navy/teal design system
-```
+We use a weighted re-ranking algorithm (`similarity_score × credibility_score`) to ensure the most reliable information reaches you first.
 
-## Credibility scores
+| Source Type | Primary Providers | Credibility |
+| :--- | :--- | :--- |
+| **Official** | WHO, CDC, ECDC, PAHO | **1.0** |
+| **Science** | PubMed, The Lancet, ScienceDaily | **0.9** |
+| **Top Press** | Reuters, BBC Health, Al Jazeera | **0.75** |
+| **General** | Google News, Wikipedia | **0.6** |
 
-| Source | Score |
-|--------|-------|
-| WHO / CDC | 1.0 |
-| PubMed (peer-reviewed) | 0.9 |
-| ECDC | 0.9 |
-| Reuters / BBC | 0.75 |
-| News (general) | 0.7 |
-| Wikipedia | 0.6 |
+---
 
-Re-ranking formula: `rerank_score = similarity_score × credibility_score`
+## 🏗️ Project Architecture
 
-## Offline mode
+-   `app.py`: Main entry point & background scheduler.
+-   `ingestion/`: Scrapers for PubMed, WHO (PDFs), News (RSS), and Wikipedia.
+-   `processing/`: Text chunking, metadata tagging, and embedding logic.
+-   `rag/`: LangChain implementation, retrieval logic, and citation formatting.
+-   `ui/`: Modular Streamlit components (Map, Fear Index, News Ticker, etc.).
+-   `vectorstore/`: Abstraction layer for Qdrant and ChromaDB.
 
-If no `OPENAI_API_KEY` is set, embeddings fall back to `all-MiniLM-L6-v2` via
-`sentence-transformers` (runs fully locally). The LLM answer generation requires
-an API key — without it, the app shows setup instructions.
+---
 
-## Data refresh
-
-Re-run `python scripts/ingest_all.py` at any time. Already-embedded documents
-(checked by URL+content hash) are skipped automatically.
+## ⚠️ Disclaimer
+*This tool is for research and informational purposes only. It is not a substitute for professional medical advice. For emergencies, contact your local health authorities.*
