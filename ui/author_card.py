@@ -51,7 +51,8 @@ def _track_visitor() -> int:
 
 
 def render_author_card() -> None:
-    visitor_count = _track_visitor()
+    # Track visitor for analytics but don't display
+    _track_visitor()
 
     st.markdown(
         f'<div style="background:linear-gradient(135deg,rgba(88,28,135,0.28) 0%,rgba(124,58,237,0.18) 100%);'
@@ -63,22 +64,14 @@ def render_author_card() -> None:
         f'display:flex;align-items:center;justify-content:center;'
         f'font-size:0.72rem;font-weight:800;color:#fff;">'
         f'{AUTHOR["initials"]}</div>'
-        f'<div>'
+        f'<div style="flex:1;">'
         f'<p style="color:#f8fafc;font-size:0.78rem;font-weight:700;margin:0;line-height:1.2;">'
         f'{AUTHOR["name"]}</p>'
         f'<p style="color:#a78bfa;font-size:0.63rem;margin:0;">{AUTHOR["role"]}</p>'
-        f'</div>'
-        f'</div>'
-        f'<div style="display:flex;gap:0.35rem;">'
-        f'<div style="flex:1;text-align:center;'
-        f'background:linear-gradient(135deg,#059669,#10b981);'
-        f'color:#fff;border-radius:6px;padding:0.28rem 0.4rem;'
-        f'font-size:0.63rem;font-weight:700;white-space:nowrap;">'
-        f'👁️ {visitor_count:,} Views</div>'
-        f'<a href="{AUTHOR["linkedin"]}" target="_blank" rel="noopener" style="flex:1;text-align:center;'
-        f'background:#0a66c2;color:#fff;border-radius:6px;padding:0.28rem 0.4rem;'
-        f'font-size:0.63rem;font-weight:700;text-decoration:none;white-space:nowrap;">'
+        f'<a href="{AUTHOR["linkedin"]}" target="_blank" rel="noopener" style="'
+        f'color:#0a66c2;font-size:0.6rem;font-weight:600;text-decoration:none;display:inline-block;margin-top:0.2rem;">'
         f'in LinkedIn</a>'
+        f'</div>'
         f'</div>'
         f'</div>',
         unsafe_allow_html=True,

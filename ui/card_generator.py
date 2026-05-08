@@ -78,7 +78,7 @@ def generate_card() -> bytes:
     draw.text((PAD, 36),  "ANDES VIRUS / MV HONDIUS OUTBREAK", font=_font("black", 36),   fill=WHITE)
     draw.text((PAD, 82),  "Live Outbreak Assessment",            font=_font("light", 18),   fill=GRAY1)
     _draw_text_right(draw, 36, today, _font("regular", 14), GRAY1)
-    _draw_text_right(draw, 56, "adityamedepalli.netlify.app", _font("regular", 13), GRAY1)
+    _draw_text_right(draw, 56, "adityamedepalli@outlook.com", _font("regular", 13), GRAY1)
 
     # Separator
     draw.rectangle([PAD, 116, W - PAD, 117], fill=GRAY2)

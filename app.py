@@ -453,6 +453,9 @@ def main() -> None:
     from ui.faq_panel import render_faq_panel
     render_faq_panel(chain)
 
+    from ui.suggestion_box import render_suggestion_box
+    render_suggestion_box()
+
     st.markdown(
         "<div class='app-footer'>"
         "Data sourced from WHO, CDC, PubMed, Reuters, BBC, Al Jazeera, Wikipedia. "
