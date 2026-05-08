@@ -191,6 +191,12 @@ _CSS_PATH = Path(__file__).parent / "ui" / "styles.css"
 if _CSS_PATH.exists():
     st.markdown(f"<style>{_CSS_PATH.read_text()}</style>", unsafe_allow_html=True)
 
+# Google Site Verification
+st.markdown(
+    '<meta name="google-site-verification" content="FKa79DavbBQG_9PoGFRcLdArnnibHWi_eF8aRv5vWh4" />',
+    unsafe_allow_html=True
+)
+
 
 def _init_rag_chain() -> Any | None:
     if "rag_chain" in st.session_state:
