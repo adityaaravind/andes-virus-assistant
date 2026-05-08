@@ -85,8 +85,6 @@ def render_fear_index() -> None:
 
     # Generate unique user ID based on session + browser fingerprint
     if "user_id" not in st.session_state:
-        # More unique ID using browser context
-        import hashlib
         browser_info = str(st.session_state) + str(hash(str(datetime.utcnow().date())))
         user_hash = hashlib.md5(browser_info.encode()).hexdigest()[:12]
         st.session_state.user_id = f"user_{user_hash}"
@@ -101,105 +99,92 @@ def render_fear_index() -> None:
         for v in data.get("votes", [])
     )
 
-    # Build complete HTML for the fear index card
-    card_html = f"""
-    <div style="
-        background:linear-gradient(135deg,rgba(13,27,42,0.95) 0%,rgba(27,46,69,0.95) 100%);
-        border:2px solid {color}88;
-        border-radius:16px;
-        padding:1.4rem 1.8rem 1rem;
-        margin-bottom:1rem;
-        position:relative;
-        overflow:hidden;
-    ">
-      <div style="
-        position:absolute;top:0;left:0;right:0;height:4px;
-        background:linear-gradient(90deg,{color},{color}44,{color});
-      "></div>
-
-      <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
-        <div style="flex:1;min-width:200px;">
-          <p style="
-            color:{color};font-size:1.55rem;font-weight:800;
-            letter-spacing:0.06em;margin:0;font-family:monospace;
-            text-shadow:0 0 20px {color}88;
-          ">😰 PUBLIC FEAR INDEX</p>
-          <p style="color:#94a3b8;font-size:0.82rem;margin:0.2rem 0 0;">
-            Community sentiment · Real-time voting · {vote_count} total votes
-          </p>
-        </div>
+    # Main fear index card
+    st.markdown(
+        f"""
         <div style="
-          background:{color}22;border:2px solid {color};
-          border-radius:12px;padding:0.5rem 1.4rem;text-align:center;
+            background:linear-gradient(135deg,rgba(13,27,42,0.95) 0%,rgba(27,46,69,0.95) 100%);
+            border:2px solid {color}88;
+            border-radius:16px;
+            padding:1.4rem 1.8rem 1rem;
+            margin-bottom:1rem;
+            position:relative;
+            overflow:hidden;
         ">
-          <p style="color:{color};font-size:1.8rem;font-weight:900;margin:0;font-family:monospace;">{label}</p>
-          <p style="color:#94a3b8;font-size:0.72rem;margin:0;">{desc}</p>
-        </div>
-      </div>
+          <div style="
+            position:absolute;top:0;left:0;right:0;height:4px;
+            background:linear-gradient(90deg,{color},{color}44,{color});
+          "></div>
 
-      <div style="
-        margin-top:0.9rem;
-        border-top:1px solid #1b2e45;padding-top:0.7rem;
-      ">
-        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.8rem;">
-          <span style="color:#94a3b8;font-size:0.75rem;">Fear Level:</span>
-          <div style="flex:1;height:8px;background:#1b2e45;border-radius:4px;position:relative;">
-            <div style="width:{avg_fear/5*100}%;height:100%;background:{color};border-radius:4px;"></div>
+          <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+            <div style="flex:1;min-width:200px;">
+              <p style="
+                color:{color};font-size:1.55rem;font-weight:800;
+                letter-spacing:0.06em;margin:0;font-family:monospace;
+                text-shadow:0 0 20px {color}88;
+              ">😰 PUBLIC FEAR INDEX</p>
+              <p style="color:#94a3b8;font-size:0.82rem;margin:0.2rem 0 0;">
+                Community sentiment · Real-time voting · {vote_count} total votes
+              </p>
+            </div>
+            <div style="
+              background:{color}22;border:2px solid {color};
+              border-radius:12px;padding:0.5rem 1.4rem;text-align:center;
+            ">
+              <p style="color:{color};font-size:1.8rem;font-weight:900;margin:0;font-family:monospace;">{label}</p>
+              <p style="color:#94a3b8;font-size:0.72rem;margin:0;">{desc}</p>
+            </div>
           </div>
-          <span style="color:{color};font-size:0.75rem;font-weight:600;">{avg_fear:.1f}/5</span>
+
+          <div style="
+            margin-top:0.9rem;
+            border-top:1px solid #1b2e45;padding-top:0.7rem;
+          ">
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.8rem;">
+              <span style="color:#94a3b8;font-size:0.75rem;">Fear Level:</span>
+              <div style="flex:1;height:8px;background:#1b2e45;border-radius:4px;position:relative;">
+                <div style="width:{avg_fear/5*100}%;height:100%;background:{color};border-radius:4px;"></div>
+              </div>
+              <span style="color:{color};font-size:0.75rem;font-weight:600;">{avg_fear:.1f}/5</span>
+            </div>
+          </div>
         </div>
-    """
+        """,
+        unsafe_allow_html=True,
+    )
 
+    # Voting buttons outside the card
     if not user_voted_today:
-        card_html += f"""
-        <p style="color:#94a3b8;font-size:0.78rem;margin:0 0 0.5rem;">How do you feel?</p>
-        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0.4rem;margin-bottom:0.5rem;">
-        """
+        st.markdown('<p style="color:#94a3b8;font-size:0.78rem;margin:0.5rem 0;">How do you feel?</p>', unsafe_allow_html=True)
 
-        for level, info in FEAR_LEVELS.items():
-            card_html += f"""
-            <button onclick="document.getElementById('hidden_vote_{level}').click()"
-            style="background:{info['color']}22;border:1px solid {info['color']};
-            border-radius:6px;padding:0.3rem 0.2rem;font-size:0.68rem;font-weight:600;
-            color:{info['color']};cursor:pointer;min-height:32px;
-            transition:all 0.2s ease;text-align:center;"
-            onmouseover="this.style.background='{info['color']}44'"
-            onmouseout="this.style.background='{info['color']}22'"
-            title="{info['desc']}">
-                {info['label']}
-            </button>
-            """
+        # Style for small compact buttons
+        st.markdown("""
+        <style>
+        .stButton > button {
+            height: 35px !important;
+            font-size: 0.7rem !important;
+            font-weight: 600 !important;
+            padding: 0.2rem !important;
+            margin: 0.1rem !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
 
-        card_html += "</div>"
-    else:
-        card_html += '<p style="color:#64748b;font-size:0.72rem;margin:0 0 0.5rem;">✓ Thanks for voting! Come back tomorrow.</p>'
-
-    # Close the main card
-    card_html += """
-      </div>
-    </div>
-    """
-
-    st.markdown(card_html, unsafe_allow_html=True)
-
-    # Hidden Streamlit buttons for voting functionality
-    if not user_voted_today:
+        # Create 5 columns for voting buttons
         cols = st.columns(5)
         for i, (level, info) in enumerate(FEAR_LEVELS.items()):
             with cols[i]:
                 if st.button(
-                    " ",
-                    key=f"hidden_vote_{level}",
+                    info['label'],
+                    key=f"vote_{level}",
+                    use_container_width=True,
+                    help=info['desc']
                 ):
                     _save_fear_vote(level, user_id)
                     st.success(f"✅ Voted: {info['label']}")
                     st.rerun()
-
-        # Hide the Streamlit buttons
-        st.markdown("""
-        <style>
-        [data-testid="column"] button {
-            display: none !important;
-        }
-        </style>
-        """, unsafe_allow_html=True)
+    else:
+        st.markdown(
+            '<p style="color:#64748b;font-size:0.72rem;margin:0.5rem 0;">✓ Thanks for voting! Come back tomorrow.</p>',
+            unsafe_allow_html=True,
+        )
