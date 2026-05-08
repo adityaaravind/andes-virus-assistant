@@ -12,11 +12,17 @@ RSS_FEEDS = [
     {"url": "https://www.who.int/rss-feeds/news-english.xml",       "source": "WHO",         "tier": "official"},
     {"url": "https://rss.cdc.gov/podcasts/2016/4048.rss",            "source": "CDC",         "tier": "official"},
     {"url": "https://www.ecdc.europa.eu/en/rss.xml",                 "source": "ECDC",        "tier": "official"},
-    {"url": "https://feeds.reuters.com/reuters/healthNews",          "source": "Reuters",     "tier": "press"},
+    {"url": "https://www.paho.org/en/rss.xml",                       "source": "PAHO",        "tier": "official"},
     {"url": "http://feeds.bbci.co.uk/news/health/rss.xml",           "source": "BBC Health",  "tier": "press"},
     {"url": "https://www.aljazeera.com/xml/rss/all.xml",             "source": "Al Jazeera",  "tier": "press"},
+    {"url": "https://outbreaknewstoday.com/feed/",                   "source": "Outbreak News","tier": "press"},
     {"url": "https://www.sciencedaily.com/rss/health_medicine/infectious_diseases.xml",
                                                                       "source": "ScienceDaily","tier": "science"},
+    {"url": "https://www.thelancet.com/rssfeed/lancet_online.xml",   "source": "The Lancet",  "tier": "science"},
+    {"url": "https://news.google.com/rss/search?q=hantavirus+2026&hl=en-US&gl=US&ceid=US:en",
+                                                                      "source": "Google News", "tier": "press"},
+    {"url": "https://news.google.com/rss/search?q=%22MV+Hondius%22+2026&hl=en-US&gl=US&ceid=US:en",
+                                                                      "source": "Google News", "tier": "press"},
 ]
 
 FILTER_KEYWORDS = {
@@ -54,14 +60,14 @@ TIER_STYLE = {
 
 SOURCE_TIER = {f["source"]: f["tier"] for f in RSS_FEEDS}
 SOURCE_CREDIBILITY = {
-    "WHO": 1.0, "CDC": 1.0, "ECDC": 0.9,
-    "Reuters": 0.75, "BBC Health": 0.75, "Al Jazeera": 0.7,
-    "ScienceDaily": 0.8,
+    "WHO": 1.0, "CDC": 1.0, "ECDC": 0.9, "PAHO": 1.0,
+    "BBC Health": 0.75, "Al Jazeera": 0.7, "Outbreak News": 0.88,
+    "ScienceDaily": 0.8, "The Lancet": 0.97, "Google News": 0.65,
 }
 
 
-@st.cache_data(ttl=3600, show_spinner=False)
-def fetch_headlines(max_per_feed: int = 6) -> list[dict[str, Any]]:
+@st.cache_data(ttl=900, show_spinner=False)
+def fetch_headlines(max_per_feed: int = 12) -> list[dict[str, Any]]:
     seen: set[str] = set()
     articles: list[dict[str, Any]] = []
 
@@ -148,7 +154,8 @@ def render_news_ticker() -> None:
     with col_ts:
         st.markdown(
             f"<p style='color:#64748b;font-size:0.72rem;text-align:right;padding-top:0.4rem;'>"
-            f"↻ every 15 min<br>{datetime.utcnow().strftime('%H:%M UTC')}</p>",
+            f"↻ every 15 min<br>{datetime.utcnow().strftime('%H:%M UTC')}<br>"
+            f"<span style='color:#94a3b8;font-size:0.65rem;'>scroll for more</span></p>",
             unsafe_allow_html=True,
         )
 
@@ -157,7 +164,7 @@ def render_news_ticker() -> None:
 
     if not articles:
         st.info(
-            "No live headlines matching outbreak keywords right now. Feeds refresh every hour.",
+            "No live headlines matching outbreak keywords right now. Feeds refresh every 15 minutes.",
             icon="📡",
         )
         return
@@ -172,9 +179,38 @@ def render_news_ticker() -> None:
         unsafe_allow_html=True,
     )
 
-    # 3-column card grid
-    cols = st.columns(3)
-    for i, art in enumerate(articles):
-        with cols[i % 3]:
-            st.markdown(_card_html(art), unsafe_allow_html=True)
-            st.markdown("<div style='margin-bottom:0.7rem;'></div>", unsafe_allow_html=True)
+    # Scrollable news container
+    scrollable_html = f"""
+    <div style="height:600px;overflow-y:auto;border:1px solid rgba(148,163,184,0.2);
+    border-radius:12px;padding:1rem;background:rgba(15,23,42,0.3);
+    scrollbar-width:thin;scrollbar-color:rgba(148,163,184,0.5) transparent;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+        gap:1rem;margin-bottom:1rem;">
+    """
+
+    for art in articles:
+        scrollable_html += _card_html(art)
+
+    scrollable_html += """
+        </div>
+    </div>
+    <style>
+        /* Custom scrollbar styling */
+        div::-webkit-scrollbar {
+            width: 8px;
+        }
+        div::-webkit-scrollbar-track {
+            background: rgba(15,23,42,0.5);
+            border-radius: 4px;
+        }
+        div::-webkit-scrollbar-thumb {
+            background: rgba(148,163,184,0.5);
+            border-radius: 4px;
+        }
+        div::-webkit-scrollbar-thumb:hover {
+            background: rgba(148,163,184,0.7);
+        }
+    </style>
+    """
+
+    st.markdown(scrollable_html, unsafe_allow_html=True)
