@@ -372,7 +372,7 @@ def _auth_gate() -> bool:
 
 
 def main() -> None:
-    _auth_gate()
+    # _auth_gate()  # Disabled for Google verification
 
     # Auto-refresh page every hour so headlines stay live
     # from streamlit_autorefresh import st_autorefresh
