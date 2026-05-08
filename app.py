@@ -375,6 +375,87 @@ def main() -> None:
     _render_header()
     st.divider()
 
+    # ── WHAT IS THIS? — Introduction Panel ──────────────────────────────────
+    st.markdown("""
+    <div style='background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+                border: 2px solid #00b4d8;
+                border-radius: 12px;
+                padding: 1.5rem;
+                margin: 1rem 0 2rem 0;
+                box-shadow: 0 8px 32px rgba(0, 180, 216, 0.2);'>
+        <div style='display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;'>
+            <div style='display: flex; align-items: center;'>
+                <span style='font-size: 2rem; margin-right: 0.5rem;'>🚨</span>
+                <h2 style='color: #00b4d8; margin: 0; font-size: 1.4rem; font-weight: bold;'>
+                    LIVE OUTBREAK INTELLIGENCE SYSTEM
+                </h2>
+            </div>
+            <div style='background: #f59e0b22; border: 2px solid #f59e0b;
+                        border-radius: 12px; padding: 0.5rem 1.4rem; text-align: center;'>
+                <p style='color: #f59e0b; font-size: 1.8rem; font-weight: 900; margin: 0; font-family: monospace;'>HANTAVIRUS</p>
+                <p style='color: #94a3b8; font-size: 0.72rem; margin: 0;'>Andes Virus Strain</p>
+            </div>
+        </div>
+
+        <div style='background: rgba(239, 68, 68, 0.15);
+                    border-left: 4px solid #ef4444;
+                    padding: 1rem;
+                    margin: 1rem 0;
+                    border-radius: 8px;'>
+            <p style='color: #fecaca; font-weight: bold; margin: 0 0 0.5rem 0; font-size: 1.1rem;'>
+                🦠 ACTIVE: MV Hondius Hantavirus Outbreak
+            </p>
+            <p style='color: #e5e7eb; margin: 0; font-size: 0.95rem;'>
+                This AI assistant tracks the ongoing Andes virus outbreak linked to the cruise ship MV Hondius.
+                Real-time monitoring of cases, deaths, and geographic spread across multiple countries.
+            </p>
+        </div>
+
+        <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0;'>
+            <div style='background: rgba(34, 197, 94, 0.1);
+                        border: 1px solid #22c55e;
+                        padding: 1rem;
+                        border-radius: 8px;'>
+                <h4 style='color: #22c55e; margin: 0 0 0.5rem 0; font-size: 1rem;'>
+                    🔍 What This Tool Does
+                </h4>
+                <ul style='color: #d1d5db; font-size: 0.9rem; margin: 0; padding-left: 1.2rem;'>
+                    <li>Real-time case tracking & mortality analysis</li>
+                    <li>AI-powered research assistant (ask questions below)</li>
+                    <li>Live news monitoring from WHO, CDC, Reuters, BBC</li>
+                    <li>Pandemic risk assessment & geographic mapping</li>
+                </ul>
+            </div>
+
+            <div style='background: rgba(168, 85, 247, 0.1);
+                        border: 1px solid #a855f7;
+                        padding: 1rem;
+                        border-radius: 8px;'>
+                <h4 style='color: #a855f7; margin: 0 0 0.5rem 0; font-size: 1rem;'>
+                    💡 How To Use
+                </h4>
+                <ul style='color: #d1d5db; font-size: 0.9rem; margin: 0; padding-left: 1.2rem;'>
+                    <li>Scroll down to see live outbreak statistics</li>
+                    <li>Ask questions in the research assistant chat</li>
+                    <li>Check the map for geographic spread patterns</li>
+                    <li>Enable alerts in sidebar for outbreak updates</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style='text-align: center;
+                    background: rgba(250, 204, 21, 0.1);
+                    border: 1px solid #facc15;
+                    padding: 0.8rem;
+                    border-radius: 8px;
+                    margin-top: 1rem;'>
+            <p style='color: #facc15; font-weight: bold; margin: 0; font-size: 0.95rem;'>
+                ⚠️ NOT MEDICAL ADVICE • For emergencies contact local health authorities
+            </p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
     _bootstrap_if_empty()
     _render_setup_warning()
 
