@@ -141,7 +141,7 @@ def _card_html(art: dict[str, Any]) -> str:
         f'{s["icon"]} {art["source"]}</span>'
         f'<span style="color:#475569;font-size:0.68rem;white-space:nowrap;">{art["date"]}</span>'
         f'</div>'
-        f'<a href="{art["url"]}" target="_blank" rel="noopener" style="text-decoration:none;'
+        f'<a href="{art["url"]}" target="_blank" rel="noopener" class="headline-link" style="text-decoration:none;'
         f'color:#f1f5f9;font-size:0.87rem;font-weight:600;line-height:1.35;">{title}</a>'
         f'<p style="color:#94a3b8;font-size:0.75rem;line-height:1.4;margin:0;flex:1;">{summary}</p>'
         f'<div style="display:flex;align-items:center;gap:0.4rem;">'
@@ -208,6 +208,7 @@ def render_news_ticker() -> None:
             </div>
         </div>
         <style>
+            .headline-link:hover { color: #00b4d8 !important; text-decoration: underline !important; }
             div::-webkit-scrollbar { width: 8px; }
             div::-webkit-scrollbar-track { background: rgba(15,23,42,0.5); border-radius: 4px; }
             div::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.5); border-radius: 4px; }
