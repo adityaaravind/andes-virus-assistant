@@ -362,36 +362,7 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
         )
 
 
-def _auth_gate() -> bool:
-    """Return True if user is allowed through. Uses APP_PASSWORD env var."""
-    password = os.getenv("APP_PASSWORD", "")
-    if not password:
-        return True  # no password set = open access (local dev)
-
-    if st.session_state.get("authenticated"):
-        return True
-
-    st.markdown(
-        "<div style='max-width:360px;margin:4rem auto;'>"
-        "<h2 style='color:#00b4d8;text-align:center;'>🧬 Andes Virus Assistant</h2>"
-        "<p style='color:#94a3b8;text-align:center;font-size:0.85rem;'>Restricted access</p>"
-        "</div>",
-        unsafe_allow_html=True,
-    )
-    pwd = st.text_input("Access password", type="password", key="auth_input")
-    if st.button("Enter", use_container_width=False):
-        if pwd == password:
-            st.session_state["authenticated"] = True
-            st.rerun()
-        else:
-            st.error("Incorrect password")
-    st.stop()
-    return False
-
-
 def main() -> None:
-    # _auth_gate()  # Disabled for Google verification
-
     # Auto-refresh page every hour so headlines stay live
     # from streamlit_autorefresh import st_autorefresh
     # st_autorefresh(interval=3600 * 1000, key="hourly_refresh")
