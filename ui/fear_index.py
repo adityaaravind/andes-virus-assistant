@@ -54,6 +54,7 @@ def _save_fear_vote(level: int, user_id: str) -> None:
         pass
 
 
+@st.cache_data(ttl=900, show_spinner=False)
 def _calculate_web_sentiment() -> float:
     """Analyze recent news to derive a 'media fear' score (1-5)."""
     try:

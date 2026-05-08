@@ -38,7 +38,23 @@ def _ensure_data_dirs() -> None:
         Path(d).mkdir(parents=True, exist_ok=True)
 
 
+def _restore_analytics_backup() -> None:
+    """Restore streamlit-analytics2 data from Qdrant (persistent_kv) to local file."""
+    try:
+        from alerts.persistent_kv import kv_get
+        import json
+        analytics_file = Path("data/analytics.json")
+        if not analytics_file.exists():
+            data = kv_get("analytics_backup")
+            if data:
+                analytics_file.write_text(json.dumps(data))
+                logging.info("Restored streamlit-analytics2 backup from Qdrant")
+    except Exception:
+        logging.exception("Failed to restore analytics backup")
+
+
 _ensure_data_dirs()
+_restore_analytics_backup()
 
 # ---------------------------------------------------------------------------
 # Background ingestion scheduler (runs once per process, not per Streamlit
@@ -64,8 +80,18 @@ def _run_fast_news_poll() -> None:
         chunks = chunk_documents(docs)
         if chunks:
             add_documents(chunks)
-        st.cache_data.clear()
         logging.info("Fast news poll: %d new chunks", len(chunks))
+
+        # Backup streamlit-analytics2 to Qdrant
+        try:
+            import json
+            analytics_file = Path("data/analytics.json")
+            if analytics_file.exists():
+                from alerts.persistent_kv import kv_set
+                data = json.loads(analytics_file.read_text())
+                kv_set("analytics_backup", data)
+        except Exception:
+            pass
 
         # Pass raw article dicts (not Document objects) to case count extractor
         updated = extract_and_save(docs)
@@ -117,7 +143,6 @@ def _run_ingestion_job() -> None:
         sys.path.insert(0, str(Path(__file__).parent))
         from scripts.ingest_all import run_ingestion
         run_ingestion()
-        st.cache_data.clear()
     except Exception:
         logging.exception("Background ingestion job failed")
     # Check alert thresholds after every ingestion
@@ -260,7 +285,6 @@ def _bootstrap_if_empty() -> None:
         try:
             from scripts.ingest_all import run_ingestion
             run_ingestion()
-            st.cache_data.clear()
             st.rerun()
         except Exception as exc:
             logging.exception("Bootstrap ingestion failed")
@@ -289,31 +313,6 @@ def _render_header() -> None:
         )
     with col_author:
         render_author_card()
-
-
-def _render_setup_warning() -> None:
-    api_key = os.getenv("OPENAI_API_KEY", "")
-    has_key = api_key and api_key != "your_key_here"
-    has_data = _check_vectorstore()
-
-    if not has_key:
-        st.warning(
-            "**OpenAI API key not configured.**\n\n"
-            "1. Copy `.env.example` → `.env`\n"
-            "2. Add your key: `OPENAI_API_KEY=sk-...`\n"
-            "3. Restart the app\n\n"
-            "Without a key, embeddings fall back to HuggingFace (offline mode).",
-            icon="⚙️",
-        )
-
-    if not has_data:
-        st.info(
-            "**Vector store is empty.** Run the ingestion pipeline first:\n\n"
-            "```bash\npython scripts/ingest_all.py\n```\n\n"
-            "This fetches PubMed abstracts, WHO documents, news, and Wikipedia articles "
-            "and stores them for retrieval.",
-            icon="📥",
-        )
 
 
 def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
@@ -362,7 +361,7 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
 
 
 def main() -> None:
-    with streamlit_analytics.track():
+    with streamlit_analytics.track(load_from_json="data/analytics.json", save_to_json="data/analytics.json"):
         # Auto-refresh page every hour so headlines stay live
         # from streamlit_autorefresh import st_autorefresh
         # st_autorefresh(interval=3600 * 1000, key="hourly_refresh")
@@ -409,7 +408,6 @@ def main() -> None:
         st.warning("⚠️ **NOT MEDICAL ADVICE** • For emergencies contact local health authorities")
 
         _bootstrap_if_empty()
-        _render_setup_warning()
 
         chain = _init_rag_chain()
 
