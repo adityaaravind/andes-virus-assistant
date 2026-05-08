@@ -141,80 +141,72 @@ def render_fear_index() -> None:
             margin-top:0.9rem;
             border-top:1px solid #1b2e45;padding-top:0.7rem;
           ">
-            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.8rem;">
               <span style="color:#94a3b8;font-size:0.75rem;">Fear Level:</span>
               <div style="flex:1;height:8px;background:#1b2e45;border-radius:4px;position:relative;">
                 <div style="width:{avg_fear/5*100}%;height:100%;background:{color};border-radius:4px;"></div>
               </div>
               <span style="color:{color};font-size:0.75rem;font-weight:600;">{avg_fear:.1f}/5</span>
             </div>
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+        """)
 
-    # Voting section
     if not user_voted_today:
         st.markdown(
-            '<p style="color:#94a3b8;font-size:0.85rem;margin:0.5rem 0;">How do you feel about the outbreak?</p>',
+            '<p style="color:#94a3b8;font-size:0.78rem;margin:0 0 0.5rem;">How do you feel?</p>',
             unsafe_allow_html=True,
         )
 
-        # Compact voting buttons
+        # Embed voting buttons inside the card with custom HTML
+        vote_buttons_html = """
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0.4rem;margin-bottom:0.5rem;">
+        """
+
+        for level, info in FEAR_LEVELS.items():
+            vote_buttons_html += f"""
+            <button onclick="document.getElementById('hidden_vote_{level}').click()"
+            style="background:{info['color']}22;border:1px solid {info['color']};
+            border-radius:6px;padding:0.3rem 0.2rem;font-size:0.68rem;font-weight:600;
+            color:{info['color']};cursor:pointer;min-height:32px;
+            transition:all 0.2s ease;text-align:center;"
+            onmouseover="this.style.background='{info['color']}44'"
+            onmouseout="this.style.background='{info['color']}22'"
+            title="{info['desc']}">
+                {info['label']}
+            </button>
+            """
+
+        vote_buttons_html += """
+        </div>
+        </div>
+        </div>
+        """
+
+        st.markdown(vote_buttons_html, unsafe_allow_html=True)
+
+        # Hidden Streamlit buttons for actual voting
+        cols = st.columns(5)
+        for i, (level, info) in enumerate(FEAR_LEVELS.items()):
+            with cols[i]:
+                if st.button(
+                    " ",
+                    key=f"hidden_vote_{level}",
+                ):
+                    _save_fear_vote(level, user_id)
+                    st.success(f"✅ Voted: {info['label']}")
+                    st.rerun()
+
+        # Hide the Streamlit buttons with CSS
         st.markdown("""
         <style>
-        .stButton > button {
-            height: 50px !important;
-            font-size: 0.75rem !important;
-            font-weight: 600 !important;
-            white-space: normal !important;
-            line-height: 1.1 !important;
-            padding: 0.5rem !important;
-        }
-        @media (max-width: 768px) {
-            .stButton > button {
-                height: 55px !important;
-                font-size: 0.8rem !important;
-                padding: 0.6rem !important;
-            }
+        [data-testid="column"]:nth-child(n) button {
+            display: none !important;
         }
         </style>
         """, unsafe_allow_html=True)
 
-        # First row: 1-3 (Calm to Worried)
-        cols1 = st.columns(3)
-        for i, level in enumerate([1, 2, 3]):
-            info = FEAR_LEVELS[level]
-            with cols1[i]:
-                if st.button(
-                    f"{level} • {info['label']}",
-                    key=f"fear_vote_{level}",
-                    use_container_width=True,
-                    type="secondary",
-                    help=info['desc']
-                ):
-                    _save_fear_vote(level, user_id)
-                    st.success(f"✅ Voted: {info['label']}")
-                    st.rerun()
-
-        # Second row: 4-5 (Fearful to Panicked)
-        cols2 = st.columns([1, 2, 1])  # Center the remaining buttons
-        for i, level in enumerate([4, 5]):
-            with cols2[i]:
-                info = FEAR_LEVELS[level]
-                if st.button(
-                    f"{level} • {info['label']}",
-                    key=f"fear_vote_{level}",
-                    use_container_width=True,
-                    type="secondary",
-                    help=info['desc']
-                ):
-                    _save_fear_vote(level, user_id)
-                    st.success(f"✅ Voted: {info['label']}")
-                    st.rerun()
     else:
         st.markdown(
-            '<p style="color:#64748b;font-size:0.78rem;margin:0.5rem 0;">✓ Thanks for voting! Come back tomorrow to vote again.</p>',
+            '<p style="color:#64748b;font-size:0.72rem;margin:0 0 0.5rem;">✓ Thanks for voting! Come back tomorrow.</p>'
+            '</div></div>',
             unsafe_allow_html=True,
         )
