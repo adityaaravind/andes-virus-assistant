@@ -124,14 +124,43 @@ def similarity_search(
                 with_payload=True,
             )
 
-    return [
-        {
-            "text":             r.payload.get("text", ""),
-            "metadata":         {k: v for k, v in r.payload.items() if k != "text"},
-            "similarity_score": r.score,
-        }
-        for r in results
-    ]
+    # Handle different result formats from different API versions
+    formatted_results = []
+    for r in results:
+        try:
+            # Standard format with .payload and .score attributes
+            if hasattr(r, 'payload') and hasattr(r, 'score'):
+                formatted_results.append({
+                    "text":             r.payload.get("text", ""),
+                    "metadata":         {k: v for k, v in r.payload.items() if k != "text"},
+                    "similarity_score": r.score,
+                })
+            # Tuple format (id, score, payload)
+            elif isinstance(r, tuple) and len(r) >= 3:
+                payload = r[2] if len(r) > 2 else {}
+                score = r[1] if len(r) > 1 else 0.0
+                formatted_results.append({
+                    "text":             payload.get("text", ""),
+                    "metadata":         {k: v for k, v in payload.items() if k != "text"},
+                    "similarity_score": score,
+                })
+            # Dict format
+            elif isinstance(r, dict):
+                payload = r.get('payload', {})
+                score = r.get('score', 0.0)
+                formatted_results.append({
+                    "text":             payload.get("text", ""),
+                    "metadata":         {k: v for k, v in payload.items() if k != "text"},
+                    "similarity_score": score,
+                })
+            else:
+                # Fallback - skip malformed results
+                logging.warning("Unknown result format: %s", type(r))
+        except Exception as e:
+            logging.warning("Error processing search result: %s", e)
+            continue
+
+    return formatted_results
 
 
 def get_stats() -> dict[str, Any]:
