@@ -1,6 +1,7 @@
 """Fear index component — user voting on outbreak fear level."""
 from __future__ import annotations
 
+import hashlib
 import json
 import streamlit as st
 from datetime import datetime
@@ -82,9 +83,13 @@ def render_fear_index() -> None:
     """Render fear index voting panel."""
     avg_fear, vote_count, label, desc, color = _calculate_fear_average()
 
-    # Generate unique user ID based on session
+    # Generate unique user ID based on session + browser fingerprint
     if "user_id" not in st.session_state:
-        st.session_state.user_id = f"user_{hash(str(datetime.utcnow()))}"
+        # More unique ID using browser context
+        import hashlib
+        browser_info = str(st.session_state) + str(hash(str(datetime.utcnow().date())))
+        user_hash = hashlib.md5(browser_info.encode()).hexdigest()[:12]
+        st.session_state.user_id = f"user_{user_hash}"
 
     user_id = st.session_state.user_id
 
@@ -156,11 +161,48 @@ def render_fear_index() -> None:
             unsafe_allow_html=True,
         )
 
-        cols = st.columns(5)
-        for i, (level, info) in enumerate(FEAR_LEVELS.items()):
-            with cols[i]:
+        # Mobile-friendly voting buttons - use 2 rows for better mobile experience
+        st.markdown("""
+        <style>
+        .stButton > button {
+            height: 80px !important;
+            font-size: 0.9rem !important;
+            font-weight: 700 !important;
+            white-space: normal !important;
+            line-height: 1.2 !important;
+        }
+        @media (max-width: 768px) {
+            .stButton > button {
+                height: 90px !important;
+                font-size: 1rem !important;
+                padding: 1rem !important;
+            }
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
+        # First row: 1-3 (Calm to Worried)
+        cols1 = st.columns(3)
+        for i, level in enumerate([1, 2, 3]):
+            info = FEAR_LEVELS[level]
+            with cols1[i]:
                 if st.button(
-                    f"{level}\n{info['label']}",
+                    f"{level} • {info['label']}\n{info['desc']}",
+                    key=f"fear_vote_{level}",
+                    use_container_width=True,
+                    type="secondary"
+                ):
+                    _save_fear_vote(level, user_id)
+                    st.success(f"✅ Voted: {info['label']}")
+                    st.rerun()
+
+        # Second row: 4-5 (Fearful to Panicked)
+        cols2 = st.columns([1, 2, 1])  # Center the remaining buttons
+        for i, level in enumerate([4, 5]):
+            with cols2[i]:
+                info = FEAR_LEVELS[level]
+                if st.button(
+                    f"{level} • {info['label']}\n{info['desc']}",
                     key=f"fear_vote_{level}",
                     use_container_width=True,
                     type="secondary"
