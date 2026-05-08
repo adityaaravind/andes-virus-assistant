@@ -117,6 +117,17 @@ def render_stats_panel() -> None:
             + stats["last_updated"] + '</span>',
             unsafe_allow_html=True,
         )
+    elif stats.get("_source") == "manual-correction":
+        st.markdown(
+            '<div style="background:rgba(59,130,246,0.1);border:1px solid #3b82f644;padding:0.5rem 0.8rem;border-radius:8px;margin-bottom:1rem;">'
+            '<span style="color:#3b82f6;font-size:0.75rem;font-weight:700;font-family:monospace;letter-spacing:0.05em;">'
+            '🛡️ VERIFIED DATA SOURCE</span><br>'
+            '<span style="color:#94a3b8;font-size:0.72rem;">'
+            'Showing verified human-checked data right now, not just what the AI guessed from a news headline. '
+            'Last sync: ' + stats["last_updated"] + '</span>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
     else:
         st.markdown(
             '<span style="color:#f59e0b;font-size:0.7rem;font-weight:700;font-family:monospace;'
