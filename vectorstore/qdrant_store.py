@@ -96,13 +96,33 @@ def similarity_search(
     if count == 0:
         return []
 
-    results = client.search(
-        collection_name=COLLECTION_NAME,
-        query_vector=query_embedding,
-        limit=min(k, count),
-        query_filter=qdrant_filter,
-        with_payload=True,
-    )
+    try:
+        results = client.search(
+            collection_name=COLLECTION_NAME,
+            query_vector=query_embedding,
+            limit=min(k, count),
+            query_filter=qdrant_filter,
+            with_payload=True,
+        )
+    except AttributeError:
+        # Try newer API format
+        try:
+            results = client.search_points(
+                collection_name=COLLECTION_NAME,
+                query=query_embedding,
+                limit=min(k, count),
+                filter=qdrant_filter,
+                with_payload=True,
+            )
+        except:
+            # Try with named arguments for v1.9+
+            results = client.query_points(
+                collection_name=COLLECTION_NAME,
+                query=query_embedding,
+                limit=min(k, count),
+                query_filter=qdrant_filter,
+                with_payload=True,
+            )
 
     return [
         {
