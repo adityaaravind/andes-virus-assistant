@@ -20,9 +20,10 @@ from qdrant_client.models import (
     VectorParams,
 )
 
-COLLECTION_NAME = "andes_virus_research"
+COLLECTION_NAME = "andes_virus_research_v11"
 VECTOR_DIM      = 1536   # text-embedding-3-small
 BATCH_SIZE      = 100
+VERSION         = "1.1"
 
 
 def _client() -> QdrantClient:
@@ -36,9 +37,14 @@ def _ensure_collection(client: QdrantClient) -> None:
     if COLLECTION_NAME not in existing:
         client.create_collection(
             collection_name=COLLECTION_NAME,
-            vectors_config=VectorParams(size=VECTOR_DIM, distance=Distance.COSINE),
+            vectors_config={
+                "summary": VectorParams(size=VECTOR_DIM, distance=Distance.COSINE),
+                "detail":  VectorParams(size=VECTOR_DIM, distance=Distance.COSINE),
+            },
+            # v1.1 Foundation for hybrid search
+            # sparse_vectors_config={"text-sparse": SparseVectorParams(index=SparseIndexParams(on_disk=True))}
         )
-        logging.info("Qdrant: created collection %s", COLLECTION_NAME)
+        logging.info("Qdrant: created collection %s with Named Vectors", COLLECTION_NAME)
 
 
 def add_documents(chunks: list[dict[str, Any]]) -> int:
@@ -49,13 +55,17 @@ def add_documents(chunks: list[dict[str, Any]]) -> int:
 
     points = []
     for chunk in chunks:
-        emb = chunk.get("embedding")
-        if not emb:
+        detail_emb = chunk.get("embedding")
+        summary_emb = chunk.get("summary_embedding") or detail_emb
+        if not detail_emb:
             continue
         cid = _chunk_id(chunk)
         points.append(PointStruct(
-            id=int(cid, 16) % (2**63),   # Qdrant requires uint64
-            vector=emb,
+            id=int(cid, 16) % (2**63),
+            vector={
+                "summary": summary_emb,
+                "detail":  detail_emb
+            },
             payload=_build_payload(chunk),
         ))
 
@@ -68,7 +78,7 @@ def add_documents(chunks: list[dict[str, Any]]) -> int:
         client.upsert(collection_name=COLLECTION_NAME, points=batch)
         added += len(batch)
 
-    logging.info("Qdrant: upserted %d points", added)
+    logging.info("Qdrant: upserted %d points to %s", added, COLLECTION_NAME)
     return added
 
 
@@ -80,6 +90,7 @@ def similarity_search(
     query_embedding: list[float],
     k: int = 6,
     where: dict[str, Any] | None = None,
+    vector_name: str = "detail",
 ) -> list[dict[str, Any]]:
     client = _client()
     _ensure_collection(client)
@@ -99,67 +110,42 @@ def similarity_search(
     try:
         results = client.search(
             collection_name=COLLECTION_NAME,
-            query_vector=query_embedding,
+            query_vector=(vector_name, query_embedding),
             limit=min(k, count),
             query_filter=qdrant_filter,
             with_payload=True,
         )
-    except AttributeError:
-        # Try newer API format
-        try:
-            results = client.search_points(
-                collection_name=COLLECTION_NAME,
-                query=query_embedding,
-                limit=min(k, count),
-                filter=qdrant_filter,
-                with_payload=True,
-            )
-        except:
-            # Try with named arguments for v1.9+
-            results = client.query_points(
-                collection_name=COLLECTION_NAME,
-                query=query_embedding,
-                limit=min(k, count),
-                query_filter=qdrant_filter,
-                with_payload=True,
-            )
+    except Exception as e:
+        logging.warning("Search failed: %s", e)
+        return []
 
-    # Handle different result formats from different API versions
+    return _format_results(results)
+
+
+
+def _format_results(results: Any) -> list[dict[str, Any]]:
+    """Helper to unify result formats from Qdrant API."""
     formatted_results = []
     for r in results:
         try:
-            # Standard format with .payload and .score attributes
             if hasattr(r, 'payload') and hasattr(r, 'score'):
                 formatted_results.append({
+                    "id":               getattr(r, 'id', None),
                     "text":             r.payload.get("text", ""),
                     "metadata":         {k: v for k, v in r.payload.items() if k != "text"},
                     "similarity_score": r.score,
                 })
-            # Tuple format (id, score, payload)
-            elif isinstance(r, tuple) and len(r) >= 3:
-                payload = r[2] if len(r) > 2 else {}
-                score = r[1] if len(r) > 1 else 0.0
-                formatted_results.append({
-                    "text":             payload.get("text", ""),
-                    "metadata":         {k: v for k, v in payload.items() if k != "text"},
-                    "similarity_score": score,
-                })
-            # Dict format
             elif isinstance(r, dict):
                 payload = r.get('payload', {})
-                score = r.get('score', 0.0)
                 formatted_results.append({
+                    "id":               r.get('id'),
                     "text":             payload.get("text", ""),
                     "metadata":         {k: v for k, v in payload.items() if k != "text"},
-                    "similarity_score": score,
+                    "similarity_score": r.get('score', 0.0),
                 })
-            else:
-                # Fallback - skip malformed results
-                logging.warning("Unknown result format: %s", type(r))
         except Exception as e:
-            logging.warning("Error processing search result: %s", e)
+            logging.warning("Error processing result: %s", e)
             continue
-
     return formatted_results
 
 
@@ -173,9 +159,11 @@ def get_stats() -> dict[str, Any]:
             "collection_name": COLLECTION_NAME,
             "status":          "ready" if count > 0 else "empty",
             "backend":         "qdrant",
+            "version":         VERSION,
         }
     except Exception as exc:
-        return {"total_chunks": 0, "status": f"error: {exc}", "backend": "qdrant"}
+        return {"total_chunks": 0, "status": f"error: {exc}", "backend": "qdrant", "version": VERSION}
+
 
 
 def _chunk_id(chunk: dict[str, Any]) -> str:

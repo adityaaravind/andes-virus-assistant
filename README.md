@@ -1,8 +1,6 @@
-# 🧬 Andes Virus Research Assistant
+# 🧬 Andes Virus Research Assistant `v1.1`
 
 **Real-time AI Outbreak Intelligence for the MV Hondius Hantavirus Incident.**
-
-The Andes Virus Research Assistant is a RAG-powered (Retrieval-Augmented Generation) dashboard and AI assistant designed to track the ongoing hantavirus outbreak linked to the cruise ship MV Hondius. It provides journalists, health workers, and researchers with cited, evidence-based answers derived from official health reports, peer-reviewed literature, and live news.
 
 ---
 
@@ -13,6 +11,7 @@ The Andes Virus Research Assistant is a RAG-powered (Retrieval-Augmented Generat
 -   **📡 Real-Time News Ticker:** Monitored feeds from WHO, CDC, Reuters, and BBC—updated every 15 minutes.
 -   **📈 Pandemic Risk & Fear Index:** Blended sentiment analysis from global media and community voting.
 -   **📊 Outbreak Analytics:** Detailed statistics on case counts, mortality rates, and source credibility.
+-   **🔗 v1.1: Contextual Recommendations:** Leveraging Qdrant's Recommendation API to map related research and bridge data silos.
 
 ---
 
@@ -21,8 +20,9 @@ The Andes Virus Research Assistant is a RAG-powered (Retrieval-Augmented Generat
 -   **Frontend:** Streamlit (Custom Navy/Teal Design System)
 -   **AI Engine:** LangChain + OpenAI GPT-4o-mini
 -   **Embeddings:** OpenAI `text-embedding-3-small` (Fallback: HuggingFace `all-MiniLM-L6-v2`)
--   **Vector Database:** Qdrant Cloud (Production) / ChromaDB (Local)
+-   **Vector Database:** Qdrant Cloud (v1.1 with Recommendation Engine) / ChromaDB (Local)
 -   **Persistence:** Persistent Analytics & Sentiment tracking via Qdrant Key-Value store.
+
 
 ---
 

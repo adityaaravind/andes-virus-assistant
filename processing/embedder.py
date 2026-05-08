@@ -18,13 +18,19 @@ RETRY_DELAY = 5.0
 
 
 def embed_chunks(chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    texts = [c["text"] for c in chunks]
-    embeddings = _embed_texts(texts)
+    """Generate both 'detail' (full text) and 'summary' (title + snippet) embeddings."""
+    detail_texts = [c["text"] for c in chunks]
+    summary_texts = [f"{c.get('title', '')}: {c['text'][:200]}" for c in chunks]
+    
+    detail_embs = _embed_texts(detail_texts)
+    summary_embs = _embed_texts(summary_texts)
 
-    for chunk, embedding in zip(chunks, embeddings):
-        chunk["embedding"] = embedding
+    for chunk, d_emb, s_emb in zip(chunks, detail_embs, summary_embs):
+        chunk["embedding"] = d_emb
+        chunk["summary_embedding"] = s_emb
 
     return chunks
+
 
 
 def _embed_texts(texts: list[str]) -> list[list[float]]:

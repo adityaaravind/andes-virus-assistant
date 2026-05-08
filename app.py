@@ -80,7 +80,27 @@ def _run_fast_news_poll() -> None:
         chunks = chunk_documents(docs)
         if chunks:
             add_documents(chunks)
+            
+            # v1.1 Semantic Alerting
+            from alerts.alert_manager import check_semantic_alerts
+            from alerts.notifier import send_ntfy
+            concerns_found = set()
+            for c in chunks:
+                if "embedding" in c:
+                    found = check_semantic_alerts(c["embedding"])
+                    concerns_found.update(found)
+            
+            for concern in concerns_found:
+                send_ntfy(
+                    os.getenv("NTFY_DEFAULT_TOPIC", "HANTAVIRUS"),
+                    "🚨 SEMANTIC ALERT DETECTED",
+                    f"Research match found for: {concern}",
+                    "critical"
+                )
+                logging.warning("Semantic alert fired: %s", concern)
+
         logging.info("Fast news poll: %d new chunks", len(chunks))
+
 
         # Backup streamlit-analytics2 to Qdrant
         try:
@@ -370,7 +390,7 @@ def main() -> None:
         col_title, col_status = st.columns([4, 1])
         with col_title:
             st.markdown(
-                "<h1 style='margin:0;'>🧬 Andes Virus Research Assistant</h1>"
+                "<h1 style='margin:0;'>🧬 Andes Virus Research Assistant <small style='font-size:0.5em; color:var(--gray-400);'>v1.1</small></h1>"
                 "<p style='color:var(--gray-300); font-size:0.85rem; margin:0;'>"
                 "MV Hondius Hantavirus Outbreak · Intelligence Dashboard</p>",
                 unsafe_allow_html=True
@@ -391,10 +411,12 @@ def main() -> None:
                 "<h3 style='margin:0 0 0.5rem 0;'>🔍 Intelligence Summary</h3>"
                 "<p style='font-size:0.8rem; color:var(--gray-100); line-height:1.4; margin:0;'>"
                 "Real-time case tracking, AI evidence review, and live news monitoring "
-                "from WHO, CDC, and major scientific journals.</p>"
+                "from WHO, CDC, and major scientific journals. "
+                "<b>v1.1 Upgrade:</b> Now using Qdrant Recommendation API for deeper context mapping.</p>"
                 "</div>",
                 unsafe_allow_html=True
             )
+
         with use_col:
             st.markdown(
                 "<div class='panel-card'>"

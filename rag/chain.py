@@ -84,12 +84,23 @@ class RAGChain:
         self._prompt = prompt
 
     def _prepare(self, question: str) -> tuple[list[Any], list[dict], list[dict]]:
+        from rag.session_memory import get_session_context
+        from processing.embedder import _embed_texts
+        
+        # Get query embedding for memory lookup
+        q_emb = _embed_texts([question])[0]
+        past_context = get_session_context("default_session", q_emb)
+
         chunks = retrieve(question)
         if not chunks:
             return [], [], []
 
         context_parts: list[str] = []
+        if past_context:
+            context_parts.append(f"PREVIOUS SESSION CONTEXT:\n{past_context}")
+
         for i, chunk in enumerate(chunks, start=1):
+
             meta = chunk.get("metadata", {})
             title  = meta.get("title", "Unknown")
             source = meta.get("source_name", meta.get("source", "Unknown"))
@@ -118,8 +129,19 @@ class RAGChain:
                 "raw_chunks": [],
             }
         response = self._llm.invoke(messages)
+        
+        # Save session context
+        from rag.session_memory import save_session_context
+        from processing.embedder import _embed_texts
+        summary = f"User asked: {question}\nAssistant answered: {response.content[:200]}..."
+        try:
+            q_emb = _embed_texts([question])[0]
+            save_session_context("default_session", summary, q_emb)
+        except: pass
+
         return {
             "answer":      response.content,
+
             "sources":     sources,
             "chunks_used": len(chunks),
             "raw_chunks":  chunks,

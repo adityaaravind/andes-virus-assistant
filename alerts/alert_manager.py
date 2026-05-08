@@ -131,6 +131,57 @@ def _snapshot(current: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _ensure_concerns_collection(client: Any) -> None:
+    from qdrant_client.models import Distance, VectorParams
+    existing = {c.name for c in client.get_collections().collections}
+    if "semantic_concerns" not in existing:
+        client.create_collection(
+            "semantic_concerns",
+            vectors_config=VectorParams(size=1536, distance=Distance.COSINE),
+        )
+        # Pre-populate with key concerns
+        from processing.embedder import _embed_texts
+        from qdrant_client.models import PointStruct
+        concerns = [
+            "Human-to-human transmission of Andes hantavirus",
+            "Mutation increasing viral load or infectivity",
+            "Resistance to ribavirin or other treatments",
+            "Cases in high-density urban environments",
+            "Asymptomatic spread in community",
+        ]
+        embs = _embed_texts(concerns)
+        points = [
+            PointStruct(id=i, vector=emb, payload={"concern": concerns[i]})
+            for i, emb in enumerate(embs)
+        ]
+        client.upsert("semantic_concerns", points=points)
+
+
+def check_semantic_alerts(chunk_embedding: list[float]) -> list[str]:
+    """Compare a new chunk against high-risk semantic concerns."""
+    if not os.getenv("QDRANT_URL"):
+        return []
+
+    try:
+        from vectorstore.qdrant_store import _client
+        client = _client()
+        _ensure_concerns_collection(client)
+        
+        results = client.search(
+            collection_name="semantic_concerns",
+            query_vector=chunk_embedding,
+            limit=1,
+            score_threshold=0.85, # High similarity required
+        )
+        
+        if results:
+            return [results[0].payload["concern"]]
+    except Exception as e:
+        logging.warning("Semantic alert check failed: %s", e)
+    
+    return []
+
+
 def check_and_fire(current: dict[str, Any]) -> int:
     """Compare current state vs last known. Fire alerts to default topic + all subscribers. Returns count."""
     default_topic = os.getenv("NTFY_DEFAULT_TOPIC", "HANTAVIRUS")
