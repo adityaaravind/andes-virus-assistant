@@ -40,7 +40,7 @@ def render_alert_settings() -> None:
         unsafe_allow_html=True,
     )
 
-    with st.expander("Configure your alerts", expanded=False):
+    with st.expander("Alerts and notifications", expanded=False):
         st.markdown(
             '<p style="color:#94a3b8;font-size:0.78rem;margin-bottom:0.8rem;">'
             'Get notified via <b style="color:#f8fafc;">ntfy.sh</b> (free push notifications) '
@@ -52,14 +52,25 @@ def render_alert_settings() -> None:
         with col1:
             ntfy_topic = st.text_input(
                 "ntfy.sh topic",
-                placeholder="e.g. andes-alerts-yourname",
+                value="HANTAVIRUS",
                 help="Install ntfy app → subscribe to your topic → get push notifications on any device. Free, no account needed.",
                 key="alert_ntfy_topic",
             )
+            # Quick subscribe button for HANTAVIRUS
+            if st.button("🔔 Subscribe to HANTAVIRUS", use_container_width=True, type="secondary"):
+                st.session_state.alert_ntfy_topic = "HANTAVIRUS"
+                st.markdown(
+                    '<div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);'
+                    'border-radius:6px;padding:0.5rem;margin:0.3rem 0;">'
+                    '<p style="color:#22c55e;font-size:0.75rem;margin:0;">✓ Topic set to HANTAVIRUS</p>'
+                    '<p style="color:#94a3b8;font-size:0.68rem;margin:0;">Install ntfy app → subscribe to HANTAVIRUS → get all outbreak alerts</p>'
+                    '</div>',
+                    unsafe_allow_html=True,
+                )
             st.markdown(
-                '<p style="color:#475569;font-size:0.68rem;margin-top:-0.4rem;">'
+                '<p style="color:#475569;font-size:0.68rem;margin-top:0.2rem;">'
                 'Download: <a href="https://ntfy.sh" target="_blank" style="color:#00b4d8;">ntfy.sh</a> '
-                '→ subscribe to your topic name above</p>',
+                '→ subscribe to topic above</p>',
                 unsafe_allow_html=True,
             )
         with col2:

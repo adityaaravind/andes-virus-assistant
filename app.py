@@ -397,7 +397,7 @@ def main() -> None:
         st.success("""
         **🔍 What This Tool Does**
         - Real-time case tracking & mortality analysis
-        - AI-powered research assistant (ask questions below)
+        - AI-powered research assistant (coming soon)
         - Live news monitoring from WHO, CDC, Reuters, BBC
         - Pandemic risk assessment & geographic mapping
         """)
@@ -406,7 +406,7 @@ def main() -> None:
         st.info("""
         **💡 How To Use**
         - Scroll down to see live outbreak statistics
-        - Ask questions in the research assistant chat
+        - Ask questions in the research assistant chat (coming soon)
         - Check the map for geographic spread patterns
         - Enable alerts in sidebar for outbreak updates
         """)
