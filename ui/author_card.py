@@ -1,6 +1,7 @@
 """Author profile card — compact top-right widget, purple/violet accent."""
 from __future__ import annotations
 
+import streamlit as st
 from alerts.persist_helper import bg_kv_set, get_persisted_value
 
 
