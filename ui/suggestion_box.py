@@ -6,11 +6,14 @@ import streamlit as st
 from datetime import datetime
 from pathlib import Path
 
+from alerts.notifier import send_email
+
 FEEDBACK_FILE = Path("data/feedback.jsonl")
+USER_EMAIL = "adityaaravind.m@gmail.com"
 
 
 def _save_feedback(feedback_type: str, message: str, email: str = "") -> bool:
-    """Save feedback to JSON lines file."""
+    """Save feedback to JSON lines file and send email notification."""
     try:
         FEEDBACK_FILE.parent.mkdir(parents=True, exist_ok=True)
 
@@ -21,8 +24,33 @@ def _save_feedback(feedback_type: str, message: str, email: str = "") -> bool:
             "email": email.strip(),
         }
 
+        # Save to file
         with open(FEEDBACK_FILE, "a", encoding="utf-8") as f:
             f.write(json.dumps(feedback_data) + "\n")
+
+        # Send email notification to user
+        timestamp = feedback_data["timestamp"]
+        subject = f"[Andes Assistant] New {feedback_type}: {timestamp}"
+
+        body = f"""New feedback received from Andes Virus Assistant:
+
+Type: {feedback_type}
+Time: {timestamp}
+From: {email if email else 'Anonymous'}
+
+Message:
+{message}
+
+---
+This feedback was submitted through the Andes Virus Research Assistant web app.
+"""
+
+        # Send email notification (non-blocking, failure won't affect saving)
+        try:
+            send_email(USER_EMAIL, subject, body)
+        except Exception:
+            # Don't fail the whole operation if email fails
+            pass
 
         return True
     except Exception:

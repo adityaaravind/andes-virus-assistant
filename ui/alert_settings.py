@@ -1,16 +1,13 @@
-"""Alert subscription UI — OneSignal browser push + email, configurable thresholds."""
+"""Alert subscription UI — ntfy.sh push notifications + email, configurable thresholds."""
 from __future__ import annotations
 
 import os
 from typing import Any
 
 import streamlit as st
-import streamlit.components.v1 as components
 
 from alerts.alert_manager import add_subscription, get_alert_history, load_subscriptions
-from alerts.notifier import send_onesignal, send_email
-
-ONESIGNAL_APP_ID = os.getenv("ONESIGNAL_APP_ID", "")
+from alerts.notifier import send_ntfy, send_email
 
 
 def render_alert_settings() -> None:
@@ -23,78 +20,25 @@ def render_alert_settings() -> None:
         unsafe_allow_html=True,
     )
 
-    # ── OneSignal browser push notifications ─────────────────────────────────
-    if ONESIGNAL_APP_ID:
-        st.markdown(
-            f'<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);'
-            f'border-radius:8px;padding:0.7rem 0.8rem;margin-bottom:0.7rem;">'
-            f'<p style="color:#ef4444;font-size:0.72rem;font-weight:700;margin:0 0 0.3rem;'
-            f'text-transform:uppercase;letter-spacing:0.05em;">📡 Browser Push Alerts</p>'
-            f'<p style="color:#f1f5f9;font-size:0.78rem;margin:0 0 0.5rem;">'
-            f'Get instant outbreak alerts directly in your browser — no app download needed.</p>',
-            unsafe_allow_html=True,
-        )
-
-        # OneSignal integration
-        onesignal_html = f"""
-        <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-        <script>
-          window.OneSignalDeferred = window.OneSignalDeferred || [];
-          OneSignalDeferred.push(function(OneSignal) {{
-            OneSignal.init({{
-              appId: "{ONESIGNAL_APP_ID}",
-              safari_web_id: "web.onesignal.auto.{ONESIGNAL_APP_ID}",
-              notifyButton: {{
-                enable: false
-              }}
-            }});
-
-            // Custom subscribe button
-            window.subscribeToNotifications = function() {{
-              OneSignal.showSlidedownPrompt().then(function() {{
-                OneSignal.getNotificationPermission().then(function(permission) {{
-                  if (permission === 'granted') {{
-                    document.getElementById('onesignal-status').innerHTML =
-                      '<span style="color:#22c55e;">✅ Subscribed to outbreak alerts!</span>';
-                  }}
-                }});
-              }});
-            }};
-
-            // Check current subscription status
-            OneSignal.getNotificationPermission().then(function(permission) {{
-              const statusEl = document.getElementById('onesignal-status');
-              if (permission === 'granted') {{
-                statusEl.innerHTML = '<span style="color:#22c55e;">✅ Already subscribed</span>';
-              }} else if (permission === 'denied') {{
-                statusEl.innerHTML = '<span style="color:#ef4444;">❌ Notifications blocked — please enable in browser settings</span>';
-              }} else {{
-                statusEl.innerHTML = '<span style="color:#f59e0b;">⏸ Click button below to subscribe</span>';
-              }}
-            }});
-          }});
-        </script>
-        <div style="text-align:center;margin:0.8rem 0;">
-          <button onclick="subscribeToNotifications()" style="
-            background:#ef4444;color:#fff;border:none;border-radius:8px;
-            padding:0.8rem 1.5rem;font-size:0.9rem;font-weight:700;
-            cursor:pointer;transition:all 0.2s ease;">
-            🔔 Enable Browser Notifications
-          </button>
-          <p id="onesignal-status" style="margin:0.5rem 0 0;font-size:0.75rem;color:#94a3b8;">
-            Loading subscription status...
-          </p>
-        </div>
-        """
-
-        components.html(onesignal_html, height=150)
-
-        st.markdown(
-            f'<p style="color:#475569;font-size:0.65rem;margin:0.4rem 0 0;font-family:monospace;">'
-            f'Powered by OneSignal · App ID: {ONESIGNAL_APP_ID[:8]}...</p>'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
+    # ── ntfy.sh alerts ─────────────────────────────────
+    st.markdown(
+        '<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);'
+        'border-radius:8px;padding:0.7rem 0.8rem;margin-bottom:0.7rem;">'
+        '<p style="color:#ef4444;font-size:0.72rem;font-weight:700;margin:0 0 0.3rem;'
+        'text-transform:uppercase;letter-spacing:0.05em;">📡 Custom Alerts</p>'
+        '<p style="color:#f1f5f9;font-size:0.78rem;margin:0 0 0.5rem;">'
+        'Get instant outbreak alerts via ntfy.sh — no account needed, works on any device.</p>'
+        '<div style="background:rgba(15,23,42,0.7);border:1px solid rgba(148,163,184,0.3);'
+        'border-radius:6px;padding:0.6rem;margin:0.5rem 0;font-family:monospace;">'
+        '<p style="color:#94a3b8;font-size:0.68rem;margin:0 0 0.3rem;">Try this command:</p>'
+        '<p style="color:#22c55e;font-size:0.75rem;margin:0;"><span style="color:#f59e0b;">$</span> curl -d "Hi" https://ntfy.sh/HANTAVIRUS</p>'
+        '</div>'
+        '<p style="color:#cbd5e1;font-size:0.68rem;margin:0.4rem 0 0;">'
+        'Install <a href="https://ntfy.sh" target="_blank" style="color:#00b4d8;">ntfy.sh app</a> '
+        '→ subscribe to <strong style="color:#f59e0b;">HANTAVIRUS</strong> topic → get all outbreak alerts</p>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
 
     with st.expander("Configure your alerts", expanded=False):
         st.markdown(
