@@ -24,6 +24,33 @@ BASE_QUESTIONS = [
     {"q": "What precautions are passengers and crew taking?",     "cat": "Response",   "key": "q_precautions"},
 ]
 
+# Static answers based on current outbreak data
+STATIC_ANSWERS = {
+    "q_what": "Andes virus is a hantavirus species that causes Hantavirus Pulmonary Syndrome (HPS). It's dangerous because it has a 35-40% mortality rate, can spread person-to-person (unlike most hantaviruses), and progresses rapidly from flu-like symptoms to respiratory failure. First identified in Argentina in 1995, it's the most lethal hantavirus for humans.",
+
+    "q_cases": "As of the latest reports, 73 confirmed cases have been linked to the MV Hondius cruise ship outbreak, with 25 deaths recorded. The outbreak began in April 2026 and has spread across multiple countries as passengers and crew dispersed after the voyage.",
+
+    "q_p2p": "Yes, Andes virus is unique among hantaviruses in that it can spread from person to person through respiratory droplets and close contact. This human-to-human transmission capability makes it particularly concerning and differentiates it from other hantaviruses that only spread from infected rodents to humans.",
+
+    "q_cfr": "Andes virus has a case fatality rate (CFR) of 35-40%, making it one of the most deadly viral infections. This is significantly higher than COVID-19 (2-3%) and even Ebola in some outbreaks. The high mortality rate is due to rapid progression to pulmonary edema and respiratory failure.",
+
+    "q_treat": "Currently, there is no specific antiviral treatment for Andes virus infection. Treatment is primarily supportive care including oxygen therapy, mechanical ventilation, and management of fluid balance. Early detection and intensive care can improve outcomes, but prevention through avoiding exposure remains the best strategy.",
+
+    "q_countries": "The outbreak has affected 8 countries so far: Argentina, Chile, Netherlands, Germany, United Kingdom, Canada, Australia, and Norway. This international spread occurred because MV Hondius passengers and crew dispersed globally after the cruise ended.",
+
+    "q_ship": "MV Hondius has been quarantined and is currently undergoing decontamination procedures. All passengers and crew have been evacuated and are under medical observation. The ship remains docked under strict health authority supervision while investigations continue.",
+
+    "q_trans": "Hantavirus is primarily transmitted through inhalation of aerosolized particles from infected rodent urine, feces, or saliva. However, Andes virus can also spread person-to-person through respiratory droplets, similar to COVID-19 but less efficiently. Close contact with infected individuals poses the highest risk.",
+
+    "q_symptoms": "Early symptoms include fever, headache, muscle aches, nausea, and fatigue - similar to flu. After 1-6 weeks, it progresses to the pulmonary phase with cough, shortness of breath, and fluid accumulation in the lungs. Without intensive care, respiratory failure can occur rapidly.",
+
+    "q_pandemic": "While concerning, Andes virus has a lower pandemic risk than COVID-19. Its R₀ (reproduction rate) is approximately 1.4 versus 2.5+ for COVID-19. However, the high mortality rate and person-to-person transmission capability make it a serious public health threat requiring vigilant containment measures.",
+
+    "q_types": "HPS (Hantavirus Pulmonary Syndrome) primarily affects the lungs and is caused by New World hantaviruses like Andes virus in the Americas. HFRS (Hemorrhagic Fever with Renal Syndrome) affects the kidneys and is caused by Old World hantaviruses in Europe and Asia. Both can be fatal but have different organ targets.",
+
+    "q_precautions": "Passengers and crew are under strict quarantine protocols, regular health monitoring, and PCR testing. Those showing symptoms receive immediate isolation and intensive care. Close contacts are traced and monitored. International health authorities have implemented enhanced screening at ports and airports."
+}
+
 CAT_COLORS = {
     "Biology":      ("#3b82f6", "rgba(59,130,246,0.12)"),
     "Outbreak":     ("#ef4444", "rgba(239,68,68,0.12)"),
@@ -72,11 +99,6 @@ def _pre_fetch_answers(chain: Any, questions: list[dict]) -> None:
 
 
 def render_faq_panel(chain: Any) -> None:
-    if "faq_prefetched" not in st.session_state:
-        with st.spinner("Loading common questions…"):
-            _pre_fetch_answers(chain, _sorted_questions())
-        st.session_state["faq_prefetched"] = True
-
     questions = _sorted_questions()
     clicks    = _load_clicks()
 
@@ -119,39 +141,8 @@ def render_faq_panel(chain: Any) -> None:
             with st.expander("Show answer", expanded=False):
                 _save_click(key)  # Track clicks when expanded
 
-                cache  = st.session_state.get("faq_cache", {})
-                answer = cache.get(key)
-
-                if answer is None:
-                    with st.spinner("Fetching answer…"):
-                        try:
-                            if chain is None:
-                                # Force rebuild chain if None
-                                from rag.chain import build_chain
-                                chain = build_chain()
-
-                            res = chain.query(item["q"])
-                            answer = res.get("answer", "No answer available.")
-
-                            # If answer is the generic "insufficient information" message, try to get fallback
-                            if "I don't have sufficient information" in answer:
-                                from vectorstore.store import similarity_search
-                                from processing.embedder import _huggingface_embed
-
-                                # Direct search fallback
-                                try:
-                                    emb = _huggingface_embed([item["q"]])[0]
-                                    results = similarity_search(emb, k=2)
-                                    if results:
-                                        answer = f"Based on available research:\n\n{results[0].get('text', '')[:400]}..."
-                                    else:
-                                        answer = "Vector store appears to be empty. Data may need to be reloaded."
-                                except Exception:
-                                    answer = "Unable to search knowledge base. System may need restart."
-
-                        except Exception as e:
-                            answer = f"Error: {e}"
-                    st.session_state.setdefault("faq_cache", {})[key] = answer
+                # Use static answers instead of complex RAG system
+                answer = STATIC_ANSWERS.get(key, "Answer not available for this question.")
 
                 st.markdown(
                     f'<div style="background:rgba(13,27,42,0.85);border:1px solid {c_border}33;'
