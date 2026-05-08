@@ -48,10 +48,16 @@ def get_outbreak_stats() -> dict[str, Any]:
     """Returns case counts — live values from scraper overlay hardcoded baseline."""
     live = _load_live()
     data = dict(OUTBREAK_DATA)
-    # Only override WHO baseline if live data is strictly HIGHER
-    for k in ("confirmed_cases", "deaths", "nationalities", "last_updated"):
-        if live.get(k) and live[k] > data.get(k, 0):
-            data[k] = live[k]
+    # Merge live data: numbers only if higher, strings always if present
+    for k in ("confirmed_cases", "suspected_cases", "deaths", "nationalities", "last_updated", "ship_status"):
+        if k in live:
+            val = live[k]
+            if isinstance(val, (int, float)):
+                if val > data.get(k, 0):
+                    data[k] = val
+            elif val:
+                data[k] = val
+
     if data["confirmed_cases"] and data["deaths"]:
         data["case_fatality_rate"] = round(data["deaths"] / data["confirmed_cases"] * 100, 1)
     data["_source"] = live.get("source", "manual")
@@ -94,12 +100,12 @@ def build_timeline_chart() -> go.Figure:
 def render_stats_panel() -> None:
     stats  = get_outbreak_stats()
     
-    # Informational note about discrepancy
+    # Informational note about definitions
     st.info(
-        "**Note on Case Counts:** Scraped news reports often highlight specific recent incidents "
-        "(e.g., '3 evacuations') which may differ from total cumulative cases reported by the WHO. "
-        "This dashboard prioritizes verified cumulative WHO data as the primary source of truth.",
-        icon="ℹ️"
+        "**Case Definitions:** 'Confirmed' refers to laboratory-verified PCR results. 'Suspected' "
+        "includes individuals showing clinical symptoms (fever, respiratory distress) who were "
+        "on board MV Hondius but await final lab confirmation.",
+        icon="🔬"
     )
 
     is_live = stats.get("_source") == "auto-extracted"
