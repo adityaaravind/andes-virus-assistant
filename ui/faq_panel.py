@@ -1,13 +1,9 @@
 """FAQ panel — most-asked questions with click-to-expand answers, popularity ranking."""
 from __future__ import annotations
 
-import json
-from pathlib import Path
-from typing import Any
+from alerts.persist_helper import bg_kv_set, get_persisted_value
 
-import streamlit as st
-
-CLICKS_FILE = Path("data/faq_clicks.json")
+_FAQ_CLICKS_KEY = "faq_popularity_clicks"
 
 BASE_QUESTIONS = [
     {"q": "What is Andes virus and why is it dangerous?",         "cat": "Biology",    "key": "q_what"},
@@ -65,19 +61,13 @@ CAT_COLORS = {
 
 
 def _load_clicks() -> dict[str, int]:
-    if not CLICKS_FILE.exists():
-        return {}
-    try:
-        return json.loads(CLICKS_FILE.read_text())
-    except Exception:
-        return {}
+    return get_persisted_value(_FAQ_CLICKS_KEY, {})
 
 
 def _save_click(key: str) -> None:
-    CLICKS_FILE.parent.mkdir(parents=True, exist_ok=True)
     clicks = _load_clicks()
     clicks[key] = clicks.get(key, 0) + 1
-    CLICKS_FILE.write_text(json.dumps(clicks))
+    bg_kv_set(_FAQ_CLICKS_KEY, clicks)
 
 
 def _sorted_questions() -> list[dict]:

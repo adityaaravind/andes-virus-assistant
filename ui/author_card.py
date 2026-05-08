@@ -1,9 +1,7 @@
 """Author profile card — compact top-right widget, purple/violet accent."""
 from __future__ import annotations
 
-import json
-import streamlit as st
-from pathlib import Path
+from alerts.persist_helper import bg_kv_set, get_persisted_value
 
 
 AUTHOR = {
@@ -13,31 +11,19 @@ AUTHOR = {
     "initials":  "AA",
 }
 
-VISITOR_COUNT_FILE = Path("data/visitor_count.json")
+_VISITOR_KEY = "analytics_visitor_count"
 
 
 def _get_visitor_count() -> int:
-    """Get current visitor count from file."""
-    if not VISITOR_COUNT_FILE.exists():
-        return 0
-    try:
-        data = json.loads(VISITOR_COUNT_FILE.read_text())
-        return data.get("count", 0)
-    except Exception:
-        return 0
+    """Get current visitor count from persistent store."""
+    return get_persisted_value(_VISITOR_KEY, 0)
 
 
 def _increment_visitor_count() -> int:
     """Increment visitor count and return new total."""
-    VISITOR_COUNT_FILE.parent.mkdir(parents=True, exist_ok=True)
     current = _get_visitor_count()
     new_count = current + 1
-
-    try:
-        VISITOR_COUNT_FILE.write_text(json.dumps({"count": new_count}))
-    except Exception:
-        pass  # Fail silently if can't write
-
+    bg_kv_set(_VISITOR_KEY, new_count)
     return new_count
 
 

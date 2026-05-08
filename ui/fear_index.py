@@ -9,7 +9,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-FEAR_DATA_FILE = Path("data/fear_votes.json")
+from alerts.persist_helper import bg_kv_set, get_persisted_value
+
+_FEAR_KEY = "fear_index_votes"
 
 FEAR_LEVELS = {
     1: {"label": "calm", "desc": "Not worried", "color": "#22c55e"},
@@ -21,17 +23,15 @@ FEAR_LEVELS = {
 
 
 def _load_fear_data() -> dict[str, Any]:
-    """Load fear voting data from file."""
-    if FEAR_DATA_FILE.exists():
-        try:
-            return json.loads(FEAR_DATA_FILE.read_text())
-        except Exception:
-            pass
+    """Load fear voting data from persistent store."""
+    data = get_persisted_value(_FEAR_KEY)
+    if data:
+        return data
     return {"votes": [], "last_updated": datetime.utcnow().isoformat()}
 
 
 def _save_fear_vote(level: int, user_id: str) -> None:
-    """Save a new fear vote."""
+    """Save a new fear vote to persistent store (background)."""
     try:
         data = _load_fear_data()
 
@@ -49,8 +49,7 @@ def _save_fear_vote(level: int, user_id: str) -> None:
         data["votes"] = data["votes"][-1000:]
         data["last_updated"] = datetime.utcnow().isoformat()
 
-        FEAR_DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
-        FEAR_DATA_FILE.write_text(json.dumps(data, indent=2))
+        bg_kv_set(_FEAR_KEY, data)
     except Exception:
         pass
 
