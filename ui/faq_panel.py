@@ -1,6 +1,7 @@
 """FAQ panel — most-asked questions with click-to-expand answers, popularity ranking."""
 from __future__ import annotations
 
+import streamlit as st
 from alerts.persist_helper import bg_kv_set, get_persisted_value
 
 _FAQ_CLICKS_KEY = "faq_popularity_clicks"
