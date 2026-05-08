@@ -175,7 +175,7 @@ def render_news_ticker() -> None:
     with col_ts:
         st.markdown(
             f"<p style='color:#64748b;font-size:0.72rem;text-align:right;padding-top:0.4rem;'>"
-            f"↻ every 15 min<br>{datetime.utcnow().strftime('%H:%M UTC')}<br>"
+            f"↻ every 5 min<br>{datetime.utcnow().strftime('%H:%M UTC')}<br>"
             f"<span style='color:#94a3b8;font-size:0.65rem;'>scroll for more</span></p>",
             unsafe_allow_html=True,
         )

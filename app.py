@@ -345,10 +345,9 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
         except Exception:
             st.markdown("<span style='color:#ef4444;'>● DB unreachable</span>", unsafe_allow_html=True)
 
-        interval_hours = int(os.getenv("NEWS_REFRESH_INTERVAL_HOURS", "6"))
         st.markdown(
             f"<p style='color:#64748b;font-size:0.72rem;margin-top:0.4rem;'>"
-            f"🔄 Full ingest every {interval_hours}h · News every 15 min</p>",
+            f"🔄 Full ingest every 1h · News every 5 min</p>",
             unsafe_allow_html=True,
         )
 
@@ -461,6 +460,12 @@ def main() -> None:
             "Not medical advice. For emergencies contact your local health authority."
             "</div>",
             unsafe_allow_html=True,
+        )
+
+
+if __name__ == "__main__":
+    main()
+html=True,
         )
 
 
