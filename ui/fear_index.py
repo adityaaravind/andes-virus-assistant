@@ -217,53 +217,51 @@ def render_fear_index() -> None:
     user_weight = 0.6 if vote_count > 0 else 0.0
     web_weight = 0.4 if vote_count > 0 else 1.0
     
-    html_content = textwrap.dedent(f"""
+    html_content = f"""
 <div style="background: linear-gradient(135deg,rgba(13,27,42,0.95) 0%,rgba(27,46,69,0.95) 100%);
-    border: 2px solid {color}88; border-radius: 16px; padding: 1.4rem 1.8rem 1rem;
-    margin-bottom: 1rem; position: relative; overflow: hidden;">
-    <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px;
-        background: linear-gradient(90deg,{color},{color}44,{color}); animation: {anim};"></div>
-    <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
-        <div style="flex:1; min-width:200px;">
-            <p style="color:{color}; font-size:1.55rem; font-weight:800;
-                letter-spacing:0.06em; margin:0; font-family:monospace;
-                text-shadow:0 0 20px {color}88;">📡 PUBLIC FEAR INDEX</p>
-            <p style="color:#94a3b8; font-size:0.82rem; margin:0.2rem 0 0;">
-                Blended Sentiment: Global Media + Community Votes
-                &nbsp;&nbsp;<span class="live-dot" style="width:7px; height:7px;"></span>
-                <span class="live-label">LIVE ASSESSMENT</span>
-            </p>
-        </div>
-        <div style="background:{color}22; border:2px solid {color};
-            border-radius:12px; padding:0.5rem 1.4rem; text-align:center;">
-            <p style="color:{color}; font-size:1.8rem; font-weight:900; margin:0; font-family:monospace;">{label.upper()}</p>
-            <p style="color:#94a3b8; font-size:0.72rem; margin:0;">{desc}</p>
-        </div>
-    </div>
-    
-    <div style="margin-top: 1rem;">
-        <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
-            <span style="color:#64748b; font-size:0.7rem;">🌐 Web Sentiment: {web_sentiment:.1f}</span>
-            <span style="color:#64748b; font-size:0.7rem;">👥 Community: {avg_fear if vote_count > 0 else 0:.1f}</span>
-        </div>
-        <div style="height:4px; background:#1b2e45; border-radius:2px; display:flex; overflow:hidden;">
-            <div style="width:{web_weight*100}%; height:100%; background:#38bdf8; opacity:0.8;"></div>
-            <div style="width:{user_weight*100}%; height:100%; background:#a78bfa; opacity:0.8;"></div>
-        </div>
-    </div>
-
-    <div style="display:flex; gap:1.5rem; margin-top:0.9rem; flex-wrap:wrap;
-        border-top:1px solid #1b2e45; padding-top:0.7rem;">
-        <span style="color:#94a3b8; font-size:0.77rem;">😰 Final Score: <b style="color:{color};">{avg_fear:.1f}/5</b></span>
-        <span style="color:#94a3b8; font-size:0.77rem;">🌍 Media Data: <b style="color:#38bdf8;">Active</b></span>
-        <span style="color:#94a3b8; font-size:0.77rem;">📈 Responses: <b style="color:#f8fafc;">{vote_count}</b></span>
-        <span style="color:#94a3b8; font-size:0.77rem;">⏱ Updated: <b style="color:#f8fafc;">{datetime.now().strftime('%H:%M')}</b></span>
-    </div>
+border: 2px solid {color}88; border-radius: 16px; padding: 1.4rem 1.8rem 1rem;
+margin-bottom: 1rem; position: relative; overflow: hidden;">
+<div style="position: absolute; top: 0; left: 0; right: 0; height: 4px;
+background: linear-gradient(90deg,{color},{color}44,{color}); animation: {anim};"></div>
+<div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+<div style="flex:1; min-width:200px;">
+<p style="color:{color}; font-size:1.55rem; font-weight:800;
+letter-spacing:0.06em; margin:0; font-family:monospace;
+text-shadow:0 0 20px {color}88;">📡 PUBLIC FEAR INDEX</p>
+<p style="color:#94a3b8; font-size:0.82rem; margin:0.2rem 0 0;">
+Blended Sentiment: Global Media + Community Votes
+&nbsp;&nbsp;<span class="live-dot" style="width:7px; height:7px;"></span>
+<span class="live-label">LIVE ASSESSMENT</span>
+</p>
+</div>
+<div style="background:{color}22; border:2px solid {color};
+border-radius:12px; padding:0.5rem 1.4rem; text-align:center;">
+<p style="color:{color}; font-size:1.8rem; font-weight:900; margin:0; font-family:monospace;">{label.upper()}</p>
+<p style="color:#94a3b8; font-size:0.72rem; margin:0;">{desc}</p>
+</div>
+</div>
+<div style="margin-top: 1rem;">
+<div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
+<span style="color:#64748b; font-size:0.7rem;">🌐 Web Sentiment: {web_sentiment:.1f}</span>
+<span style="color:#64748b; font-size:0.7rem;">👥 Community: {avg_fear if vote_count > 0 else 0:.1f}</span>
+</div>
+<div style="height:4px; background:#1b2e45; border-radius:2px; display:flex; overflow:hidden;">
+<div style="width:{web_weight*100}%; height:100%; background:#38bdf8; opacity:0.8;"></div>
+<div style="width:{user_weight*100}%; height:100%; background:#a78bfa; opacity:0.8;"></div>
+</div>
+</div>
+<div style="display:flex; gap:1.5rem; margin-top:0.9rem; flex-wrap:wrap;
+border-top:1px solid #1b2e45; padding-top:0.7rem;">
+<span style="color:#94a3b8; font-size:0.77rem;">😰 Final Score: <b style="color:{color};">{avg_fear:.1f}/5</b></span>
+<span style="color:#94a3b8; font-size:0.77rem;">🌍 Media Data: <b style="color:#38bdf8;">Active</b></span>
+<span style="color:#94a3b8; font-size:0.77rem;">📈 Responses: <b style="color:#f8fafc;">{vote_count}</b></span>
+<span style="color:#94a3b8; font-size:0.77rem;">⏱ Updated: <b style="color:#f8fafc;">{datetime.now().strftime('%H:%M')}</b></span>
+</div>
 </div>
 <style>
 @keyframes pulse-fear {{ 0%,100% {{ opacity:1; }} 50% {{ opacity:0.4; }} }}
 </style>
-""").strip()
+""".replace("\n", "").strip()
     st.markdown(html_content, unsafe_allow_html=True)
 
 
@@ -284,53 +282,47 @@ def render_fear_index() -> None:
         st.plotly_chart(fig_dist, use_container_width=True, config={"displayModeBar": False})
 
     # Callout boxes matching pandemic panel
-    st.markdown(
-        f"""
-        <div style="
-            display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;
-            margin-top:0.3rem; margin-bottom: 1rem;
-        ">
-          <div style="background:rgba(27,46,69,0.3);border:1px solid #1b2e45;
-                      border-radius:8px;padding:0.6rem 0.8rem;">
-            <p style="color:#94a3b8;font-size:0.72rem;font-weight:700;margin:0;">ℹ️ SENTIMENT ANALYSIS</p>
-            <p style="color:#64748b;font-size:0.73rem;margin:0.2rem 0 0;">
-                Tracks public anxiety level based on 1000+ real-time votes. 
-                Weighted to favor recent sentiment (15-min decay).
-            </p>
-          </div>
-          <div style="background:rgba(27,46,69,0.3);border:1px solid #1b2e45;
-                      border-radius:8px;padding:0.6rem 0.8rem;">
-            <p style="color:#94a3b8;font-size:0.72rem;font-weight:700;margin:0;">📈 IMPACT ASSESSMENT</p>
-            <p style="color:#64748b;font-size:0.73rem;margin:0.2rem 0 0;">
-                Public fear often correlates with geographic spread but can be mitigated by 
-                clear official communications and verified data.
-            </p>
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    callout_html = f"""
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-top:0.3rem; margin-bottom: 1rem;">
+<div style="background:rgba(27,46,69,0.3);border:1px solid #1b2e45;border-radius:8px;padding:0.6rem 0.8rem;">
+<p style="color:#94a3b8;font-size:0.72rem;font-weight:700;margin:0;">ℹ️ SENTIMENT ANALYSIS</p>
+<p style="color:#64748b;font-size:0.73rem;margin:0.2rem 0 0;">
+Tracks public anxiety level based on 1000+ real-time votes. 
+Weighted to favor recent sentiment (15-min decay).
+</p>
+</div>
+<div style="background:rgba(27,46,69,0.3);border:1px solid #1b2e45;border-radius:8px;padding:0.6rem 0.8rem;">
+<p style="color:#94a3b8;font-size:0.72rem;font-weight:700;margin:0;">📈 IMPACT ASSESSMENT</p>
+<p style="color:#64748b;font-size:0.73rem;margin:0.2rem 0 0;">
+Public fear often correlates with geographic spread but can be mitigated by 
+clear official communications and verified data.
+</p>
+</div>
+</div>
+""".replace("\n", "").strip()
+    st.markdown(callout_html, unsafe_allow_html=True)
 
 
     # Voting buttons section below the visualization
     if not user_voted_today:
-        st.markdown(textwrap.dedent(f"""
-            <style>
-            .vote-buttons .stButton > button {{
-                height: 45px !important; font-size: 0.8rem !important; font-weight: 600 !important;
-                padding: 0.6rem 1rem !important; margin: 0.2rem 0 !important;
-                background: linear-gradient(135deg, rgba(13,27,42,0.8) 0%, rgba(27,46,69,0.8) 100%) !important;
-                border: 1px solid {color}44 !important; border-radius: 8px !important; color: {color} !important;
-                transition: all 0.2s ease !important;
-            }}
-            .vote-buttons .stButton > button:hover {{
-                background: linear-gradient(135deg, {color}15 0%, {color}25 100%) !important;
-                border-color: {color} !important; transform: translateY(-1px) !important;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
-            }}
-            </style>
-            <div class="vote-buttons">
-        """).strip(), unsafe_allow_html=True)
+        style_html = f"""
+<style>
+.vote-buttons .stButton > button {{
+height: 45px !important; font-size: 0.8rem !important; font-weight: 600 !important;
+padding: 0.6rem 1rem !important; margin: 0.2rem 0 !important;
+background: linear-gradient(135deg, rgba(13,27,42,0.8) 0%, rgba(27,46,69,0.8) 100%) !important;
+border: 1px solid {color}44 !important; border-radius: 8px !important; color: {color} !important;
+transition: all 0.2s ease !important;
+}}
+.vote-buttons .stButton > button:hover {{
+background: linear-gradient(135deg, {color}15 0%, {color}25 100%) !important;
+border-color: {color} !important; transform: translateY(-1px) !important;
+box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+}}
+</style>
+<div class="vote-buttons">
+""".replace("\n", "").strip()
+        st.markdown(style_html, unsafe_allow_html=True)
 
         st.markdown(f'<p style="color:#94a3b8; font-size:0.85rem; margin:0.5rem 0 0.8rem;">How do you feel about the outbreak?</p>', unsafe_allow_html=True)
 
@@ -356,9 +348,10 @@ def render_fear_index() -> None:
 
         st.markdown('</div>', unsafe_allow_html=True)
     else:
-        st.markdown(textwrap.dedent("""
-            <div style="background:rgba(34,197,94,0.08); border:1px solid #22c55e44; border-radius:8px; padding:0.8rem; margin-top:1rem;">
-                <p style="color:#22c55e; font-size:0.8rem; margin:0;">✓ Thanks for participating! Your vote has been recorded.</p>
-                <p style="color:#94a3b8; font-size:0.75rem; margin:0.2rem 0 0;">Outbreak sentiment tracking helps researchers understand public response and information gaps.</p>
-            </div>
-        """).strip(), unsafe_allow_html=True)
+        thanks_html = """
+<div style="background:rgba(34,197,94,0.08); border:1px solid #22c55e44; border-radius:8px; padding:0.8rem; margin-top:1rem;">
+<p style="color:#22c55e; font-size:0.8rem; margin:0;">✓ Thanks for participating! Your vote has been recorded.</p>
+<p style="color:#94a3b8; font-size:0.75rem; margin:0.2rem 0 0;">Outbreak sentiment tracking helps researchers understand public response and information gaps.</p>
+</div>
+""".replace("\n", "").strip()
+        st.markdown(thanks_html, unsafe_allow_html=True)

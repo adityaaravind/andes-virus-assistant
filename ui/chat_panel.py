@@ -37,14 +37,13 @@ def _render_rate_bar() -> None:
     color = "#22c55e" if pct < 60 else "#f59e0b" if pct < 85 else "#ef4444"
     st.markdown(
         f"""<div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.4rem;">
-          <div style="flex:1;height:4px;background:#1b2e45;border-radius:2px;">
-            <div style="width:{pct:.0f}%;height:100%;background:{color};border-radius:2px;
-                        transition:width 0.3s;"></div>
-          </div>
-          <span style="color:{color};font-size:0.7rem;white-space:nowrap;">
-            {used}/{RATE_LIMIT} queries
-          </span>
-        </div>""",
+<div style="flex:1;height:4px;background:#1b2e45;border-radius:2px;">
+<div style="width:{pct:.0f}%;height:100%;background:{color};border-radius:2px;transition:width 0.3s;"></div>
+</div>
+<span style="color:{color};font-size:0.7rem;white-space:nowrap;">
+{used}/{RATE_LIMIT} queries
+</span>
+</div>""",
         unsafe_allow_html=True,
     )
 

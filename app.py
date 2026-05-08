@@ -192,28 +192,26 @@ if _CSS_PATH.exists():
     st.markdown(f"<style>{_CSS_PATH.read_text()}</style>", unsafe_allow_html=True)
 
 # Google Analytics (gtag.js) for Verification
-st.markdown(
-    """
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5Y9BDH9W0"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-Z5Y9BDH9W0');
-        
-        // Also ensure it is in <head> for Google verification
-        var script1 = document.createElement('script');
-        script1.async = true;
-        script1.src = "https://www.googletagmanager.com/gtag/js?id=G-Z5Y9BDH9W0";
-        document.getElementsByTagName('head')[0].appendChild(script1);
-        
-        var script2 = document.createElement('script');
-        script2.innerHTML = "window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-Z5Y9BDH9W0');";
-        document.getElementsByTagName('head')[0].appendChild(script2);
-    </script>
-    """,
-    unsafe_allow_html=True
-)
+ga_html = """
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5Y9BDH9W0"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-Z5Y9BDH9W0');
+
+// Also ensure it is in <head> for Google verification
+var script1 = document.createElement('script');
+script1.async = true;
+script1.src = "https://www.googletagmanager.com/gtag/js?id=G-Z5Y9BDH9W0";
+document.getElementsByTagName('head')[0].appendChild(script1);
+
+var script2 = document.createElement('script');
+script2.innerHTML = "window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-Z5Y9BDH9W0');";
+document.getElementsByTagName('head')[0].appendChild(script2);
+</script>
+""".replace("\n", "").strip()
+st.markdown(ga_html, unsafe_allow_html=True)
 
 
 def _init_rag_chain() -> Any | None:

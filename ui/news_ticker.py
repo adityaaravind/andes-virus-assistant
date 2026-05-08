@@ -19,7 +19,7 @@ RSS_FEEDS = [
     {"url": "https://outbreaknewstoday.com/feed/",                   "source": "Outbreak News","tier": "press"},
     {"url": "https://www.sciencedaily.com/rss/health_medicine/infectious_diseases.xml",
                                                                       "source": "ScienceDaily","tier": "science"},
-    {"url": "https://www.thelancet.com/rssfeed/lancet_online.xml",   "source": "The Lancet",  "tier": "science"},
+    {"url": "https://www.thelancet.com/rssfeed/lanceet_online.xml",   "source": "The Lancet",  "tier": "science"},
     {"url": "https://news.google.com/rss/search?q=hantavirus+2026&hl=en-US&gl=US&ceid=US:en",
                                                                       "source": "Google News", "tier": "press"},
     {"url": "https://news.google.com/rss/search?q=%22MV+Hondius%22+2026&hl=en-US&gl=US&ceid=US:en",
@@ -191,39 +191,37 @@ def render_news_ticker() -> None:
         return
 
     # Legend row
-    st.markdown(
-        "<div style='display:flex;gap:1.2rem;margin-bottom:0.6rem;flex-wrap:wrap;'>"
-        "<span style='color:#22c55e;font-size:0.75rem;'>🏥 Official (WHO/CDC/ECDC)</span>"
-        "<span style='color:#00b4d8;font-size:0.75rem;'>📰 Press (Reuters/BBC/AJ)</span>"
-        "<span style='color:#a78bfa;font-size:0.75rem;'>🔬 Science</span>"
-        "</div>",
-        unsafe_allow_html=True,
-    )
+    legend_html = """
+<div style='display:flex;gap:1.2rem;margin-bottom:0.6rem;flex-wrap:wrap;'>
+<span style='color:#22c55e;font-size:0.75rem;'>🏥 Official (WHO/CDC/ECDC)</span>
+<span style='color:#00b4d8;font-size:0.75rem;'>📰 Press (Reuters/BBC/AJ)</span>
+<span style='color:#a78bfa;font-size:0.75rem;'>🔬 Science</span>
+</div>
+""".replace("\n", "").strip()
+    st.markdown(legend_html, unsafe_allow_html=True)
 
     # Scrollable news container
-    import textwrap
-    scrollable_html = textwrap.dedent(f"""
-        <div style="height:600px;overflow-y:auto;border:1px solid rgba(148,163,184,0.2);
-            border-radius:12px;padding:1rem;background:rgba(15,23,42,0.3);
-            scrollbar-width:thin;scrollbar-color:rgba(148,163,184,0.5) transparent;">
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-                gap:1rem;margin-bottom:1rem;">
-    """).strip()
+    scrollable_html = """
+<div style="height:600px;overflow-y:auto;border:1px solid rgba(148,163,184,0.2);
+border-radius:12px;padding:1rem;background:rgba(15,23,42,0.3);
+scrollbar-width:thin;scrollbar-color:rgba(148,163,184,0.5) transparent;">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+gap:1rem;margin-bottom:1rem;">
+""".replace("\n", "").strip()
 
     for art in articles:
         scrollable_html += _card_html(art)
 
-    scrollable_html += textwrap.dedent("""
-            </div>
-        </div>
-        <style>
-            .headline-link:hover { color: #00b4d8 !important; text-decoration: underline !important; }
-            div::-webkit-scrollbar { width: 8px; }
-            div::-webkit-scrollbar-track { background: rgba(15,23,42,0.5); border-radius: 4px; }
-            div::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.5); border-radius: 4px; }
-            div::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,0.7); }
-        </style>
-    """).strip()
-
+    scrollable_html += """
+</div>
+</div>
+<style>
+.headline-link:hover { color: #00b4d8 !important; text-decoration: underline !important; }
+div::-webkit-scrollbar { width: 8px; }
+div::-webkit-scrollbar-track { background: rgba(15,23,42,0.5); border-radius: 4px; }
+div::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.5); border-radius: 4px; }
+div::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,0.7); }
+</style>
+""".replace("\n", "").strip()
 
     st.markdown(scrollable_html, unsafe_allow_html=True)
