@@ -132,22 +132,56 @@ def _parse_date(entry: Any) -> str:
     return entry.get("published", "—")
 
 
+def _get_source_color(source: str) -> str:
+    """Generate a stable hex color from a source name string."""
+    import hashlib
+    # Colors that look good in dark mode
+    palette = [
+        "#38bdf8", "#818cf8", "#a78bfa", "#c084fc", "#e879f9",
+        "#fb7185", "#f472b6", "#fb923c", "#fbbf24", "#34d399", "#2dd4bf"
+    ]
+    idx = int(hashlib.md5(source.encode()).hexdigest(), 16) % len(palette)
+    return palette[idx]
+
+
 def _card_html(art: dict[str, Any]) -> str:
     s = TIER_STYLE[art["tier"]]
+    source_color = _get_source_color(art["source"])
     cred_pct = int(art["credibility"] * 100)
     cred_color = "#22c55e" if cred_pct >= 90 else "#f59e0b" if cred_pct >= 70 else "#94a3b8"
     title = art["title"].replace('"', "&quot;").replace("<", "&lt;").replace(">", "&gt;")
     summary = art["summary"].replace("<", "&lt;").replace(">", "&gt;")
 
+    # Check if article is "live" (within last 6 hours)
+    is_live = False
+    try:
+        # Example format: "May 08, 00:41 UTC"
+        pub_dt = datetime.strptime(art["date"], "%b %d, %H:%M UTC").replace(year=datetime.utcnow().year)
+        diff = (datetime.utcnow() - pub_dt).total_seconds() / 3600
+        if 0 <= diff <= 6:
+            is_live = True
+    except Exception:
+        pass
+
+    live_indicator = (
+        f'<div style="display:flex;align-items:center;gap:0.3rem;">'
+        f'<span class="blink-dot"></span>'
+        f'<span style="color:#22c55e;font-size:0.6rem;font-weight:800;letter-spacing:0.05em;">LIVE</span>'
+        f'</div>'
+    ) if is_live else ""
+
     # Single-line HTML — prevents Streamlit markdown treating indented lines as code blocks
     return (
-        f'<div style="background:{s["bg"]};border:1px solid {s["border"]}44;border-top:3px solid {s["border"]};'
+        f'<div style="background:{s["bg"]};border:1px solid {s["border"]}44;border-top:3px solid {source_color};'
         f'border-radius:10px;padding:0.9rem 1rem;min-height:150px;box-shadow:0 4px 20px {s["glow"]};'
         f'display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.1rem;">'
         f'<div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;">'
-        f'<span style="background:{s["badge_bg"]};color:{s["badge_fg"]};font-size:0.68rem;font-weight:700;'
-        f'letter-spacing:0.06em;padding:2px 8px;border-radius:20px;text-transform:uppercase;white-space:nowrap;">'
+        f'<div style="display:flex;align-items:center;gap:0.5rem;">'
+        f'<span style="background:{source_color}22;color:{source_color};font-size:0.68rem;font-weight:700;'
+        f'letter-spacing:0.06em;padding:2px 8px;border-radius:20px;text-transform:uppercase;white-space:nowrap;border:1px solid {source_color}44;">'
         f'{s["icon"]} {art["source"]}</span>'
+        f'{live_indicator}'
+        f'</div>'
         f'<span style="color:#475569;font-size:0.68rem;white-space:nowrap;">{art["date"]}</span>'
         f'</div>'
         f'<a href="{art["url"]}" target="_blank" rel="noopener" class="headline-link" style="text-decoration:none;'
@@ -157,6 +191,10 @@ def _card_html(art: dict[str, Any]) -> str:
         f'<div style="flex:1;height:3px;background:#1b2e45;border-radius:2px;">'
         f'<div style="width:{cred_pct}%;height:100%;background:{cred_color};border-radius:2px;"></div>'
         f'</div>'
+        f'<span style="color:{cred_color};font-size:0.65rem;">{cred_pct}% credibility</span>'
+        f'</div>'
+        f'</div>'
+    )
         f'<span style="color:{cred_color};font-size:0.65rem;">{cred_pct}% credibility</span>'
         f'</div>'
         f'</div>'
@@ -218,6 +256,17 @@ def render_news_ticker() -> None:
         </div>
         <style>
             .headline-link:hover { color: #00b4d8 !important; text-decoration: underline !important; }
+            .blink-dot {
+                height: 8px; width: 8px; background-color: #22c55e;
+                border-radius: 50%; display: inline-block;
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 1);
+                animation: pulse-green 2s infinite;
+            }
+            @keyframes pulse-green {
+                0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+                70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+                100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+            }
             div::-webkit-scrollbar { width: 8px; }
             div::-webkit-scrollbar-track { background: rgba(15,23,42,0.5); border-radius: 4px; }
             div::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.5); border-radius: 4px; }
