@@ -99,53 +99,45 @@ def render_fear_index() -> None:
         for v in data.get("votes", [])
     )
 
-    # Main fear index card
+    # Compact fear index card
     st.markdown(
         f"""
         <div style="
             background:linear-gradient(135deg,rgba(13,27,42,0.95) 0%,rgba(27,46,69,0.95) 100%);
             border:2px solid {color}88;
-            border-radius:16px;
-            padding:1.4rem 1.8rem 1rem;
-            margin-bottom:1rem;
+            border-radius:12px;
+            padding:1rem;
+            margin-bottom:0.5rem;
             position:relative;
             overflow:hidden;
         ">
           <div style="
-            position:absolute;top:0;left:0;right:0;height:4px;
+            position:absolute;top:0;left:0;right:0;height:3px;
             background:linear-gradient(90deg,{color},{color}44,{color});
           "></div>
 
-          <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
-            <div style="flex:1;min-width:200px;">
-              <p style="
-                color:{color};font-size:1.55rem;font-weight:800;
-                letter-spacing:0.06em;margin:0;font-family:monospace;
-                text-shadow:0 0 20px {color}88;
-              ">😰 PUBLIC FEAR INDEX</p>
-              <p style="color:#94a3b8;font-size:0.82rem;margin:0.2rem 0 0;">
-                Community sentiment · Real-time voting · {vote_count} total votes
-              </p>
-            </div>
+          <div style="text-align:center;margin-bottom:0.8rem;">
+            <p style="
+                color:{color};font-size:1.2rem;font-weight:800;
+                letter-spacing:0.04em;margin:0 0 0.3rem;font-family:monospace;
+                text-shadow:0 0 15px {color}88;
+              ">😰 FEAR INDEX</p>
             <div style="
               background:{color}22;border:2px solid {color};
-              border-radius:12px;padding:0.5rem 1.4rem;text-align:center;
+              border-radius:8px;padding:0.4rem 0.8rem;display:inline-block;
             ">
-              <p style="color:{color};font-size:1.8rem;font-weight:900;margin:0;font-family:monospace;">{label}</p>
-              <p style="color:#94a3b8;font-size:0.72rem;margin:0;">{desc}</p>
+              <p style="color:{color};font-size:1.4rem;font-weight:900;margin:0;font-family:monospace;">{label}</p>
+              <p style="color:#94a3b8;font-size:0.65rem;margin:0;">{vote_count} votes · {desc}</p>
             </div>
           </div>
 
-          <div style="
-            margin-top:0.9rem;
-            border-top:1px solid #1b2e45;padding-top:0.7rem;
-          ">
-            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.8rem;">
-              <span style="color:#94a3b8;font-size:0.75rem;">Fear Level:</span>
-              <div style="flex:1;height:8px;background:#1b2e45;border-radius:4px;position:relative;">
-                <div style="width:{avg_fear/5*100}%;height:100%;background:{color};border-radius:4px;"></div>
+          <div style="margin-bottom:0.5rem;">
+            <div style="display:flex;align-items:center;gap:0.4rem;">
+              <span style="color:#94a3b8;font-size:0.7rem;">Level:</span>
+              <div style="flex:1;height:6px;background:#1b2e45;border-radius:3px;position:relative;">
+                <div style="width:{avg_fear/5*100}%;height:100%;background:{color};border-radius:3px;"></div>
               </div>
-              <span style="color:{color};font-size:0.75rem;font-weight:600;">{avg_fear:.1f}/5</span>
+              <span style="color:{color};font-size:0.7rem;font-weight:600;">{avg_fear:.1f}/5</span>
             </div>
           </div>
         </div>
@@ -153,27 +145,34 @@ def render_fear_index() -> None:
         unsafe_allow_html=True,
     )
 
-    # Voting buttons outside the card
+    # Compact voting buttons
     if not user_voted_today:
-        st.markdown('<p style="color:#94a3b8;font-size:0.78rem;margin:0.5rem 0;">How do you feel?</p>', unsafe_allow_html=True)
+        st.markdown('<p style="color:#94a3b8;font-size:0.75rem;margin:0.3rem 0;">Vote your feeling:</p>', unsafe_allow_html=True)
 
-        # Style for small compact buttons
+        # Responsive button grid: 3 top row, 2 bottom row for better mobile layout
         st.markdown("""
         <style>
         .stButton > button {
-            height: 35px !important;
-            font-size: 0.7rem !important;
+            height: 32px !important;
+            font-size: 0.65rem !important;
             font-weight: 600 !important;
-            padding: 0.2rem !important;
-            margin: 0.1rem !important;
+            padding: 0.2rem 0.1rem !important;
+            margin: 0.05rem !important;
+        }
+        @media (max-width: 768px) {
+            .stButton > button {
+                height: 40px !important;
+                font-size: 0.7rem !important;
+            }
         }
         </style>
         """, unsafe_allow_html=True)
 
-        # Create 5 columns for voting buttons
-        cols = st.columns(5)
-        for i, (level, info) in enumerate(FEAR_LEVELS.items()):
-            with cols[i]:
+        # First row: CALM, CONCERNED, WORRIED
+        cols1 = st.columns(3)
+        for i, level in enumerate([1, 2, 3]):
+            info = FEAR_LEVELS[level]
+            with cols1[i]:
                 if st.button(
                     info['label'],
                     key=f"vote_{level}",
@@ -181,10 +180,25 @@ def render_fear_index() -> None:
                     help=info['desc']
                 ):
                     _save_fear_vote(level, user_id)
-                    st.success(f"✅ Voted: {info['label']}")
+                    st.success(f"✅ {info['label']}")
+                    st.rerun()
+
+        # Second row: FEARFUL, PANICKED (centered)
+        cols2 = st.columns([1, 2, 2, 1])
+        for i, level in enumerate([4, 5]):
+            info = FEAR_LEVELS[level]
+            with cols2[i + 1]:
+                if st.button(
+                    info['label'],
+                    key=f"vote_{level}",
+                    use_container_width=True,
+                    help=info['desc']
+                ):
+                    _save_fear_vote(level, user_id)
+                    st.success(f"✅ {info['label']}")
                     st.rerun()
     else:
         st.markdown(
-            '<p style="color:#64748b;font-size:0.72rem;margin:0.5rem 0;">✓ Thanks for voting! Come back tomorrow.</p>',
+            '<p style="color:#64748b;font-size:0.7rem;margin:0.3rem 0;">✓ Voted today! Come back tomorrow.</p>',
             unsafe_allow_html=True,
         )

@@ -425,8 +425,9 @@ def main() -> None:
     from ui.map_panel import render_map_panel
     from ui.journalist_tools import render_journalist_tools
 
-    # ── PANDEMIC RISK & FEAR INDEX — side by side ────────────────────────────
-    col_risk, col_fear = st.columns([1, 1])
+    # ── PANDEMIC RISK & FEAR INDEX — responsive layout ───────────────────────
+    # Use responsive columns: larger left panel, smaller right panel
+    col_risk, col_fear = st.columns([2, 1])
     with col_risk:
         render_pandemic_risk_panel()
     with col_fear:
