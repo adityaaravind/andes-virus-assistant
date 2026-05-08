@@ -22,6 +22,11 @@ CASE_PATTERNS = [
     r"confirmed\s+(\d+)\s+case",
     r"(\d+)\s+total\s+case",
     r"total\s+of\s+(\d+)\s+case",
+]
+
+SUSPECTED_PATTERNS = [
+    r"(\d+)\s+suspected\s+case",
+    r"suspected\s+(\d+)\s+case",
     r"(\d+)\s+(?:passengers?|crew|people).{0,30}(?:infected|positive|ill|sick)",
     r"(?:infected|positive|ill|sick).{0,30}(\d+)\s+(?:passengers?|crew|people)",
 ]
@@ -122,5 +127,8 @@ def extract_and_save(articles: list[dict[str, Any]]) -> dict[str, Any]:
 
     return extracted if changed else {}
 nt live update: %s", {k: merged[k] for k in ("confirmed_cases","deaths","nationalities") if k in merged})
+
+    return extracted if changed else {}
+nationalities") if k in merged})
 
     return extracted if changed else {}

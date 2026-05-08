@@ -43,7 +43,7 @@ def _load_live() -> dict[str, Any]:
     return {}
 
 
-@st.cache_data(ttl=900, show_spinner=False)
+@st.cache_data(ttl=600, show_spinner=False)
 def get_outbreak_stats() -> dict[str, Any]:
     """Returns case counts — live values from scraper overlay hardcoded baseline."""
     live = _load_live()
