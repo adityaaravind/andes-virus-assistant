@@ -126,7 +126,19 @@ def render_stats_panel() -> None:
                 unsafe_allow_html=True,
             )
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    # Source link button
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col2:
+        source_url = "https://www.who.int/emergencies/disease-outbreak-news/item/2025-DON599"
+        if st.button("📊 View Data Source (WHO DON599)", use_container_width=True, type="secondary"):
+            st.markdown(f'<meta http-equiv="refresh" content="0; url={source_url}">', unsafe_allow_html=True)
+
+    st.markdown(
+        f'<p style="text-align:center;color:#94a3b8;font-size:0.7rem;margin:0.3rem 0 1rem;">'
+        f'Data sourced from <a href="{source_url}" target="_blank" style="color:#00b4d8;">WHO Disease Outbreak News</a> · '
+        f'Updated: {stats["last_updated"]}</p>',
+        unsafe_allow_html=True,
+    )
 
 
 def render_timeline_chart() -> None:
