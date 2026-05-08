@@ -107,7 +107,7 @@ def extract_and_save(articles: list[dict[str, Any]]) -> dict[str, Any]:
 
     merged = dict(stored)
     changed = False
-    for k in ("confirmed_cases", "deaths", "nationalities"):
+    for k in ("confirmed_cases", "suspected_cases", "deaths", "nationalities"):
         if k in extracted and extracted[k] > stored.get(k, 0):
             merged[k] = extracted[k]
             changed = True
@@ -119,5 +119,8 @@ def extract_and_save(articles: list[dict[str, Any]]) -> dict[str, Any]:
         LIVE_FILE.parent.mkdir(parents=True, exist_ok=True)
         LIVE_FILE.write_text(json.dumps(merged, indent=2))
         logging.info("Case count live update: %s", {k: merged[k] for k in ("confirmed_cases","deaths","nationalities") if k in merged})
+
+    return extracted if changed else {}
+nt live update: %s", {k: merged[k] for k in ("confirmed_cases","deaths","nationalities") if k in merged})
 
     return extracted if changed else {}

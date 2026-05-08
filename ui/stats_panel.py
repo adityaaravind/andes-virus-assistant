@@ -120,11 +120,11 @@ def render_stats_panel() -> None:
 
     cols  = st.columns(5)
     cards = [
-        ("🧪", str(stats["confirmed_cases"]), "Confirmed Cases"),
-        ("⚠️", str(stats["suspected_cases"]), "Suspected Cases"),
-        ("💀", str(stats["deaths"]), "Deaths"),
-        ("🌍", str(stats["nationalities"]), "Nationalities"),
-        ("🚢", stats["ship_status"], "Ship Status"),
+        ("🧪", str(stats.get("confirmed_cases", 0)), "Confirmed Cases"),
+        ("⚠️", str(stats.get("suspected_cases", 0)), "Suspected Cases"),
+        ("💀", str(stats.get("deaths", 0)), "Deaths"),
+        ("🌍", str(stats.get("nationalities", 0)), "Nationalities"),
+        ("🚢", stats.get("ship_status", "Unknown"), "Ship Status"),
     ]
     for col, (icon, value, label) in zip(cols, cards):
         with col:
