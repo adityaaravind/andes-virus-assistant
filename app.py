@@ -369,8 +369,8 @@ def main() -> None:
     _auth_gate()
 
     # Auto-refresh page every hour so headlines stay live
-    from streamlit_autorefresh import st_autorefresh
-    st_autorefresh(interval=3600 * 1000, key="hourly_refresh")
+    # from streamlit_autorefresh import st_autorefresh
+    # st_autorefresh(interval=3600 * 1000, key="hourly_refresh")
 
     _render_header()
     st.divider()
