@@ -191,9 +191,16 @@ _CSS_PATH = Path(__file__).parent / "ui" / "styles.css"
 if _CSS_PATH.exists():
     st.markdown(f"<style>{_CSS_PATH.read_text()}</style>", unsafe_allow_html=True)
 
-# Google Site Verification
+# Google Site Verification (JS Injection into <head>)
 st.markdown(
-    '<meta name="google-site-verification" content="FKa79DavbBQG_9PoGFRcLdArnnibHWi_eF8aRv5vWh4" />',
+    """
+    <script>
+        var meta = document.createElement('meta');
+        meta.name = "google-site-verification";
+        meta.content = "FKa79DavbBQG_9PoGFRcLdArnnibHWi_eF8aRv5vWh4";
+        document.getElementsByTagName('head')[0].appendChild(meta);
+    </script>
+    """,
     unsafe_allow_html=True
 )
 
