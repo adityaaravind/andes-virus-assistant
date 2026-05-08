@@ -1,8 +1,9 @@
 {
-  "confirmed_cases": 3,
+  "confirmed_cases": 5,
   "deaths": 3,
-  "nationalities": 5,
+  "nationalities": 23,
   "last_updated": "2026-05-08",
-  "source": "auto-extracted",
-  "articles_scanned": 252
+  "source": "manual-correction",
+  "articles_scanned": 252,
+  "note": "Corrected erroneous 50 case count derived from CFR percentage."
 }

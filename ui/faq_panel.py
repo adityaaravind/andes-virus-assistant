@@ -25,7 +25,7 @@ BASE_QUESTIONS = [
 STATIC_ANSWERS = {
     "q_what": "Andes virus is a hantavirus species that causes Hantavirus Pulmonary Syndrome (HPS). It's dangerous because it has a 35-40% mortality rate, can spread person-to-person (unlike most hantaviruses), and progresses rapidly from flu-like symptoms to respiratory failure. First identified in Argentina in 1995, it's the most lethal hantavirus for humans.",
 
-    "q_cases": "As of the latest reports, 73 confirmed cases have been linked to the MV Hondius cruise ship outbreak, with 25 deaths recorded. The outbreak began in April 2026 and has spread across multiple countries as passengers and crew dispersed after the voyage.",
+    "q_cases": "As of May 8, 2026, there are 5 laboratory-confirmed cases and approximately 4 suspected cases (9 total) linked to the MV Hondius cruise ship outbreak, with 3 deaths recorded. The outbreak is primarily localized to the ship's passengers and crew, with a high case fatality rate reaching up to 50-60%.",
 
     "q_p2p": "Yes, Andes virus is unique among hantaviruses in that it can spread from person to person through respiratory droplets and close contact. This human-to-human transmission capability makes it particularly concerning and differentiates it from other hantaviruses that only spread from infected rodents to humans.",
 

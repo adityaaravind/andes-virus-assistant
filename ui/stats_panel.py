@@ -11,14 +11,14 @@ import streamlit as st
 
 LIVE_FILE = Path("data/outbreak_live.json")
 
-# Hardcoded baseline (WHO DON599, as of 2026-05-04) — auto-overridden by outbreak_live.json
+# Hardcoded baseline (WHO DON599, as of 2026-05-08) — auto-overridden by outbreak_live.json
 OUTBREAK_DATA: dict[str, Any] = {
-    "confirmed_cases": 7,
+    "confirmed_cases": 5,
     "deaths": 3,
     "nationalities": 23,
     "ship_status": "Moored — Cabo Verde",
-    "last_updated": "2026-05-04",
-    "case_fatality_rate": 42.9,
+    "last_updated": "2026-05-08",
+    "case_fatality_rate": 60.0,
 }
 
 # Timeline built from WHO DON599 (2026-DON599)

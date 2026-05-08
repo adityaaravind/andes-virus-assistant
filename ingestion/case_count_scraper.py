@@ -45,6 +45,11 @@ def _nums(text: str, patterns: list[str], lo: int, hi: int) -> list[int]:
     out = []
     for p in patterns:
         for m in re.finditer(p, text, re.IGNORECASE):
+            # Check for percentage symbol immediately after the number to avoid CFR confusion
+            start, end = m.span(1)
+            if end < len(text) and text[end] == "%":
+                continue
+            
             for g in m.groups():
                 try:
                     n = int(g)
@@ -56,17 +61,26 @@ def _nums(text: str, patterns: list[str], lo: int, hi: int) -> list[int]:
 
 
 def extract_and_save(articles: list[dict[str, Any]]) -> dict[str, Any]:
-    """Scan articles, update outbreak_live.json if higher counts found. Returns extracted dict."""
+    """Scan articles, update outbreak_live.json if higher counts found. 
+    
+    CRITICAL: Only trusts sources with credibility >= 0.9 (WHO, CDC, etc.) 
+    to prevent misinformation or misinterpretation of secondary news.
+    """
     relevant = [
         a for a in articles
         if any(kw in (a.get("title", "") + " " + a.get("summary", "")).lower()
                for kw in OUTBREAK_KWS)
     ]
-    if not relevant:
+    
+    # Filter for high-credibility sources only for numerical extraction
+    trusted = [a for a in relevant if a.get("credibility", 0) >= 0.9]
+    
+    if not trusted:
+        logging.info("No high-credibility articles found for case count extraction.")
         return {}
 
     all_cases, all_deaths, all_countries = [], [], []
-    for art in relevant:
+    for art in trusted:
         text = (art.get("title", "") + " " + art.get("summary", "")).lower()
         all_cases    += _nums(text, CASE_PATTERNS, 1, 500)
         all_deaths   += _nums(text, DEATH_PATTERNS, 0, 200)

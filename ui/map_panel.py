@@ -361,14 +361,14 @@ def render_map_panel() -> None:
         f'<p style="color:#475569;font-size:0.68rem;margin-top:0.3rem;">'
         f'Total: {total_confirmed} confirmed · {total_deaths} deaths · '
         f'{total_on_board} people on board across {len(NATIONALITIES_DATA)} nationalities · '
-        f'Updates every 2h</p>',
+        f'Last verified: May 8, 2026</p>',
         unsafe_allow_html=True,
     )
 
     with st.expander("📊 Data Source & Methodology"):
         methodology_html = """
 <div style="font-size: 0.85rem; color: #94a3b8; line-height: 1.5;">
-<p><strong>Primary Source:</strong> World Health Organization (WHO) Disease Outbreak News (DON) 599, published May 4, 2026.</p>
+<p><strong>Primary Source:</strong> World Health Organization (WHO) Disease Outbreak News (DON) 599, published May 4, 2026 (updated May 8).</p>
 <p><strong>Verified Data:</strong>
 <ul>
 <li>Total complement: 147 persons (88 passengers, 59 crew)</li>
