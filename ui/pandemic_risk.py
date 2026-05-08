@@ -172,8 +172,9 @@ def _build_comparison_bars(risk: dict[str, Any]) -> go.Figure:
 
 
 def render_pandemic_risk_panel() -> None:
-    cases     = OUTBREAK_DATA["confirmed_cases"]
-    countries = OUTBREAK_DATA["nationalities"]
+    stats     = get_outbreak_stats()
+    cases     = stats["confirmed_cases"]
+    countries = stats["nationalities"]
     risk      = _compute_risk(cases, countries)
     color, label, desc = _risk_meta(risk["overall"])
 

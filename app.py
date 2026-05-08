@@ -148,15 +148,16 @@ def _run_ingestion_job() -> None:
     # Check alert thresholds after every ingestion
     try:
         from alerts.alert_manager import check_and_fire
-        from ui.stats_panel import OUTBREAK_DATA
+        from ui.stats_panel import get_outbreak_stats
         from ui.map_panel import NATIONALITIES_DATA
         from ui.pandemic_risk import _compute_risk, _risk_meta
-        risk = _compute_risk(OUTBREAK_DATA["confirmed_cases"], OUTBREAK_DATA["nationalities"])
+        stats = get_outbreak_stats()
+        risk = _compute_risk(stats["confirmed_cases"], stats["nationalities"])
         _, risk_label, _ = _risk_meta(risk["overall"])
         current = {
-            "cases":      OUTBREAK_DATA["confirmed_cases"],
-            "deaths":     OUTBREAK_DATA["deaths"],
-            "countries":  OUTBREAK_DATA["nationalities"],
+            "cases":      stats["confirmed_cases"],
+            "deaths":     stats["deaths"],
+            "countries":  stats["nationalities"],
             "risk_level": risk_label,
             "areas":      [d["country"] for d in NATIONALITIES_DATA if d["cases"] > 0],
         }
