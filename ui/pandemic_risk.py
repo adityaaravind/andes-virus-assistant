@@ -178,81 +178,49 @@ def render_pandemic_risk_panel() -> None:
     color, label, desc = _risk_meta(risk["overall"])
 
     # ── Flashy header ────────────────────────────────────────────────────────
+    import textwrap
     anim = "pulse-risk 1.8s ease-in-out infinite" if risk["overall"] >= 40 else "none"
-    st.markdown(
-        f"""
-        <div style="
-            background:linear-gradient(135deg,rgba(13,27,42,0.95) 0%,rgba(27,46,69,0.95) 100%);
-            border:2px solid {color}88;
-            border-radius:16px;
-            padding:1.4rem 1.8rem 1rem;
-            margin-bottom:1rem;
-            position:relative;
-            overflow:hidden;
-        ">
-          <div style="
-            position:absolute;top:0;left:0;right:0;height:4px;
-            background:linear-gradient(90deg,{color},{color}44,{color});
-            animation:{anim};
-          "></div>
-
-          <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
-            <div style="flex:1;min-width:200px;">
-              <p style="
-                color:{color};font-size:1.55rem;font-weight:800;
-                letter-spacing:0.06em;margin:0;font-family:monospace;
-                text-shadow:0 0 20px {color}88;
-              ">⚠ CHANCES OF GLOBAL PANDEMIC</p>
-              <p style="color:#94a3b8;font-size:0.82rem;margin:0.2rem 0 0;">
-                Andes Virus · MV Hondius Outbreak · Live Assessment
-                &nbsp;&nbsp;<span class="live-dot" style="width:7px;height:7px;"></span>
-                <span class="live-label">UPDATES EVERY 5 MIN</span>
-              </p>
+    header_html = textwrap.dedent(f"""
+        <div style="background:linear-gradient(135deg,rgba(13,27,42,0.95) 0%,rgba(27,46,69,0.95) 100%);
+            border:2px solid {color}88; border-radius:16px; padding:1.4rem 1.8rem 1rem;
+            margin-bottom:1rem; position:relative; overflow:hidden;">
+            <div style="position:absolute;top:0;left:0;right:0;height:4px;
+                background:linear-gradient(90deg,{color},{color}44,{color}); animation:{anim};"></div>
+            <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+                <div style="flex:1;min-width:200px;">
+                    <p style="color:{color};font-size:1.55rem;font-weight:800;
+                        letter-spacing:0.06em;margin:0;font-family:monospace;
+                        text-shadow:0 0 20px {color}88;">⚠ CHANCES OF GLOBAL PANDEMIC</p>
+                    <p style="color:#94a3b8;font-size:0.82rem;margin:0.2rem 0 0;">
+                        Andes Virus · MV Hondius Outbreak · Live Assessment
+                        &nbsp;&nbsp;<span class="live-dot" style="width:7px;height:7px;"></span>
+                        <span class="live-label">UPDATES EVERY 5 MIN</span>
+                    </p>
+                </div>
+                <div style="background:{color}22;border:2px solid {color};
+                    border-radius:12px;padding:0.5rem 1.4rem;text-align:center;">
+                    <p style="color:{color};font-size:1.8rem;font-weight:900;margin:0;font-family:monospace;">{label}</p>
+                    <p style="color:#94a3b8;font-size:0.72rem;margin:0;">{desc}</p>
+                </div>
             </div>
-            <div style="
-              background:{color}22;border:2px solid {color};
-              border-radius:12px;padding:0.5rem 1.4rem;text-align:center;
-            ">
-              <p style="color:{color};font-size:1.8rem;font-weight:900;margin:0;font-family:monospace;">{label}</p>
-              <p style="color:#94a3b8;font-size:0.72rem;margin:0;">{desc}</p>
+            <div style="display:flex;gap:1.5rem;margin-top:0.9rem;flex-wrap:wrap;
+                border-top:1px solid #1b2e45;padding-top:0.7rem;">
+                <span style="color:#94a3b8;font-size:0.77rem;">📅 Day <b style="color:#f8fafc;">{risk['days']}</b>
+                    <span style="color:#475569;"> since Apr 6, 2026 (first symptom onset)</span></span>
+                <span style="color:#94a3b8;font-size:0.77rem;">🦠 Cases: <b style="color:#ef4444;">{cases}</b></span>
+                <span style="color:#94a3b8;font-size:0.77rem;">🌍 Countries: <b style="color:#f8fafc;">{countries}</b></span>
+                <span style="color:#94a3b8;font-size:0.77rem;">📈 R₀: <b style="color:#f59e0b;">{ANDES_FIXED['r0']}</b>
+                    <span style="color:#475569;"> vs COVID </span><b style="color:#ef4444;">{COVID_EARLY['r0']}</b></span>
+                <span style="color:#94a3b8;font-size:0.77rem;">💀 CFR: <b style="color:#ef4444;">{ANDES_FIXED['cfr_pct']}%</b>
+                    <span style="color:#475569;"> vs COVID </span><b style="color:#f59e0b;">{COVID_EARLY['cfr_pct']}%</b></span>
             </div>
-          </div>
-
-          <div style="
-            display:flex;gap:1.5rem;margin-top:0.9rem;flex-wrap:wrap;
-            border-top:1px solid #1b2e45;padding-top:0.7rem;
-          ">
-            <span style="color:#94a3b8;font-size:0.77rem;">
-              📅 Day <b style="color:#f8fafc;">{risk['days']}</b>
-              <span style="color:#475569;"> since Apr 6, 2026 (first symptom onset — WHO DON599)</span>
-            </span>
-            <span style="color:#94a3b8;font-size:0.77rem;">
-              🦠 Cases: <b style="color:#ef4444;">{cases}</b>
-            </span>
-            <span style="color:#94a3b8;font-size:0.77rem;">
-              🌍 Countries: <b style="color:#f8fafc;">{countries}</b>
-            </span>
-            <span style="color:#94a3b8;font-size:0.77rem;">
-              📈 R₀ (reproduction rate): <b style="color:#f59e0b;">{ANDES_FIXED['r0']}</b>
-              <span style="color:#475569;"> vs COVID </span>
-              <b style="color:#ef4444;">{COVID_EARLY['r0']}</b>
-            </span>
-            <span style="color:#94a3b8;font-size:0.77rem;">
-              💀 CFR (case fatality rate): <b style="color:#ef4444;">{ANDES_FIXED['cfr_pct']}%</b>
-              <span style="color:#475569;"> vs COVID </span>
-              <b style="color:#f59e0b;">{COVID_EARLY['cfr_pct']}%</b>
-            </span>
-          </div>
         </div>
         <style>
-        @keyframes pulse-risk {{
-          0%,100% {{ opacity:1; }}
-          50% {{ opacity:0.4; }}
-        }}
+        @keyframes pulse-risk {{ 0%,100% {{ opacity:1; }} 50% {{ opacity:0.4; }} }}
         </style>
-        """,
-        unsafe_allow_html=True,
-    )
+    """).strip()
+    st.markdown(header_html, unsafe_allow_html=True)
+
 
     # ── Gauge + Comparison bars ───────────────────────────────────────────────
     col_gauge, col_bars = st.columns([1, 1.6])

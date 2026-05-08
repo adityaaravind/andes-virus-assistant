@@ -180,37 +180,28 @@ def render_news_ticker() -> None:
     )
 
     # Scrollable news container
-    scrollable_html = f"""
-    <div style="height:600px;overflow-y:auto;border:1px solid rgba(148,163,184,0.2);
-    border-radius:12px;padding:1rem;background:rgba(15,23,42,0.3);
-    scrollbar-width:thin;scrollbar-color:rgba(148,163,184,0.5) transparent;">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-        gap:1rem;margin-bottom:1rem;">
-    """
+    import textwrap
+    scrollable_html = textwrap.dedent(f"""
+        <div style="height:600px;overflow-y:auto;border:1px solid rgba(148,163,184,0.2);
+            border-radius:12px;padding:1rem;background:rgba(15,23,42,0.3);
+            scrollbar-width:thin;scrollbar-color:rgba(148,163,184,0.5) transparent;">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+                gap:1rem;margin-bottom:1rem;">
+    """).strip()
 
     for art in articles:
         scrollable_html += _card_html(art)
 
-    scrollable_html += """
+    scrollable_html += textwrap.dedent("""
+            </div>
         </div>
-    </div>
-    <style>
-        /* Custom scrollbar styling */
-        div::-webkit-scrollbar {
-            width: 8px;
-        }
-        div::-webkit-scrollbar-track {
-            background: rgba(15,23,42,0.5);
-            border-radius: 4px;
-        }
-        div::-webkit-scrollbar-thumb {
-            background: rgba(148,163,184,0.5);
-            border-radius: 4px;
-        }
-        div::-webkit-scrollbar-thumb:hover {
-            background: rgba(148,163,184,0.7);
-        }
-    </style>
-    """
+        <style>
+            div::-webkit-scrollbar { width: 8px; }
+            div::-webkit-scrollbar-track { background: rgba(15,23,42,0.5); border-radius: 4px; }
+            div::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.5); border-radius: 4px; }
+            div::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,0.7); }
+        </style>
+    """).strip()
+
 
     st.markdown(scrollable_html, unsafe_allow_html=True)
