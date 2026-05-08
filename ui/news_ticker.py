@@ -4,6 +4,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
+import re
 import feedparser
 import streamlit as st
 
@@ -78,7 +79,13 @@ def fetch_headlines(max_per_feed: int = 12) -> list[dict[str, Any]]:
                 title   = entry.get("title", "").strip()
                 url     = entry.get("link", "")
                 summary = entry.get("summary", "")
-                text    = (title + " " + summary).lower()
+                
+                # Clean HTML tags and entities for better context
+                clean_summary = re.sub(r"<[^>]*>", " ", summary)
+                clean_summary = clean_summary.replace("&nbsp;", " ").replace("&quot;", '"')
+                clean_summary = re.sub(r"\s+", " ", clean_summary).strip()
+                
+                text = (title + " " + clean_summary).lower()
 
                 if not any(kw in text for kw in FILTER_KEYWORDS):
                     continue
@@ -86,13 +93,18 @@ def fetch_headlines(max_per_feed: int = 12) -> list[dict[str, Any]]:
                     continue
 
                 seen.add(url)
+                
+                # If summary is empty or just a link, use title as context
+                display_summary = clean_summary if len(clean_summary) > 10 else "No additional summary available."
+                display_summary = display_summary[:220] + ("…" if len(display_summary) > 220 else "")
+
                 articles.append({
                     "title":   title,
                     "url":     url,
                     "source":  feed_cfg["source"],
                     "tier":    feed_cfg["tier"],
                     "date":    _parse_date(entry),
-                    "summary": summary[:220] + ("…" if len(summary) > 220 else ""),
+                    "summary": display_summary,
                     "credibility": SOURCE_CREDIBILITY.get(feed_cfg["source"], 0.7),
                 })
         except Exception:
