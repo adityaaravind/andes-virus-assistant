@@ -72,6 +72,16 @@ def _pre_fetch_answers(chain: Any, questions: list[dict]) -> None:
 
 
 def render_faq_panel(chain: Any) -> None:
+    # Auto-refresh FAQ cache every 2 hours
+    import time
+    current_time = time.time()
+    last_refresh = st.session_state.get("faq_last_refresh", 0)
+
+    if current_time - last_refresh > 7200:  # 2 hours = 7200 seconds
+        st.session_state["faq_cache"] = {}
+        st.session_state["faq_prefetched"] = False
+        st.session_state["faq_last_refresh"] = current_time
+
     if "faq_prefetched" not in st.session_state:
         with st.spinner("Loading common questions…"):
             _pre_fetch_answers(chain, _sorted_questions())
@@ -83,13 +93,13 @@ def render_faq_panel(chain: Any) -> None:
     st.markdown(
         '<div style="display:flex;align-items:baseline;gap:0.8rem;margin-bottom:0.6rem;">'
         '<h3 style="margin:0;color:#f8fafc;">Frequently Asked Questions</h3>'
-        '<span style="color:#64748b;font-size:0.75rem;">Click any card · Auto-ranked by popularity</span>'
+        '<span style="color:#64748b;font-size:0.75rem;">Click any card · Auto-ranked by popularity · Refreshes every 2h</span>'
         '</div>',
         unsafe_allow_html=True,
     )
 
-    cols    = st.columns(3)
-    open_key = st.session_state.get("faq_open")
+    # Use expanders instead of custom button logic for more reliable functionality
+    cols = st.columns(3)
 
     for i, item in enumerate(questions):
         col = cols[i % 3]
@@ -98,32 +108,27 @@ def render_faq_panel(chain: Any) -> None:
             cat         = item["cat"]
             c_border, c_bg = CAT_COLORS.get(cat, ("#94a3b8", "rgba(148,163,184,0.10)"))
             click_count = clicks.get(key, 0)
-            is_open     = (open_key == key)
-            btn_label   = "▲ Hide" if is_open else "▼ Show answer"
 
             # Card header
             st.markdown(
                 f'<div style="background:{c_bg};border:1px solid {c_border}44;border-top:2px solid {c_border};'
-                f'border-radius:10px 10px {"0 0" if is_open else "10px 10px"};'
-                f'padding:0.75rem 0.85rem;margin-bottom:0;">'
+                f'border-radius:10px;padding:0.75rem 0.85rem;margin-bottom:0.5rem;">'
                 f'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.4rem;">'
                 f'<span style="background:{c_border}22;color:{c_border};font-size:0.62rem;font-weight:700;'
                 f'padding:1px 7px;border-radius:10px;text-transform:uppercase;white-space:nowrap;">{cat}</span>'
                 f'<span style="color:#475569;font-size:0.65rem;white-space:nowrap;">'
                 f'{"🔥 " if click_count > 5 else ""}{click_count} views</span>'
                 f'</div>'
-                f'<p style="color:#f1f5f9;font-size:0.82rem;font-weight:600;margin:0.4rem 0 0.5rem;line-height:1.35;">'
+                f'<p style="color:#f1f5f9;font-size:0.82rem;font-weight:600;margin:0.4rem 0 0;line-height:1.35;">'
                 f'{item["q"]}</p>'
                 f'</div>',
                 unsafe_allow_html=True,
             )
 
-            if st.button(btn_label, key=f"faq_btn_{key}_{i}", use_container_width=True):
-                _save_click(key)
-                st.session_state["faq_open"] = None if is_open else key
-                st.rerun()
+            # Use streamlit expander for reliable click functionality
+            with st.expander("Show answer", expanded=False):
+                _save_click(key)  # Track clicks when expanded
 
-            if is_open:
                 cache  = st.session_state.get("faq_cache", {})
                 answer = cache.get(key)
 
@@ -138,11 +143,9 @@ def render_faq_panel(chain: Any) -> None:
 
                 st.markdown(
                     f'<div style="background:rgba(13,27,42,0.85);border:1px solid {c_border}33;'
-                    f'border-top:none;border-radius:0 0 10px 10px;padding:0.85rem;margin-bottom:0.6rem;">'
+                    f'border-radius:8px;padding:0.85rem;margin:0.5rem 0;">'
                     f'<p style="color:#e2e8f0;font-size:0.82rem;line-height:1.6;margin:0;">'
                     f'{answer.replace(chr(10), "<br>")}</p>'
                     f'</div>',
                     unsafe_allow_html=True,
                 )
-            else:
-                st.markdown("<div style='margin-bottom:0.6rem;'></div>", unsafe_allow_html=True)
