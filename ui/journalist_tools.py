@@ -21,6 +21,7 @@ def _summary_text() -> str:
         f"• Deaths: {d['deaths']} (CFR {d['case_fatality_rate']}%)\n"
         f"• Nationalities affected: {d['nationalities']}\n"
         f"• Ship status: {d['ship_status']}\n\n"
+        f"📊 Live tracking: https://andes-virus-assistant.streamlit.app\n\n"
         f"Data sourced from WHO, CDC, PubMed. Not medical advice."
     )
 
@@ -148,6 +149,7 @@ def render_journalist_tools() -> None:
         ("in LinkedIn",  f"https://www.linkedin.com/shareArticle?mini=true&title=Andes+Virus+Outbreak&summary={encoded}", "#0a66c2", "#ffffff"),
         ("✈ Telegram",   f"https://t.me/share/url?text={encoded}",                    "#0088cc", "#ffffff"),
         ("💬 WhatsApp",  f"https://api.whatsapp.com/send?text={encoded}",             "#25d366", "#000000"),
+        ("💬 Text/SMS",  f"sms:?&body={encoded}",                                     "#8b5cf6", "#ffffff"),
     ]
 
     cols = st.columns(len(share_links))

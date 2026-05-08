@@ -173,7 +173,7 @@ def generate_card() -> bytes:
 
     # ── Author footer ─────────────────────────────────────────────────────────
     draw.text((PAD, 518), "Aditya Aravind Medepalli",     font=_font("bold", 18),    fill=WHITE)
-    draw.text((PAD, 546), "adityamedepalli.netlify.app",  font=_font("regular", 13), fill=GRAY1)
+    draw.text((PAD, 546), "adityamedepalli@outlook.com",  font=_font("regular", 13), fill=GRAY1)
 
     _draw_text_right(draw, 518, "Andes Virus Research Assistant",  _font("semibold", 14), GRAY1)
     _draw_text_right(draw, 540, "linkedin.com/in/aditya-aravind-medepalli", _font("regular", 12), GRAY1)
@@ -227,7 +227,7 @@ def generate_story_card() -> bytes:
     # Author
     draw.rectangle([80, SH - 200, SW - 80, SH - 199], fill=GRAY2)
     draw.text((80, SH - 180), "Aditya Aravind Medepalli",     font=_font("bold",    30), fill=WHITE)
-    draw.text((80, SH - 140), "adityamedepalli.netlify.app",  font=_font("regular", 22), fill=GRAY1)
+    draw.text((80, SH - 140), "adityamedepalli@outlook.com",  font=_font("regular", 22), fill=GRAY1)
     draw.text((80, SH - 100), "linkedin.com/in/aditya-aravind-medepalli", font=_font("regular", 18), fill=GRAY1)
     draw.text((80, SH - 60),  "Andes Virus Research Assistant",  font=_font("light", 20), fill=GRAY2)
 
