@@ -54,29 +54,70 @@ def _save_fear_vote(level: int, user_id: str) -> None:
         pass
 
 
-def _calculate_fear_average() -> tuple[float, int, str, str, str]:
-    """Calculate average fear level and return display values."""
+def _calculate_web_sentiment() -> float:
+    """Analyze recent news to derive a 'media fear' score (1-5)."""
+    try:
+        from ui.news_ticker import fetch_headlines
+        articles = fetch_headlines()
+        if not articles:
+            return 2.5  # Neutral baseline
+            
+        # Fear-inducing keywords with weights
+        fear_keywords = {
+            "outbreak": 0.5, "deadly": 0.8, "fatality": 1.0, "death": 0.8,
+            "emergency": 0.6, "spread": 0.4, "evacuated": 0.5, "quarantine": 0.7,
+            "alarm": 0.6, "critical": 0.7, "risk": 0.4, "confirmed": 0.3,
+            "threat": 0.6, "scramble": 0.5, "warning": 0.5
+        }
+        
+        total_score = 0.0
+        relevant_count = 0
+        
+        for art in articles[:50]: # Look at recent 50
+            text = (art.get("title", "") + " " + art.get("summary", "")).lower()
+            article_score = 1.0 # Base score (neutral)
+            
+            for kw, weight in fear_keywords.items():
+                if kw in text:
+                    article_score += weight
+            
+            total_score += min(article_score, 5.0)
+            relevant_count += 1
+            
+        if relevant_count == 0:
+            return 2.5
+            
+        return round(total_score / relevant_count, 2)
+    except Exception:
+        return 2.5
+
+
+def _calculate_fear_average() -> tuple[float, int, str, str, str, float]:
+    """Calculate average fear level blending user votes and web sentiment."""
     data = _load_fear_data()
     votes = data.get("votes", [])
+    web_score = _calculate_web_sentiment()
 
     if not votes:
-        return 2.5, len(votes), "unknown", "No votes yet", "#94a3b8"
+        # If no votes, show web sentiment as the primary driver
+        avg = web_score
+    else:
+        # Calculate weighted average of votes (recent votes count more)
+        total_weight = 0
+        weighted_sum = 0
+        for i, vote in enumerate(reversed(votes)):
+            weight = 1 + (i / len(votes)) * 0.5
+            weighted_sum += vote["level"] * weight
+            total_weight += weight
+        user_avg = weighted_sum / total_weight
+        
+        # Blend: 60% user votes, 40% web sentiment
+        avg = (user_avg * 0.6) + (web_score * 0.4)
 
-    # Calculate weighted average (recent votes count more)
-    total_weight = 0
-    weighted_sum = 0
-
-    for i, vote in enumerate(reversed(votes)):
-        # More recent votes have higher weight
-        weight = 1 + (i / len(votes)) * 0.5
-        weighted_sum += vote["level"] * weight
-        total_weight += weight
-
-    avg = weighted_sum / total_weight
     closest_level = min(FEAR_LEVELS.keys(), key=lambda x: abs(x - avg))
-
     level_info = FEAR_LEVELS[closest_level]
-    return avg, len(votes), level_info["label"], level_info["desc"], level_info["color"]
+    
+    return avg, len(votes), level_info["label"], level_info["desc"], level_info["color"], web_score
 
 
 @st.cache_data(ttl=60, show_spinner=False)
@@ -145,7 +186,7 @@ def _build_fear_dist_chart(dist: dict[int, int]) -> go.Figure:
 
 def render_fear_index() -> None:
     """Render fear index voting panel."""
-    avg_fear, vote_count, label, desc, color = _calculate_fear_average()
+    avg_fear, vote_count, label, desc, color, web_sentiment = _calculate_fear_average()
 
     # Generate unique user ID based on session + browser fingerprint
     if "user_id" not in st.session_state:
@@ -171,6 +212,11 @@ def render_fear_index() -> None:
     # Horizontal card layout matching pandemic card
     import textwrap
     anim = "pulse-fear 2s ease-in-out infinite" if avg_fear >= 3.0 else "none"
+    
+    # Calculate percentages for the breakdown bar
+    user_weight = 0.6 if vote_count > 0 else 0.0
+    web_weight = 0.4 if vote_count > 0 else 1.0
+    
     html_content = textwrap.dedent(f"""
         <div style="background: linear-gradient(135deg,rgba(13,27,42,0.95) 0%,rgba(27,46,69,0.95) 100%);
             border: 2px solid {color}88; border-radius: 16px; padding: 1.4rem 1.8rem 1rem;
@@ -183,7 +229,7 @@ def render_fear_index() -> None:
                         letter-spacing:0.06em; margin:0; font-family:monospace;
                         text-shadow:0 0 20px {color}88;">📡 PUBLIC FEAR INDEX</p>
                     <p style="color:#94a3b8; font-size:0.82rem; margin:0.2rem 0 0;">
-                        Community Sentiment · Real-time Voting
+                        Blended Sentiment: Global Media + Community Votes
                         &nbsp;&nbsp;<span class="live-dot" style="width:7px; height:7px;"></span>
                         <span class="live-label">LIVE ASSESSMENT</span>
                     </p>
@@ -194,11 +240,23 @@ def render_fear_index() -> None:
                     <p style="color:#94a3b8; font-size:0.72rem; margin:0;">{desc}</p>
                 </div>
             </div>
+            
+            <div style="margin-top: 1rem;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
+                    <span style="color:#64748b; font-size:0.7rem;">🌐 Web Sentiment: {web_sentiment:.1f}</span>
+                    <span style="color:#64748b; font-size:0.7rem;">👥 Community: {avg_fear if vote_count > 0 else 0:.1f}</span>
+                </div>
+                <div style="height:4px; background:#1b2e45; border-radius:2px; display:flex; overflow:hidden;">
+                    <div style="width:{web_weight*100}%; height:100%; background:#38bdf8; opacity:0.8;"></div>
+                    <div style="width:{user_weight*100}%; height:100%; background:#a78bfa; opacity:0.8;"></div>
+                </div>
+            </div>
+
             <div style="display:flex; gap:1.5rem; margin-top:0.9rem; flex-wrap:wrap;
                 border-top:1px solid #1b2e45; padding-top:0.7rem;">
-                <span style="color:#94a3b8; font-size:0.77rem;">😰 Fear Level: <b style="color:{color};">{avg_fear:.1f}/5</b></span>
+                <span style="color:#94a3b8; font-size:0.77rem;">😰 Final Score: <b style="color:{color};">{avg_fear:.1f}/5</b></span>
+                <span style="color:#94a3b8; font-size:0.77rem;">🌍 Media Data: <b style="color:#38bdf8;">Active</b></span>
                 <span style="color:#94a3b8; font-size:0.77rem;">📈 Responses: <b style="color:#f8fafc;">{vote_count}</b></span>
-                <span style="color:#94a3b8; font-size:0.77rem;">🎯 State: <b style="color:{color};">{label.title()}</b></span>
                 <span style="color:#94a3b8; font-size:0.77rem;">⏱ Updated: <b style="color:#f8fafc;">{datetime.now().strftime('%H:%M')}</b></span>
             </div>
         </div>
