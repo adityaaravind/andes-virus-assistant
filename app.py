@@ -465,9 +465,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-html=True,
-        )
-
-
-if __name__ == "__main__":
-    main()
