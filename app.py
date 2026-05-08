@@ -386,6 +386,22 @@ def main() -> None:
         from streamlit_autorefresh import st_autorefresh
         st_autorefresh(interval=15 * 60 * 1000, key="stats_refresh")
 
+        # ── v1.1 Feature Scroller ──
+        st.markdown(
+            """
+            <div class='v11-scroller-container'>
+                <div class='v11-scroller-content'>
+                    <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1 UPDATE</span> 🧠 Semantic Alerting: Detect transmission concerns via concept matching</span>
+                    <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1 UPDATE</span> 🔗 Recommendation Engine: Find related research via Qdrant similarity</span>
+                    <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1 UPDATE</span> 📑 Named Vectors: Dual-embedding (Summary + Detail) for precision retrieval</span>
+                    <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1 UPDATE</span> 💾 Session Memory: Assistant now persists conversation context in Qdrant</span>
+                    <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1 UPDATE</span> ⚡ Search Fallbacks: Improved reliability across different Qdrant versions</span>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
         # ── Compact Header ──
         col_title, col_status = st.columns([4, 1])
         with col_title:

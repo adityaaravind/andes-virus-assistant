@@ -91,3 +91,13 @@ We use a weighted re-ranking algorithm (`similarity_score × credibility_score`)
 
 ## ⚠️ Disclaimer
 *This tool is for research and informational purposes only. It is not a substitute for professional medical advice. For emergencies, contact your local health authorities.*
+
+---
+
+## 📜 v1.1 Changelog (Active Intelligence Update)
+
+- **Semantic Alerting Engine:** Moves beyond keyword thresholds. Automatically alerts if indexed documents contain high-risk concepts like "human-to-human transmission" or "mutation" using vector similarity.
+- **Qdrant Named Vectors:** Implemented dual-vector storage (`summary` vs `detail`). Enables high-level browsing and deep-fact extraction within the same collection.
+- **Recommendation API:** Native Qdrant-powered "Related Research" mapping to bridge disparate data sources.
+- **Persistent Session Memory:** Conversation context is now indexed in Qdrant, allowing the assistant to maintain deeper context across sessions.
+- **Hybrid Search Foundation:** Configured sparse vector support for future keyword+semantic hybrid ranking.
