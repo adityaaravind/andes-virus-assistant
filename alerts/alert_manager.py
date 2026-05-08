@@ -133,7 +133,7 @@ def _snapshot(current: dict[str, Any]) -> dict[str, Any]:
 
 def check_and_fire(current: dict[str, Any]) -> int:
     """Compare current state vs last known. Fire alerts to default topic + all subscribers. Returns count."""
-    default_topic = os.getenv("NTFY_DEFAULT_TOPIC", "")
+    default_topic = os.getenv("NTFY_DEFAULT_TOPIC", "HANTAVIRUS")
     fired = 0
 
     # ── Always check default topic (no subscriber required) ──────────────────

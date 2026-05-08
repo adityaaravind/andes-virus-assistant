@@ -87,25 +87,23 @@ def send_ntfy(
     level: str = "warning",
     click_url: str = "",
 ) -> bool:
-    """Legacy ntfy.sh support — prefer send_onesignal for new integrations."""
+    """Send notification to ntfy.sh using HANTAVIRUS topic as default."""
+    # Use HANTAVIRUS as default topic if none provided
     if not topic:
-        return False
+        topic = "HANTAVIRUS"
+
     try:
-        payload: dict[str, Any] = {
-            "topic":    topic.strip(),
-            "title":    title,
-            "message":  message,
-            "priority": PRIORITY_MAP.get(level, "default"),
-            "tags":     TAG_MAP.get(level, []),
-        }
-        if click_url:
-            payload["click"] = click_url
+        # Simple curl-style request to ntfy.sh/TOPIC
+        full_message = f"{title}\n\n{message}"
+
         resp = requests.post(
-            NTFY_BASE,
-            json=payload,
+            f"https://ntfy.sh/{topic}",
+            data=full_message.encode('utf-8'),
+            headers={"Content-Type": "text/plain; charset=utf-8"},
             timeout=TIMEOUT,
         )
         resp.raise_for_status()
+        logging.info(f"ntfy notification sent to {topic}: {title}")
         return True
     except Exception as exc:
         logging.warning("ntfy.sh send failed: %s", exc)
@@ -150,16 +148,11 @@ def dispatch(
     level: str = "warning",
 ) -> None:
     """Send notification via configured channels."""
-    # OneSignal (browser push) — primary method
-    if os.getenv("ONESIGNAL_APP_ID"):
-        send_onesignal(title, message, level)
+    # Primary notification method: ntfy.sh with HANTAVIRUS topic
+    topic = sub.get("ntfy_topic", "HANTAVIRUS")
+    send_ntfy(topic, title, message, level)
 
-    # Legacy ntfy support
-    topic = sub.get("ntfy_topic", "")
-    if topic:
-        send_ntfy(topic, title, message, level)
-
-    # Email notifications
+    # Email notifications (if configured)
     email = sub.get("email", "")
     if email:
         send_email(email, f"[Andes Outbreak Alert] {title}", message)
