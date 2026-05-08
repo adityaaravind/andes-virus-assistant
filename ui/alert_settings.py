@@ -20,10 +20,39 @@ def render_alert_settings() -> None:
         unsafe_allow_html=True,
     )
 
-    # ── ntfy.sh alerts ─────────────────────────────────
+    # ── Direct subscribe button ─────────────────────────────────
+    if st.button("📱 Press here for free alerts", use_container_width=True, type="primary"):
+        st.session_state.alert_ntfy_topic = "HANTAVIRUS"
+        # Auto-save subscription with HANTAVIRUS
+        sub = {
+            "ntfy_topic": "HANTAVIRUS",
+            "email": "",
+            "alerts": {
+                "any_case_increase": True,
+                "death_increase": True,
+                "new_country": True,
+                "risk_level_change": True,
+                "case_threshold": 0,
+            },
+            "last_known": {},
+        }
+        add_subscription(sub)
+
+        st.markdown(
+            '<div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);'
+            'border-radius:8px;padding:0.8rem;margin:0.5rem 0;">'
+            '<p style="color:#22c55e;font-size:0.9rem;font-weight:600;margin:0 0 0.4rem;">✅ Subscribed to outbreak alerts!</p>'
+            '<p style="color:#e2e8f0;font-size:0.75rem;margin:0 0 0.3rem;">Install ntfy app → subscribe to <strong>HANTAVIRUS</strong> topic</p>'
+            '<p style="color:#94a3b8;font-size:0.7rem;margin:0;">'
+            'Download: <a href="https://ntfy.sh" target="_blank" style="color:#00b4d8;">ntfy.sh</a></p>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+
+    # ── Custom alerts section ─────────────────────────────────
     st.markdown(
         '<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);'
-        'border-radius:8px;padding:0.7rem 0.8rem;margin-bottom:0.7rem;">'
+        'border-radius:8px;padding:0.7rem 0.8rem;margin:0.7rem 0;">'
         '<p style="color:#ef4444;font-size:0.72rem;font-weight:700;margin:0 0 0.3rem;'
         'text-transform:uppercase;letter-spacing:0.05em;">📡 Custom Alerts</p>'
         '<p style="color:#f1f5f9;font-size:0.78rem;margin:0 0 0.5rem;">'
@@ -40,7 +69,7 @@ def render_alert_settings() -> None:
         unsafe_allow_html=True,
     )
 
-    with st.expander("Alerts and notifications", expanded=False):
+    with st.expander("Advanced alert settings", expanded=False):
         st.markdown(
             '<p style="color:#94a3b8;font-size:0.78rem;margin-bottom:0.8rem;">'
             'Get notified via <b style="color:#f8fafc;">ntfy.sh</b> (free push notifications) '
@@ -51,27 +80,10 @@ def render_alert_settings() -> None:
         col1, col2 = st.columns(2)
         with col1:
             ntfy_topic = st.text_input(
-                "ntfy.sh topic",
+                "Custom ntfy.sh topic",
                 value="HANTAVIRUS",
-                help="Install ntfy app → subscribe to your topic → get push notifications on any device. Free, no account needed.",
+                help="Use a custom topic name for private alerts. Leave as HANTAVIRUS for public outbreak alerts.",
                 key="alert_ntfy_topic",
-            )
-            # Quick subscribe button for HANTAVIRUS
-            if st.button("🔔 Subscribe to HANTAVIRUS", use_container_width=True, type="secondary"):
-                st.session_state.alert_ntfy_topic = "HANTAVIRUS"
-                st.markdown(
-                    '<div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);'
-                    'border-radius:6px;padding:0.5rem;margin:0.3rem 0;">'
-                    '<p style="color:#22c55e;font-size:0.75rem;margin:0;">✓ Topic set to HANTAVIRUS</p>'
-                    '<p style="color:#94a3b8;font-size:0.68rem;margin:0;">Install ntfy app → subscribe to HANTAVIRUS → get all outbreak alerts</p>'
-                    '</div>',
-                    unsafe_allow_html=True,
-                )
-            st.markdown(
-                '<p style="color:#475569;font-size:0.68rem;margin-top:0.2rem;">'
-                'Download: <a href="https://ntfy.sh" target="_blank" style="color:#00b4d8;">ntfy.sh</a> '
-                '→ subscribe to topic above</p>',
-                unsafe_allow_html=True,
             )
         with col2:
             email_addr = st.text_input(
