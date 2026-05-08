@@ -1,19 +1,58 @@
 """Author profile card — compact top-right widget, purple/violet accent."""
 from __future__ import annotations
 
+import json
 import streamlit as st
+from pathlib import Path
 
 
 AUTHOR = {
     "name":      "Aditya Aravind Medepalli",
     "role":      "Researcher & Developer",
-    "portfolio": "https://adityamedepalli.netlify.app/",
     "linkedin":  "https://www.linkedin.com/in/aditya-aravind-medepalli/",
     "initials":  "AA",
 }
 
+VISITOR_COUNT_FILE = Path("data/visitor_count.json")
+
+
+def _get_visitor_count() -> int:
+    """Get current visitor count from file."""
+    if not VISITOR_COUNT_FILE.exists():
+        return 0
+    try:
+        data = json.loads(VISITOR_COUNT_FILE.read_text())
+        return data.get("count", 0)
+    except Exception:
+        return 0
+
+
+def _increment_visitor_count() -> int:
+    """Increment visitor count and return new total."""
+    VISITOR_COUNT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    current = _get_visitor_count()
+    new_count = current + 1
+
+    try:
+        VISITOR_COUNT_FILE.write_text(json.dumps({"count": new_count}))
+    except Exception:
+        pass  # Fail silently if can't write
+
+    return new_count
+
+
+def _track_visitor() -> int:
+    """Track unique session visitor and return total count."""
+    if st.session_state.get("visitor_counted"):
+        return _get_visitor_count()
+
+    st.session_state["visitor_counted"] = True
+    return _increment_visitor_count()
+
 
 def render_author_card() -> None:
+    visitor_count = _track_visitor()
+
     st.markdown(
         f'<div style="background:linear-gradient(135deg,rgba(88,28,135,0.28) 0%,rgba(124,58,237,0.18) 100%);'
         f'border:1px solid rgba(167,139,250,0.35);border-top:3px solid #a78bfa;'
@@ -31,11 +70,11 @@ def render_author_card() -> None:
         f'</div>'
         f'</div>'
         f'<div style="display:flex;gap:0.35rem;">'
-        f'<a href="{AUTHOR["portfolio"]}" target="_blank" rel="noopener" style="flex:1;text-align:center;'
-        f'background:linear-gradient(135deg,#7c3aed,#a78bfa);'
+        f'<div style="flex:1;text-align:center;'
+        f'background:linear-gradient(135deg,#059669,#10b981);'
         f'color:#fff;border-radius:6px;padding:0.28rem 0.4rem;'
-        f'font-size:0.63rem;font-weight:700;text-decoration:none;white-space:nowrap;">'
-        f'🌐 Portfolio</a>'
+        f'font-size:0.63rem;font-weight:700;white-space:nowrap;">'
+        f'👁️ {visitor_count:,} Views</div>'
         f'<a href="{AUTHOR["linkedin"]}" target="_blank" rel="noopener" style="flex:1;text-align:center;'
         f'background:#0a66c2;color:#fff;border-radius:6px;padding:0.28rem 0.4rem;'
         f'font-size:0.63rem;font-weight:700;text-decoration:none;white-space:nowrap;">'
