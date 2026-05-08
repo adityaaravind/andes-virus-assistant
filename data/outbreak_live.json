@@ -1,9 +1,10 @@
 {
   "confirmed_cases": 5,
+  "suspected_cases": 9,
   "deaths": 3,
   "nationalities": 23,
   "last_updated": "2026-05-08",
   "source": "manual-correction",
   "articles_scanned": 252,
-  "note": "Corrected erroneous 50 case count derived from CFR percentage."
+  "note": "Updated to latest verified totals: 5 confirmed, 9 suspected."
 }

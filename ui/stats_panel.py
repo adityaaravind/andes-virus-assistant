@@ -118,9 +118,10 @@ def render_stats_panel() -> None:
             unsafe_allow_html=True,
         )
 
-    cols  = st.columns(4)
+    cols  = st.columns(5)
     cards = [
-        ("🦠", str(stats["confirmed_cases"]), "Confirmed Cases"),
+        ("🧪", str(stats["confirmed_cases"]), "Confirmed Cases"),
+        ("⚠️", str(stats["suspected_cases"]), "Suspected Cases"),
         ("💀", str(stats["deaths"]), "Deaths"),
         ("🌍", str(stats["nationalities"]), "Nationalities"),
         ("🚢", stats["ship_status"], "Ship Status"),
