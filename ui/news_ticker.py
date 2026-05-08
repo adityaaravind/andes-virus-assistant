@@ -93,7 +93,16 @@ def fetch_headlines(max_per_feed: int = 12) -> list[dict[str, Any]]:
                     continue
 
                 seen.add(url)
-                
+
+                # Extract real source for Google News entries
+                display_source = feed_cfg["source"]
+                if display_source == "Google News" and " - " in title:
+                    # Google News titles are typically "Headline - Source Name"
+                    parts = title.rsplit(" - ", 1)
+                    if len(parts) > 1:
+                        title = parts[0].strip()
+                        display_source = parts[1].strip()
+
                 # If summary is empty or just a link, use title as context
                 display_summary = clean_summary if len(clean_summary) > 10 else "No additional summary available."
                 display_summary = display_summary[:220] + ("…" if len(display_summary) > 220 else "")
@@ -101,11 +110,11 @@ def fetch_headlines(max_per_feed: int = 12) -> list[dict[str, Any]]:
                 articles.append({
                     "title":   title,
                     "url":     url,
-                    "source":  feed_cfg["source"],
+                    "source":  display_source,
                     "tier":    feed_cfg["tier"],
                     "date":    _parse_date(entry),
                     "summary": display_summary,
-                    "credibility": SOURCE_CREDIBILITY.get(feed_cfg["source"], 0.7),
+                    "credibility": SOURCE_CREDIBILITY.get(display_source, 0.7) if display_source != "Google News" else 0.65,
                 })
         except Exception:
             continue
