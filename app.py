@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 import streamlit as st
+import streamlit_analytics2 as streamlit_analytics
 from dotenv import load_dotenv
 
 
@@ -361,106 +362,107 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
 
 
 def main() -> None:
-    # Auto-refresh page every hour so headlines stay live
-    # from streamlit_autorefresh import st_autorefresh
-    # st_autorefresh(interval=3600 * 1000, key="hourly_refresh")
+    with streamlit_analytics.track():
+        # Auto-refresh page every hour so headlines stay live
+        # from streamlit_autorefresh import st_autorefresh
+        # st_autorefresh(interval=3600 * 1000, key="hourly_refresh")
 
-    _render_header()
-    st.divider()
+        _render_header()
+        st.divider()
 
-    # ── WHAT IS THIS? — Introduction Panel ──────────────────────────────────
-    with st.container():
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            st.markdown("## 🚨 **LIVE OUTBREAK INTELLIGENCE SYSTEM**")
-        with col2:
-            st.markdown(
-                "<div style='background: #f59e0b22; border: 2px solid #f59e0b; border-radius: 12px; padding: 0.5rem 1rem; text-align: center;'>"
-                "<p style='color: #f59e0b; font-size: 1.4rem; font-weight: 900; margin: 0; font-family: monospace;'>HANTAVIRUS</p>"
-                "<p style='color: #94a3b8; font-size: 0.65rem; margin: 0;'>Andes Virus Strain</p>"
-                "</div>",
-                unsafe_allow_html=True
-            )
+        # ── WHAT IS THIS? — Introduction Panel ──────────────────────────────────
+        with st.container():
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                st.markdown("## 🚨 **LIVE OUTBREAK INTELLIGENCE SYSTEM**")
+            with col2:
+                st.markdown(
+                    "<div style='background: #f59e0b22; border: 2px solid #f59e0b; border-radius: 12px; padding: 0.5rem 1rem; text-align: center;'>"
+                    "<p style='color: #f59e0b; font-size: 1.4rem; font-weight: 900; margin: 0; font-family: monospace;'>HANTAVIRUS</p>"
+                    "<p style='color: #94a3b8; font-size: 0.65rem; margin: 0;'>Andes Virus Strain</p>"
+                    "</div>",
+                    unsafe_allow_html=True
+                )
 
-    st.error("🦠 **ACTIVE: MV Hondius Hantavirus Outbreak**\n\nThis AI assistant tracks the ongoing Andes virus outbreak linked to the cruise ship MV Hondius. Real-time monitoring of cases, deaths, and geographic spread across multiple countries.")
+        st.error("🦠 **ACTIVE: MV Hondius Hantavirus Outbreak**\n\nThis AI assistant tracks the ongoing Andes virus outbreak linked to the cruise ship MV Hondius. Real-time monitoring of cases, deaths, and geographic spread across multiple countries.")
 
-    col_features, col_usage = st.columns(2)
+        col_features, col_usage = st.columns(2)
 
-    with col_features:
-        st.success("""
-        **🔍 What This Tool Does**
-        - Real-time case tracking & mortality analysis
-        - AI-powered research assistant (coming soon)
-        - Live news monitoring from WHO, CDC, Reuters, BBC
-        - Pandemic risk assessment & geographic mapping
-        """)
+        with col_features:
+            st.success("""
+            **🔍 What This Tool Does**
+            - Real-time case tracking & mortality analysis
+            - AI-powered research assistant (coming soon)
+            - Live news monitoring from WHO, CDC, Reuters, BBC
+            - Pandemic risk assessment & geographic mapping
+            """)
 
-    with col_usage:
-        st.info("""
-        **💡 How To Use**
-        - Scroll down to see live outbreak statistics
-        - Ask questions in the research assistant chat (coming soon)
-        - Check the map for geographic spread patterns
-        - Enable alerts in sidebar for outbreak updates
-        """)
+        with col_usage:
+            st.info("""
+            **💡 How To Use**
+            - Scroll down to see live outbreak statistics
+            - Ask questions in the research assistant chat (coming soon)
+            - Check the map for geographic spread patterns
+            - Enable alerts in sidebar for outbreak updates
+            """)
 
-    st.warning("⚠️ **NOT MEDICAL ADVICE** • For emergencies contact local health authorities")
+        st.warning("⚠️ **NOT MEDICAL ADVICE** • For emergencies contact local health authorities")
 
-    _bootstrap_if_empty()
-    _render_setup_warning()
+        _bootstrap_if_empty()
+        _render_setup_warning()
 
-    chain = _init_rag_chain()
+        chain = _init_rag_chain()
 
-    from ui.pandemic_risk import render_pandemic_risk_panel
-    from ui.fear_index import render_fear_index
-    from ui.news_ticker import render_news_ticker
-    from ui.stats_panel import render_stats_panel, render_timeline_chart
-    from ui.map_panel import render_map_panel
-    from ui.journalist_tools import render_journalist_tools
+        from ui.pandemic_risk import render_pandemic_risk_panel
+        from ui.fear_index import render_fear_index
+        from ui.news_ticker import render_news_ticker
+        from ui.stats_panel import render_stats_panel, render_timeline_chart
+        from ui.map_panel import render_map_panel
+        from ui.journalist_tools import render_journalist_tools
 
-    # ── PANDEMIC RISK & FEAR INDEX — equal size cards ────────────────────────
-    col_risk, col_fear = st.columns([1, 1])
-    with col_risk:
-        render_pandemic_risk_panel()
-    with col_fear:
-        render_fear_index()
-    st.divider()
+        # ── PANDEMIC RISK & FEAR INDEX — equal size cards ────────────────────────
+        col_risk, col_fear = st.columns([1, 1])
+        with col_risk:
+            render_pandemic_risk_panel()
+        with col_fear:
+            render_fear_index()
+        st.divider()
 
-    # ── Live news ────────────────────────────────────────────────────────────
-    render_news_ticker()
-    st.divider()
+        # ── Live news ────────────────────────────────────────────────────────────
+        render_news_ticker()
+        st.divider()
 
-    # ── Stats + map ──────────────────────────────────────────────────────────
-    render_stats_panel()
-    render_map_panel()
-    render_timeline_chart()
-    st.divider()
+        # ── Stats + map ──────────────────────────────────────────────────────────
+        render_stats_panel()
+        render_map_panel()
+        render_timeline_chart()
+        st.divider()
 
-    # ── Journalist tools ─────────────────────────────────────────────────────
-    render_journalist_tools()
-    st.divider()
+        # ── Journalist tools ─────────────────────────────────────────────────────
+        render_journalist_tools()
+        st.divider()
 
-    if "citation_cards" not in st.session_state:
-        st.session_state.citation_cards = []
+        if "citation_cards" not in st.session_state:
+            st.session_state.citation_cards = []
 
-    def update_sources(cards: list[dict[str, Any]]) -> None:
-        st.session_state.citation_cards = cards
+        def update_sources(cards: list[dict[str, Any]]) -> None:
+            st.session_state.citation_cards = cards
 
-    _render_sidebar(st.session_state.citation_cards)
+        _render_sidebar(st.session_state.citation_cards)
 
-    from ui.faq_panel import render_faq_panel
-    render_faq_panel(chain)
+        from ui.faq_panel import render_faq_panel
+        render_faq_panel(chain)
 
-    from ui.suggestion_box import render_suggestion_box
-    render_suggestion_box()
+        from ui.suggestion_box import render_suggestion_box
+        render_suggestion_box()
 
-    st.markdown(
-        "<div class='app-footer'>"
-        "Data sourced from WHO, CDC, PubMed, Reuters, BBC, Al Jazeera, Wikipedia. "
-        "Not medical advice. For emergencies contact your local health authority."
-        "</div>",
-        unsafe_allow_html=True,
-    )
+        st.markdown(
+            "<div class='app-footer'>"
+            "Data sourced from WHO, CDC, PubMed, Reuters, BBC, Al Jazeera, Wikipedia. "
+            "Not medical advice. For emergencies contact your local health authority."
+            "</div>",
+            unsafe_allow_html=True,
+        )
 
 
 if __name__ == "__main__":
