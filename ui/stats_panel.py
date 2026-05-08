@@ -136,7 +136,6 @@ def render_stats_panel() -> None:
             unsafe_allow_html=True,
         )
 
-    cols  = st.columns(5)
     cards = [
         ("🧪", str(stats.get("confirmed_cases", 0)), "Confirmed Cases"),
         ("⚠️", str(stats.get("suspected_cases", 0)), "Suspected Cases"),
@@ -144,16 +143,22 @@ def render_stats_panel() -> None:
         ("🌍", str(stats.get("nationalities", 0)), "Nationalities"),
         ("🚢", stats.get("ship_status", "Unknown"), "Ship Status"),
     ]
-    for col, (icon, value, label) in zip(cols, cards):
-        with col:
-            st.markdown(
-                f'<div class="stat-card">'
-                f'<div style="font-size:1.4rem;">{icon}</div>'
-                f'<div class="stat-value">{value}</div>'
-                f'<div class="stat-label">{label}</div>'
-                f'</div>',
-                unsafe_allow_html=True,
-            )
+
+    # Responsive grid for stat cards
+    cards_html = ""
+    for icon, value, label in cards:
+        cards_html += (
+            f'<div class="stat-card">'
+            f'<div style="font-size:1.4rem;">{icon}</div>'
+            f'<div class="stat-value">{value}</div>'
+            f'<div class="stat-label">{label}</div>'
+            f'</div>'
+        )
+    
+    st.markdown(
+        f'<div class="stats-grid">{cards_html}</div>',
+        unsafe_allow_html=True,
+    )
 
     st.markdown("<br>", unsafe_allow_html=True)
 

@@ -101,45 +101,42 @@ def render_faq_panel(chain: Any) -> None:
         unsafe_allow_html=True,
     )
 
-    # Use expanders instead of custom button logic for more reliable functionality
-    cols = st.columns(3)
+    # Use responsive grid instead of st.columns for better mobile behavior
+    faq_html = ""
 
     for i, item in enumerate(questions):
-        col = cols[i % 3]
-        with col:
-            key         = item["key"]
-            cat         = item["cat"]
-            c_border, c_bg = CAT_COLORS.get(cat, ("#94a3b8", "rgba(148,163,184,0.10)"))
-            click_count = clicks.get(key, 0)
+        key         = item["key"]
+        cat         = item["cat"]
+        c_border, c_bg = CAT_COLORS.get(cat, ("#94a3b8", "rgba(148,163,184,0.10)"))
+        click_count = clicks.get(key, 0)
+        answer = STATIC_ANSWERS.get(key, "Answer not available for this question.")
 
-            # Card header
-            st.markdown(
-                f'<div style="background:{c_bg};border:1px solid {c_border}44;border-top:2px solid {c_border};'
-                f'border-radius:10px;padding:0.75rem 0.85rem;margin-bottom:0.5rem;">'
-                f'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.4rem;">'
-                f'<span style="background:{c_border}22;color:{c_border};font-size:0.62rem;font-weight:700;'
-                f'padding:1px 7px;border-radius:10px;text-transform:uppercase;white-space:nowrap;">{cat}</span>'
-                f'<span style="color:#475569;font-size:0.65rem;white-space:nowrap;">'
-                f'{"🔥 " if click_count > 5 else ""}{click_count} views</span>'
-                f'</div>'
-                f'<p style="color:#f1f5f9;font-size:0.82rem;font-weight:600;margin:0.4rem 0 0;line-height:1.35;">'
-                f'{item["q"]}</p>'
-                f'</div>',
-                unsafe_allow_html=True,
-            )
+        # Card and expansion logic inside a single markdown block for grid control
+        faq_html += (
+            f'<div style="background:{c_bg};border:1px solid {c_border}44;border-top:2px solid {c_border};'
+            f'border-radius:10px;padding:0.75rem 0.85rem;display:flex;flex-direction:column;gap:0.4rem;">'
+            f'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.4rem;">'
+            f'<span style="background:{c_border}22;color:{c_border};font-size:0.62rem;font-weight:700;'
+            f'padding:1px 7px;border-radius:10px;text-transform:uppercase;white-space:nowrap;">{cat}</span>'
+            f'<span style="color:#475569;font-size:0.65rem;white-space:nowrap;">'
+            f'{"🔥 " if click_count > 5 else ""}{click_count} views</span>'
+            f'</div>'
+            f'<p style="color:#f1f5f9;font-size:0.82rem;font-weight:600;margin:0;line-height:1.35;">'
+            f'{item["q"]}</p>'
+            f'<details style="margin-top:0.3rem;cursor:pointer;">'
+            f'<summary style="color:{c_border};font-size:0.75rem;font-weight:600;outline:none;">Show answer</summary>'
+            f'<div style="background:rgba(13,27,42,0.85);border:1px solid {c_border}33;'
+            f'border-radius:8px;padding:0.85rem;margin:0.5rem 0;color:#e2e8f0;font-size:0.82rem;line-height:1.6;">'
+            f'{answer.replace(chr(10), "<br>")}</div>'
+            f'</details>'
+            f'</div>'
+        )
 
-            # Use streamlit expander for reliable click functionality
-            with st.expander("Show answer", expanded=False):
-                _save_click(key)  # Track clicks when expanded
-
-                # Use static answers instead of complex RAG system
-                answer = STATIC_ANSWERS.get(key, "Answer not available for this question.")
-
-                st.markdown(
-                    f'<div style="background:rgba(13,27,42,0.85);border:1px solid {c_border}33;'
-                    f'border-radius:8px;padding:0.85rem;margin:0.5rem 0;">'
-                    f'<p style="color:#e2e8f0;font-size:0.82rem;line-height:1.6;margin:0;">'
-                    f'{answer.replace(chr(10), "<br>")}</p>'
-                    f'</div>',
-                    unsafe_allow_html=True,
-                )
+    st.markdown(
+        f'<style>'
+        f'.faq-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }}'
+        f'@media (max-width: 768px) {{ .faq-grid {{ grid-template-columns: 1fr; }} }}'
+        f'</style>'
+        f'<div class="faq-grid">{faq_html}</div>',
+        unsafe_allow_html=True,
+    )

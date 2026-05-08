@@ -352,6 +352,13 @@ hr {
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
-  .stat-card .stat-value { font-size: 1.5rem; }
-  .chat-user-bubble, .chat-assistant-bubble { max-width: 98%; }
+  .main .block-container { padding-left: 0.5rem; padding-right: 0.5rem; }
+  .stat-card { padding: 1rem 0.6rem; }
+  .stat-card .stat-value { font-size: 1.6rem; }
+  .stat-card .stat-label { font-size: 0.65rem; }
+  .stats-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.6rem; }
+  .chat-user-bubble, .chat-assistant-bubble { max-width: 98%; padding: 0.7rem 0.9rem; }
+  h1 { font-size: 1.3rem !important; }
+  h2 { font-size: 1.1rem !important; }
+  .outbreak-badge { padding: 0.2rem 0.6rem; font-size: 0.7rem; }
 }

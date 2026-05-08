@@ -248,7 +248,15 @@ border-top:1px solid #1b2e45;padding-top:0.7rem;">
 
     # ── Key difference callout ────────────────────────────────────────────────
     callout_html = f"""
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.6rem;margin-top:0.3rem;">
+<style>
+.risk-callout-grid {{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 0.6rem;
+    margin-top: 0.3rem;
+}}
+</style>
+<div class="risk-callout-grid">
 <div style="background:rgba(34,197,94,0.08);border:1px solid #22c55e44;border-radius:8px;padding:0.6rem 0.8rem;">
 <p style="color:#22c55e;font-size:0.72rem;font-weight:700;margin:0;">✓ LOWER RISK THAN COVID</p>
 <p style="color:#94a3b8;font-size:0.73rem;margin:0.2rem 0 0;">

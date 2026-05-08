@@ -370,40 +370,65 @@ def main() -> None:
         st.divider()
 
         # ── WHAT IS THIS? — Introduction Panel ──────────────────────────────────
-        with st.container():
-            col1, col2 = st.columns([3, 1])
-            with col1:
-                st.markdown("## 🚨 **LIVE OUTBREAK INTELLIGENCE SYSTEM**")
-            with col2:
-                st.markdown(
-                    "<div style='background: #f59e0b22; border: 2px solid #f59e0b; border-radius: 12px; padding: 0.5rem 1rem; text-align: center;'>"
-                    "<p style='color: #f59e0b; font-size: 1.4rem; font-weight: 900; margin: 0; font-family: monospace;'>HANTAVIRUS</p>"
-                    "<p style='color: #94a3b8; font-size: 0.65rem; margin: 0;'>Andes Virus Strain</p>"
-                    "</div>",
-                    unsafe_allow_html=True
-                )
+        st.markdown(
+            """
+            <style>
+            .intro-grid {
+                display: grid;
+                grid-template-columns: 3fr 1fr;
+                gap: 1rem;
+                align-items: center;
+                margin-bottom: 1rem;
+            }
+            .feature-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+                margin-bottom: 1rem;
+            }
+            @media (max-width: 768px) {
+                .intro-grid, .feature-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+
+        intro_html = f"""
+<div class="intro-grid">
+<div><h2 style="margin:0;">🚨 <b>LIVE OUTBREAK INTELLIGENCE SYSTEM</b></h2></div>
+<div style='background: #f59e0b22; border: 2px solid #f59e0b; border-radius: 12px; padding: 0.5rem 1rem; text-align: center;'>
+<p style='color: #f59e0b; font-size: 1.4rem; font-weight: 900; margin: 0; font-family: monospace;'>HANTAVIRUS</p>
+<p style='color: #94a3b8; font-size: 0.65rem; margin: 0;'>Andes Virus Strain</p>
+</div>
+</div>
+"""
+        st.markdown(intro_html, unsafe_allow_html=True)
 
         st.error("🦠 **ACTIVE: MV Hondius Hantavirus Outbreak**\n\nThis AI assistant tracks the ongoing Andes virus outbreak linked to the cruise ship MV Hondius. Real-time monitoring of cases, deaths, and geographic spread across multiple countries.")
 
+        # Manual wrap for feature boxes to ensure grid control
+        st.markdown('<div class="feature-grid">', unsafe_allow_html=True)
         col_features, col_usage = st.columns(2)
-
         with col_features:
             st.success("""
             **🔍 What This Tool Does**
             - Real-time case tracking & mortality analysis
-            - AI-powered research assistant (coming soon)
-            - Live news monitoring from WHO, CDC, Reuters, BBC
+            - AI-powered research assistant
+            - Live news monitoring from WHO, CDC, Reuters
             - Pandemic risk assessment & geographic mapping
             """)
-
         with col_usage:
             st.info("""
             **💡 How To Use**
             - Scroll down to see live outbreak statistics
-            - Ask questions in the research assistant chat (coming soon)
+            - Ask questions in the research assistant chat
             - Check the map for geographic spread patterns
             - Enable alerts in sidebar for outbreak updates
             """)
+        st.markdown('</div>', unsafe_allow_html=True)
 
         st.warning("⚠️ **NOT MEDICAL ADVICE** • For emergencies contact local health authorities")
 
