@@ -6,9 +6,6 @@ import streamlit as st
 from pathlib import Path
 
 
-from alerts.persistent_kv import kv_get, kv_set
-
-
 AUTHOR = {
     "name":      "Aditya Aravind Medepalli",
     "role":      "Researcher & Developer",
@@ -16,19 +13,31 @@ AUTHOR = {
     "initials":  "AA",
 }
 
-_VISITOR_KEY = "analytics_visitor_count"
+VISITOR_COUNT_FILE = Path("data/visitor_count.json")
 
 
 def _get_visitor_count() -> int:
-    """Get current visitor count from persistent store."""
-    return kv_get(_VISITOR_KEY, 0)
+    """Get current visitor count from file."""
+    if not VISITOR_COUNT_FILE.exists():
+        return 0
+    try:
+        data = json.loads(VISITOR_COUNT_FILE.read_text())
+        return data.get("count", 0)
+    except Exception:
+        return 0
 
 
 def _increment_visitor_count() -> int:
     """Increment visitor count and return new total."""
+    VISITOR_COUNT_FILE.parent.mkdir(parents=True, exist_ok=True)
     current = _get_visitor_count()
     new_count = current + 1
-    kv_set(_VISITOR_KEY, new_count)
+
+    try:
+        VISITOR_COUNT_FILE.write_text(json.dumps({"count": new_count}))
+    except Exception:
+        pass  # Fail silently if can't write
+
     return new_count
 
 
