@@ -7,7 +7,7 @@ from typing import Any
 import plotly.graph_objects as go
 import streamlit as st
 
-from ui.stats_panel import OUTBREAK_DATA, CASE_TIMELINE
+from ui.stats_panel import get_outbreak_stats, CASE_TIMELINE
 
 
 # ── COVID-19 reference metrics (at equivalent early stage & current) ────────
