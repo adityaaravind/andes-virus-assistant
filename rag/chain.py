@@ -22,7 +22,8 @@ TEMPERATURE = 0.1
 def build_chain() -> "RAGChain":
     api_key = os.getenv("OPENAI_API_KEY", "")
     if not api_key or api_key == "your_key_here":
-        raise ValueError("OPENAI_API_KEY not set")
+        # Return fallback chain when no API key
+        return FallbackRAGChain()
 
     llm = ChatOpenAI(
         model=DEFAULT_MODEL,
@@ -33,6 +34,48 @@ def build_chain() -> "RAGChain":
     )
     prompt = build_rag_prompt()
     return RAGChain(llm=llm, prompt=prompt)
+
+
+class FallbackRAGChain:
+    """Fallback RAG chain that provides answers using retrieved chunks without OpenAI."""
+
+    def query(self, question: str) -> dict[str, Any]:
+        chunks = retrieve(question)
+        if not chunks:
+            return {
+                "answer": "No relevant information found in the knowledge base for this question.",
+                "sources": [],
+                "chunks_used": 0,
+                "raw_chunks": [],
+            }
+
+        # Generate answer from retrieved chunks without LLM
+        answer_parts = []
+        answer_parts.append("Based on the available research:")
+
+        for i, chunk in enumerate(chunks[:3], 1):
+            text = chunk.get('text', '')[:300]  # First 300 chars
+            answer_parts.append(f"\n{i}. {text}...")
+
+        sources = [chunk.get("metadata", {}) for chunk in chunks]
+
+        return {
+            "answer": "\n".join(answer_parts),
+            "sources": sources,
+            "chunks_used": len(chunks),
+            "raw_chunks": chunks,
+        }
+
+    def stream(self, question: str):
+        """Simple streaming implementation."""
+        result = self.query(question)
+        yield result["answer"]
+
+        import streamlit as st
+        st.session_state["_last_rag_meta"] = {
+            "sources": result["sources"],
+            "raw_chunks": result["raw_chunks"]
+        }
 
 
 class RAGChain:

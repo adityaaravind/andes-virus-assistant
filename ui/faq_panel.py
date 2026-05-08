@@ -72,16 +72,6 @@ def _pre_fetch_answers(chain: Any, questions: list[dict]) -> None:
 
 
 def render_faq_panel(chain: Any) -> None:
-    # Auto-refresh FAQ cache every 2 hours
-    import time
-    current_time = time.time()
-    last_refresh = st.session_state.get("faq_last_refresh", 0)
-
-    if current_time - last_refresh > 7200:  # 2 hours = 7200 seconds
-        st.session_state["faq_cache"] = {}
-        st.session_state["faq_prefetched"] = False
-        st.session_state["faq_last_refresh"] = current_time
-
     if "faq_prefetched" not in st.session_state:
         with st.spinner("Loading common questions…"):
             _pre_fetch_answers(chain, _sorted_questions())
@@ -93,7 +83,7 @@ def render_faq_panel(chain: Any) -> None:
     st.markdown(
         '<div style="display:flex;align-items:baseline;gap:0.8rem;margin-bottom:0.6rem;">'
         '<h3 style="margin:0;color:#f8fafc;">Frequently Asked Questions</h3>'
-        '<span style="color:#64748b;font-size:0.75rem;">Click any card · Auto-ranked by popularity · Refreshes every 2h</span>'
+        '<span style="color:#64748b;font-size:0.75rem;">Click any card · Auto-ranked by popularity</span>'
         '</div>',
         unsafe_allow_html=True,
     )
