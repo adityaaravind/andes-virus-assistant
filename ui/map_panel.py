@@ -364,3 +364,23 @@ def render_map_panel() -> None:
         f'Updates every 2h</p>',
         unsafe_allow_html=True,
     )
+
+    with st.expander("📊 Data Source & Methodology"):
+        st.markdown(
+            """
+            <div style="font-size: 0.85rem; color: #94a3b8; line-height: 1.5;">
+                <p><strong>Primary Source:</strong> World Health Organization (WHO) Disease Outbreak News (DON) 599, published May 4, 2026.</p>
+                <p><strong>Verified Data:</strong>
+                    <ul>
+                        <li>Total complement: 147 persons (88 passengers, 59 crew)</li>
+                        <li>Number of nationalities: 23</li>
+                        <li>Ship status and itinerary track</li>
+                        <li>Confirmed case/death totals</li>
+                    </ul>
+                </p>
+                <p><strong>Methodology & Approximations:</strong> While the WHO confirms 23 nationalities are involved, the specific per-country passenger/crew breakdown is <em>approximated</em> based on official response patterns and evacuation reports. Case assignments to specific nationalities are informed estimations derived from localized health ministry statements (e.g., South Africa NICD, Spain, Netherlands).</p>
+                <p style="font-size: 0.75rem; border-top: 1px solid #243b55; pt-2; mt-2;"><em>Disclaimer: This dashboard is for research purposes. Figures are updated as official validation is released.</em></p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
