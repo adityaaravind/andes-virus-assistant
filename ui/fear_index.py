@@ -305,45 +305,60 @@ clear official communications and verified data.
     # Voting buttons section below the visualization
     if not user_voted_today:
         st.markdown(
-            f'<p style="color:#94a3b8; font-size:0.85rem; font-weight:700; margin:1.5rem 0 1rem;">'
+            f'<p style="color:#94a3b8; font-size:0.85rem; font-weight:700; margin:1.5rem 0 0.8rem;">'
             f'🗳️ <b>CAST YOUR VOTE:</b> How do you feel about the outbreak today?</p>',
             unsafe_allow_html=True
         )
 
-        # Custom CSS for Cyber-style buttons
+        # ── Custom Voting Card Grid ──
+        # We use a grid of HTML elements. To handle the click, we'll use streamlit columns with buttons hidden inside cards or use streamlit's standard columns with custom-styled buttons.
+        v_cols = st.columns(5)
+        for i, level in enumerate(range(1, 6)):
+            info = FEAR_LEVELS[level]
+            l_color = info['color']
+            with v_cols[i]:
+                # We'll use a standard button but style it heavily to look like a stat card
+                # The label will include the subtext via HTML injection if possible, or just the main label
+                if st.button(info['label'].upper(), key=f"vote_{level}", use_container_width=True, help=info['desc']):
+                    _save_fear_vote(level, user_id)
+                    st.rerun()
+                
+                # Under the button, we show the subtext in a styled div
+                st.markdown(
+                    f'<div style="text-align:center; font-size:0.6rem; color:{l_color}; opacity:0.8; margin-top:-5px; font-weight:600; text-transform:none;">{info["desc"]}</div>',
+                    unsafe_allow_html=True
+                )
+
+        # Update CSS for these specific buttons to look like mini stat cards
         btn_style = ""
         for level, info in FEAR_LEVELS.items():
             l_color = info['color']
             btn_style += f"""
                 div[data-testid="stButton"] button[key*="vote_{level}"] {{
-                    border: 1px solid {l_color}99 !important;
+                    background: rgba(15, 23, 42, 0.6) !important;
+                    border: 1px solid {l_color}44 !important;
                     color: {l_color} !important;
-                    background: rgba(10, 20, 35, 0.8) !important;
-                    height: 38px !important;
-                    font-size: 0.7rem !important;
-                    transition: all 0.2s ease !important;
-                    font-weight: 900 !important;
-                    text-shadow: 0 0 5px {l_color}44 !important;
-                    border-radius: 4px !important;
+                    height: 60px !important;
+                    font-size: 0.8rem !important;
+                    font-weight: 950 !important;
+                    text-transform: uppercase !important;
+                    letter-spacing: 0.05em !important;
+                    border-radius: 8px !important;
+                    transition: all 0.25s ease !important;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
+                    text-shadow: 0 0 10px {l_color}66 !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
                 }}
                 div[data-testid="stButton"] button[key*="vote_{level}"]:hover {{
-                    background: {l_color}22 !important;
-                    box-shadow: 0 0 15px {l_color}33 !important;
-                    transform: translateY(-1px) !important;
                     border-color: {l_color} !important;
+                    background: rgba(15, 23, 42, 0.8) !important;
+                    transform: translateY(-2px) !important;
+                    box-shadow: 0 0 20px {l_color}33 !important;
                 }}
             """
-        
         st.markdown(f"<style>{btn_style}</style>", unsafe_allow_html=True)
-
-        # 5-column grid for high density
-        v_cols = st.columns(5)
-        for i, level in enumerate(range(1, 6)):
-            info = FEAR_LEVELS[level]
-            with v_cols[i]:
-                if st.button(info['label'].upper(), key=f"vote_{level}", use_container_width=True):
-                    _save_fear_vote(level, user_id)
-                    st.rerun()
     else:
         thanks_html = """
 <div style="background:rgba(34,197,94,0.08); border:1px solid #22c55e44; border-radius:8px; padding:0.8rem; margin-top:1rem;">
