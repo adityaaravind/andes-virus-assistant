@@ -247,64 +247,56 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         st.markdown(
             """
             <style>
-            /* 1. Attention-Grabbing Blinking Wave Track */
-            @keyframes wave-blink {
-                0%, 100% { opacity: 0.4; filter: brightness(1) drop-shadow(0 0 5px var(--v-active-color)); }
-                50% { opacity: 0.9; filter: brightness(1.5) drop-shadow(0 0 15px var(--v-active-color)); }
+            /* 1. Shrunken Track Styling */
+            div[data-testid="stSlider"] [data-baseweb="slider"] {
+                height: 35px !important;
+                padding: 15px 0 0 0 !important;
+            }
+            
+            /* The Line - Blinking restricted here */
+            @keyframes line-blink {
+                0%, 100% { filter: brightness(1) drop-shadow(0 0 2px var(--v-active-color)); }
+                50% { filter: brightness(1.8) drop-shadow(0 0 10px var(--v-active-color)); }
             }
 
             div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child {
-                height: 10px !important;
+                height: 5px !important;
                 background: linear-gradient(90deg, #22c55e 0%, #f59e0b 50%, #991b1b 100%) !important;
-                border-radius: 20px !important;
-                position: relative !important;
-                animation: wave-blink 2s infinite ease-in-out; /* Attention catch */
-                transition: all 0.3s ease;
+                border-radius: 10px !important;
+                animation: line-blink 2s infinite ease-in-out;
             }
 
-            /* 2. Constant Intense Glow during interaction */
-            div[data-testid="stSlider"] [data-baseweb="slider"]:active > div:first-child,
-            div[data-testid="stSlider"] [data-baseweb="slider"]:focus-within > div:first-child {
-                animation: none !important; /* Stop blinking */
-                opacity: 1 !important;
-                filter: brightness(1.3) !important;
-                box-shadow: 0 0 30px var(--v-active-color) !important;
-                height: 12px !important;
+            /* Constant Intense Line Glow during interaction */
+            div[data-testid="stSlider"] [data-baseweb="slider"]:active > div:first-child {
+                animation: none !important;
+                filter: brightness(1.5) !important;
+                box-shadow: 0 0 20px var(--v-active-color) !important;
             }
 
-            /* The Thumb: The Ship */
+            /* 2. Shrunken Thumb (The Ship) */
             div[data-testid="stSlider"] [role="slider"] {
                 background: transparent !important;
                 border: none !important;
-                width: 50px !important;
-                height: 50px !important;
+                width: 35px !important;
+                height: 35px !important;
                 top: -12px !important;
                 box-shadow: none !important;
-                cursor: grab !important;
-            }
-            div[data-testid="stSlider"] [role="slider"]:active {
-                cursor: grabbing !important;
             }
             div[data-testid="stSlider"] [role="slider"]::after {
                 content: '🚢';
-                font-size: 2.5rem;
+                font-size: 1.8rem; /* Smaller for mobile compatibility */
                 display: block;
-                filter: drop-shadow(0 0 15px var(--v-active-color));
+                filter: drop-shadow(0 0 10px var(--v-active-color));
                 transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             }
             div[data-testid="stSlider"] [role="slider"]:active::after {
-                transform: scale(1.3) translateY(-5px);
+                transform: scale(1.3) translateY(-3px);
             }
 
-            /* Static Wave Pattern Overlay */
-            div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child::before {
-                content: '';
-                position: absolute;
-                top: -15px; left: 0; right: 0; bottom: 0;
-                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z' fill='white' fill-opacity='0.1'%3E%3C/path%3E%3C/svg%3E");
-                background-size: 300px 45px;
-                height: 30px;
-                pointer-events: none;
+            /* 3. Mobile Specific Adjustments */
+            @media (max-width: 768px) {
+                div[data-testid="stSlider"] [role="slider"]::after { font-size: 1.5rem; }
+                .sentiment-label h2 { font-size: 1.5rem !important; }
             }
             </style>
             """,
@@ -315,15 +307,14 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         def on_fear_change():
             new_val = st.session_state.fear_slider_input
             _save_fear_vote(new_val, user_id)
-            st.toast(f"Sentiment shared: {slider_labels[new_val]} 🚢", icon="⚓")
+            st.toast(f"Sentiment shared! 🚢", icon="⚓")
 
         # Initial color setup
         l_color = FEAR_LEVELS[int(live_fear) if 1 <= live_fear <= 5 else 1]['color']
         st.markdown(f"<style>:root {{ --v-active-color: {l_color}; }}</style>", unsafe_allow_html=True)
 
         st.markdown(
-            "<p style='color:#f8fafc; font-size:0.9rem; font-weight:800; margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.1em; text-shadow: 0 0 10px rgba(0, 180, 216, 0.4);'>"
-            "🌊 SHIP YOUR SENTIMENT</p>",
+            "<p style='color:#94a3b8; font-size:0.75rem; font-weight:800; margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:0.1em;'>🌊 SHIP YOUR SENTIMENT</p>",
             unsafe_allow_html=True,
         )
 
@@ -346,20 +337,20 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         st.markdown(f"<style>:root {{ --v-active-color: {current_l_color}; }}</style>", unsafe_allow_html=True)
         
         st.markdown(
-            f"<div class='sentiment-label'><h2 style='color:{current_l_color}; text-align:center; margin:0.5rem 0; font-family:monospace; text-shadow: 0 0 25px {current_l_color}; font-weight:950; font-size:2rem !important;'>{current_label}</h2></div>",
+            f"<div class='sentiment-label'><h2 style='color:{current_l_color}; text-align:center; margin:0.3rem 0; font-family:monospace; text-shadow: 0 0 20px {current_l_color}; font-weight:950; font-size:1.8rem !important;'>{current_label}</h2></div>",
             unsafe_allow_html=True
         )
 
         if user_voted_today:
             st.markdown(
-                f"<div style='background:rgba(34,197,94,0.1); border:2px solid #22c55e66; border-radius:12px; padding:0.8rem; margin-top:1rem; text-align:center; box-shadow: 0 0 20px rgba(34,197,94,0.2);'>"
-                f"<p style='color:#22c55e; font-size:0.9rem; font-weight:950; margin:0;'>✓ SHIP ANCHORED: {current_label}</p>"
+                f"<div style='background:rgba(34,197,94,0.05); border:1px solid #22c55e33; border-radius:10px; padding:0.5rem; margin-top:0.5rem; text-align:center;'>"
+                f"<p style='color:#22c55e; font-size:0.75rem; font-weight:900; margin:0;'>✓ SHIP ANCHORED: {current_label}</p>"
                 f"</div>",
                 unsafe_allow_html=True
             )
         else:
             st.markdown(
-                "<p style='color:#94a3b8; font-size:0.7rem; text-align:center; margin-top:0.5rem; opacity:0.8;'>DRAG THE SHIP TO VOTE</p>",
+                "<p style='color:#64748b; font-size:0.6rem; text-align:center; margin-top:0.2rem; opacity:0.7;'>DRAG SHIP TO VOTE</p>",
                 unsafe_allow_html=True
             )
 
