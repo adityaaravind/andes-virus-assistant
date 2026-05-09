@@ -234,10 +234,11 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
 <p style="color:#94a3b8; font-size:0.5rem; font-weight:800; margin:0; text-transform:uppercase; opacity:0.8;">SCORE</p>
 </div>
 </div>
-<div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap; border-top:1px solid rgba(255,255,255,0.05); padding-top:0.5rem;">
-<p style="color:#64748b; font-size:0.6rem; margin:0; font-weight:700; text-transform:uppercase;">
-Media + Community Assessment &nbsp;&nbsp;<span class="live-dot" style="width:5px; height:5px;"></span>
-</p>
+<div style="display:flex; gap:0.9rem; flex-wrap:wrap; border-top:1px solid rgba(255,255,255,0.05); padding-top:0.4rem;">
+<span style="color:#94a3b8; font-size:0.6rem;">🌐 Web: <b style="color:white;">{web_sentiment:.1f}</b></span>
+<span style="color:#94a3b8; font-size:0.6rem;">👥 User: <b style="color:white;">{avg_fear:.1f}</b></span>
+<span style="color:#94a3b8; font-size:0.6rem;">📈 Votes: <b style="color:white;">{vote_count}</b></span>
+<span style="color:#64748b; font-size:0.6rem; font-weight:700; text-transform:uppercase;">Live <span class="live-dot" style="width:5px; height:5px; margin-left:3px;"></span></span>
 </div>
 <div style="margin-top: 1rem;">
 <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">

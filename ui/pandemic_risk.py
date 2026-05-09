@@ -197,10 +197,13 @@ text-align:center; min-width:82px; box-shadow: 0 0 15px {color}10; flex-shrink:0
 <p style="color:#94a3b8; font-size:0.45rem; font-weight:800; margin:0; text-transform:uppercase; opacity:0.8;">SCORE</p>
 </div>
 </div>
-<div style="display:flex; gap:0.9rem; flex-wrap:wrap; border-top:1px solid rgba(255,255,255,0.05); padding-top:0.4rem;">
-<span style="color:#94a3b8; font-size:0.65rem;">📅 Day <b style="color:white;">{risk['days']}</b></span>
-<span style="color:#94a3b8; font-size:0.65rem;">🧪 Cases: <b style="color:white;">{cases}</b></span>
-<span style="color:#94a3b8; font-size:0.65rem;">💀 CFR: <b style="color:white;">{ANDES_FIXED['cfr_pct']}%</b></span>
+<div style="display:flex; gap:1rem; flex-wrap:wrap; border-top:1px solid rgba(255,255,255,0.05); padding-top:0.4rem;">
+<span style="color:#94a3b8; font-size:0.6rem;">📅 Day <b style="color:white;">{risk['days']}</b></span>
+<span style="color:#94a3b8; font-size:0.6rem;">🧪 Cases: <b style="color:white;">{cases}</b></span>
+<span style="color:#94a3b8; font-size:0.6rem;">🌍 Countries: <b style="color:white;">{countries}</b></span>
+<span style="color:#94a3b8; font-size:0.6rem;">📈 R₀: <b style="color:white;">{ANDES_FIXED['r0']}</b></span>
+<span style="color:#94a3b8; font-size:0.6rem;">📊 Growth: <b style="color:white;">{risk['growth']}%</b></span>
+<span style="color:#94a3b8; font-size:0.6rem;">💀 CFR: <b style="color:white;">{ANDES_FIXED['cfr_pct']}%</b></span>
 </div>
 </div>
 """.replace("\n", "").strip()
