@@ -263,16 +263,12 @@ div[data-testid="stButton"] button[key*="vote_"] div[data-testid="stMarkdownCont
 }
 
 .v11-feature-tag {
-    background: var(--teal);
-    color: #000000 !important;
-    padding: 2px 10px;
-    border-radius: 4px;
-    margin-right: 10px;
-    font-size: 0.7rem;
+    color: var(--teal) !important;
+    margin-left: 10px;
+    font-size: 0.8rem;
     text-transform: uppercase;
-    font-weight: 950;
+    font-weight: 800;
     display: inline-block !important;
-    line-height: 1.2;
     vertical-align: middle;
 }
 
