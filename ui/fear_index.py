@@ -203,83 +203,71 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         if "fear_slider_input" in st.session_state:
             level_int = int(st.session_state.fear_slider_input)
 
-        # ── NEON GLOW TOGGLE GROUP ──
         st.markdown(
             """
             <style>
-            .neon-group {
+            .sentiment-grid {
+                display: flex;
+                justify-content: space-between;
+                gap: 0.5rem;
+                margin: 1.5rem 0;
+                padding: 0.5rem;
+            }
+            
+            .sentiment-tile {
+                flex: 1;
+                aspect-ratio: 1;
                 display: flex;
                 flex-direction: column;
-                gap: 0.8rem;
-                padding: 1rem 0;
-            }
-            
-            .neon-toggle-row {
-                display: flex;
                 align-items: center;
-                justify-content: space-between;
+                justify-content: center;
                 background: rgba(15, 23, 42, 0.4);
-                padding: 0.6rem 1rem;
+                border: 2px solid rgba(255, 255, 255, 0.05);
                 border-radius: 12px;
-                border: 1px solid rgba(255,255,255,0.05);
-                transition: all 0.3s ease;
+                cursor: pointer;
+                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                position: relative;
             }
 
-            .neon-toggle-row.active {
+            .sentiment-tile.active {
                 background: rgba(15, 23, 42, 0.8);
                 border-color: var(--l-color);
-                box-shadow: 0 0 20px var(--l-color-low);
+                box-shadow: 0 0 25px var(--l-color-low), inset 0 0 10px var(--l-color-low);
+                transform: scale(1.05);
             }
 
-            .neon-label-text {
+            .sentiment-tile.disabled {
+                opacity: 0.3;
+                filter: grayscale(0.8);
+                cursor: not-allowed;
+            }
+
+            .tile-label {
                 font-family: 'Inter', sans-serif;
-                font-weight: 800;
-                font-size: 0.9rem;
+                font-weight: 900;
+                font-size: 0.6rem;
                 letter-spacing: 0.05em;
-                color: #94a3b8;
-                transition: all 0.3s ease;
+                color: #64748b;
+                text-align: center;
+                margin-top: 0.4rem;
+                text-transform: uppercase;
             }
             
-            .active .neon-label-text {
+            .active .tile-label {
                 color: white;
-                text-shadow: 0 0 10px var(--l-color);
+                text-shadow: 0 0 8px var(--l-color);
             }
 
-            /* The Neon Switch Visual */
-            .neon-switch {
-                width: 50px;
-                height: 24px;
-                background: #0f172a;
-                border-radius: 50px;
-                position: relative;
-                border: 2px solid rgba(255,255,255,0.1);
-                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            .tile-icon {
+                font-size: 1.2rem;
+                transition: transform 0.3s ease;
+            }
+            .active .tile-icon {
+                transform: scale(1.2);
             }
 
-            .active .neon-switch {
-                border-color: var(--l-color);
-                box-shadow: 0 0 15px var(--l-color), inset 0 0 5px var(--l-color);
-            }
-
-            .neon-handle {
-                position: absolute;
-                top: 2px;
-                left: 2px;
-                width: 16px;
-                height: 16px;
-                background: #1e293b;
-                border-radius: 50%;
-                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            }
-
-            .active .neon-handle {
-                transform: translateX(26px);
-                background: var(--l-color);
-                box-shadow: 0 0 10px var(--l-color);
-            }
-
-            /* Custom button to overlay the whole row */
-            div[data-testid="stButton"] button[key^="neon_btn_"] {
+            /* Hidden Streamlit Button Overlay */
+            div[data-testid="stButton"] button[key^="tile_btn_"] {
                 position: absolute;
                 inset: 0;
                 background: transparent !important;
@@ -290,55 +278,57 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
                 width: 100% !important;
             }
             </style>
-            <p style='color:#f8fafc; font-size:0.8rem; font-weight:800; margin-bottom:1rem; letter-spacing:0.1em; opacity:0.8; text-transform:uppercase;'>📡 SELECT CURRENT SENTIMENT</p>
+            <p style='color:#94a3b8; font-size:0.75rem; font-weight:800; margin-bottom:0.5rem; letter-spacing:0.1em; opacity:0.8; text-transform:uppercase;'>📡 SELECT SENTIMENT</p>
             """,
             unsafe_allow_html=True
         )
 
-        def on_neon_click(level_id):
+        def on_tile_click(level_id):
             _save_fear_vote(level_id, user_id)
             st.session_state.fear_slider_input = level_id
-            st.toast(f"Sentiment updated: {FEAR_LEVELS[level_id]['label'].upper()}! ⚡", icon="🟢")
+            st.toast(f"Sentiment: {FEAR_LEVELS[level_id]['label'].upper()}! 📡", icon="✅")
 
-        st.markdown('<div class="neon-group">', unsafe_allow_html=True)
+        st.markdown('<div class="sentiment-grid">', unsafe_allow_html=True)
         
-        for level_id, info in FEAR_LEVELS.items():
+        icons = {1: "🟢", 2: "🟡", 3: "🟠", 4: "🔴", 5: "💀"}
+        
+        # We use a horizontal layout of buttons
+        cols = st.columns(5, gap="small")
+        for i, level_id in enumerate(range(1, 6)):
+            info = FEAR_LEVELS[level_id]
             is_active = (level_id == level_int)
             l_color = info['color']
-            l_color_low = l_color + "22" # Low opacity for glow
+            l_color_low = l_color + "44"
             
-            # Use a container to group the visual and the hidden button
-            container = st.container()
-            with container:
-                # The visual HTML
+            with cols[i]:
+                # Visual Tile
                 st.markdown(
                     f"""
-                    <div class="neon-toggle-row {'active' if is_active else ''}" style="--l-color: {l_color}; --l-color-low: {l_color_low}; position: relative;">
-                        <span class="neon-label-text">{info['label'].upper()}</span>
-                        <div class="neon-switch">
-                            <div class="neon-handle"></div>
-                        </div>
+                    <div class="sentiment-tile {'active' if is_active else ''} {'disabled' if user_voted_today and not is_active else ''}" 
+                         style="--l-color: {l_color}; --l-color-low: {l_color_low};">
+                        <span class="tile-icon">{icons[level_id]}</span>
+                        <span class="tile-label">{info['label'][:4].upper()}</span>
                     </div>
                     """,
                     unsafe_allow_html=True
                 )
                 
-                # The hidden button that handles the click
-                if st.button("", key=f"neon_btn_{level_id}", disabled=user_voted_today):
-                    on_neon_click(level_id)
+                # Invisible triggering button
+                if st.button("", key=f"tile_btn_{level_id}", disabled=user_voted_today):
+                    on_tile_click(level_id)
                     st.rerun()
 
         st.markdown('</div>', unsafe_allow_html=True)
 
         if user_voted_today:
             st.markdown(
-                f"<div style='background:rgba(34,197,94,0.05); border:1px solid #22c55e33; border-radius:10px; padding:0.8rem; margin-top:0.5rem; text-align:center;'>"
-                f"<p style='color:#22c55e; font-size:0.75rem; font-weight:900; margin:0;'>✓ SENTIMENT LOCKED: {FEAR_LEVELS[level_int]['label'].upper()}</p>"
+                f"<div style='background:rgba(34,197,94,0.05); border:1px solid #22c55e33; border-radius:12px; padding:0.8rem; margin-top:0.5rem; text-align:center;'>"
+                f"<p style='color:#22c55e; font-size:0.75rem; font-weight:950; margin:0;'>✓ SENTIMENT ANCHORED: {FEAR_LEVELS[level_int]['label'].upper()}</p>"
                 f"</div>",
                 unsafe_allow_html=True
             )
         else:
-            st.caption("Tap any level to instantly register your sentiment.")
+            st.markdown("<p style='color:#64748b; font-size:0.6rem; text-align:center; margin-top:0.5rem; font-weight:700;'>TAP TILE TO CAST VOTE</p>", unsafe_allow_html=True)
 
     # Callouts
     callout_html = """
