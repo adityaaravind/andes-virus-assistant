@@ -54,17 +54,24 @@ def render_alert_settings() -> None:
         '<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);'
         'border-radius:8px;padding:0.7rem 0.8rem;margin:0.7rem 0;">'
         '<p style="color:#ef4444;font-size:0.72rem;font-weight:700;margin:0 0 0.3rem;'
-        'text-transform:uppercase;letter-spacing:0.05em;">📡 Custom Alerts</p>'
+        'text-transform:uppercase;letter-spacing:0.05em;">📡 Mobile Push Alerts</p>'
         '<p style="color:#f1f5f9;font-size:0.78rem;margin:0 0 0.5rem;">'
-        'Get instant outbreak alerts via ntfy.sh — no account needed, works on any device.</p>'
-        '<div style="background:rgba(15,23,42,0.7);border:1px solid rgba(148,163,184,0.3);'
-        'border-radius:6px;padding:0.6rem;margin:0.5rem 0;font-family:monospace;">'
-        '<p style="color:#94a3b8;font-size:0.68rem;margin:0 0 0.3rem;">Try this command:</p>'
-        '<p style="color:#22c55e;font-size:0.75rem;margin:0;"><span style="color:#f59e0b;">$</span> curl -d "Hi" https://ntfy.sh/HANTAVIRUS</p>'
+        'Get instant outbreak alerts on your phone — no account or signup needed.</p>'
+        
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin:0.5rem 0;">'
+        '<a href="https://apps.apple.com/app/ntfy/id1622393045" target="_blank" style="text-decoration:none;">'
+        '<div style="background:#1b2e45;padding:0.4rem;border-radius:6px;text-align:center;color:#00b4d8;font-size:0.7rem;font-weight:700;border:1px solid rgba(0,180,216,0.2);">🍎 iOS App</div></a>'
+        '<a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" target="_blank" style="text-decoration:none;">'
+        '<div style="background:#1b2e45;padding:0.4rem;border-radius:6px;text-align:center;color:#00b4d8;font-size:0.7rem;font-weight:700;border:1px solid rgba(0,180,216,0.2);">🤖 Android</div></a>'
         '</div>'
-        '<p style="color:#cbd5e1;font-size:0.68rem;margin:0.4rem 0 0;">'
-        'Install <a href="https://ntfy.sh" target="_blank" style="color:#00b4d8;">ntfy.sh app</a> '
-        '→ subscribe to <strong style="color:#f59e0b;">HANTAVIRUS</strong> topic → get all outbreak alerts</p>'
+
+        '<p style="color:#cbd5e1;font-size:0.75rem;margin:0.4rem 0 0.3rem;">'
+        '1. Install <b>ntfy</b> app<br>'
+        '2. Tap "Subscribe to topic"<br>'
+        '3. Enter <b>HANTAVIRUS</b></p>'
+        
+        '<a href="https://ntfy.sh/HANTAVIRUS" target="_blank" style="display:block;background:#ef4444;color:white;text-align:center;padding:0.5rem;border-radius:6px;text-decoration:none;font-size:0.75rem;font-weight:800;margin-top:0.5rem;">'
+        '🔔 View Live Alert Feed</a>'
         '</div>',
         unsafe_allow_html=True,
     )
