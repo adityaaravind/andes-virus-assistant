@@ -61,9 +61,28 @@ def render_alert_settings() -> None:
         '<a href="https://ntfy.sh/HANTAVIRUS" target="_blank" style="display:block;background:#ef4444;color:white;text-align:center;padding:0.6rem;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:800;margin-top:0.5rem;box-shadow: 0 4px 15px rgba(239,68,68,0.3);">'
         '🔔 Subscribe in Browser</a>'
 
-        '<p style="color:#cbd5e1;font-size:0.7rem;margin:0.6rem 0 0;">'
-        '<b>How it works:</b> Click above → Tap <b>Subscribe</b> on the ntfy page → Enable notifications. '
-        'Works on Chrome, Safari (iOS 16.4+), and Android.</p>'
+        '<p style="color:#cbd5e1;font-size:0.75rem;margin:0.6rem 0 0.4rem;font-weight:600;">'
+        'How it works:</p>'
+        
+        # ── Visual Guide Mockup ──
+        '<div style="background:#08111e; border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:0.8rem; margin:0.5rem 0; position:relative;">'
+            '<div style="display:flex; align-items:center; gap:8px; margin-bottom:0.8rem; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:0.4rem;">'
+                '<div style="width:10px; height:10px; border-radius:50%; background:#ff5f56;"></div>'
+                '<div style="width:10px; height:10px; border-radius:50%; background:#ffbd2e;"></div>'
+                '<div style="width:10px; height:10px; border-radius:50%; background:#27c93f;"></div>'
+                '<div style="color:#64748b; font-size:0.6rem; font-family:monospace; margin-left:4px;">ntfy.sh/HANTAVIRUS</div>'
+            '</div>'
+            '<div style="text-align:center; padding:0.5rem 0;">'
+                '<div style="display:inline-block; background:#ef4444; color:white; padding:0.4rem 1.2rem; border-radius:20px; font-size:0.75rem; font-weight:800; border:2px solid #ffffff; box-shadow:0 0 15px rgba(239,68,68,0.5); animation: pulse-sub 2s infinite;">'
+                    'Click "Subscribe"'
+                '</div>'
+                '<p style="color:#94a3b8; font-size:0.6rem; margin-top:0.6rem;">Tap the button on the next page</p>'
+            '</div>'
+        '</div>'
+        '<style>@keyframes pulse-sub { 0% { transform:scale(1); } 50% { transform:scale(1.05); } 100% { transform:scale(1); } }</style>'
+
+        '<p style="color:#94a3b8; font-size:0.68rem; line-height:1.4;">'
+        'Works on Chrome, Safari (iOS 16.4+), and Android browsers. Your privacy is protected; no personal data is shared.</p>'
         
         '<div style="margin-top:0.8rem;padding-top:0.6rem;border-top:1px solid rgba(239,68,68,0.2);">'
         '<p style="color:#94a3b8;font-size:0.65rem;margin:0;">'
