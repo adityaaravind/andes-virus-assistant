@@ -16,6 +16,7 @@ if _use_qdrant:
         add_documents,
         upsert_chunks,
         similarity_search,
+        recommend_similar_chunks,
         get_stats,
     )
 else:
@@ -25,3 +26,4 @@ else:
         get_stats,
     )
     upsert_chunks = add_documents            # noqa: F811
+    def recommend_similar_chunks(*args, **kwargs): return []
