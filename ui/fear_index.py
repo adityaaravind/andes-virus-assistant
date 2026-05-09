@@ -219,26 +219,23 @@ def render_fear_index() -> None:
     web_weight = 0.4 if vote_count > 0 else 1.0
     
     html_content = f"""
-<div style="background: linear-gradient(135deg,rgba(13,27,42,0.95) 0%,rgba(27,46,69,0.95) 100%);
-border: 2px solid {color}88; border-radius: 16px; padding: 1.4rem 1.8rem 1rem;
+<div style="background:rgba(15, 23, 42, 0.4); border: 2px solid {color}44; border-radius: 16px; padding: 1.4rem 1.8rem 1.2rem;
 margin-bottom: 1rem; position: relative; overflow: hidden;">
 <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px;
 background: linear-gradient(90deg,{color},{color}44,{color}); animation: {anim};"></div>
-<div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
-<div style="flex:1; min-width:200px;">
-<p style="color:{color}; font-size:1.55rem; font-weight:800;
-letter-spacing:0.06em; margin:0; font-family:monospace;
-text-shadow:0 0 20px {color}88;">📡 PUBLIC FEAR INDEX</p>
-<p style="color:#94a3b8; font-size:0.82rem; margin:0.2rem 0 0;">
-Blended Sentiment: Global Media + Community Votes
-&nbsp;&nbsp;<span class="live-dot" style="width:7px; height:7px;"></span>
-<span class="live-label">LIVE ASSESSMENT</span>
+<div style="display:flex; align-items:center; gap:2rem; flex-wrap:wrap;">
+<div style="flex-shrink:0;">
+<p style="color:#94a3b8; font-size:0.7rem; font-weight:800; letter-spacing:0.12em; margin:0; font-family:monospace; opacity:0.8;">📡 PUBLIC FEAR INDEX</p>
+<h2 style="margin:0.1rem 0 0; font-size:2.2rem !important; font-weight:900; color:white !important; letter-spacing:-0.02em;">{label.upper()}</h2>
+<p style="color:#64748b; font-size:0.65rem; margin:0.2rem 0 0; font-weight:700;">
+Blended Sentiment: Media + Community &nbsp;&nbsp;<span class="live-dot" style="width:6px; height:6px;"></span>
+<span class="live-label" style="font-size:0.6rem;">LIVE</span>
 </p>
 </div>
-<div style="background:{color}22; border:2px solid {color};
-border-radius:12px; padding:0.5rem 1.4rem; text-align:center;">
-<p style="color:{color}; font-size:1.8rem; font-weight:900; margin:0; font-family:monospace;">{label.upper()}</p>
-<p style="color:#94a3b8; font-size:0.72rem; margin:0;">{desc}</p>
+<div style="background:{color}15; border:2px solid {color}; border-radius:10px; padding:0.4rem 1.2rem; 
+text-align:center; min-width:110px; box-shadow: 0 0 20px {color}15;">
+<p style="color:{color}; font-size:1.8rem; font-weight:900; margin:0; line-height:1; font-family:monospace; text-shadow:0 0 10px {color}88;">{avg_fear:.1f}<small style="font-size:0.5em; opacity:0.7;">/5</small></p>
+<p style="color:#94a3b8; font-size:0.6rem; font-weight:800; margin:2px 0 0; text-transform:uppercase; letter-spacing:0.05em; opacity:0.8;">FEAR SCORE</p>
 </div>
 </div>
 <div style="margin-top: 1rem;">

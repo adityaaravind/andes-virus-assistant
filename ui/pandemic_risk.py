@@ -182,17 +182,18 @@ def render_pandemic_risk_panel() -> None:
     import textwrap
     anim = "pulse-risk 1.8s ease-in-out infinite" if risk["overall"] >= 40 else "none"
     header_html = f"""
-<div style="background:rgba(255,255,255,0.02);border:1px solid {color}44; border-radius:12px; padding:1.2rem;
+<div style="background:rgba(15, 23, 42, 0.4); border:1px solid {color}44; border-radius:12px; padding:1.2rem;
 margin-bottom:1rem; position:relative; overflow:hidden;">
-<div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
-<div>
-<p style="color:{color};font-size:0.75rem;font-weight:800;letter-spacing:0.1em;margin:0;font-family:monospace;">
+<div style="display:flex; align-items:center; gap:2rem; flex-wrap:wrap;">
+<div style="flex-shrink:0;">
+<p style="color:{color};font-size:0.7rem;font-weight:800;letter-spacing:0.12em;margin:0;font-family:monospace;opacity:0.8;">
 GLOBAL PANDEMIC RISK ASSESSMENT</p>
-<h2 style="margin:0.2rem 0 0;font-size:1.8rem !important;font-weight:900;color:white !important;">{label}</h2>
+<h2 style="margin:0.1rem 0 0;font-size:2.2rem !important;font-weight:900;color:white !important;letter-spacing:-0.02em;">{label}</h2>
 </div>
-<div style="background:{color}22;border:2px solid {color}88;border-radius:12px;padding:0.6rem 1.4rem;text-align:right;box-shadow: 0 0 15px {color}22;">
-<p style="color:{color};font-size:1.6rem;font-weight:900;margin:0;font-family:monospace;text-shadow:0 0 12px {color}88;">{risk['overall']}%</p>
-<p style="color:#94a3b8;font-size:0.65rem;font-weight:800;margin:0;text-transform:uppercase;letter-spacing:0.05em;">RISK SCORE</p>
+<div style="background:{color}15; border:2px solid {color}88; border-radius:10px; padding:0.4rem 1.2rem; 
+text-align:center; min-width:110px; box-shadow: 0 0 20px {color}15;">
+<p style="color:{color}; font-size:1.8rem; font-weight:900; margin:0; line-height:1; text-shadow:0 0 10px {color}88;">{risk['overall']}%</p>
+<p style="color:#94a3b8; font-size:0.6rem; font-weight:800; margin:2px 0 0; text-transform:uppercase; letter-spacing:0.05em; opacity:0.8;">RISK SCORE</p>
 </div>
 </div>
 <div style="display:flex;gap:1.2rem;margin-top:1rem;flex-wrap:wrap;border-top:1px solid rgba(148,163,184,0.1);padding-top:0.6rem;">
