@@ -42,24 +42,29 @@ def render_author_card() -> None:
     _track_visitor()
 
     st.markdown(
-        f'<div style="background:linear-gradient(135deg,rgba(88,28,135,0.28) 0%,rgba(124,58,237,0.18) 100%);'
-        f'border:1px solid rgba(167,139,250,0.35);border-top:3px solid #a78bfa;'
-        f'border-radius:10px;padding:0.6rem 0.9rem;">'
-        f'<div style="display:flex;align-items:center;gap:0.55rem;margin-bottom:0.45rem;">'
-        f'<div style="width:34px;height:34px;border-radius:50%;flex-shrink:0;'
-        f'background:linear-gradient(135deg,#7c3aed,#a78bfa);'
-        f'display:flex;align-items:center;justify-content:center;'
-        f'font-size:0.72rem;font-weight:800;color:#fff;">'
-        f'{AUTHOR["initials"]}</div>'
-        f'<div style="flex:1;">'
-        f'<p style="color:#f8fafc;font-size:0.78rem;font-weight:700;margin:0;line-height:1.2;">'
-        f'{AUTHOR["name"]}</p>'
-        f'<p style="color:#a78bfa;font-size:0.63rem;margin:0;">{AUTHOR["role"]}</p>'
-        f'<a href="{AUTHOR["linkedin"]}" target="_blank" rel="noopener" style="'
-        f'color:#0a66c2;font-size:0.6rem;font-weight:600;text-decoration:none;display:inline-block;margin-top:0.2rem;">'
-        f'in LinkedIn</a>'
-        f'</div>'
-        f'</div>'
-        f'</div>',
+        f"""
+        <div class="author-card-glow">
+            <div style="display:flex; align-items:center; gap: 0.8rem;">
+                <div style="width:40px; height:40px; border-radius:50%; flex-shrink:0; 
+                    background:linear-gradient(135deg, #0077b5, #00b4d8); 
+                    display:flex; align-items:center; justify-content:center; 
+                    font-size:0.9rem; font-weight:950; color:white;
+                    box-shadow: 0 0 15px rgba(0, 180, 216, 0.4);">
+                    {AUTHOR["initials"]}
+                </div>
+                <div style="flex:1;">
+                    <p style="color:white; font-size:0.85rem; font-weight:800; margin:0; line-height:1.1;">
+                        {AUTHOR["name"]}
+                    </p>
+                    <p style="color:var(--gray-300); font-size:0.65rem; margin:0; margin-bottom: 6px; font-weight:500;">
+                        {AUTHOR["role"]}
+                    </p>
+                    <a href="{AUTHOR["linkedin"]}" target="_blank" class="linkedin-tag">
+                        LinkedIn ↗
+                    </a>
+                </div>
+            </div>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
