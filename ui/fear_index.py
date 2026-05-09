@@ -273,12 +273,29 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
 
     with col_dist:
         st.markdown(
-            "<p style='color:#94a3b8; font-size:0.8rem; margin-bottom:0.2rem;'>"
-            "📊 <b>Community Vote Distribution</b></p>",
+            "<p style='color:#94a3b8; font-size:0.8rem; margin-bottom:0.5rem;'>"
+            "📊 <b>Cast Your Sentiment</b></p>",
             unsafe_allow_html=True,
         )
-        fig_dist = _build_fear_dist_chart(dist)
-        st.plotly_chart(fig_dist, use_container_width=True, config={"displayModeBar": False})
+        
+        # Grid of voting buttons
+        v_grid_top = st.columns(3, gap="small")
+        v_grid_bot = st.columns(2, gap="small")
+        
+        for i, level in enumerate(range(1, 6)):
+            info = FEAR_LEVELS[level]
+            l_color = info['color']
+            target_col = v_grid_top[i] if i < 3 else v_grid_bot[i-3]
+            with target_col:
+                label_html = f"""
+                    <div style="width:100%; text-align:left;">
+                        <span style="color:{l_color}; font-size:1.0rem; font-weight:950; text-transform:uppercase; display:block; text-shadow: 0 0 10px {l_color}44; line-height:1;">{info['label']}</span>
+                        <span style="color:var(--gray-300); font-size:0.55rem; font-weight:500; text-transform:none; opacity:0.8; display:block; margin-top:2px; line-height:1.1;">{info['desc']}</span>
+                    </div>
+                """
+                if st.button(label_html, key=f"vote_dist_{level}", use_container_width=True, disabled=user_voted_today):
+                    _save_fear_vote(level, user_id)
+                    st.rerun()
 
     # Callout boxes matching pandemic panel
     callout_html = f"""
@@ -301,32 +318,50 @@ clear official communications and verified data.
 """.replace("\n", "").strip()
     st.markdown(callout_html, unsafe_allow_html=True)
 
+    if user_voted_today:
+        thanks_html = """
+<div style="background:rgba(34,197,94,0.08); border:1px solid #22c55e44; border-radius:8px; padding:0.8rem; margin-top:0.2rem;">
+<p style="color:#22c55e; font-size:0.8rem; margin:0;">✓ Vote recorded. Thanks for participating!</p>
+</div>
+""".replace("\n", "").strip()
+        st.markdown(thanks_html, unsafe_allow_html=True)
 
-    # Voting buttons section below the visualization
-    if not user_voted_today:
-        st.markdown("<br>", unsafe_allow_html=True)
-        v_cols = st.columns(5, gap="small")
-        for i, level in enumerate(range(1, 6)):
-            info = FEAR_LEVELS[level]
-            l_color = info['color']
-            with v_cols[i]:
-                label_html = f"""
-                    <div style="width:100%; text-align:left;">
-                        <span style="color:{l_color}; font-size:1.1rem; font-weight:950; text-transform:uppercase; display:block; text-shadow: 0 0 12px {l_color}55; line-height:1;">{info['label']}</span>
-                        <span style="color:var(--gray-300); font-size:0.6rem; font-weight:500; text-transform:none; opacity:0.8; display:block; margin-top:4px; line-height:1.1;">{info['desc']}</span>
-                    </div>
-                """
-                if st.button(label_html, key=f"vote_card_{level}", use_container_width=True):
-                    _save_fear_vote(level, user_id)
-                    st.rerun()
+    # Update CSS for the new distribution buttons
+    btn_dist_style = ""
+    for level, info in FEAR_LEVELS.items():
+        l_color = info['color']
+        btn_dist_style += f"""
+            div[data-testid="stButton"] button[key*="vote_dist_{level}"] {{
+                background: rgba(15, 23, 42, 0.4) !important;
+                backdrop-filter: blur(8px) !important;
+                border: 1px solid rgba(255, 255, 255, 0.08) !important;
+                border-radius: 10px !important;
+                min-height: 80px !important;
+                padding: 0.6rem !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                justify-content: center !important;
+                transition: all 0.2s ease !important;
+                margin-bottom: 0.5rem !important;
+            }}
+            div[data-testid="stButton"] button[key*="vote_dist_{level}"]:hover:not(:disabled) {{
+                border-color: {l_color} !important;
+                transform: translateY(-2px) !important;
+                background: rgba(15, 23, 42, 0.6) !important;
+                box-shadow: 0 8px 24px {l_color}15 !important;
+            }}
+            div[data-testid="stButton"] button[key*="vote_dist_{level}"]:disabled {{
+                opacity: 0.5 !important;
+                cursor: not-allowed !important;
+                border-color: rgba(255,255,255,0.05) !important;
+                filter: grayscale(0.5);
+            }}
+        """
+    st.markdown(f"<style>{btn_dist_style}</style>", unsafe_allow_html=True)
 
-        # Custom hover colors per level (done safely)
-        hover_styles = "".join([
-            f'div[data-testid="stButton"] button[key*="vote_card_{lvl}"]:hover {{ border-color: {FEAR_LEVELS[lvl]["color"]} !important; box-shadow: 0 0 20px {FEAR_LEVELS[lvl]["color"]}33 !important; }}'
-            for lvl in range(1, 6)
-        ])
-        st.markdown(f"<style>{hover_styles}</style>", unsafe_allow_html=True)
-    else:
+    # Remove old voting section
+
         thanks_html = """
 <div style="background:rgba(34,197,94,0.08); border:1px solid #22c55e44; border-radius:8px; padding:0.8rem; margin-top:1rem;">
 <p style="color:#22c55e; font-size:0.8rem; margin:0;">✓ Thanks for participating! Your vote has been recorded.</p>
