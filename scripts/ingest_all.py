@@ -27,97 +27,56 @@ console = Console()
 
 
 def run_ingestion() -> None:
-    console.rule("[bold blue]Andes Virus Research Assistant — Ingestion Pipeline")
+    import gc
+    console.rule("[bold blue]Andes Virus Research Assistant — Incremental Ingestion Pipeline")
 
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        BarColumn(),
-        TaskProgressColumn(),
-        console=console,
-    ) as progress:
-
-        # Fetch raw documents
-        all_docs: list[dict[str, Any]] = []
-
-        task = progress.add_task("Fetching PubMed abstracts...", total=None)
-        try:
-            pubmed_docs = fetch_abstracts(max_results=200)
-            console.print(f"  [green]✓ PubMed:[/green] {len(pubmed_docs)} articles")
-            all_docs.extend(pubmed_docs)
-        except Exception as exc:
-            console.print(f"  [yellow]⚠ PubMed failed:[/yellow] {exc}")
-        progress.remove_task(task)
-
-        task = progress.add_task("Downloading WHO PDFs...", total=None)
-        try:
-            who_results = download_who_pdfs()
-            downloaded = [r for r in who_results if r["status"] in ("downloaded", "cached")]
-            console.print(f"  [green]✓ WHO PDFs:[/green] {len(downloaded)} files")
-        except Exception as exc:
-            console.print(f"  [yellow]⚠ WHO scraper failed:[/yellow] {exc}")
-        progress.remove_task(task)
-
-        task = progress.add_task("Parsing PDFs...", total=None)
-        try:
-            pdf_docs = parse_all_pdfs()
-            console.print(f"  [green]✓ PDFs parsed:[/green] {len(pdf_docs)} documents")
-            all_docs.extend(pdf_docs)
-        except Exception as exc:
-            console.print(f"  [yellow]⚠ PDF parsing failed:[/yellow] {exc}")
-        progress.remove_task(task)
-
-        task = progress.add_task("Scraping news RSS feeds...", total=None)
-        try:
-            news_docs = scrape_all_feeds()
-            console.print(f"  [green]✓ News:[/green] {len(news_docs)} articles")
-            all_docs.extend(news_docs)
-        except Exception as exc:
-            console.print(f"  [yellow]⚠ News scraping failed:[/yellow] {exc}")
-        progress.remove_task(task)
-
-        task = progress.add_task("Loading Wikipedia articles...", total=None)
-        try:
-            wiki_docs = load_wikipedia_articles()
-            console.print(f"  [green]✓ Wikipedia:[/green] {len(wiki_docs)} articles")
-            all_docs.extend(wiki_docs)
-        except Exception as exc:
-            console.print(f"  [yellow]⚠ Wikipedia failed:[/yellow] {exc}")
-        progress.remove_task(task)
-
-        console.print(f"\n[bold]Total raw documents:[/bold] {len(all_docs)}")
-
-        if not all_docs:
-            console.print("[red]No documents fetched. Check network connectivity and API access.[/red]")
+    def _process_batch(source_name: str, docs: list[dict[str, Any]]) -> None:
+        if not docs:
             return
+        console.print(f"  [blue]→ Processing batch: {source_name} ({len(docs)} docs)[/blue]")
+        chunks = chunk_documents(docs)
+        if chunks:
+            chunks = tag_chunks(chunks)
+            try:
+                chunks = embed_chunks(chunks)
+                added = add_documents(chunks)
+                console.print(f"  [green]✓ {source_name} batch complete:[/green] {added} chunks stored")
+            except Exception as e:
+                console.print(f"  [red]✖ {source_name} batch failed:[/red] {e}")
+        
+        # Explicit cleanup after every batch
+        del docs
+        del chunks
+        gc.collect()
 
-        # Chunk
-        task = progress.add_task("Chunking documents...", total=None)
-        chunks = chunk_documents(all_docs)
-        progress.remove_task(task)
-        console.print(f"  [green]✓ Chunks created:[/green] {len(chunks)}")
+    # 1. PubMed
+    try:
+        pubmed_docs = fetch_abstracts(max_results=200)
+        _process_batch("PubMed", pubmed_docs)
+    except Exception as exc:
+        console.print(f"  [yellow]⚠ PubMed failed:[/yellow] {exc}")
 
-        # Tag metadata
-        task = progress.add_task("Tagging metadata...", total=None)
-        chunks = tag_chunks(chunks)
-        progress.remove_task(task)
+    # 2. WHO PDFs
+    try:
+        download_who_pdfs()
+        pdf_docs = parse_all_pdfs()
+        _process_batch("WHO_PDFs", pdf_docs)
+    except Exception as exc:
+        console.print(f"  [yellow]⚠ WHO/PDF failed:[/yellow] {exc}")
 
-        # Embed
-        provider = get_embedding_provider()
-        task = progress.add_task(f"Embedding ({provider})...", total=None)
-        try:
-            chunks = embed_chunks(chunks)
-        except Exception as exc:
-            console.print(f"[red]Embedding failed: {exc}[/red]")
-            return
-        progress.remove_task(task)
-        console.print(f"  [green]✓ Embeddings generated:[/green] {len(chunks)}")
+    # 3. News RSS
+    try:
+        news_docs = scrape_all_feeds()
+        _process_batch("News_RSS", news_docs)
+    except Exception as exc:
+        console.print(f"  [yellow]⚠ News scraping failed:[/yellow] {exc}")
 
-        # Store
-        task = progress.add_task("Storing in ChromaDB...", total=None)
-        added = add_documents(chunks)
-        progress.remove_task(task)
-        console.print(f"  [green]✓ New chunks stored:[/green] {added}")
+    # 4. Wikipedia
+    try:
+        wiki_docs = load_wikipedia_articles()
+        _process_batch("Wikipedia", wiki_docs)
+    except Exception as exc:
+        console.print(f"  [yellow]⚠ Wikipedia failed:[/yellow] {exc}")
 
     # Summary table
     stats = get_stats()

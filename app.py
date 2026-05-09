@@ -107,13 +107,14 @@ def _run_fast_news_poll() -> None:
             import json
             analytics_file = Path("data/analytics.json")
             if analytics_file.exists():
-                # If analytics grows > 5MB, backup and clear to save RAM
-                if analytics_file.stat().st_size > 5 * 1024 * 1024:
-                    logging.info("Analytics log > 5MB, clearing local file to save RAM")
+                # Aggressive 3MB cap for Streamlit Cloud stability
+                if analytics_file.stat().st_size > 3 * 1024 * 1024:
+                    logging.info("Analytics log > 3MB, clearing local file to save RAM")
                     from alerts.persistent_kv import kv_set
                     data = json.loads(analytics_file.read_text())
                     kv_set("analytics_backup", data)
                     analytics_file.write_text(json.dumps({"counts": {}, "total_views": 0})) # Reset
+                    gc.collect()
                 else:
                     from alerts.persistent_kv import kv_set
                     data = json.loads(analytics_file.read_text())
@@ -165,6 +166,27 @@ def _run_fast_news_poll() -> None:
 
     except Exception:
         logging.exception("Fast news poll failed")
+
+
+def _system_watchdog_cleanup() -> None:
+    """Watchdog job to ensure the app stays under 1GB RAM."""
+    import gc
+    import os
+    import psutil
+    try:
+        process = psutil.Process(os.getpid())
+        mem_mb = process.memory_info().rss / 1024 / 1024
+        logging.info("WATCHDOG: Current RAM usage: %.2f MB", mem_mb)
+        
+        # If we hit 700MB, force aggressive cleanup
+        if mem_mb > 700:
+            logging.warning("WATCHDOG: High memory detected (%.2f MB). Forcing global cleanup.", mem_mb)
+            gc.collect()
+            # Clear internal streamlit caches if needed
+            st.cache_data.clear()
+            st.cache_resource.clear()
+    except Exception:
+        pass
 
 
 def _run_ingestion_job() -> None:
@@ -221,6 +243,15 @@ def _start_scheduler() -> None:
                 trigger="interval",
                 minutes=15,
                 id="fast_news_poll",
+                max_instances=1,
+                coalesce=True,
+            )
+            # Add Watchdog job every 30 minutes
+            scheduler.add_job(
+                _system_watchdog_cleanup,
+                trigger="interval",
+                minutes=30,
+                id="watchdog_cleanup",
                 max_instances=1,
                 coalesce=True,
             )
