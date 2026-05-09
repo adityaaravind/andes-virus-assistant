@@ -381,6 +381,11 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
 
 def main() -> None:
     with streamlit_analytics.track(load_from_json="data/analytics.json", save_to_json="data/analytics.json"):
+        if "citation_cards" not in st.session_state:
+            st.session_state.citation_cards = []
+
+        _render_sidebar(st.session_state.citation_cards)
+
         # Auto-refresh page every 15 mins so stats and headlines stay live
         from streamlit_autorefresh import st_autorefresh
         st_autorefresh(interval=15 * 60 * 1000, key="stats_refresh")
@@ -554,13 +559,8 @@ def main() -> None:
             )
         st.divider()
 
-        if "citation_cards" not in st.session_state:
-            st.session_state.citation_cards = []
-
         def update_sources(cards: list[dict[str, Any]]) -> None:
             st.session_state.citation_cards = cards
-
-        _render_sidebar(st.session_state.citation_cards)
 
         from ui.faq_panel import render_faq_panel
         render_faq_panel(chain)
