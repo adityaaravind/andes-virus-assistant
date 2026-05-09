@@ -279,7 +279,12 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         if user_voted_today:
             st.markdown(f"<div style='background:rgba(34,197,94,0.05); border:1px solid #22c55e33; border-radius:10px; padding:0.8rem; margin-top:1.2rem; text-align:center;'><p style='color:#22c55e; font-size:0.75rem; font-weight:950; margin:0;'>✓ SENTIMENT ANCHORED: {FEAR_LEVELS[level_int]['label'].upper()}</p></div>", unsafe_allow_html=True)
         else:
-            st.markdown("<p style='color:#64748b; font-size:0.5rem; text-align:center; margin-top:0.6rem; font-weight:700;'>TAP TILE TO VOTE</p>", unsafe_allow_html=True)
+            st.markdown(
+                "<p style='color:#38bdf8; font-size:0.55rem; text-align:center; margin-top:1rem; font-weight:950; letter-spacing:0.05em; text-shadow: 0 0 12px rgba(56,189,248,0.5);'>"
+                "⚡ TAP TILE TO CAST VOTE — CRITICAL FOR ACCURATE OUTBREAK RISK MODELING"
+                "</p>", 
+                unsafe_allow_html=True
+            )
 
     callout_html = """
 <style>.fear-callout-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.6rem; margin-top: 0.3rem; }</style>
