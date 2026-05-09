@@ -304,58 +304,68 @@ clear official communications and verified data.
 
     # Voting buttons section below the visualization
     if not user_voted_today:
-        st.markdown(
-            f'<p style="color:#94a3b8; font-size:0.85rem; font-weight:700; margin:1.5rem 0 0.8rem;">'
-            f'🗳️ <b>CAST YOUR VOTE:</b> How do you feel about the outbreak today?</p>',
-            unsafe_allow_html=True
-        )
-
-        # ── Custom Voting Card Grid ──
-        # We use a grid of HTML elements. To handle the click, we'll use streamlit columns with buttons hidden inside cards or use streamlit's standard columns with custom-styled buttons.
-        v_cols = st.columns(5)
-        for i, level in enumerate(range(1, 6)):
-            info = FEAR_LEVELS[level]
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        # ── Refined Voting Layout ──
+        # We use a single markdown block for the entire row to control layout precisely
+        
+        button_html = ""
+        for level, info in FEAR_LEVELS.items():
             l_color = info['color']
-            with v_cols[i]:
-                # We'll use a standard button but style it heavily to look like a stat card
-                # The label will include the subtext via HTML injection if possible, or just the main label
-                if st.button(info['label'].upper(), key=f"vote_{level}", use_container_width=True, help=info['desc']):
-                    _save_fear_vote(level, user_id)
-                    st.rerun()
-                
-                # Under the button, we show the subtext in a styled div
-                st.markdown(
-                    f'<div style="text-align:center; font-size:0.6rem; color:{l_color}; opacity:0.8; margin-top:-5px; font-weight:600; text-transform:none;">{info["desc"]}</div>',
-                    unsafe_allow_html=True
-                )
+            # Note: We still use st.button for functionality, but we wrap the layout
+            pass # Placeholder for logic below
 
-        # Update CSS for these specific buttons to look like mini stat cards
+        # Use columns to put label on left and buttons on right
+        lbl_col, btn_col = st.columns([1, 4])
+        
+        with lbl_col:
+            st.markdown(
+                f'<div style="height: 50px; display: flex; align-items: center;">'
+                f'<p style="color:#94a3b8; font-size:0.85rem; font-weight:700; margin:0;">'
+                f'🗳️ <b>CAST YOUR VOTE:</b></p></div>',
+                unsafe_allow_html=True
+            )
+        
+        with btn_col:
+            v_cols = st.columns(5)
+            for i, level in enumerate(range(1, 6)):
+                info = FEAR_LEVELS[level]
+                l_color = info['color']
+                with v_cols[i]:
+                    if st.button(info['label'].upper(), key=f"vote_{level}", use_container_width=True, help=info['desc']):
+                        _save_fear_vote(level, user_id)
+                        st.rerun()
+                    st.markdown(
+                        f'<div style="text-align:center; font-size:0.55rem; color:{l_color}; opacity:0.7; margin-top:-8px; font-weight:500;">{info["desc"]}</div>',
+                        unsafe_allow_html=True
+                    )
+
+        # Update CSS to match stat-card style exactly but more compact
         btn_style = ""
         for level, info in FEAR_LEVELS.items():
             l_color = info['color']
             btn_style += f"""
                 div[data-testid="stButton"] button[key*="vote_{level}"] {{
                     background: rgba(15, 23, 42, 0.6) !important;
-                    border: 1px solid {l_color}44 !important;
+                    backdrop-filter: blur(12px) !important;
+                    border: 1px solid {l_color}33 !important;
                     color: {l_color} !important;
-                    height: 60px !important;
-                    font-size: 0.8rem !important;
+                    height: 50px !important;
+                    font-size: 0.75rem !important;
                     font-weight: 950 !important;
                     text-transform: uppercase !important;
                     letter-spacing: 0.05em !important;
-                    border-radius: 8px !important;
-                    transition: all 0.25s ease !important;
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
-                    text-shadow: 0 0 10px {l_color}66 !important;
-                    display: flex !important;
-                    align-items: center !important;
-                    justify-content: center !important;
+                    border-radius: 10px !important;
+                    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+                    text-shadow: 0 0 10px {l_color}44 !important;
+                    padding: 0 !important;
                 }}
                 div[data-testid="stButton"] button[key*="vote_{level}"]:hover {{
                     border-color: {l_color} !important;
                     background: rgba(15, 23, 42, 0.8) !important;
                     transform: translateY(-2px) !important;
-                    box-shadow: 0 0 20px {l_color}33 !important;
+                    box-shadow: 0 0 20px {l_color}22 !important;
                 }}
             """
         st.markdown(f"<style>{btn_style}</style>", unsafe_allow_html=True)
