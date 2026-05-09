@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import random
 from typing import Any
 
 import streamlit as st
@@ -82,33 +83,34 @@ def render_alert_settings() -> None:
         '<style>@keyframes pulse-sub { 0% { transform:scale(1); } 50% { transform:scale(1.05); } 100% { transform:scale(1); } }</style>'
 
         '<p style="color:#94a3b8; font-size:0.68rem; line-height:1.4;">'
-        'Works on Chrome, Safari (iOS 16.4+), and Android browsers. Your privacy is protected; no personal data is shared.</p>'
+        'Works on Chrome, Safari (iOS 16.4+), and Android browsers. Your privacy is protected; no personal data is shared.</p></div>',
+        unsafe_allow_html=True,
+    )
 
-        # ── Funny Welcome Ping Button ──
-        if st.button("🚀 Get a Welcome Ping", use_container_width=True):
-            import random
-            messages = [
-                ("🧼 Hand Wash Protocol", "Wash your hands like you're scrubbing for a million-dollar surgery. We'll handle the data, you handle the soap!"),
-                ("🤖 AI vs Virus", "Our AI is currently arguing with the Andes virus. The AI is winning. You're in safe hands!"),
-                ("🛡️ Defense Force", "You're now part of the elite Andes Defense Force. First rule: No sharing drinks with rodents. Stay safe!"),
-                ("🥤 Hydration Check", "We're tracking the virus so you can focus on tracking your weekend plans. Stay safe and stay hydrated!"),
-                ("🦸‍♂️ Superhero Status", "If knowledge is power, you just became a superhero. Your notification shield is now ACTIVATED!"),
-                ("🍎 Vitamin Boost", "Eating an apple today? Good. Reading our alerts today? Even better. Let's keep that health score high!"),
-            ]
-            title, msg = random.choice(messages)
-            ok = send_ntfy("HANTAVIRUS", f"✨ {title}", msg, level="info")
-            if ok:
-                st.toast("Ping sent! Check your notifications. 🚀", icon="✅")
-            else:
-                st.error("Ping failed. Make sure you're subscribed!")
+    # ── Funny Welcome Ping Button ──
+    if st.button("🚀 Get a Welcome Ping", use_container_width=True):
+        messages = [
+            ("🧼 Hand Wash Protocol", "Wash your hands like you're scrubbing for a million-dollar surgery. We'll handle the data, you handle the soap!"),
+            ("🤖 AI vs Virus", "Our AI is currently arguing with the Andes virus. The AI is winning. You're in safe hands!"),
+            ("🛡️ Defense Force", "You're now part of the elite Andes Defense Force. First rule: No sharing drinks with rodents. Stay safe!"),
+            ("🥤 Hydration Check", "We're tracking the virus so you can focus on tracking your weekend plans. Stay safe and stay hydrated!"),
+            ("🦸‍♂️ Superhero Status", "If knowledge is power, you just became a superhero. Your notification shield is now ACTIVATED!"),
+            ("🍎 Vitamin Boost", "Eating an apple today? Good. Reading our alerts today? Even better. Let's keep that health score high!"),
+        ]
+        title, msg = random.choice(messages)
+        ok = send_ntfy("HANTAVIRUS", f"✨ {title}", msg, level="info")
+        if ok:
+            st.toast("Ping sent! Check your notifications. 🚀", icon="✅")
+        else:
+            st.error("Ping failed. Make sure you're subscribed!")
 
-        '<div style="margin-top:0.8rem;padding-top:0.6rem;border-top:1px solid rgba(239,68,68,0.2);">'
-
+    st.markdown(
+        '<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);'
+        'border-radius:8px;padding:0.7rem 0.8rem;margin:0.7rem 0;margin-top:0.8rem;padding-top:0.6rem;border-top:1px solid rgba(239,68,68,0.2);">'
         '<p style="color:#94a3b8;font-size:0.65rem;margin:0;">'
         'Prefer an app? Get <b>ntfy</b> on <a href="https://apps.apple.com/app/ntfy/id1622393045" target="_blank" style="color:#00b4d8;">iOS</a> or <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" target="_blank" style="color:#00b4d8;">Android</a> and subscribe to <b>HANTAVIRUS</b>.'
-        '</p></div>'
-        '</div>',
-        unsafe_allow_html=True,
+        '</p></div>',
+        unsafe_allow_html=True
     )
 
     with st.expander("Advanced alert settings", expanded=False):
