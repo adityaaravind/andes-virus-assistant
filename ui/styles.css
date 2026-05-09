@@ -431,3 +431,25 @@ div[data-testid="stButton"] button[key*="vote_dist_"] div[data-testid="stMarkdow
     letter-spacing: -0.04em;
     line-height: 1.1;
 }
+
+/* ── Sidebar Toggle Animation ── */
+@keyframes sidebar-pulse {
+    0% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.2); filter: brightness(1.5); box-shadow: 0 0 15px var(--teal); }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+
+button[data-testid="stSidebarCollapseButton"] {
+    animation: sidebar-pulse 2s infinite ease-in-out !important;
+    background: var(--navy-mid) !important;
+    border: 1px solid var(--teal) !important;
+    border-radius: 50% !important;
+    color: var(--teal) !important;
+    z-index: 999999 !important;
+}
+
+section[data-testid="stSidebar"] button[data-testid="stSidebarCollapseButton"] {
+    animation: none !important; /* Don't pulse when already open */
+    border: none !important;
+    background: transparent !important;
+}
