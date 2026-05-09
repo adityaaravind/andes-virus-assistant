@@ -352,12 +352,6 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
         render_alert_settings()
 
         st.divider()
-        if st.button("🔄 Re-run Interactive Tour", use_container_width=True):
-            st.session_state.onboarding_complete = False
-            st.session_state.onboarding_step = 0
-            st.rerun()
-
-        st.divider()
         st.markdown("#### Vector Store")
         try:
             stats = get_stats()
@@ -481,19 +475,16 @@ def main() -> None:
                 window.addEventListener('touchstart', showGuide);
                 window.addEventListener('keydown', showGuide);
                 
-                // Show on initial load
-                setTimeout(showGuide, 1500);
-            </script>
-            """,
-            unsafe_allow_html=True
-        )
-        st.divider()
+                # Show on initial load
+                        setTimeout(showGuide, 1500);
+                    </script>
+                    """,
+                    unsafe_allow_html=True
+                )
+                st.divider()
 
-        from ui.onboarding import render_onboarding
-        render_onboarding()
-
-        # ── LIVE STATS (BELOW HEADER) ──
-        from ui.stats_panel import render_stats_panel
+                # ── LIVE STATS (BELOW HEADER) ──
+                from ui.stats_panel import render_stats_panel
         render_stats_panel()
 
         st.warning("⚠️ **NOT MEDICAL ADVICE** • For emergencies contact local health authorities")
@@ -534,7 +525,7 @@ def main() -> None:
 
         # ── ROADMAP (COMING SOON) ───────────────────────────────────────────────
         st.markdown("### 🚀 Next Intelligence Phases (coming soon)")
-        col_road1, col_road2, col_road3 = st.columns(3)
+        col_road1, col_road2 = st.columns(2)
         with col_road1:
             st.markdown(
                 """
@@ -557,19 +548,6 @@ def main() -> None:
                         "What If?" Scenario Lab. Adjust viral variables to simulate outbreak progression and response.
                     </p>
                     <div style='margin-top:auto;'><span class='v11-feature-tag' style='margin-left:0; opacity:0.6;'>PHASE 2</span></div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-        with col_road3:
-            st.markdown(
-                """
-                <div class='stat-card' style='border-color: rgba(34, 197, 94, 0.6); min-height: 140px; background: rgba(34, 197, 94, 0.05) !important;'>
-                    <p class='stat-label glowing-title' style='color:#22c55e; font-size: 0.9rem !important; text-shadow: 0 0 15px rgba(34, 197, 94, 0.4);'>Guided Onboarding</p>
-                    <p style='color:#f8fafc; font-size:0.75rem; margin-top:0.5rem;'>
-                        Interactive tour and AI-driven onboarding is now active. Refresh or click 'Start Tour' to re-run.
-                    </p>
-                    <div style='margin-top:auto;'><span class='v11-feature-tag' style='margin-left:0; background:#22c55e; color:white !important; opacity:1;'>LIVE NOW</span></div>
                 </div>
                 """,
                 unsafe_allow_html=True
