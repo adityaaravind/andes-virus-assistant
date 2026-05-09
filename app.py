@@ -380,25 +380,7 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
         )
 
 def main() -> None:
-    # ── LIVE STATS (ABSOLUTE TOP FOR MOBILE) ──
-    from ui.stats_panel import render_stats_panel
-    render_stats_panel()
-    st.divider()
-
-    # ── Sidebar Scroll Guide ──
-    st.markdown(
-        """
-        <div class="sidebar-scroll-guide">
-            <div class="scroll-line">
-                <div class="scroll-dot"></div>
-            </div>
-            <div style="color:var(--teal); font-size:0.5rem; font-weight:800; transform:rotate(90deg); margin-top:20px;">SCROLL</div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # ── v1.1 Feature Scroller (ABSOLUTE TOP) ──
+    # ── Tickers (ABSOLUTE TOP) ──
     st.markdown(
         """
         <div class='v11-scroller-container'>
@@ -421,6 +403,24 @@ def main() -> None:
         """,
         unsafe_allow_html=True
     )
+
+    # ── Sidebar Scroll Guide ──
+    st.markdown(
+        """
+        <div class="sidebar-scroll-guide">
+            <div class="scroll-line">
+                <div class="scroll-dot"></div>
+            </div>
+            <div style="color:var(--teal); font-size:0.5rem; font-weight:800; transform:rotate(90deg); margin-top:20px;">SCROLL</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # ── LIVE STATS (MOVED BELOW TICKERS) ──
+    from ui.stats_panel import render_stats_panel
+    render_stats_panel()
+    st.divider()
 
     with streamlit_analytics.track(load_from_json="data/analytics.json", save_to_json="data/analytics.json"):
         # Auto-refresh page every 15 mins so stats and headlines stay live
