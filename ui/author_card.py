@@ -9,6 +9,7 @@ AUTHOR = {
     "name":      "Aditya Aravind Medepalli",
     "role":      "Researcher & Developer",
     "linkedin":  "https://www.linkedin.com/in/aditya-aravind-medepalli/",
+    "github":    "https://github.com/adityaaravind",
     "initials":  "AA",
 }
 
@@ -45,23 +46,28 @@ def render_author_card() -> None:
         f"""
         <div class="author-card-glow">
             <div style="display:flex; align-items:center; gap: 0.8rem;">
-                <div style="width:40px; height:40px; border-radius:50%; flex-shrink:0; 
+                <div style="width:42px; height:42px; border-radius:50%; flex-shrink:0; 
                     background:linear-gradient(135deg, #0077b5, #00b4d8); 
                     display:flex; align-items:center; justify-content:center; 
-                    font-size:0.9rem; font-weight:950; color:white;
-                    box-shadow: 0 0 15px rgba(0, 180, 216, 0.4);">
+                    font-size:1rem; font-weight:950; color:white;
+                    box-shadow: 0 0 15px rgba(0, 180, 216, 0.5);">
                     {AUTHOR["initials"]}
                 </div>
                 <div style="flex:1;">
-                    <p style="color:white; font-size:0.85rem; font-weight:800; margin:0; line-height:1.1;">
+                    <p style="color:white; font-size:0.9rem; font-weight:950; margin:0; line-height:1.1; text-shadow: 0 0 10px rgba(255,255,255,0.3);">
                         {AUTHOR["name"]}
                     </p>
-                    <p style="color:var(--gray-300); font-size:0.65rem; margin:0; margin-bottom: 6px; font-weight:500;">
+                    <p style="color:var(--teal); font-size:0.65rem; margin:0; margin-bottom: 6px; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; text-shadow: 0 0 8px rgba(0,180,216,0.4);">
                         {AUTHOR["role"]}
                     </p>
-                    <a href="{AUTHOR["linkedin"]}" target="_blank" class="linkedin-tag">
-                        LinkedIn ↗
-                    </a>
+                    <div style="display:flex; gap:8px;">
+                        <a href="{AUTHOR["linkedin"]}" target="_blank" class="linkedin-tag" style="font-size:0.55rem;">
+                            LinkedIn ↗
+                        </a>
+                        <a href="{AUTHOR["github"]}" target="_blank" class="linkedin-tag" style="background:#333; box-shadow: 0 0 10px rgba(255,255,255,0.1); font-size:0.55rem;">
+                            GitHub ↗
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
