@@ -25,6 +25,25 @@
   max-width: 1200px;
 }
 
+/* Global Streamlit Overrides for Cleaner UI */
+div[data-testid="stVerticalBlock"] > div {
+    margin-bottom: 0rem !important;
+}
+
+div[data-testid="stHorizontalBlock"] {
+    gap: 1rem !important;
+}
+
+/* Reset default Streamlit button margins that cause unwanted whitespace */
+div[data-testid="stButton"] {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+div[data-testid="stButton"] button {
+    margin: 0 !important;
+}
+
 /* ── Typography ── */
 h1 { font-size: 1.6rem !important; font-weight: 800 !important; letter-spacing: -0.02em !important; }
 h2 { font-size: 1.2rem !important; font-weight: 700 !important; color: var(--gray-100) !important; }

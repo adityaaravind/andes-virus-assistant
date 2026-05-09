@@ -304,40 +304,56 @@ clear official communications and verified data.
 
     # Voting buttons section below the visualization
     if not user_voted_today:
-        st.markdown("<br>", unsafe_allow_html=True)
+        # ── Unified Voting Grid ──
+        # Use a single column set with minimal gap
+        st.markdown("<div style='margin-top:1.5rem; margin-bottom:0.5rem; color:#94a3b8; font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;'>Cast your sentiment</div>", unsafe_allow_html=True)
         
-        # ── Refined Voting Layout ──
-        # Occupy full width without the label on the left
-        v_cols = st.columns(5)
+        v_cols = st.columns(5, gap="small")
         for i, level in enumerate(range(1, 6)):
             info = FEAR_LEVELS[level]
             l_color = info['color']
             with v_cols[i]:
                 label_html = f"""
-                    <span style="color:{l_color}; font-size:1.2rem; font-weight:950; text-transform:uppercase; display:block; text-shadow: 0 0 15px {l_color}66; margin-bottom:4px;">{info['label']}</span>
-                    <span style="color:var(--gray-300); font-size:0.65rem; font-weight:500; text-transform:none; opacity:0.9; display:block;">{info['desc']}</span>
+                    <div style="width:100%; text-align:left;">
+                        <span style="color:{l_color}; font-size:1.1rem; font-weight:950; text-transform:uppercase; display:block; text-shadow: 0 0 12px {l_color}55; line-height:1;">{info['label']}</span>
+                        <span style="color:var(--gray-300); font-size:0.6rem; font-weight:500; text-transform:none; opacity:0.8; display:block; margin-top:4px; line-height:1.1;">{info['desc']}</span>
+                    </div>
                 """
                 if st.button(label_html, key=f"vote_card_{level}", use_container_width=True):
                     _save_fear_vote(level, user_id)
                     st.rerun()
 
-        # Update CSS to match stat-card style exactly but more compact
-        btn_card_style = ""
+        # Update CSS to match stat-card style exactly but more compact for mobile
+        btn_card_style = """
+            <style>
+            @media (max-width: 768px) {
+                div[data-testid="stHorizontalBlock"]:has(button[key*="vote_card_"]) {
+                    display: grid !important;
+                    grid-template-columns: repeat(2, 1fr) !important;
+                    gap: 0.5rem !important;
+                }
+                div[data-testid="stHorizontalBlock"]:has(button[key*="vote_card_"]) > div {
+                    width: 100% !important;
+                    max-width: 100% !important;
+                }
+            }
+            </style>
+        """
         for level, info in FEAR_LEVELS.items():
             l_color = info['color']
             btn_card_style += f"""
+                <style>
                 div[data-testid="stButton"] button[key*="vote_card_{level}"] {{
                     background: rgba(15, 23, 42, 0.6) !important;
                     backdrop-filter: blur(12px) !important;
                     border: 1px solid rgba(255, 255, 255, 0.12) !important;
                     border-radius: 12px !important;
-                    height: 110px !important;
+                    min-height: 100px !important;
                     padding: 0.8rem !important;
                     display: flex !important;
                     flex-direction: column !important;
                     align-items: flex-start !important;
                     justify-content: center !important;
-                    text-align: left !important;
                     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
                     box-shadow: 0 8px 32px rgba(0,0,0,0.4) !important;
                 }}
@@ -347,13 +363,12 @@ clear official communications and verified data.
                     background: rgba(15, 23, 42, 0.8) !important;
                     box-shadow: 0 12px 40px {l_color}22 !important;
                 }}
-                /* Force inner text styling */
                 div[data-testid="stButton"] button[key*="vote_card_{level}"] div[data-testid="stMarkdownContainer"] p {{
                     margin: 0 !important;
-                    line-height: 1.2 !important;
                 }}
+                </style>
             """
-        st.markdown(f"<style>{btn_card_style}</style>", unsafe_allow_html=True)
+        st.markdown(btn_card_style, unsafe_allow_html=True)
     else:
         thanks_html = """
 <div style="background:rgba(34,197,94,0.08); border:1px solid #22c55e44; border-radius:8px; padding:0.8rem; margin-top:1rem;">
