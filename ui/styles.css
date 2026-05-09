@@ -318,7 +318,7 @@ div[data-testid="stButton"] button[key*="vote_"] div[data-testid="stMarkdownCont
   border-right: 1px solid rgba(148,163,184,0.1);
 }
 
-/* Branding */
+/* ── Branding */
 .glowing-title {
     background: linear-gradient(135deg, #00f5ff, var(--teal-light), #ffffff);
     -webkit-background-clip: text;
@@ -328,4 +328,30 @@ div[data-testid="stButton"] button[key*="vote_"] div[data-testid="stMarkdownCont
     font-size: clamp(1.6rem, 5vw, 2.8rem) !important;
     letter-spacing: -0.04em;
     line-height: 1.1;
+}
+
+/* ── Live Jitter & Pulse Animations ── */
+@keyframes needle-jitter {
+  0% { transform: rotate(-0.15deg); }
+  25% { transform: rotate(0.1deg); }
+  50% { transform: rotate(-0.05deg); }
+  75% { transform: rotate(0.15deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes text-live-pulse {
+  0%, 100% { opacity: 1; filter: brightness(1); }
+  50% { opacity: 0.85; filter: brightness(1.2); }
+}
+
+/* Target Plotly Gauge Needle (SVG path) */
+.js-plotly-plot .indicator path.needle, 
+.js-plotly-plot .indicator path.threshold {
+  animation: needle-jitter 0.15s infinite linear;
+  transform-origin: center bottom;
+}
+
+/* Target the main number in Plotly Gauges */
+.js-plotly-plot .indicator text.numbers {
+  animation: text-live-pulse 2s infinite ease-in-out;
 }
