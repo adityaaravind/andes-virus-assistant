@@ -283,28 +283,35 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
                     st.session_state.fear_slider_input = level_id
                     st.rerun()
 
-        # Target the ACTIVE button with high-intensity neon glow
+        # Target the ACTIVE button with high-intensity "Lit" neon glow
         active_color = FEAR_LEVELS[level_int]['color']
         active_css = f"""
         <style>
+        /* Base inactive hover for better UX */
+        div[data-testid="stButton"] button[key*="tile_v3_"]:hover:not(:disabled) {{
+            background: rgba(255, 255, 255, 0.05) !important;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1) !important;
+        }}
+
         div[data-testid="stButton"] button[key*="tile_v3_{level_int}"] {{
-            background: rgba(15, 23, 42, 0.95) !important;
+            background: radial-gradient(circle at center, {active_color}44 0%, rgba(15, 23, 42, 0.95) 100%) !important;
             border: 2px solid {active_color} !important;
-            box-shadow: 0 0 30px {active_color}88, inset 0 0 15px {active_color}66 !important;
-            transform: scale(1.1) translateY(-2px) !important;
+            box-shadow: 0 0 40px {active_color}77, inset 0 0 15px {active_color}44 !important;
+            transform: scale(1.1) translateY(-3px) !important;
             opacity: 1 !important;
             filter: none !important;
             z-index: 100 !important;
-            animation: active-pulse 2.5s infinite ease-in-out !important;
+            animation: active-pulse 2s infinite ease-in-out !important;
         }}
         @keyframes active-pulse {{
-            0%, 100% {{ box-shadow: 0 0 20px {active_color}66, inset 0 0 10px {active_color}44; border-color: {active_color}88; }}
-            50% {{ box-shadow: 0 0 45px {active_color}aa, inset 0 0 20px {active_color}88; border-color: {active_color}; }}
+            0%, 100% {{ box-shadow: 0 0 30px {active_color}55, inset 0 0 10px {active_color}33; }}
+            50% {{ box-shadow: 0 0 50px {active_color}99, inset 0 0 20px {active_color}66; }}
         }}
         div[data-testid="stButton"] button[key*="tile_v3_{level_int}"] p {{
             color: white !important;
-            text-shadow: 0 0 12px {active_color}, 0 0 25px {active_color} !important;
-            font-size: 0.52rem !important; /* Slightly smaller for full text fit */
+            font-weight: 950 !important;
+            text-shadow: 0 0 15px {active_color}, 0 0 30px {active_color}cc !important;
+            font-size: 0.52rem !important;
             opacity: 1 !important;
         }}
         </style>
