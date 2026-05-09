@@ -280,42 +280,98 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         
         for i, level_id in enumerate(range(1, 6)):
             info = FEAR_LEVELS[level_id]
+            is_active = (level_id == level_int)
+            l_color = info['color']
+            
             with cols[i]:
-                # Wrap icon in span for easier targeting
-                label_html = f'<span class="tile-emoji">{icons[level_id]}</span>\n{info["label"].upper()}'
+                # ── VISUAL TILE ──
+                # Use a custom class for the visual div to avoid button artifacts
+                st.markdown(
+                    f"""
+                    <div class="sentiment-tile-wrapper" style="position: relative; width: 100%; aspect-ratio: 1/1;">
+                        <div class="tile-visual {'active' if is_active else ''} {'disabled' if user_voted_today and not is_active else ''}" 
+                             style="--t-color: {l_color};">
+                            <span class="tile-emoji">{icons[level_id]}</span>
+                            <span class="tile-label">{info['label'].upper()}</span>
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
                 
-                if st.button(label_html, key=f"tile_v5_{level_id}", disabled=user_voted_today, use_container_width=True):
+                # ── INVISIBLE BUTTON OVERLAY ──
+                # Use a negative margin to pull the button UP over the tile
+                if st.button("", key=f"tile_click_{level_id}", disabled=user_voted_today, use_container_width=True):
                     _save_fear_vote(level_id, user_id)
                     st.session_state.fear_slider_input = level_id
                     st.rerun()
 
-        # Aggressive Active styling to match 'Confirmed Cases' lit effect
-        active_info = FEAR_LEVELS[level_int]
-        c = active_info['color']
-        active_css = f"""
-        <style>
-        div[data-testid="stButton"] button[key*="tile_v5_{level_int}"] {{
-            background: radial-gradient(circle at center, {c}44 0%, rgba(15, 23, 42, 0.95) 100%) !important;
-            border: 2px solid {c} !important;
-            box-shadow: 0 0 40px {c}77, inset 0 0 15px {c}44 !important;
-            transform: scale(1.1) translateY(-5px) !important;
-            opacity: 1 !important;
-            filter: none !important;
-            z-index: 100 !important;
-        }}
-        div[data-testid="stButton"] button[key*="tile_v5_{level_int}"] p {{
-            color: white !important;
-            opacity: 1 !important;
-            text-shadow: 0 0 20px {c}, 0 0 40px {c}88 !important;
-            font-weight: 950 !important;
-        }}
-        div[data-testid="stButton"] button[key*="tile_v5_{level_int}"] .tile-emoji {{
-            transform: scale(1.2) !important;
-            filter: drop-shadow(0 0 15px {c});
-        }}
-        </style>
-        """
-        st.markdown(active_css, unsafe_allow_html=True)
+        # Target the ACTIVE button and clean up button layout
+        st.markdown(
+            f"""
+            <style>
+            /* Pull invisible buttons over the tiles */
+            div[data-testid="column"] div[data-testid="stButton"] {{
+                margin-top: -100% !important;
+                z-index: 10;
+                height: 100% !important;
+            }}
+            div[data-testid="column"] div[data-testid="stButton"] button {{
+                height: 100px !important;
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                color: transparent !important;
+            }}
+            div[data-testid="column"] div[data-testid="stButton"] button:hover {{
+                background: transparent !important;
+            }}
+
+            /* Base tile styling (applied to the div, not button) */
+            .tile-visual {{
+                background: rgba(15, 23, 42, 0.6);
+                backdrop-filter: blur(12px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 14px;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                padding: 1rem;
+                text-align: center;
+            }}
+
+            .tile-visual.active {{
+                background: radial-gradient(circle at center, var(--t-color)44 0%, rgba(15, 23, 42, 0.95) 100%);
+                border: 2px solid var(--t-color);
+                box-shadow: 0 0 40px var(--t-color)77, inset 0 0 15px var(--t-color)44;
+                transform: scale(1.1) translateY(-5px);
+            }}
+
+            .tile-visual.disabled {{ opacity: 0.2; filter: grayscale(1); }}
+
+            .tile-emoji {{ font-size: 2.2rem; line-height: 1; margin-bottom: 0.3rem; transition: transform 0.3s ease; }}
+            .active .tile-emoji {{ transform: scale(1.2); filter: drop-shadow(0 0 10px var(--t-color)); }}
+            
+            .tile-label {{
+                font-family: 'Inter', sans-serif;
+                font-weight: 800;
+                font-size: 0.7rem;
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                color: var(--white);
+                opacity: 0.8;
+                line-height: 1.2;
+            }}
+            .active .tile-label {{ opacity: 1; text-shadow: 0 0 20px var(--t-color); }}
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
 
         if user_voted_today:
             st.markdown(
