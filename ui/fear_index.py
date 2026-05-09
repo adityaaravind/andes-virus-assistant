@@ -244,67 +244,44 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         st.plotly_chart(fig_gauge, use_container_width=True, config={"displayModeBar": False})
 
     with col_dist:
-        # Define the styles locally for maximum override priority
-        vote_styles = """
-        <style>
-        @keyframes v-pulse {
-            0% { box-shadow: 0 0 5px rgba(255,255,255,0.1); transform: scale(1); }
-            50% { box-shadow: 0 0 20px var(--v-color); transform: scale(1.02); }
-            100% { box-shadow: 0 0 5px rgba(255,255,255,0.1); transform: scale(1); }
-        }
-        
-        /* Base button style for all voting tiles */
-        div[data-testid="stButton"] button[key*="vote_dist_"] {
-            height: 60px !important;
-            border-radius: 8px !important;
-            border: 2px solid var(--v-color) !important;
-            background: rgba(15, 23, 42, 0.6) !important;
-            transition: all 0.3s ease !important;
-            animation: v-pulse 2s infinite ease-in-out !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            padding: 0 !important;
-        }
-        
-        div[data-testid="stButton"] button[key*="vote_dist_"] p {
-            color: #ffffff !important;
-            font-size: 0.85rem !important;
-            font-weight: 950 !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.1em !important;
-            text-shadow: 0 0 10px var(--v-color) !important;
-        }
-
-        div[data-testid="stButton"] button[key*="vote_dist_"]:hover {
-            background: var(--v-color) !important;
-            color: #ffffff !important;
-            transform: translateY(-3px) scale(1.05) !important;
-            box-shadow: 0 10px 30px var(--v-color) !important;
-        }
-
-        /* Color definitions */
-        div[data-testid="stButton"]:has(button[key="vote_dist_1"]) { --v-color: #22c55e; }
-        div[data-testid="stButton"]:has(button[key="vote_dist_2"]) { --v-color: #f59e0b; }
-        div[data-testid="stButton"]:has(button[key="vote_dist_3"]) { --v-color: #ef4444; }
-        div[data-testid="stButton"]:has(button[key="vote_dist_4"]) { --v-color: #dc2626; }
-        div[data-testid="stButton"]:has(button[key="vote_dist_5"]) { --v-color: #991b1b; }
-        </style>
-        """
-        st.markdown(vote_styles, unsafe_allow_html=True)
         st.markdown(
-            "<p style='color:#f8fafc; font-size:0.9rem; font-weight:800; margin-bottom:1rem; letter-spacing:0.05em;'>"
-            "📊 CAST YOUR SENTIMENT</p>",
+            "<p style='color:#f8fafc; font-size:1rem; font-weight:800; margin-bottom:1.5rem; letter-spacing:0.05em;'>"
+            "📊 SLIDE TO CAST SENTIMENT</p>",
             unsafe_allow_html=True,
         )
         
-        v_grid = st.columns(5, gap="small")
-        for i, level in enumerate(range(1, 6)):
-            info = FEAR_LEVELS[level]
-            with v_grid[i]:
-                if st.button(info['label'].upper()[:4], key=f"vote_dist_{level}", use_container_width=True, disabled=user_voted_today):
-                    _save_fear_vote(level, user_id)
-                    st.rerun()
+        # Define labels and mapping
+        slider_labels = ["CALM", "CONCERNED", "WORRIED", "FEARFUL", "PANICKED"]
+        label_to_level = {l: i+1 for i, l in enumerate(slider_labels)}
+        
+        # Local state for slider if not yet voted
+        current_fear_label = slider_labels[int(live_fear-1)] if 1 <= live_fear <= 5 else "CALM"
+        
+        # Use st.select_slider for better UX
+        selected_label = st.select_slider(
+            "How worried are you about the outbreak?",
+            options=slider_labels,
+            value=current_fear_label,
+            disabled=user_voted_today,
+            label_visibility="collapsed",
+            key="fear_slider_input"
+        )
+        
+        # Auto-register vote on change
+        if not user_voted_today and selected_label != current_fear_label:
+            _save_fear_vote(label_to_level[selected_label], user_id)
+            st.toast(f"Vote registered: {selected_label}! 📡", icon="✅")
+            st.rerun()
+
+        if user_voted_today:
+            st.markdown(
+                f"<div style='background:rgba(34,197,94,0.1); border:1px solid #22c55e44; border-radius:8px; padding:0.8rem; margin-top:1rem; text-align:center;'>"
+                f"<p style='color:#22c55e; font-size:0.85rem; font-weight:700; margin:0;'>✓ SENTIMENT RECORDED: {selected_label}</p>"
+                f"</div>",
+                unsafe_allow_html=True
+            )
+        else:
+            st.caption("Slide to your current fear level to contribute to the index.")
 
     # Callout boxes matching pandemic panel
     callout_html = f"""
