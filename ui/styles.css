@@ -478,10 +478,20 @@ section[data-testid="stSidebar"] button[data-testid="stSidebarCollapseButton"] {
 
 .nav-tile:hover, .nav-tile:active {
     transform: scale(1.15) !important;
-    background: rgba(27, 46, 69, 0.8) !important;
-    border-color: var(--teal) !important;
-    box-shadow: 0 8px 25px rgba(0, 180, 216, 0.4) !important;
+    background: radial-gradient(circle at center, rgba(0, 180, 216, 0.25) 0%, rgba(27, 46, 69, 0.95) 100%) !important;
+    border-color: var(--teal-light) !important;
+    box-shadow: 0 12px 45px rgba(0, 180, 216, 0.7), inset 0 0 15px rgba(0, 180, 216, 0.3) !important;
     z-index: 100 !important;
+}
+
+.nav-tile:hover .nav-tile-icon {
+    text-shadow: 0 0 20px rgba(0, 180, 216, 0.8) !important;
+    transform: translateY(-2px) !important;
+}
+
+.nav-tile:hover .nav-tile-label {
+    color: var(--teal-light) !important;
+    text-shadow: 0 0 10px rgba(0, 180, 216, 0.4) !important;
 }
 
 .nav-tile-icon {
