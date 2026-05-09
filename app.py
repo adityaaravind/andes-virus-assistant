@@ -399,61 +399,9 @@ def main() -> None:
             unsafe_allow_html=True
         )
 
-        # ── Tickers (BELOW TITLE) ──
-        st.markdown(
-            """
-            <div class='v11-scroller-container'>
-                <div class='v11-scroller-content'>
-                    <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 🧠 Semantic Alerting: Detect transmission concerns via concept matching</span>
-                    <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 🔗 Recommendation Engine: Map related research via Qdrant similarity</span>
-                    <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 📑 Named Vectors: Dual-embedding (Summary + Detail) for precision retrieval</span>
-                    <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 💾 Session Memory: Persist conversation context across user sessions</span>
-                    <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> ⚡ Search Fallbacks: Improved reliability across multi-version clients</span>
-                </div>
-            </div>
-            <div class='nav-scroller-container'>
-                <div class='scroller-reverse'>
-                    <span class='v11-feature-item'><span class='nav-tag'>GUIDE</span> Real-time intelligence dashboard</span>
-                    <span class='v11-feature-item'><span class='nav-tag'>NAV</span> Scroll for metrics and map</span>
-                    <span class='v11-feature-item'><span class='nav-tag'>NAV</span> Use AI assistant for queries</span>
-                    <span class='v11-feature-item'><span class='nav-tag'>DATA</span> Official WHO, CDC, PubMed feeds</span>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        # ── Sidebar Scroll Guide ──
-        st.markdown(
-            """
-            <div id="scroll-guide" class="sidebar-scroll-guide">
-                <div class="scroll-line">
-                    <div class="scroll-dot"></div>
-                </div>
-            </div>
-            <script>
-                const guide = document.getElementById('scroll-guide');
-                let timeout;
-
-                function showGuide() {
-                    guide.classList.add('active');
-                    clearTimeout(timeout);
-                    timeout = setTimeout(() => {
-                        guide.classList.remove('active');
-                    }, 2500);
-                }
-
-                // Show on scroll
-                window.addEventListener('scroll', showGuide);
-                // Show on initial load
-                setTimeout(showGuide, 1000);
-            </script>
-            """,
-            unsafe_allow_html=True
-        )
         st.divider()
 
-        # ── LIVE STATS (BELOW TICKERS) ──
+        # ── LIVE STATS (BELOW HEADER) ──
         from ui.stats_panel import render_stats_panel
         render_stats_panel()
         st.divider()
