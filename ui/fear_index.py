@@ -247,65 +247,57 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         st.markdown(
             """
             <style>
-            /* 1. Global Slider Overhaul */
+            /* 1. Minimal Slider Container */
             div[data-testid="stSlider"] [data-baseweb="slider"] {
-                height: 50px !important;
-                padding-top: 25px !important;
+                height: 40px !important;
+                padding-top: 20px !important;
             }
-            /* The Track: Dynamic Wave Gradient */
+            /* The Track: Minimal Navy */
             div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child {
-                height: 10px !important;
-                background: linear-gradient(90deg, #22c55e 0%, #f59e0b 50%, #991b1b 100%) !important;
-                border-radius: 20px !important;
+                height: 6px !important;
+                background: rgba(255, 255, 255, 0.05) !important;
+                border-radius: 10px !important;
                 position: relative !important;
-                box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
             }
-            /* The Thumb: The Ship with Smooth Motion */
+            /* The Progress Bar (Active Track) */
+            div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child > div:first-child {
+                background: var(--v-active-color, #00b4d8) !important;
+                height: 6px !important;
+                border-radius: 10px !important;
+                opacity: 0.6 !important;
+            }
+            /* The Thumb: The Ship */
             div[data-testid="stSlider"] [role="slider"] {
                 background: transparent !important;
                 border: none !important;
-                width: 50px !important;
-                height: 50px !important;
-                top: -10px !important;
+                width: 40px !important;
+                height: 40px !important;
+                top: -8px !important;
                 box-shadow: none !important;
-                transition: transform 0.1s ease-out !important;
             }
             div[data-testid="stSlider"] [role="slider"]::after {
                 content: '🚢';
-                font-size: 2.5rem;
+                font-size: 2rem;
                 display: block;
-                filter: drop-shadow(0 0 12px rgba(0, 180, 216, 0.7));
-                transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                filter: drop-shadow(0 0 15px var(--v-active-color, rgba(0, 180, 216, 0.8)));
+                transition: transform 0.2s ease;
             }
-            /* Wave Animation: Smoother and Deeper */
-            @keyframes track-wave-smooth {
-                0% { background-position: 0% 50%; }
-                100% { background-position: 100% 50%; }
+            
+            /* Subtle Shimmer instead of heavy waves */
+            @keyframes shimmer {
+                0% { opacity: 0.1; }
+                50% { opacity: 0.3; }
+                100% { opacity: 0.1; }
             }
             div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child::before {
                 content: '';
                 position: absolute;
-                top: -20px; left: 0; right: 0; bottom: 0;
-                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z' fill='%2300b4d8' fill-opacity='0.3'%3E%3C/path%3E%3C/svg%3E");
-                background-size: 600px 80px;
-                height: 50px;
-                opacity: 0.6;
-                animation: track-wave-smooth 8s linear infinite;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: linear-gradient(90deg, transparent, rgba(0, 180, 216, 0.2), transparent);
+                animation: shimmer 4s infinite;
                 pointer-events: none;
             }
-
-            /* Smooth Text Transition */
-            .sentiment-label {
-                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-                animation: label-pop 0.4s ease-out;
-            }
-            @keyframes label-pop {
-                0% { transform: scale(0.9); opacity: 0; }
-                100% { transform: scale(1); opacity: 1; }
-            }
             </style>
-            <p style='color:#f8fafc; font-size:1rem; font-weight:800; margin-bottom:0.5rem; letter-spacing:0.05em;'>
-            📊 SHIP YOUR SENTIMENT</p>
             """,
             unsafe_allow_html=True,
         )
@@ -314,7 +306,17 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         def on_fear_change():
             new_val = st.session_state.fear_slider_input
             _save_fear_vote(new_val, user_id)
-            st.toast(f"Sentiment auto-registered! 🚢", icon="⚓")
+            st.toast(f"Outbreak sentiment updated! 🚢", icon="✅")
+
+        # Color mapping for the ship's glow
+        l_color = FEAR_LEVELS[int(live_fear) if 1 <= live_fear <= 5 else 1]['color']
+        st.markdown(f"<style>:root {{ --v-active-color: {l_color}; }}</style>", unsafe_allow_html=True)
+
+        st.markdown(
+            "<p style='color:#94a3b8; font-size:0.75rem; font-weight:800; margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.1em; opacity:0.8;'>"
+            "📊 SHIP YOUR SENTIMENT</p>",
+            unsafe_allow_html=True,
+        )
 
         level = st.slider(
             "Fear Level",
@@ -328,25 +330,30 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
             on_change=on_fear_change if not user_voted_today else None
         )
         
-        # Display reactive label
+        # Update dynamic color based on current slider value for live feedback
+        current_l_color = FEAR_LEVELS[level]['color']
+        st.markdown(f"<style>:root {{ --v-active-color: {current_l_color}; }}</style>", unsafe_allow_html=True)
+        
         slider_labels = {1: "CALM", 2: "CONCERNED", 3: "WORRIED", 4: "FEARFUL", 5: "PANICKED"}
         current_label = slider_labels[level]
-        l_color = FEAR_LEVELS[level]['color']
         
         st.markdown(
-            f"<div class='sentiment-label'><h2 style='color:{l_color}; text-align:center; margin-top:0.5rem; font-family:monospace; text-shadow: 0 0 20px {l_color}aa; font-weight:950;'>{current_label}</h2></div>",
+            f"<div class='sentiment-label' style='margin-top:0.2rem;'><h2 style='color:{current_l_color}; text-align:center; margin:0; font-family:monospace; text-shadow: 0 0 20px {current_l_color}aa; font-weight:950; font-size:1.8rem !important;'>{current_label}</h2></div>",
             unsafe_allow_html=True
         )
 
         if user_voted_today:
             st.markdown(
-                f"<div style='background:rgba(34,197,94,0.1); border:1px solid #22c55e44; border-radius:12px; padding:0.8rem; margin-top:1rem; text-align:center; animation: label-pop 0.5s ease-out;'>"
-                f"<p style='color:#22c55e; font-size:0.85rem; font-weight:700; margin:0;'>✓ SHIP ANCHORED: {current_label}</p>"
+                f"<div style='background:rgba(34,197,94,0.05); border:1px solid #22c55e33; border-radius:8px; padding:0.6rem; margin-top:0.8rem; text-align:center;'>"
+                f"<p style='color:#22c55e; font-size:0.75rem; font-weight:700; margin:0; text-transform:uppercase;'>✓ SHIP ANCHORED: {current_label}</p>"
                 f"</div>",
                 unsafe_allow_html=True
             )
         else:
-            st.caption("Move the ship to instantly register your sentiment.")
+            st.markdown(
+                "<p style='color:#64748b; font-size:0.65rem; text-align:center; margin-top:0.5rem;'>Slide the ship to instantly share your sentiment with the index.</p>",
+                unsafe_allow_html=True
+            )
 
     # Callout boxes matching pandemic panel
     callout_html = f"""
