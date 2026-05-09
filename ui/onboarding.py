@@ -62,6 +62,25 @@ def render_onboarding() -> None:
 
     step = ONBOARDING_STEPS[step_idx]
 
+    # ── Auto-Scroll Logic ──
+    # We use a small JS snippet to find elements based on text or tags since 
+    # Streamlit doesn't always provide stable IDs for all widgets.
+    scroll_js = ""
+    if step["selector"] == "stats":
+        scroll_js = "window.scrollTo({top: 0, behavior: 'smooth'});"
+    elif step["selector"] == "risk_fear":
+        scroll_js = "document.querySelectorAll('h2').forEach(h => { if(h.innerText.includes('PANDEMIC RISK')) h.scrollIntoView({behavior: 'smooth', block: 'center'}); });"
+    elif step["selector"] == "map":
+        scroll_js = "document.querySelectorAll('h2').forEach(h => { if(h.innerText.includes('NATIONALITY')) h.scrollIntoView({behavior: 'smooth', block: 'center'}); });"
+    elif step["selector"] == "journalist":
+        scroll_js = "document.querySelectorAll('p').forEach(p => { if(p.innerText.includes('SHARE & DOWNLOAD')) p.scrollIntoView({behavior: 'smooth', block: 'center'}); });"
+    elif step["selector"] == "chat":
+        scroll_js = "document.querySelectorAll('h3').forEach(h => { if(h.innerText.includes('Ask a Question')) h.scrollIntoView({behavior: 'smooth', block: 'center'}); });"
+    elif step["selector"] == "sidebar":
+        scroll_js = "window.scrollTo({top: 0, behavior: 'smooth'});" # Sidebar is always visible/at top
+
+    st.markdown(f"<script>{scroll_js}</script>", unsafe_allow_html=True)
+
     # Overlay / Modal-like UI using a container at the top
     with st.container():
         st.markdown(
