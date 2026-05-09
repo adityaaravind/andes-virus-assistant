@@ -380,43 +380,6 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
         )
 
 def main() -> None:
-    # ── Component Widget Mode Detection ──
-    widget_mode = st.query_params.get("widget")
-    
-    if widget_mode:
-        # Mini-mode for smartphone home screen shortcuts (App-like feel)
-        st.markdown(
-            """
-            <style>
-                .stApp { background: #08111e !important; }
-                header, footer { visibility: hidden !important; }
-                .main .block-container { padding: 1rem 0.5rem !important; }
-            </style>
-            """, 
-            unsafe_allow_html=True
-        )
-        
-        # Auto-refresh widgets every 5 minutes
-        from streamlit_autorefresh import st_autorefresh
-        st_autorefresh(interval=5 * 60 * 1000, key="widget_refresh")
-
-        if widget_mode == "stats":
-            from ui.stats_panel import render_stats_panel
-            render_stats_panel()
-        elif widget_mode == "risk":
-            from ui.pandemic_risk import render_pandemic_risk_panel
-            render_pandemic_risk_panel()
-        elif widget_mode == "fear":
-            from ui.fear_index import render_fear_index
-            render_fear_index()
-            
-        st.markdown(
-            "<div style='text-align:center; margin-top:20px; opacity:0.5; font-size:0.6rem; color:white;'>"
-            "Andes Virus Research Assistant · Live Update</div>", 
-            unsafe_allow_html=True
-        )
-        st.stop()
-
     with streamlit_analytics.track(load_from_json="data/analytics.json", save_to_json="data/analytics.json"):
         # Auto-refresh page every 15 mins so stats and headlines stay live
         from streamlit_autorefresh import st_autorefresh
@@ -521,19 +484,6 @@ def main() -> None:
             st.session_state.citation_cards = cards
 
         _render_sidebar(st.session_state.citation_cards)
-
-        # ── Smartphone Widget Installer ──
-        with st.sidebar:
-            st.divider()
-            st.markdown("#### 📱 Smartphone Widget")
-            if st.button("Generate Widget Link", use_container_width=True):
-                st.info(
-                    "**To add as a widget:**\n\n"
-                    "1. Click the 'Open Widget Mode' link below.\n"
-                    "2. In your mobile browser (Safari/Chrome), tap **'Add to Home Screen'**.\n"
-                    "3. You now have a mini-dashboard icon on your smartphone!"
-                )
-                st.link_button("🚀 Open Widget Mode", "/?view=widget", use_container_width=True)
 
         from ui.faq_panel import render_faq_panel
         render_faq_panel(chain)

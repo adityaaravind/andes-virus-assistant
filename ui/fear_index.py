@@ -264,16 +264,6 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
 """.replace("\n", "").strip()
     st.markdown(html_content, unsafe_allow_html=True)
 
-    col_empty, col_pin = st.columns([4, 1])
-    with col_pin:
-        if st.button("📱 Pin Widget", key="pin_fear", use_container_width=True):
-            st.info(
-                "**Install Fear Index Widget:**\n\n"
-                "1. Click the link below to open Widget Mode.\n"
-                "2. In Safari/Chrome, tap **Share** > **Add to Home Screen**."
-            )
-            st.link_button("🚀 Open Fear Widget", "/?widget=fear", use_container_width=True)
-
     # Gauge + Distribution visualization
     col_gauge, col_dist = st.columns([1, 1.2])
 
