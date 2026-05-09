@@ -190,9 +190,9 @@ margin-bottom:1rem; position:relative; overflow:hidden;">
 GLOBAL PANDEMIC RISK ASSESSMENT</p>
 <h2 style="margin:0.2rem 0 0;font-size:1.8rem !important;font-weight:900;color:white !important;">{label}</h2>
 </div>
-<div style="background:{color}22;border:1px solid {color}44;border-radius:8px;padding:0.4rem 1rem;text-align:right;">
-<p style="color:{color};font-size:0.65rem;font-weight:800;margin:0;">SCORE: {risk['overall']}%</p>
-<p style="color:#94a3b8;font-size:0.6rem;margin:0;">{desc}</p>
+<div style="background:{color}22;border:2px solid {color}88;border-radius:12px;padding:0.6rem 1.4rem;text-align:right;box-shadow: 0 0 15px {color}22;">
+<p style="color:{color};font-size:1.6rem;font-weight:900;margin:0;font-family:monospace;text-shadow:0 0 12px {color}88;">{risk['overall']}%</p>
+<p style="color:#94a3b8;font-size:0.65rem;font-weight:800;margin:0;text-transform:uppercase;letter-spacing:0.05em;">RISK SCORE</p>
 </div>
 </div>
 <div style="display:flex;gap:1.2rem;margin-top:1rem;flex-wrap:wrap;border-top:1px solid rgba(148,163,184,0.1);padding-top:0.6rem;">
