@@ -239,9 +239,6 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
 Media + Community Assessment &nbsp;&nbsp;<span class="live-dot" style="width:5px; height:5px;"></span>
 </p>
 </div>
-</div>
-""".replace("\n", "").strip()
-    st.markdown(html_content, unsafe_allow_html=True)
 <div style="margin-top: 1rem;">
 <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
 <span style="color:#64748b; font-size:0.7rem;">🌐 Web Sentiment: {web_sentiment:.1f}</span>
@@ -259,10 +256,10 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
 <span style="color:#94a3b8; font-size:0.77rem;">📈 Responses: <b style="color:#f8fafc;">{vote_count}</b></span>
 <span style="color:#94a3b8; font-size:0.77rem;">⏱ Updated: <b style="color:#f8fafc;">{datetime.now().strftime('%H:%M')}</b></span>
 </div>
-</div>
 <style>
 @keyframes pulse-fear {{ 0%,100% {{ opacity:1; }} 50% {{ opacity:0.4; }} }}
 </style>
+</div>
 """.replace("\n", "").strip()
     st.markdown(html_content, unsafe_allow_html=True)
 
