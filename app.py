@@ -380,6 +380,19 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
         )
 
 def main() -> None:
+    # ── Sidebar Scroll Guide ──
+    st.markdown(
+        """
+        <div class="sidebar-scroll-guide">
+            <div class="scroll-line">
+                <div class="scroll-dot"></div>
+            </div>
+            <div style="color:var(--teal); font-size:0.5rem; font-weight:800; transform:rotate(90deg); margin-top:20px;">SCROLL</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
     # ── v1.1 Feature Scroller (ABSOLUTE TOP) ──
     st.markdown(
         """
@@ -412,8 +425,8 @@ def main() -> None:
         # ── Compact Header ──
         st.markdown(
             """
-            <div style='display: flex; flex-wrap: wrap; align-items: center; gap: 15px; margin-bottom: 0.2rem;'>
-                <h1 style='margin:0; display: inline-block;'>🧬 Andes Virus Research Assistant <small style='font-size:0.5em; color:var(--gray-400); vertical-align: middle;'>v1.1</small></h1>
+            <div style='display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin-bottom: 0.5rem; padding-top: 10px;'>
+                <h1 class='glowing-title' style='margin:0; display: inline-block;'>🧬 Andes Virus Research Assistant <small style='font-size:0.5em; color:var(--gray-400); vertical-align: middle; text-shadow:none;'>v1.1</small></h1>
                 <div class='outbreak-badge'>OUTBREAK ACTIVE</div>
             </div>
             <p style='color:var(--gray-300); font-size:0.85rem; margin:0;'>
@@ -429,21 +442,7 @@ def main() -> None:
         from ui.stats_panel import render_stats_panel
         render_stats_panel()
 
-        # ── Dynamic Scroll Guide (CENTERED FLOW) ──
-        st.markdown(
-            """
-            <div class="scroll-guide-container">
-                <div class="scroll-pill">
-                    <span class="scroll-text-dynamic">Explore Intelligence</span>
-                    <span class="scroll-chevron">↓</span>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
         st.divider()
-
 
         st.warning("⚠️ **NOT MEDICAL ADVICE** • For emergencies contact local health authorities")
 
