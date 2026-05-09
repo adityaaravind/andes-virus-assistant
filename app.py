@@ -465,7 +465,7 @@ def main() -> None:
                     <h1 class='glowing-title' style='margin:0; display: inline-block;'>🧬 Andes Virus Research Assistant <span class='v11-feature-tag' style='vertical-align: middle; margin-left: 10px;'>v1.2.0</span></h1>
                     <div class='outbreak-badge'>OUTBREAK ACTIVE</div>
                 </div>
-                <p class='glowing-title' style='font-size:0.35rem; margin:0; margin-bottom: 0.8rem; opacity: 0.45; text-shadow: 0 0 5px rgba(0, 180, 216, 0.05);'>
+                <p class='glowing-title' style='font-size:0.9rem !important; margin:0; margin-bottom: 0.8rem; opacity: 0.85; text-shadow: 0 0 15px rgba(0, 180, 216, 0.3);'>
                     MV Hondius Hantavirus Outbreak · Intelligence Dashboard
                 </p>
                 """,
