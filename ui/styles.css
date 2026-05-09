@@ -103,29 +103,37 @@ h3 { font-size: 1rem !important; font-weight: 700 !important; }
 .glow-amber { color: #fbbf24 !important; text-shadow: 0 0 30px rgba(251, 191, 36, 0.6); }
 .glow-red { color: #f87171 !important; text-shadow: 0 0 35px rgba(248, 113, 113, 0.7); }
 
-/* ── Live Jitter & Pulse Animations ── */
-@keyframes needle-jitter {
-  0% { transform: translate(0,0) rotate(-0.2deg); }
-  25% { transform: translate(0.5px, 0.5px) rotate(0.1deg); }
-  50% { transform: translate(-0.5px, 0.5px) rotate(0.2deg); }
-  75% { transform: translate(0.5px, -0.5px) rotate(-0.1deg); }
-  100% { transform: translate(0,0) rotate(-0.2deg); }
+/* ── Live High-Frequency Jitter & Shake Animations ── */
+@keyframes live-jitter {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  20% { transform: translate(-0.4px, 0.4px) rotate(-0.1deg); }
+  40% { transform: translate(0.4px, -0.2px) rotate(0.1deg); }
+  60% { transform: translate(-0.2px, -0.4px) rotate(-0.05deg); }
+  80% { transform: translate(0.4px, 0.4px) rotate(0.1deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
 }
 
-@keyframes text-live-pulse {
-  0%, 100% { opacity: 1; filter: brightness(1) contrast(100%); }
-  50% { opacity: 0.8; filter: brightness(1.3) contrast(120%); }
+@keyframes text-live-shake {
+  0% { transform: translate(0, 0); filter: brightness(1); }
+  25% { transform: translate(0.3px, -0.3px); filter: brightness(1.1); }
+  50% { transform: translate(-0.3px, 0.3px); filter: brightness(1); }
+  75% { transform: translate(0.3px, 0.3px); filter: brightness(1.1); }
+  100% { transform: translate(0, 0); filter: brightness(1); }
 }
 
-/* Force animations on Plotly Gauge Elements */
+/* Force high-frequency vibration on Plotly Gauge Elements */
 .js-plotly-plot .indicator path.needle,
-.js-plotly-plot .indicator path.threshold {
-  animation: needle-jitter 0.12s infinite linear !important;
+.js-plotly-plot .indicator path.threshold,
+.js-plotly-plot .indicator path.gauge-path {
+  animation: live-jitter 0.08s infinite linear !important;
   transform-origin: center bottom !important;
 }
 
-.js-plotly-plot .indicator text.numbers {
-  animation: text-live-pulse 2s infinite ease-in-out !important;
+/* Force high-frequency vibration on main numbers */
+.js-plotly-plot .indicator text.numbers,
+.js-plotly-plot .indicator text.growth-number {
+  animation: text-live-shake 0.12s infinite linear !important;
+  display: inline-block !important;
 }
 
 /* ── Voting Cards & Buttons ── */
