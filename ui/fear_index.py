@@ -245,9 +245,12 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
 
     with col_dist:
         # Pre-initialize level for CSS calculation - Use float for smooth motion
-        level_float = float(live_fear) if 1 <= live_fear <= 5 else 1.0
+        level_float = float(live_fear)
         if "fear_slider_input" in st.session_state:
-            level_float = st.session_state.fear_slider_input
+            try:
+                level_float = float(st.session_state.fear_slider_input)
+            except:
+                level_float = float(live_fear)
             
         # Map float to integer for labels/logic
         level_int = int(round(level_float))
@@ -361,8 +364,8 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
             "Fear Level",
             min_value=1.0,
             max_value=5.0,
-            value=level_float,
-            step=0.01, # HIGH RESOLUTION for smooth motion
+            value=float(level_float),
+            step=0.01,
             disabled=user_voted_today,
             label_visibility="collapsed",
             key="fear_slider_input",
