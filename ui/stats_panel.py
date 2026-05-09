@@ -154,10 +154,6 @@ def render_stats_panel() -> None:
         unsafe_allow_html=True,
     )
 
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
 
 def render_timeline_chart() -> None:
     st.markdown("#### Case Progression")

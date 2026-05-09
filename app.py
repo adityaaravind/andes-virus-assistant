@@ -404,7 +404,6 @@ def main() -> None:
         # ── LIVE STATS (BELOW HEADER) ──
         from ui.stats_panel import render_stats_panel
         render_stats_panel()
-        st.divider()
 
         st.warning("⚠️ **NOT MEDICAL ADVICE** • For emergencies contact local health authorities")
 
