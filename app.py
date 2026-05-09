@@ -416,7 +416,12 @@ def main() -> None:
                 "<div style='text-align:right;'><span class='outbreak-badge'>OUTBREAK ACTIVE</span></div>",
                 unsafe_allow_html=True
             )
-        
+
+        st.divider()
+
+        # ── LIVE STATS (MOVED TO TOP FOR MOBILE) ──
+        from ui.stats_panel import render_stats_panel
+        render_stats_panel()
         st.divider()
 
         # ── Information Panels ──
@@ -432,7 +437,6 @@ def main() -> None:
                 "</div>",
                 unsafe_allow_html=True
             )
-
         with use_col:
             st.markdown(
                 "<div class='panel-card'>"
@@ -453,7 +457,7 @@ def main() -> None:
         from ui.pandemic_risk import render_pandemic_risk_panel
         from ui.fear_index import render_fear_index
         from ui.news_ticker import render_news_ticker
-        from ui.stats_panel import render_stats_panel, render_timeline_chart
+        from ui.stats_panel import render_timeline_chart
         from ui.map_panel import render_map_panel
         from ui.journalist_tools import render_journalist_tools
 
@@ -470,10 +474,11 @@ def main() -> None:
         st.divider()
 
         # ── Stats + map ──────────────────────────────────────────────────────────
-        render_stats_panel()
+        # render_stats_panel()  <-- MOVED UP
         render_map_panel()
         render_timeline_chart()
         st.divider()
+
 
         # ── Journalist tools ─────────────────────────────────────────────────────
         render_journalist_tools()
