@@ -157,34 +157,6 @@ def _build_fear_gauge(avg_fear: float, color: str) -> go.Figure:
     return fig
 
 
-def _build_fear_dist_chart(dist: dict[int, int]) -> go.Figure:
-    """Build horizontal bar chart for vote distribution."""
-    labels = [FEAR_LEVELS[i]["label"].title() for i in sorted(dist.keys())]
-    values = [dist[i] for i in sorted(dist.keys())]
-    colors = [FEAR_LEVELS[i]["color"] for i in sorted(dist.keys())]
-
-    fig = go.Figure(go.Bar(
-        x=values,
-        y=labels,
-        orientation='h',
-        marker=dict(color=colors, line=dict(color="rgba(255,255,255,0.2)", width=1)),
-        text=values,
-        textposition='auto',
-        textfont=dict(color="#f8fafc", size=10, family="monospace"),
-    ))
-
-    fig.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#94a3b8", size=10),
-        margin=dict(l=10, r=10, t=20, b=10),
-        height=200,
-        xaxis=dict(showgrid=False, showticklabels=False),
-        yaxis=dict(autorange="reversed"),
-    )
-    return fig
-
-
 def render_fear_index() -> None:
     """Render fear index voting panel."""
     avg_fear, vote_count, label, desc, color, web_sentiment = _calculate_fear_average()
@@ -211,7 +183,6 @@ def render_fear_index() -> None:
         dist[v["level"]] += 1
 
     # Horizontal card layout matching pandemic card
-    import textwrap
     anim = "pulse-fear 2s ease-in-out infinite" if avg_fear >= 3.0 else "none"
     
     # Calculate percentages for the breakdown bar
@@ -352,20 +323,9 @@ clear official communications and verified data.
                 box-shadow: 0 8px 24px {l_color}15 !important;
             }}
             div[data-testid="stButton"] button[key*="vote_dist_{level}"]:disabled {{
-                opacity: 0.5 !important;
+                opacity: 0.4 !important;
                 cursor: not-allowed !important;
-                border-color: rgba(255,255,255,0.05) !important;
-                filter: grayscale(0.5);
+                filter: grayscale(0.8);
             }}
         """
     st.markdown(f"<style>{btn_dist_style}</style>", unsafe_allow_html=True)
-
-    # Remove old voting section
-
-        thanks_html = """
-<div style="background:rgba(34,197,94,0.08); border:1px solid #22c55e44; border-radius:8px; padding:0.8rem; margin-top:1rem;">
-<p style="color:#22c55e; font-size:0.8rem; margin:0;">✓ Thanks for participating! Your vote has been recorded.</p>
-<p style="color:#94a3b8; font-size:0.75rem; margin:0.2rem 0 0;">Outbreak sentiment tracking helps researchers understand public response and information gaps.</p>
-</div>
-""".replace("\n", "").strip()
-        st.markdown(thanks_html, unsafe_allow_html=True)
