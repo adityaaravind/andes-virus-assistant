@@ -306,48 +306,46 @@ clear official communications and verified data.
 
     # Voting buttons section below the visualization
     if not user_voted_today:
-        style_html = f"""
-<style>
-.vote-buttons .stButton > button {{
-height: 45px !important; font-size: 0.8rem !important; font-weight: 600 !important;
-padding: 0.6rem 1rem !important; margin: 0.2rem 0 !important;
-background: linear-gradient(135deg, rgba(13,27,42,0.8) 0%, rgba(27,46,69,0.8) 100%) !important;
-border: 1px solid {color}44 !important; border-radius: 8px !important; color: {color} !important;
-transition: all 0.2s ease !important;
-}}
-.vote-buttons .stButton > button:hover {{
-background: linear-gradient(135deg, {color}15 0%, {color}25 100%) !important;
-border-color: {color} !important; transform: translateY(-1px) !important;
-box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
-}}
-</style>
-<div class="vote-buttons">
-""".replace("\n", "").strip()
-        st.markdown(style_html, unsafe_allow_html=True)
+        st.markdown(
+            f'<p style="color:#94a3b8; font-size:0.85rem; font-weight:700; margin:1.5rem 0 1rem;">'
+            f'🗳️ <b>CAST YOUR VOTE:</b> How do you feel about the outbreak today?</p>',
+            unsafe_allow_html=True
+        )
 
-        st.markdown(f'<p style="color:#94a3b8; font-size:0.85rem; margin:0.5rem 0 0.8rem;">How do you feel about the outbreak?</p>', unsafe_allow_html=True)
+        # Custom CSS for colorful, glowing buttons
+        btn_style = ""
+        for level, info in FEAR_LEVELS.items():
+            l_color = info['color']
+            btn_style += f"""
+                div[data-testid="stButton"] button[key*="vote_{level}"] {{
+                    border: 1px solid {l_color}66 !important;
+                    color: {l_color} !important;
+                    background: rgba(15, 23, 42, 0.4) !important;
+                    height: 48px !important;
+                    transition: all 0.3s ease !important;
+                    font-weight: 800 !important;
+                    letter-spacing: 0.05em !important;
+                    box-shadow: 0 0 10px {l_color}11 !important;
+                }}
+                div[data-testid="stButton"] button[key*="vote_{level}"]:hover {{
+                    border-color: {l_color} !important;
+                    background: {l_color}1a !important;
+                    box-shadow: 0 0 20px {l_color}44 !important;
+                    transform: translateY(-2px) !important;
+                }}
+            """
+        
+        st.markdown(f"<style>{btn_style}</style>", unsafe_allow_html=True)
 
-        # First row: calm, concerned, worried
-        cols1 = st.columns(3)
-        for i, level in enumerate([1, 2, 3]):
+        # 5-column grid for perfect alignment
+        v_cols = st.columns(5)
+        for i, level in enumerate(range(1, 6)):
             info = FEAR_LEVELS[level]
-            with cols1[i]:
+            with v_cols[i]:
                 if st.button(info['label'].upper(), key=f"vote_{level}", use_container_width=True, help=info['desc']):
                     _save_fear_vote(level, user_id)
                     st.success(f"✅ Voted: {info['label']}")
                     st.rerun()
-
-        # Second row: fearful, panicked (centered)
-        cols2 = st.columns([1, 2, 2, 1])
-        for i, level in enumerate([4, 5]):
-            info = FEAR_LEVELS[level]
-            with cols2[i + 1]:
-                if st.button(info['label'].upper(), key=f"vote_{level}", use_container_width=True, help=info['desc']):
-                    _save_fear_vote(level, user_id)
-                    st.success(f"✅ Voted: {info['label']}")
-                    st.rerun()
-
-        st.markdown('</div>', unsafe_allow_html=True)
     else:
         thanks_html = """
 <div style="background:rgba(34,197,94,0.08); border:1px solid #22c55e44; border-radius:8px; padding:0.8rem; margin-top:1rem;">
