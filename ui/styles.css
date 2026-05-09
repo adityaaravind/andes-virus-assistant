@@ -294,27 +294,45 @@ h3 { font-size: 1rem !important; font-weight: 700 !important; }
 }
 
 .cyber-dropdown summary {
-    padding: 0.6rem 1rem;
+    padding: 0.8rem 1rem;
     list-style: none;
     cursor: pointer;
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     font-weight: 800;
     color: var(--gray-300);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    gap: 12px;
     outline: none;
+    position: relative;
 }
 
 .cyber-dropdown summary::-webkit-details-marker {
     display: none;
 }
 
+/* Custom Chevron Indicator */
+.cyber-dropdown summary::after {
+    content: '▼';
+    font-size: 0.5rem;
+    transition: transform 0.3s ease;
+    opacity: 0.5;
+}
+
+.cyber-dropdown[open] summary::after {
+    transform: rotate(180deg);
+}
+
 .cyber-dropdown summary:hover {
     color: var(--teal);
     background: rgba(0, 180, 216, 0.05);
+}
+
+.cyber-dropdown summary:hover::after {
+    opacity: 1;
 }
 
 .cyber-dropdown[open] {
