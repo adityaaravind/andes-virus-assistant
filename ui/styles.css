@@ -453,3 +453,48 @@ section[data-testid="stSidebar"] button[data-testid="stSidebarCollapseButton"] {
     border: none !important;
     background: transparent !important;
 }
+
+/* ── Sidebar Navigation Tiles ── */
+.nav-tile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+}
+
+.nav-tile {
+    text-decoration: none !important;
+    background: rgba(27, 46, 69, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    padding: 0.9rem 0.5rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; /* Pop effect */
+    cursor: pointer !important;
+}
+
+.nav-tile:hover, .nav-tile:active {
+    transform: scale(1.15) !important;
+    background: rgba(27, 46, 69, 0.8) !important;
+    border-color: var(--teal) !important;
+    box-shadow: 0 8px 25px rgba(0, 180, 216, 0.4) !important;
+    z-index: 100 !important;
+}
+
+.nav-tile-icon {
+    font-size: 1.5rem !important;
+    margin-bottom: 0.4rem !important;
+}
+
+.nav-tile-label {
+    color: var(--white) !important;
+    font-size: 0.62rem !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    text-align: center !important;
+    line-height: 1.2 !important;
+}

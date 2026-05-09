@@ -68,6 +68,7 @@ def _run_fast_news_poll() -> None:
     """15-minute job: RSS only → vector store + case count extraction + alert check."""
     try:
         import sys
+        import gc
         sys.path.insert(0, str(Path(__file__).parent))
         from ingestion.news_scraper import scrape_all_feeds
         from processing.chunker import chunk_documents
@@ -83,7 +84,6 @@ def _run_fast_news_poll() -> None:
             
             # v1.1 Semantic Alerting
             from alerts.alert_manager import check_semantic_alerts
-            from alerts.notifier import send_ntfy
             concerns_found = set()
             for c in chunks:
                 if "embedding" in c:
@@ -102,19 +102,27 @@ def _run_fast_news_poll() -> None:
         logging.info("Fast news poll: %d new chunks", len(chunks))
 
 
-        # Backup streamlit-analytics2 to Qdrant
+        # Backup streamlit-analytics2 to Qdrant & Check size
         try:
             import json
             analytics_file = Path("data/analytics.json")
             if analytics_file.exists():
-                from alerts.persistent_kv import kv_set
-                data = json.loads(analytics_file.read_text())
-                kv_set("analytics_backup", data)
+                # If analytics grows > 5MB, backup and clear to save RAM
+                if analytics_file.stat().st_size > 5 * 1024 * 1024:
+                    logging.info("Analytics log > 5MB, clearing local file to save RAM")
+                    from alerts.persistent_kv import kv_set
+                    data = json.loads(analytics_file.read_text())
+                    kv_set("analytics_backup", data)
+                    analytics_file.write_text(json.dumps({"counts": {}, "total_views": 0})) # Reset
+                else:
+                    from alerts.persistent_kv import kv_set
+                    data = json.loads(analytics_file.read_text())
+                    kv_set("analytics_backup", data)
         except Exception:
             pass
 
         # Pass raw article dicts (not Document objects) to case count extractor
-        updated = extract_and_save(docs)
+        extract_and_save(docs)
 
         # Fire ntfy + alert checks with latest known data
         try:
@@ -152,6 +160,8 @@ def _run_fast_news_poll() -> None:
                 )
         except Exception:
             logging.exception("Fast poll alert check failed")
+            
+        gc.collect() # Force cleanup
 
     except Exception:
         logging.exception("Fast news poll failed")
@@ -160,13 +170,12 @@ def _run_fast_news_poll() -> None:
 def _run_ingestion_job() -> None:
     try:
         import sys
+        import gc
         sys.path.insert(0, str(Path(__file__).parent))
         from scripts.ingest_all import run_ingestion
         run_ingestion()
-    except Exception:
-        logging.exception("Background ingestion job failed")
-    # Check alert thresholds after every ingestion
-    try:
+        
+        # Check alert thresholds after every ingestion
         from alerts.alert_manager import check_and_fire
         from ui.stats_panel import get_outbreak_stats
         from ui.map_panel import NATIONALITIES_DATA
@@ -184,8 +193,10 @@ def _run_ingestion_job() -> None:
         fired = check_and_fire(current)
         if fired:
             logging.info("Dispatched %d alert(s)", fired)
+        
+        gc.collect() # Force cleanup
     except Exception:
-        logging.exception("Alert check failed")
+        logging.exception("Background ingestion job failed")
 
 
 def _start_scheduler() -> None:
@@ -339,9 +350,19 @@ def _render_header() -> None:
 def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
     from ui.source_panel import render_source_panel
     from ui.alert_settings import render_alert_settings
+    from ui.tile_menu import render_tile_menu
     from vectorstore.store import get_stats
 
     with st.sidebar:
+        st.markdown(
+            "<h2 style='color:#00b4d8;font-size:1.1rem;margin-bottom:0.5rem;'>"
+            "🧬 Command Center</h2>",
+            unsafe_allow_html=True,
+        )
+        
+        render_tile_menu()
+        st.divider()
+
         st.markdown(
             "<h2 style='color:#00b4d8;font-size:1.1rem;margin-bottom:0.5rem;'>"
             "📚 Source Panel</h2>",
@@ -489,6 +510,7 @@ def main() -> None:
         st.divider()
 
         # ── LIVE STATS (BELOW HEADER) ──
+        st.markdown("<div id='stats'></div>", unsafe_allow_html=True)
         from ui.stats_panel import render_stats_panel
         render_stats_panel()
 
@@ -506,6 +528,7 @@ def main() -> None:
         from ui.journalist_tools import render_journalist_tools
 
         # ── PANDEMIC RISK & FEAR INDEX — equal size cards ────────────────────────
+        st.markdown("<div id='risk_fear'></div>", unsafe_allow_html=True)
         col_risk, col_fear = st.columns([1, 1])
         with col_risk:
             render_pandemic_risk_panel()
@@ -514,21 +537,24 @@ def main() -> None:
         st.divider()
 
         # ── Live news ────────────────────────────────────────────────────────────
+        st.markdown("<div id='news'></div>", unsafe_allow_html=True)
         render_news_ticker()
         st.divider()
 
         # ── Stats + map ──────────────────────────────────────────────────────────
-        # render_stats_panel()  <-- MOVED UP
+        st.markdown("<div id='map'></div>", unsafe_allow_html=True)
         render_map_panel()
         render_timeline_chart()
         st.divider()
 
 
         # ── Journalist tools ─────────────────────────────────────────────────────
+        st.markdown("<div id='journalist'></div>", unsafe_allow_html=True)
         render_journalist_tools()
         st.divider()
 
         # ── ROADMAP (COMING SOON) ───────────────────────────────────────────────
+        st.markdown("<div id='roadmap'></div>", unsafe_allow_html=True)
         st.markdown("### 🚀 Next Intelligence Phases (coming soon)")
         col_road1, col_road2 = st.columns(2)
         with col_road1:
