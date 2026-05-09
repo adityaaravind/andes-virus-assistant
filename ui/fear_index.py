@@ -198,154 +198,147 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         st.plotly_chart(fig_gauge, use_container_width=True, config={"displayModeBar": False})
 
     with col_dist:
-        # Pre-initialize level for logic
-        level_f = float(live_fear)
+        # Pre-calculate state
+        level_int = max(1, min(5, int(round(live_fear))))
         if "fear_slider_input" in st.session_state:
-            try: level_f = float(st.session_state.fear_slider_input)
-            except: pass
-            
-        level_int = max(1, min(5, int(round(level_f))))
-        l_color = FEAR_LEVELS[level_int]['color']
-        
-        # ── EXACT LUXURY SLIDER IMPLEMENTATION ──
+            level_int = int(st.session_state.fear_slider_input)
+
+        # ── NEON GLOW TOGGLE GROUP ──
         st.markdown(
-            f"""
+            """
             <style>
-            /* 1. The provided CSS foundation */
-            :root {{
-              --width: 100%;
-              --update: 0.1s;
-              --value: {(level_f - 1) * 25}; /* Map 1-5 to 0-100 */
-              --accent: {l_color};
-              --thickness: 4px;
-              --outset: -.5rem;
-            }}
-
-            .control {{
-                position: relative;
-                display: grid;
-                place-items: center;
-                border-radius: 100px;
-                margin: 2rem auto;
-                height: 12px;
-                width: 90%;
-                background: #00000033;
-                box-shadow: 0 0 10px inset black;
-            }}
-
-            .control__track {{
-                height: 100%;
-                width: 100%;
-                border-radius: 100px;
-                position: absolute;
-                bottom: 0;
-                pointer-events: none;
-                background: hsl(0 0% 8%);
-                box-shadow: 0 -2px 10px 0 hsl(210 10% 0% / 0.5) inset,
-                            0 2px 10px 0 hsl(210 10% 0% / 0.65) inset,
-                            0 -1px inset hsl(0 0% 100% / 0.5),
-                            0 0 10px inset black;
-            }}
-
-            .control__indicator {{
-                height: 100%;
-                aspect-ratio: 1;
-                border-radius: 50%;
-                position: absolute;
-                top: 50%;
-                left: calc(var(--value, 0) * 1%);
-                z-index: 2;
-                translate: calc(var(--value, 0) * -1%) -50%;
-                transition: left var(--update), translate var(--update);
-                display: grid;
-                place-items: center;
-            }}
-
-            .control__thumb {{
-                width: 60px;
-                height: 60px;
+            .neon-group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.8rem;
+                padding: 1rem 0;
+            }
+            
+            .neon-toggle-row {
                 display: flex;
                 align-items: center;
-                justify-content: center;
-            }}
-            .control__thumb::after {{
-                content: '🚢';
-                font-size: 2.8rem;
-                filter: drop-shadow(0 0 15px var(--accent));
-            }}
+                justify-content: space-between;
+                background: rgba(15, 23, 42, 0.4);
+                padding: 0.6rem 1rem;
+                border-radius: 12px;
+                border: 1px solid rgba(255,255,255,0.05);
+                transition: all 0.3s ease;
+            }
 
-            .control__beams {{
-                position: absolute;
-                inset: var(--outset);
-                pointer-events: none;
-                container-type: size;
-            }}
+            .neon-toggle-row.active {
+                background: rgba(15, 23, 42, 0.8);
+                border-color: var(--l-color);
+                box-shadow: 0 0 20px var(--l-color-low);
+            }
 
-            .control__beam-track {{
-                position: absolute;
-                border-radius: 100px;
-                inset: 0;
-            }}
-
-            .control__beam-track::after {{
-                content: "";
-                border: var(--thickness) solid var(--accent);
-                position: absolute;
-                border-radius: 100px;
-                inset: 0;
-                z-index: 2;
-                clip-path: inset(0 calc(100% - (var(--value) * 1%)) 0 0);
-                transition: clip-path var(--update);
-                box-shadow: 0 0 40px var(--accent);
-            }}
-
-            /* Hide Streamlit slider artifacts */
-            div[data-testid="stSlider"] [data-baseweb="slider"] > div:last-child,
-            div[data-testid="stThumbValue"],
-            div[aria-valuenow] {{ display: none !important; }}
+            .neon-label-text {
+                font-family: 'Inter', sans-serif;
+                font-weight: 800;
+                font-size: 0.9rem;
+                letter-spacing: 0.05em;
+                color: #94a3b8;
+                transition: all 0.3s ease;
+            }
             
-            div[data-testid="stSlider"] [role="slider"] {{ opacity: 0 !important; }}
-            div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child {{
+            .active .neon-label-text {
+                color: white;
+                text-shadow: 0 0 10px var(--l-color);
+            }
+
+            /* The Neon Switch Visual */
+            .neon-switch {
+                width: 50px;
+                height: 24px;
+                background: #0f172a;
+                border-radius: 50px;
+                position: relative;
+                border: 2px solid rgba(255,255,255,0.1);
+                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+
+            .active .neon-switch {
+                border-color: var(--l-color);
+                box-shadow: 0 0 15px var(--l-color), inset 0 0 5px var(--l-color);
+            }
+
+            .neon-handle {
+                position: absolute;
+                top: 2px;
+                left: 2px;
+                width: 16px;
+                height: 16px;
+                background: #1e293b;
+                border-radius: 50%;
+                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+
+            .active .neon-handle {
+                transform: translateX(26px);
+                background: var(--l-color);
+                box-shadow: 0 0 10px var(--l-color);
+            }
+
+            /* Custom button to overlay the whole row */
+            div[data-testid="stButton"] button[key^="neon_btn_"] {
+                position: absolute;
+                inset: 0;
                 background: transparent !important;
-                height: 40px !important;
-            }}
+                border: none !important;
+                color: transparent !important;
+                z-index: 10;
+                height: 100% !important;
+                width: 100% !important;
+            }
             </style>
-            <p style='color:#f8fafc; font-size:0.9rem; font-weight:800; margin-bottom:1rem; letter-spacing:0.1em; text-align:center;'>📊 COMMAND SENTIMENT</p>
+            <p style='color:#f8fafc; font-size:0.8rem; font-weight:800; margin-bottom:1rem; letter-spacing:0.1em; opacity:0.8; text-transform:uppercase;'>📡 SELECT CURRENT SENTIMENT</p>
             """,
             unsafe_allow_html=True
         )
 
-        def on_fear_change():
-            nv = int(round(st.session_state.fear_slider_input))
-            _save_fear_vote(nv, user_id)
-            st.toast(f"Course locked: {FEAR_LEVELS[nv]['label'].upper()}! 🚢", icon="✅")
+        def on_neon_click(level_id):
+            _save_fear_vote(level_id, user_id)
+            st.session_state.fear_slider_input = level_id
+            st.toast(f"Sentiment updated: {FEAR_LEVELS[level_id]['label'].upper()}! ⚡", icon="🟢")
 
-        level = st.slider("Fear Level", 1.0, 5.0, float(level_f), 0.01, disabled=user_voted_today, label_visibility="collapsed", key="fear_slider_input", on_change=on_fear_change if not user_voted_today else None)
+        st.markdown('<div class="neon-group">', unsafe_allow_html=True)
         
-        l_now = int(round(level))
-        c_l = FEAR_LEVELS[l_now]['color']
-        
-        st.markdown(
-            f"""
-            <div class="control">
-                <div class="control__track">
-                    <div class="control__indicator">
-                        <div class="control__thumb"></div>
+        for level_id, info in FEAR_LEVELS.items():
+            is_active = (level_id == level_int)
+            l_color = info['color']
+            l_color_low = l_color + "22" # Low opacity for glow
+            
+            # Use a container to group the visual and the hidden button
+            container = st.container()
+            with container:
+                # The visual HTML
+                st.markdown(
+                    f"""
+                    <div class="neon-toggle-row {'active' if is_active else ''}" style="--l-color: {l_color}; --l-color-low: {l_color_low}; position: relative;">
+                        <span class="neon-label-text">{info['label'].upper()}</span>
+                        <div class="neon-switch">
+                            <div class="neon-handle"></div>
+                        </div>
                     </div>
-                </div>
-                <div class="control__beams">
-                    <div class="control__beam-track"></div>
-                </div>
-            </div>
-            <div class='sentiment-label' style='margin-top:2rem;'><h2 style='color:{c_l}; text-align:center; margin:0; font-family:monospace; text-shadow: 0 0 30px {c_l}; font-weight:950; font-size:2.4rem !important;'>{FEAR_LEVELS[l_now]['label'].upper()}</h2></div>
-            """, 
-            unsafe_allow_html=True
-        )
+                    """,
+                    unsafe_allow_html=True
+                )
+                
+                # The hidden button that handles the click
+                if st.button("", key=f"neon_btn_{level_id}", disabled=user_voted_today):
+                    on_neon_click(level_id)
+                    st.rerun()
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
         if user_voted_today:
-            st.markdown(f"<div style='background:rgba(34,197,94,0.1); border:1px solid #22c55e66; border-radius:12px; padding:1rem; margin-top:1rem; text-align:center; box-shadow: 0 0 25px rgba(34,197,94,0.3);'><p style='color:#22c55e; font-size:0.95rem; font-weight:950; margin:0; letter-spacing:0.05em;'>✓ SHIP ANCHORED: {FEAR_LEVELS[l_now]['label'].upper()}</p></div>", unsafe_allow_html=True)
+            st.markdown(
+                f"<div style='background:rgba(34,197,94,0.05); border:1px solid #22c55e33; border-radius:10px; padding:0.8rem; margin-top:0.5rem; text-align:center;'>"
+                f"<p style='color:#22c55e; font-size:0.75rem; font-weight:900; margin:0;'>✓ SENTIMENT LOCKED: {FEAR_LEVELS[level_int]['label'].upper()}</p>"
+                f"</div>",
+                unsafe_allow_html=True
+            )
         else:
-            st.markdown("<p style='color:#64748b; font-size:0.75rem; text-align:center; margin-top:0.8rem; font-weight:700;'>DRAG SHIP TO NAVIGATE OUTBREAK FEAR</p>", unsafe_allow_html=True)
+            st.caption("Tap any level to instantly register your sentiment.")
 
     # Callouts
     callout_html = """
