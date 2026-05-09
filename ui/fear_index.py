@@ -262,17 +262,25 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
 
     # Callout boxes matching pandemic panel
     callout_html = f"""
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-top:0.3rem; margin-bottom: 1rem;">
-<div style="background:rgba(27,46,69,0.3);border:1px solid #1b2e45;border-radius:8px;padding:0.6rem 0.8rem;">
-<p style="color:#94a3b8;font-size:0.72rem;font-weight:700;margin:0;">ℹ️ SENTIMENT ANALYSIS</p>
-<p style="color:#64748b;font-size:0.73rem;margin:0.2rem 0 0;">
+<style>
+.fear-callout-grid {{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 0.6rem;
+    margin-top: 0.3rem;
+}}
+</style>
+<div class="fear-callout-grid">
+<div style="background:rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.3); border-radius:8px; padding:0.6rem 0.8rem;">
+<p style="color:#38bdf8; font-size:0.72rem; font-weight:700; margin:0; text-transform:uppercase;">ℹ️ SENTIMENT ANALYSIS</p>
+<p style="color:#94a3b8; font-size:0.73rem; margin:0.2rem 0 0;">
 Tracks public anxiety level based on 1000+ real-time votes. 
 Weighted to favor recent sentiment (15-min decay).
 </p>
 </div>
-<div style="background:rgba(27,46,69,0.3);border:1px solid #1b2e45;border-radius:8px;padding:0.6rem 0.8rem;">
-<p style="color:#94a3b8;font-size:0.72rem;font-weight:700;margin:0;">📈 IMPACT ASSESSMENT</p>
-<p style="color:#64748b;font-size:0.73rem;margin:0.2rem 0 0;">
+<div style="background:rgba(167,139,250,0.08); border:1px solid rgba(167,139,250,0.3); border-radius:8px; padding:0.6rem 0.8rem;">
+<p style="color:#a78bfa; font-size:0.72rem; font-weight:700; margin:0; text-transform:uppercase;">📈 IMPACT ASSESSMENT</p>
+<p style="color:#94a3b8; font-size:0.73rem; margin:0.2rem 0 0;">
 Public fear often correlates with geographic spread but can be mitigated by 
 clear official communications and verified data.
 </p>
