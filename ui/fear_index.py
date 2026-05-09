@@ -219,28 +219,29 @@ def render_fear_index() -> None:
     web_weight = 0.4 if vote_count > 0 else 1.0
     
     html_content = f"""
-<div style="background:rgba(15, 23, 42, 0.4); border: 2px solid {color}44; border-radius: 12px; padding: 1.2rem 1.4rem;
-margin-bottom: 1rem; position: relative; overflow: hidden; height: 160px; display: flex; flex-direction: column; justify-content: space-between;">
-<div style="position: absolute; top: 0; left: 0; right: 0; height: 4px;
+<div style="background:rgba(15, 23, 42, 0.6); border: 1px solid {color}44; border-radius: 10px; padding: 0.8rem 1.2rem;
+margin-bottom: 0.8rem; position: relative; overflow: hidden; min-height: 120px; display: flex; flex-direction: column; justify-content: space-between; backdrop-filter: blur(10px);">
+<div style="position: absolute; top: 0; left: 0; right: 0; height: 3px;
 background: linear-gradient(90deg,{color},{color}44,{color}); animation: {anim};"></div>
-<div style="display:flex; align-items:center; justify-content: space-between; gap:1rem;">
-<div style="flex:1;">
-<p style="color:#94a3b8; font-size:0.7rem; font-weight:800; letter-spacing:0.12em; margin:0; font-family:monospace; opacity:0.9;">📡 PUBLIC FEAR INDEX</p>
-<h2 style="margin:0.1rem 0 0; font-size:2.1rem !important; font-weight:900; color:white !important; letter-spacing:-0.02em; line-height: 1.1;">{label.upper()}</h2>
+<div style="display:flex; align-items:center; gap: 1.5rem; flex-wrap:wrap;">
+<div style="flex-shrink:0;">
+<p style="color:#94a3b8; font-size:0.65rem; font-weight:800; letter-spacing:0.1em; margin:0; font-family:monospace; opacity:0.8;">📡 FEAR INDEX</p>
+<h2 style="margin:0; font-size:1.8rem !important; font-weight:950; color:white !important; letter-spacing:-0.03em; line-height: 1;">{label.upper()}</h2>
 </div>
-<div style="background:{color}15; border:2px solid {color}; border-radius:10px; padding:0.5rem 1rem; 
-text-align:center; min-width:110px; box-shadow: 0 0 20px {color}15; height: fit-content;">
-<p style="color:{color}; font-size:1.8rem; font-weight:900; margin:0; line-height:1; font-family:monospace; text-shadow:0 0 10px {color}88;">{avg_fear:.1f}<small style="font-size:0.5em; opacity:0.7;">/5</small></p>
-<p style="color:#94a3b8; font-size:0.55rem; font-weight:800; margin:2px 0 0; text-transform:uppercase; letter-spacing:0.05em; opacity:0.8;">FEAR SCORE</p>
+<div style="background:{color}15; border:1px solid {color}; border-radius:6px; padding:0.3rem 0.8rem; 
+text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-content;">
+<p style="color:{color}; font-size:1.5rem; font-weight:900; margin:0; line-height:1; font-family:monospace; text-shadow:0 0 8px {color}88;">{avg_fear:.1f}<small style="font-size:0.5em; opacity:0.7;">/5</small></p>
+<p style="color:#94a3b8; font-size:0.5rem; font-weight:800; margin:0; text-transform:uppercase; opacity:0.8;">SCORE</p>
 </div>
 </div>
-<div style="display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap; border-top:1px solid rgba(148,163,184,0.1); padding-top:0.6rem;">
-<p style="color:#64748b; font-size:0.65rem; margin:0; font-weight:700;">
-Blended Sentiment: Media + Community &nbsp;&nbsp;<span class="live-dot" style="width:6px; height:6px;"></span>
-<span class="live-label" style="font-size:0.6rem;">LIVE ASSESSMENT</span>
+<div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap; border-top:1px solid rgba(255,255,255,0.05); padding-top:0.5rem;">
+<p style="color:#64748b; font-size:0.6rem; margin:0; font-weight:700; text-transform:uppercase;">
+Media + Community Assessment &nbsp;&nbsp;<span class="live-dot" style="width:5px; height:5px;"></span>
 </p>
 </div>
 </div>
+""".replace("\n", "").strip()
+    st.markdown(html_content, unsafe_allow_html=True)
 <div style="margin-top: 1rem;">
 <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
 <span style="color:#64748b; font-size:0.7rem;">🌐 Web Sentiment: {web_sentiment:.1f}</span>
@@ -312,39 +313,39 @@ clear official communications and verified data.
             unsafe_allow_html=True
         )
 
-        # Custom CSS for colorful, glowing buttons
+        # Custom CSS for Cyber-style buttons
         btn_style = ""
         for level, info in FEAR_LEVELS.items():
             l_color = info['color']
             btn_style += f"""
                 div[data-testid="stButton"] button[key*="vote_{level}"] {{
-                    border: 1px solid {l_color}66 !important;
+                    border: 1px solid {l_color}99 !important;
                     color: {l_color} !important;
-                    background: rgba(15, 23, 42, 0.4) !important;
-                    height: 48px !important;
-                    transition: all 0.3s ease !important;
-                    font-weight: 800 !important;
-                    letter-spacing: 0.05em !important;
-                    box-shadow: 0 0 10px {l_color}11 !important;
+                    background: rgba(10, 20, 35, 0.8) !important;
+                    height: 38px !important;
+                    font-size: 0.7rem !important;
+                    transition: all 0.2s ease !important;
+                    font-weight: 900 !important;
+                    text-shadow: 0 0 5px {l_color}44 !important;
+                    border-radius: 4px !important;
                 }}
                 div[data-testid="stButton"] button[key*="vote_{level}"]:hover {{
+                    background: {l_color}22 !important;
+                    box-shadow: 0 0 15px {l_color}33 !important;
+                    transform: translateY(-1px) !important;
                     border-color: {l_color} !important;
-                    background: {l_color}1a !important;
-                    box-shadow: 0 0 20px {l_color}44 !important;
-                    transform: translateY(-2px) !important;
                 }}
             """
         
         st.markdown(f"<style>{btn_style}</style>", unsafe_allow_html=True)
 
-        # 5-column grid for perfect alignment
+        # 5-column grid for high density
         v_cols = st.columns(5)
         for i, level in enumerate(range(1, 6)):
             info = FEAR_LEVELS[level]
             with v_cols[i]:
-                if st.button(info['label'].upper(), key=f"vote_{level}", use_container_width=True, help=info['desc']):
+                if st.button(info['label'].upper(), key=f"vote_{level}", use_container_width=True):
                     _save_fear_vote(level, user_id)
-                    st.success(f"✅ Voted: {info['label']}")
                     st.rerun()
     else:
         thanks_html = """
