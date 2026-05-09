@@ -430,12 +430,10 @@ def main() -> None:
                 <div class="scroll-line">
                     <div class="scroll-dot"></div>
                 </div>
-                <div style="color:var(--teal); font-size:0.5rem; font-weight:800; transform:rotate(90deg); margin-top:20px;">SCROLL</div>
             </div>
             """,
             unsafe_allow_html=True
         )
-
         st.divider()
 
         # ── LIVE STATS (BELOW TICKERS) ──
