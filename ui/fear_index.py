@@ -198,7 +198,6 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         st.plotly_chart(fig_gauge, use_container_width=True, config={"displayModeBar": False})
 
     with col_dist:
-        # Pre-calculate state
         level_int = max(1, min(5, int(round(live_fear))))
         if "fear_slider_input" in st.session_state:
             level_int = int(st.session_state.fear_slider_input)
@@ -208,78 +207,76 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         st.markdown(
             """
             <style>
-            /* 1. Visual Tile Styling */
             .premium-tile {
-                background: rgba(15, 23, 42, 0.6);
-                backdrop-filter: blur(12px);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                border-radius: 14px;
-                width: 100%;
-                aspect-ratio: 1/1;
+                background: rgba(15, 23, 42, 0.4);
+                backdrop-filter: blur(8px);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                border-radius: 12px;
+                width: 72px;
+                height: 72px;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
                 position: relative;
                 z-index: 1;
                 pointer-events: none;
-                margin-bottom: -100px; /* Pull button context into tile */
+                margin: 0 auto -72px auto;
+            }
+
+            .premium-tile-wrapper:hover .premium-tile:not(.disabled) {
+                background: radial-gradient(circle at center, rgba(255,255,255,0.15) 0%, rgba(15, 23, 42, 0.6) 100%);
+                border-color: rgba(255,255,255,0.2);
+                box-shadow: 0 0 20px rgba(255,255,255,0.1);
+                transform: translateY(-2px);
             }
 
             .premium-tile.active {
-                background: radial-gradient(circle at center, var(--t-color)44 0%, rgba(15, 23, 42, 0.95) 100%);
-                border: 2.5px solid var(--t-color);
-                box-shadow: 0 0 40px var(--t-color)77, inset 0 0 15px var(--t-color)44;
-                transform: scale(1.1) translateY(-5px);
+                background: radial-gradient(circle at center, var(--t-color)55 0%, rgba(15, 23, 42, 0.95) 100%) !important;
+                border: 2px solid var(--t-color) !important;
+                box-shadow: 0 0 35px var(--t-color)77, inset 0 0 10px var(--t-color)44 !important;
+                transform: scale(1.1) translateY(-4px) !important;
                 z-index: 2;
+                opacity: 1 !important;
             }
 
-            .premium-tile.disabled { opacity: 0.2; filter: grayscale(1); }
-
-            .tile-icon { font-size: 2.2rem; margin-bottom: 5px; line-height: 1; transition: 0.3s ease; }
-            .active .tile-icon { transform: scale(1.2); filter: drop-shadow(0 0 12px var(--t-color)); }
+            .premium-tile.disabled { opacity: 0.15; filter: grayscale(1); }
+            .tile-icon { font-size: 1.5rem; line-height: 1; margin-bottom: 2px; }
+            .active .tile-icon { filter: drop-shadow(0 0 8px var(--t-color)); }
 
             .tile-label {
                 font-family: 'Inter', sans-serif;
                 font-weight: 950;
-                font-size: 0.7rem;
+                font-size: 0.5rem;
                 text-transform: uppercase;
-                letter-spacing: 0.08em;
                 color: #94a3b8;
-                transition: 0.3s ease;
                 text-align: center;
-                line-height: 1.1;
+                line-height: 1;
             }
-            .active .tile-label {
-                color: white !important;
-                text-shadow: 0 0 15px var(--t-color), 0 0 30px var(--t-color)aa;
-                opacity: 1;
-            }
+            .active .tile-label { color: white !important; text-shadow: 0 0 10px var(--t-color); }
 
-            /* 2. Interaction Layer Overrides */
             div[data-testid="column"] div[data-testid="stButton"] {
                 position: relative;
                 z-index: 10;
                 margin: 0 !important;
                 padding: 0 !important;
+                display: flex;
+                justify-content: center;
             }
             
             div[data-testid="column"] div[data-testid="stButton"] button {
                 background: transparent !important;
                 border: none !important;
                 box-shadow: none !important;
-                height: 100px !important;
-                width: 100% !important;
+                height: 72px !important;
+                width: 72px !important;
                 color: transparent !important;
-                margin: 0 !important;
-            }
-            div[data-testid="column"] div[data-testid="stButton"] button:hover {
-                background: rgba(255,255,255,0.05) !important;
+                margin: 0 auto !important;
             }
             </style>
-            <p style='color:#94a3b8; font-size:0.75rem; font-weight:800; margin-bottom:1.2rem; letter-spacing:0.1em; opacity:0.8; text-transform:uppercase;'>📡 SELECT CURRENT SENTIMENT</p>
+            <p style='color:#94a3b8; font-size:0.7rem; font-weight:800; margin-bottom:0.8rem; letter-spacing:0.1em; opacity:0.8; text-transform:uppercase;'>📡 COMMAND SENTIMENT</p>
             """,
             unsafe_allow_html=True
         )
@@ -288,35 +285,18 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         for i, level_id in enumerate(range(1, 6)):
             info = FEAR_LEVELS[level_id]
             is_active = (level_id == level_int)
-            l_color = info['color']
-            
             with cols[i]:
-                st.markdown(
-                    f"""
-                    <div class="premium-tile {'active' if is_active else ''} {'disabled' if user_voted_today and not is_active else ''}" 
-                         style="--t-color: {l_color};">
-                        <span class="tile-icon">{icons[level_id]}</span>
-                        <span class="tile-label">{info['label'].upper()}</span>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-                if st.button(" ", key=f"v8_btn_{level_id}", disabled=user_voted_today, use_container_width=True):
+                st.markdown(f'<div class="premium-tile-wrapper"><div class="premium-tile {"active" if is_active else ""} {"disabled" if user_voted_today and not is_active else ""}" style="--t-color: {info["color"]};"><span class="tile-icon">{icons[level_id]}</span><span class="tile-label">{info["label"][:4].upper()}</span></div></div>', unsafe_allow_html=True)
+                if st.button(" ", key=f"v10_btn_{level_id}", disabled=user_voted_today):
                     _save_fear_vote(level_id, user_id)
                     st.session_state.fear_slider_input = level_id
                     st.rerun()
 
         if user_voted_today:
-            st.markdown(
-                f"<div style='background:rgba(34,197,94,0.05); border:1px solid #22c55e33; border-radius:12px; padding:0.8rem; margin-top:1rem; text-align:center; box-shadow: 0 0 25px rgba(34,197,94,0.2);'>"
-                f"<p style='color:#22c55e; font-size:0.8rem; font-weight:950; margin:0;'>✓ SENTIMENT ANCHORED: {FEAR_LEVELS[level_int]['label'].upper()}</p>"
-                f"</div>",
-                unsafe_allow_html=True
-            )
+            st.markdown(f"<div style='background:rgba(34,197,94,0.05); border:1px solid #22c55e33; border-radius:10px; padding:0.8rem; margin-top:1.2rem; text-align:center;'><p style='color:#22c55e; font-size:0.75rem; font-weight:950; margin:0;'>✓ SENTIMENT ANCHORED: {FEAR_LEVELS[level_int]['label'].upper()}</p></div>", unsafe_allow_html=True)
         else:
-            st.markdown("<p style='color:#64748b; font-size:0.6rem; text-align:center; margin-top:0.6rem; font-weight:700;'>TAP TILE TO CAST VOTE</p>", unsafe_allow_html=True)
+            st.markdown("<p style='color:#64748b; font-size:0.5rem; text-align:center; margin-top:0.6rem; font-weight:700;'>TAP TILE TO VOTE</p>", unsafe_allow_html=True)
 
-    # Callouts
     callout_html = """
 <style>.fear-callout-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.6rem; margin-top: 0.3rem; }</style>
 <div class="fear-callout-grid">
@@ -325,11 +305,3 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
 </div>
 """.replace("\n", "").strip()
     st.markdown(callout_html, unsafe_allow_html=True)
-
-    if user_voted_today:
-        thanks_html = """
-<div style="background:rgba(34,197,94,0.08); border:1px solid #22c55e44; border-radius:8px; padding:0.8rem; margin-top:0.2rem;">
-<p style="color:#22c55e; font-size:0.8rem; margin:0;">✓ Vote recorded. Thanks for participating!</p>
-</div>
-""".replace("\n", "").strip()
-        st.markdown(thanks_html, unsafe_allow_html=True)
