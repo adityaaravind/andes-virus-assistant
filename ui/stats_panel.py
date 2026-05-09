@@ -154,24 +154,6 @@ def render_stats_panel() -> None:
         unsafe_allow_html=True,
     )
 
-    # ── 2. INTERACTIVE METADATA (CYBER DROPDOWNS) ──
-    is_live = stats.get("_source") == "auto-extracted"
-    source_label = "🛡️ VERIFIED SOURCE" if not is_live else "📡 AUTO-SYNC"
-    
-    dropdown_html = f"""
-<div style="display: flex; justify-content: center; width: 100%;">
-    <details class="cyber-dropdown" style="width: 100%; max-width: 600px;">
-        <summary>{source_label}</summary>
-        <div class="cyber-dropdown-content">
-            <b>Status:</b> {"Real-time AI extraction active" if is_live else "Human-verified data source"}<br>
-            <b>Last Sync:</b> {stats['last_updated']}<br>
-            {"Verified from official bulletins" if not is_live else "Automated NLP extraction"}
-        </div>
-    </details>
-</div>
-"""
-    st.markdown(dropdown_html, unsafe_allow_html=True)
-
     st.markdown("<br>", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
