@@ -420,16 +420,28 @@ div[data-testid="stButton"] button[key*="vote_dist_"] div[data-testid="stMarkdow
     box-shadow: 0 0 15px rgba(0, 119, 181, 0.6);
 }
 
-/* ── Branding */
-.glowing-title {
-    background: linear-gradient(135deg, #00f5ff, var(--teal-light), #ffffff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 25px rgba(0, 245, 255, 0.4), 0 0 50px rgba(0, 180, 216, 0.2);
-    font-weight: 950;
-    font-size: clamp(1.6rem, 5vw, 2.8rem) !important;
-    letter-spacing: -0.04em;
-    line-height: 1.1;
+/* ── Header Mascot Animation ── */
+@keyframes virus-adventure {
+    0% { transform: translate(-100px, 0) rotate(0deg); opacity: 0; }
+    5% { opacity: 1; }
+    15% { transform: translate(20px, -30px) rotate(15deg); } /* First jump */
+    25% { transform: translate(60px, 0) rotate(0deg); }
+    35% { transform: translate(110px, -45px) rotate(-20deg); } /* High jump */
+    45% { transform: translate(160px, 0) rotate(0deg); }
+    55% { transform: translate(220px, -25px) rotate(10deg); } /* Small hop */
+    65% { transform: translate(280px, 0) rotate(0deg); }
+    75% { transform: translate(350px, 150px) rotate(180deg); opacity: 1; } /* Falling off */
+    100% { transform: translate(350px, 300px) rotate(360deg); opacity: 0; }
+}
+
+.cute-mascot {
+    position: absolute;
+    font-size: 1.2rem;
+    pointer-events: none;
+    z-index: 1000;
+    animation: virus-adventure 8s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95);
+    display: inline-block;
+    filter: drop-shadow(0 0 8px rgba(0, 180, 216, 0.6));
 }
 
 /* ── Sidebar Toggle Animation ── */
