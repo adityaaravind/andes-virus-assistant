@@ -137,7 +137,7 @@ def render_stats_panel() -> None:
     # Responsive grid for stat cards
     cards_html = ""
     for value, label, glow_class, subtext in cards:
-        subtext_html = f'<div style="font-size:0.55rem; color:var(--gray-500); margin-top:2px; font-weight:400; text-transform:none; letter-spacing:0;">{subtext}</div>' if subtext else ""
+        subtext_html = f'<div style="font-size:0.65rem; color:var(--gray-300); margin-top:4px; font-weight:500; text-transform:none; opacity:0.9; line-height:1.2;">{subtext}</div>' if subtext else ""
         cards_html += (
             f'<div class="stat-card" style="position:relative;">'
             f'<div style="position:absolute; top:8px; right:10px; display:flex; align-items:center; gap:4px; opacity:0.6;">'
