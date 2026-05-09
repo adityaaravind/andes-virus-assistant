@@ -216,3 +216,60 @@ h3 { font-size: 1rem !important; font-weight: 700 !important; }
     margin-right: 60px;
     display: inline-block;
 }
+
+/* --- Glowing Scroll Indicator --- */
+.scroll-indicator {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.scroll-mouse {
+    width: 20px;
+    height: 32px;
+    border: 2px solid var(--teal);
+    border-radius: 12px;
+    position: relative;
+    box-shadow: 0 0 10px rgba(0, 180, 216, 0.3);
+}
+
+.scroll-wheel {
+    width: 3px;
+    height: 6px;
+    background: var(--white);
+    border-radius: 2px;
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: scroll-ping 2s infinite;
+    box-shadow: 0 0 8px var(--white);
+}
+
+.scroll-text {
+    font-size: 0.55rem;
+    color: var(--teal);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-shadow: 0 0 5px rgba(0, 180, 216, 0.5);
+}
+
+@keyframes scroll-ping {
+    0% { transform: translate(-50%, 0); opacity: 1; }
+    100% { transform: translate(-50%, 15px); opacity: 0; }
+}
+
+@media (max-width: 768px) {
+    .scroll-indicator {
+        bottom: 20px;
+        right: 15px;
+    }
+}

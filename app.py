@@ -381,6 +381,19 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
 
 
 def main() -> None:
+    # ── Scroll Indicator (Fixed position via CSS) ──
+    st.markdown(
+        """
+        <div class="scroll-indicator">
+            <div class="scroll-mouse">
+                <div class="scroll-wheel"></div>
+            </div>
+            <div class="scroll-text">Scroll</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
     # ── v1.1 Feature Scroller (ABSOLUTE TOP) ──
     st.markdown(
         """
