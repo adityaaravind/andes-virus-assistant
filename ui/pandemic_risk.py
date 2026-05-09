@@ -182,28 +182,26 @@ def render_pandemic_risk_panel() -> None:
     import textwrap
     anim = "pulse-risk 1.8s ease-in-out infinite" if risk["overall"] >= 40 else "none"
     header_html = f"""
-<div style="background:rgba(15, 23, 42, 0.6); border: 1px solid {color}33; border-radius: 10px; padding: 0.7rem 1.1rem;
-margin-bottom: 0.8rem; position:relative; overflow:hidden; display: flex; flex-direction: column; gap: 0.6rem; backdrop-filter: blur(10px);">
+<div style="background:rgba(15, 23, 42, 0.6); border: 1px solid {color}33; border-radius: 12px; padding: 1rem;
+margin-bottom: 1rem; position:relative; overflow:hidden; display: flex; flex-direction: column; gap: 0.8rem; backdrop-filter: blur(12px);">
 <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px;
 background: linear-gradient(90deg,{color},{color}44,{color}); animation: {anim};"></div>
-<div style="display:flex; align-items:center; justify-content: space-between; gap: 0.8rem; flex-wrap:nowrap;">
-<div style="flex:1; overflow:hidden;">
-<p style="color:{color}; font-size:0.6rem; font-weight:800; letter-spacing:0.08em; margin:0; font-family:monospace; opacity:0.8; text-transform:uppercase; white-space:nowrap;">GLOBAL PANDEMIC RISK</p>
-<h2 style="margin:0; font-size:1.6rem !important; font-weight:950; color:white !important; letter-spacing:-0.03em; line-height: 1; white-space:nowrap;">{label}</h2>
+<div style="display:flex; align-items:center; justify-content: space-between; gap: 0.8rem;">
+<div style="overflow:hidden;">
+<p style="color:{color}; font-size:0.65rem; font-weight:800; letter-spacing:0.1em; margin:0; font-family:monospace; opacity:0.8; text-transform:uppercase;">GLOBAL PANDEMIC RISK</p>
+<h2 style="margin:0; font-size:1.8rem !important; font-weight:950; color:white !important; letter-spacing:-0.03em; line-height: 1;">{label}</h2>
 </div>
-<div style="background:{color}15; border:1px solid {color}66; border-radius:6px; padding:0.3rem 0.6rem; 
-text-align:center; min-width:82px; box-shadow: 0 0 15px {color}10; flex-shrink:0;">
-<p style="color:{color}; font-size:1.3rem; font-weight:900; margin:0; line-height:1; text-shadow:0 0 8px {color}88;">{risk['overall']}%</p>
-<p style="color:#94a3b8; font-size:0.45rem; font-weight:800; margin:0; text-transform:uppercase; opacity:0.8;">SCORE</p>
+<div style="background:{color}15; border:1px solid {color}66; border-radius:6px; padding:0.4rem 0.8rem; 
+text-align:center; min-width:85px; box-shadow: 0 0 15px {color}10;">
+<p style="color:{color}; font-size:1.5rem; font-weight:900; margin:0; line-height:1; text-shadow:0 0 8px {color}88;">{risk['overall']}%</p>
+<p style="color:#94a3b8; font-size:0.5rem; font-weight:800; margin:0; text-transform:uppercase; opacity:0.8;">SCORE</p>
 </div>
 </div>
-<div style="display:flex; gap:1rem; flex-wrap:wrap; border-top:1px solid rgba(255,255,255,0.05); padding-top:0.4rem;">
-<span style="color:#94a3b8; font-size:0.6rem;">📅 Day <b style="color:white;">{risk['days']}</b></span>
-<span style="color:#94a3b8; font-size:0.6rem;">🧪 Cases: <b style="color:white;">{cases}</b></span>
-<span style="color:#94a3b8; font-size:0.6rem;">🌍 Countries: <b style="color:white;">{countries}</b></span>
-<span style="color:#94a3b8; font-size:0.6rem;">📈 R₀: <b style="color:white;">{ANDES_FIXED['r0']}</b></span>
-<span style="color:#94a3b8; font-size:0.6rem;">📊 Growth: <b style="color:white;">{risk['growth']}%</b></span>
-<span style="color:#94a3b8; font-size:0.6rem;">💀 CFR: <b style="color:white;">{ANDES_FIXED['cfr_pct']}%</b></span>
+<div style="display:flex; gap:0.8rem; flex-wrap:wrap; border-top:1px solid rgba(255,255,255,0.05); padding-top:0.6rem;">
+<div style="background:rgba(255,255,255,0.03); padding:2px 8px; border-radius:4px; border:1px solid rgba(255,255,255,0.05);"><span style="color:#94a3b8; font-size:0.65rem;">📅 Day <b style="color:white;">{risk['days']}</b></span></div>
+<div style="background:rgba(255,255,255,0.03); padding:2px 8px; border-radius:4px; border:1px solid rgba(255,255,255,0.05);"><span style="color:#94a3b8; font-size:0.65rem;">🧪 Cases: <b style="color:white;">{cases}</b></span></div>
+<div style="background:rgba(255,255,255,0.03); padding:2px 8px; border-radius:4px; border:1px solid rgba(255,255,255,0.05);"><span style="color:#94a3b8; font-size:0.65rem;">🌍 Countries: <b style="color:white;">{countries}</b></span></div>
+<div style="background:rgba(255,255,255,0.03); padding:2px 8px; border-radius:4px; border:1px solid rgba(255,255,255,0.05);"><span style="color:#94a3b8; font-size:0.65rem;">📈 R₀: <b style="color:white;">{ANDES_FIXED['r0']}</b></span></div>
 </div>
 </div>
 """.replace("\n", "").strip()
