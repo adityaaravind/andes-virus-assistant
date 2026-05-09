@@ -304,16 +304,6 @@ clear official communications and verified data.
 
     # Voting buttons section below the visualization
     if not user_voted_today:
-        # ── Unified Voting Grid ──
-        st.markdown(
-            f'<div style="margin-top:1.5rem; margin-bottom:1rem; display:flex; align-items:center; gap:10px;">'
-            f'<div style="width:20px; height:1px; background:var(--teal); opacity:0.4;"></div>'
-            f'<div style="color:var(--gray-300); font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; opacity:0.8;">Cast your sentiment</div>'
-            f'<div style="flex-grow:1; height:1px; background:linear-gradient(90deg, rgba(0,180,216,0.4), transparent);"></div>'
-            f'</div>',
-            unsafe_allow_html=True
-        )
-        
         v_cols = st.columns(5, gap="small")
         for i, level in enumerate(range(1, 6)):
             info = FEAR_LEVELS[level]
