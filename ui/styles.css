@@ -16,6 +16,10 @@
 }
 
 /* ── Global Layout & Reset ── */
+html {
+  scroll-behavior: smooth;
+}
+
 .stApp {
   background: radial-gradient(circle at top, #0f1e30 0%, var(--navy) 100%);
   color: var(--white);
@@ -53,7 +57,38 @@ h1 { font-size: clamp(1.4rem, 4vw, 1.8rem) !important; font-weight: 800 !importa
 h2 { font-size: clamp(1.1rem, 3vw, 1.3rem) !important; font-weight: 700 !important; color: var(--gray-100) !important; }
 h3 { font-size: 1rem !important; font-weight: 700 !important; }
 
-/* ── Stat Cards (Standardized Metrics) ── */
+/* ── Journalist Share Buttons ── */
+.share-button {
+    display: block;
+    text-align: center;
+    border-radius: 8px;
+    padding: 0.5rem 0.3rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.2s ease;
+}
+
+.share-button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.2);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+@keyframes rich-gold-pulse {
+    0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+    50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.7); }
+    100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+}
+
+.rich-tag {
+    background: #ffd700 !important;
+    color: #0d1b2a !important;
+    font-weight: 900 !important;
+    animation: rich-gold-pulse 2s infinite ease-in-out;
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -352,27 +387,80 @@ div[data-testid="stButton"] button[key*="vote_dist_"] div[data-testid="stMarkdow
     display: inline-block;
 }
 
-/* ── Mobile Overrides ── */
+/* ── Mobile Experience Overrides ── */
 @media (max-width: 768px) {
-  .main .block-container { padding: 1rem 0.8rem; }
-  .stats-grid { 
-      grid-template-columns: repeat(2, 1fr) !important; 
-      gap: 0.6rem !important; 
+  .main .block-container { 
+      padding: 0.5rem 0.6rem !important; 
   }
-  .stat-card { 
-      padding: 0.8rem !important; 
-      min-height: 100px !important; 
-  }
-  .stat-card .stat-value { font-size: 2rem !important; }
   
-  div[data-testid="stHorizontalBlock"]:has(button[key*="vote_"]) {
-      display: grid !important;
-      grid-template-columns: repeat(2, 1fr) !important;
-      gap: 0.6rem !important;
+  /* Scale down header for mobile */
+  .glowing-title {
+      font-size: clamp(1.2rem, 8vw, 1.8rem) !important;
+      line-height: 1.2 !important;
   }
-  div[data-testid="stHorizontalBlock"]:has(button[key*="vote_"]) > div {
+  
+  /* Navigation tiles: 3 columns on mobile for better thumb reach */
+  .nav-tile-grid {
+      grid-template-columns: 1fr 1fr 1fr !important;
+      gap: 0.4rem !important;
+  }
+  
+  .nav-tile {
+      padding: 0.6rem 0.3rem !important;
+      min-height: 60px !important;
+  }
+  
+  .nav-tile-icon {
+      font-size: 1.1rem !important;
+      margin-bottom: 0.2rem !important;
+  }
+  
+  .nav-tile-label {
+      font-size: 0.5rem !important;
+  }
+
+  /* Stat cards: more compact on mobile */
+  .stats-grid { 
+      grid-template-columns: 1fr 1fr !important; 
+      gap: 0.5rem !important; 
+  }
+  
+  .stat-card { 
+      padding: 0.7rem !important; 
+      min-height: 90px !important; 
+  }
+  
+  .stat-card .stat-value { 
+      font-size: 1.6rem !important; 
+  }
+
+  /* News ticker: full width on mobile */
+  .news-grid {
+      grid-template-columns: 1fr !important;
+  }
+  
+  /* Share buttons: 2 columns on mobile to avoid squishing */
+  div[data-testid="stHorizontalBlock"]:has(.share-button) {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      gap: 0.5rem !important;
+  }
+  
+  div[data-testid="stHorizontalBlock"]:has(.share-button) > div {
       width: 100% !important;
       max-width: 100% !important;
+  }
+
+  /* Roadmap: stack to 1 column */
+  div[data-testid="stHorizontalBlock"]:has(.v11-feature-tag) {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 1rem !important;
+  }
+  
+  /* Hide heavy decorative elements on mobile for performance */
+  .sidebar-scroll-guide {
+      display: none !important;
   }
 }
 
@@ -413,11 +501,6 @@ div[data-testid="stButton"] button[key*="vote_dist_"] div[data-testid="stMarkdow
     align-items: center;
     gap: 4px;
     box-shadow: 0 0 10px rgba(0, 119, 181, 0.4);
-}
-
-.linkedin-tag:hover {
-    filter: brightness(1.2);
-    box-shadow: 0 0 15px rgba(0, 119, 181, 0.6);
 }
 
 /* ── Branding ── */

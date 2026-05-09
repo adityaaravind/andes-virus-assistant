@@ -200,7 +200,7 @@ def render_news_ticker() -> None:
 <div style="height:450px;overflow-y:auto;border:1px solid rgba(148,163,184,0.1);
 border-radius:12px;padding:0.75rem;background:rgba(15,23,42,0.2);
 scrollbar-width:thin;scrollbar-color:rgba(148,163,184,0.3) transparent;">
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+<div class="news-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
 gap:0.75rem;margin-bottom:1rem;">
 """.replace("\n", "").strip()
 
