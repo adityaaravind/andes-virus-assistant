@@ -279,6 +279,10 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
                 display: none !important;
             }}
             
+            /* Hide the value bubble at the top */
+            div[aria-valuenow] {{ display: none !important; }}
+            div[data-testid="stThumbValue"] {{ display: none !important; }}
+            
             /* 2. The Dynamic Track */
             div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child {{
                 height: 5px !important;
@@ -335,13 +339,20 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
                 transform: scale(1.15) rotate(calc(-10deg * var(--v-intensity)));
             }}
 
-            /* Label Animation */
-            .sentiment-label h2 {{
-                animation: text-glow-pulse 2s infinite ease-in-out;
+            /* Label Animation: Fluid Cross-fade & Pop */
+            .sentiment-label {{
+                min-height: 4rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }}
-            @keyframes text-glow-pulse {{
-                0%, 100% {{ opacity: 0.9; transform: scale(1); }}
-                50% {{ opacity: 1; transform: scale(1.02); }}
+            .sentiment-label h2 {{
+                animation: label-pop-fade 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                margin: 0 !important;
+            }}
+            @keyframes label-pop-fade {{
+                0% {{ transform: scale(0.8) translateY(10px); opacity: 0; filter: blur(4px); }}
+                100% {{ transform: scale(1) translateY(0); opacity: 1; filter: blur(0); }}
             }}
             </style>
             """,
