@@ -244,14 +244,18 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         st.plotly_chart(fig_gauge, use_container_width=True, config={"displayModeBar": False})
 
     with col_dist:
-        # Pre-initialize level for CSS calculation
-        level = int(live_fear) if 1 <= live_fear <= 5 else 1
+        # Pre-initialize level for CSS calculation - Use float for smooth motion
+        level_float = float(live_fear) if 1 <= live_fear <= 5 else 1.0
         if "fear_slider_input" in st.session_state:
-            level = st.session_state.fear_slider_input
+            level_float = st.session_state.fear_slider_input
             
+        # Map float to integer for labels/logic
+        level_int = int(round(level_float))
+        level_int = max(1, min(5, level_int))
+        
         # Calculate intensity percentage for CSS (0% at CALM, 100% at PANICKED)
-        intensity = (level - 1) / 4
-        current_l_color = FEAR_LEVELS[level]['color']
+        intensity = (level_float - 1) / 4
+        current_l_color = FEAR_LEVELS[level_int]['color']
         
         st.markdown(
             f"""
@@ -267,42 +271,41 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
                 padding: 20px 0 0 0 !important;
             }}
             
-            /* 2. The Dynamic Track - Morphs from line to zigzag */
+            /* 2. The Dynamic Track */
             div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child {{
-                height: 4px !important;
+                height: 5px !important;
                 background: rgba(255,255,255,0.05) !important;
                 border-radius: 10px !important;
                 position: relative !important;
-                overflow: visible !important;
             }}
 
-            /* The "Storm" Overlay - Becomes zigzag via clip-path */
+            /* The "Storm" Zigzag Overlay */
             div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child::after {{
                 content: '';
                 position: absolute;
                 top: -15px; left: 0; right: 0; bottom: -15px;
                 background: linear-gradient(90deg, #22c55e 0%, #f59e0b 50%, #991b1b 100%);
                 
-                /* Zigzag Clip Path - POINTY waves */
+                /* Dynamic Zigzag Clip Path */
                 clip-path: polygon(
                     0% 50%, 
-                    10% calc(50% - (15px * var(--v-intensity))),
+                    10% calc(50% - (18px * var(--v-intensity))),
                     20% 50%,
-                    30% calc(50% + (15px * var(--v-intensity))),
+                    30% calc(50% + (18px * var(--v-intensity))),
                     40% 50%,
-                    50% calc(50% - (20px * var(--v-intensity))),
+                    50% calc(50% - (22px * var(--v-intensity))),
                     60% 50%,
-                    70% calc(50% + (20px * var(--v-intensity))),
+                    70% calc(50% + (22px * var(--v-intensity))),
                     80% 50%,
-                    90% calc(50% - (15px * var(--v-intensity))),
+                    90% calc(50% - (18px * var(--v-intensity))),
                     100% 50%
                 );
                 
-                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                transition: opacity 0.3s ease;
                 opacity: calc(0.3 + (0.7 * var(--v-intensity)));
             }}
 
-            /* 3. Fluid Ship Motion */
+            /* 3. The Ship - Minimal transition to allow real-time response */
             div[data-testid="stSlider"] [role="slider"] {{
                 background: transparent !important;
                 border: none !important;
@@ -310,8 +313,6 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
                 height: 50px !important;
                 top: -15px !important;
                 box-shadow: none !important;
-                /* Ensures ship glides rather than snaps */
-                transition: left 0.4s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
             }}
             
             div[data-testid="stSlider"] [role="slider"]::after {{
@@ -319,60 +320,74 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
                 font-size: 2.2rem;
                 display: block;
                 filter: drop-shadow(0 0 15px var(--v-active-color));
-                transition: all 0.3s ease;
+                transition: transform 0.2s ease;
             }}
 
             div[data-testid="stSlider"] [role="slider"]:active::after {{
-                transform: scale(1.2) rotate(calc(-12deg * var(--v-intensity)));
+                transform: scale(1.15) rotate(calc(-10deg * var(--v-intensity)));
+            }}
+
+            /* Label Animation */
+            .sentiment-label h2 {{
+                animation: text-glow-pulse 2s infinite ease-in-out;
+            }}
+            @keyframes text-glow-pulse {{
+                0%, 100% {{ opacity: 0.9; transform: scale(1); }}
+                50% {{ opacity: 1; transform: scale(1.02); }}
             }}
             </style>
             """,
             unsafe_allow_html=True,
         )
         
-        # Numeric slider with auto-callback
+        # Auto-vote logic: trigger only if the rounded level changes
+        if "last_voted_level" not in st.session_state:
+            st.session_state.last_voted_level = level_int
+
         def on_fear_change():
-            new_val = st.session_state.fear_slider_input
-            _save_fear_vote(new_val, user_id)
-            st.toast(f"Sentiment shared! 🚢", icon="⚓")
+            new_float = st.session_state.fear_slider_input
+            new_int = int(round(new_float))
+            if new_int != st.session_state.last_voted_level:
+                _save_fear_vote(new_int, user_id)
+                st.session_state.last_voted_level = new_int
+                st.toast(f"Sentiment: {slider_labels[new_int]}! 🚢", icon="⚓")
 
         st.markdown(
-            "<p style='color:#94a3b8; font-size:0.75rem; font-weight:800; margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:0.1em;'>🌊 DYNAMIC FEAR TRACKER</p>",
+            "<p style='color:#94a3b8; font-size:0.75rem; font-weight:800; margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:0.1em;'>🌊 LIVE SHIP TRACKER</p>",
             unsafe_allow_html=True,
         )
 
         level = st.slider(
             "Fear Level",
-            min_value=1,
-            max_value=5,
-            value=level,
-            step=1,
+            min_value=1.0,
+            max_value=5.0,
+            value=level_float,
+            step=0.01, # HIGH RESOLUTION for smooth motion
             disabled=user_voted_today,
             label_visibility="collapsed",
             key="fear_slider_input",
             on_change=on_fear_change if not user_voted_today else None
         )
         
-        # Reactive labels & colors
+        # Reactive Labels
         slider_labels = {1: "CALM", 2: "CONCERNED", 3: "WORRIED", 4: "FEARFUL", 5: "PANICKED"}
-        current_label = slider_labels[level]
-        current_l_color = FEAR_LEVELS[level]['color']
+        current_label = slider_labels[level_int]
         
         st.markdown(
-            f"<div class='sentiment-label'><h2 style='color:{current_l_color}; text-align:center; margin:0.3rem 0; font-family:monospace; text-shadow: 0 0 20px {current_l_color}; font-weight:950; font-size:1.8rem !important;'>{current_label}</h2></div>",
+            f"<div class='sentiment-label'><h2 style='color:{current_l_color}; text-align:center; margin:0.3rem 0; font-family:monospace; text-shadow: 0 0 20px {current_l_color}; font-weight:950; font-size:1.9rem !important;'>{current_label}</h2></div>",
             unsafe_allow_html=True
         )
 
         if user_voted_today:
             st.markdown(
-                f"<div style='background:rgba(34,197,94,0.05); border:1px solid #22c55e33; border-radius:10px; padding:0.5rem; margin-top:0.5rem; text-align:center;'>"
-                f"<p style='color:#22c55e; font-size:0.75rem; font-weight:900; margin:0;'>✓ SHIP ANCHORED: {current_label}</p>"
+                f"<div style='background:rgba(34,197,94,0.05); border:1px solid #22c55e33; border-radius:10px; padding:0.5rem; margin-top:0.8rem; text-align:center;'>"
+                f"<p style='color:#22c55e; font-size:0.85rem; font-weight:950; margin:0;'>✓ SHIP ANCHORED: {current_label}</p>"
                 f"</div>",
                 unsafe_allow_html=True
             )
         else:
             st.markdown(
-                "<p style='color:#64748b; font-size:0.6rem; text-align:center; margin-top:0.2rem; opacity:0.7;'>DRAG SHIP TO CHANGE COURSE</p>",
+                f"<p style='color:#64748b; font-size:0.65rem; text-align:center; margin-top:0.2rem; opacity:0.8;'>DRAG SHIP TO NAVIGATE (CURRENT: {level_float:.2f})</p>",
                 unsafe_allow_html=True
             )
 
