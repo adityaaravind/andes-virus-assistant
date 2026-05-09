@@ -306,21 +306,15 @@ clear official communications and verified data.
     if not user_voted_today:
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # ── Refined Voting Layout ──
-        # We use a single markdown block for the entire row to control layout precisely
+        # Use a hidden radio or selectbox to capture the click from the HTML
+        # But actually, the most reliable way in pure Streamlit without complex components
+        # is to keep the buttons but hide their default styling so completely that ONLY our card CSS shows.
         
-        button_html = ""
-        for level, info in FEAR_LEVELS.items():
-            l_color = info['color']
-            # Note: We still use st.button for functionality, but we wrap the layout
-            pass # Placeholder for logic below
-
-        # Use columns to put label on left and buttons on right
         lbl_col, btn_col = st.columns([1, 4])
         
         with lbl_col:
             st.markdown(
-                f'<div style="height: 50px; display: flex; align-items: center;">'
+                f'<div style="height: 110px; display: flex; align-items: center;">'
                 f'<p style="color:#94a3b8; font-size:0.85rem; font-weight:700; margin:0;">'
                 f'🗳️ <b>CAST YOUR VOTE:</b></p></div>',
                 unsafe_allow_html=True
@@ -332,43 +326,107 @@ clear official communications and verified data.
                 info = FEAR_LEVELS[level]
                 l_color = info['color']
                 with v_cols[i]:
-                    if st.button(info['label'].upper(), key=f"vote_{level}", use_container_width=True, help=info['desc']):
-                        _save_fear_vote(level, user_id)
-                        st.rerun()
+                    # We wrap the button in a div that we will style to look like the stat card
+                    # We then make the button invisible but filling the entire card area
                     st.markdown(
-                        f'<div style="text-align:center; font-size:0.65rem; color:var(--gray-300); margin-top:-4px; font-weight:500; text-transform:none; opacity:0.9; line-height:1.2;">{info["desc"]}</div>',
+                        f"""
+                        <div class="vote-card-wrapper" style="position:relative; height:110px; width:100%;">
+                            <div class="stat-card" style="position:absolute; top:0; left:0; right:0; bottom:0; padding:0.8rem; pointer-events:none; border-color:{l_color}44;">
+                                <span class="stat-value" style="color:{l_color}; font-size:1.2rem !important; text-shadow: 0 0 15px {l_color}66;">{info['label'].upper()}</span>
+                                <div class="stat-label" style="font-size:0.65rem !important; color:var(--gray-300); margin-top:4px; font-weight:500; text-transform:none; opacity:0.9; line-height:1.2;">{info["desc"]}</div>
+                            </div>
+                        </div>
+                        """,
                         unsafe_allow_html=True
                     )
+                    if st.button(" ", key=f"vote_{level}", use_container_width=True):
+                        _save_fear_vote(level, user_id)
+                        st.rerun()
 
-        # Update CSS to match stat-card style exactly but more compact
-        btn_style = ""
+        # CSS to hide the button but keep it clickable over the card
+        btn_hide_style = """
+            <style>
+            .vote-card-wrapper + div[data-testid="stButton"] {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 110px;
+                z-index: 10;
+            }
+            div[data-testid="stButton"] button[key*="vote_"] {
+                background: transparent !important;
+                border: none !important;
+                color: transparent !important;
+                height: 110px !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+            }
+            /* Hover effect on the card when the invisible button is hovered */
+            div[data-testid="stButton"]:hover + .vote-card-wrapper .stat-card,
+            .vote-card-wrapper:has(+ div[data-testid="stButton"] button:hover) .stat-card {
+                border-color: var(--teal-light) !important;
+                transform: translateY(-2px);
+                background: rgba(15, 23, 42, 0.8) !important;
+                box-shadow: 0 12px 40px rgba(0, 180, 216, 0.15) !important;
+            }
+            
+            /* Since :has() might not be supported everywhere yet, we'll use a simpler sibling approach */
+            /* We swap order in HTML: Put button FIRST, then card. Then use + selector. */
+            </style>
+        """
+        # Re-doing the loop with correct sibling order for CSS hover
+        st.markdown("<style>.vote-container { position:relative; height:110px; }</style>", unsafe_allow_html=True)
+        
+        # Actually, let's use a more robust CSS-only approach by making the button THE card.
+        btn_card_style = ""
         for level, info in FEAR_LEVELS.items():
             l_color = info['color']
-            btn_style += f"""
+            btn_card_style += f"""
                 div[data-testid="stButton"] button[key*="vote_{level}"] {{
                     background: rgba(15, 23, 42, 0.6) !important;
                     backdrop-filter: blur(12px) !important;
                     border: 1px solid rgba(255, 255, 255, 0.12) !important;
-                    color: {l_color} !important;
-                    height: 55px !important;
-                    font-size: 0.9rem !important;
-                    font-weight: 950 !important;
-                    text-transform: uppercase !important;
-                    letter-spacing: -0.02em !important;
                     border-radius: 12px !important;
+                    height: 110px !important;
+                    padding: 0.8rem !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    align-items: flex-start !important;
+                    justify-content: center !important;
+                    text-align: left !important;
                     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
                     box-shadow: 0 8px 32px rgba(0,0,0,0.4) !important;
-                    text-shadow: 0 0 15px {l_color}66 !important;
-                    padding: 0 !important;
                 }}
                 div[data-testid="stButton"] button[key*="vote_{level}"]:hover {{
                     border-color: {l_color} !important;
-                    background: rgba(15, 23, 42, 0.8) !important;
                     transform: translateY(-2px) !important;
+                    background: rgba(15, 23, 42, 0.8) !important;
                     box-shadow: 0 12px 40px {l_color}22 !important;
                 }}
+                /* Force inner text styling */
+                div[data-testid="stButton"] button[key*="vote_{level}"] div[data-testid="stMarkdownContainer"] p {{
+                    margin: 0 !important;
+                    line-height: 1.2 !important;
+                }}
             """
-        st.markdown(f"<style>{btn_style}</style>", unsafe_allow_html=True)
+        st.markdown(f"<style>{btn_card_style}</style>", unsafe_allow_html=True)
+
+        with btn_col:
+            v_cols = st.columns(5)
+            for i, level in enumerate(range(1, 6)):
+                info = FEAR_LEVELS[level]
+                l_color = info['color']
+                with v_cols[i]:
+                    label_html = f"""
+                        <span style="color:{l_color}; font-size:1.2rem; font-weight:950; text-transform:uppercase; display:block; text-shadow: 0 0 15px {l_color}66; margin-bottom:4px;">{info['label']}</span>
+                        <span style="color:var(--gray-300); font-size:0.65rem; font-weight:500; text-transform:none; opacity:0.9; display:block;">{info['desc']}</span>
+                    """
+                    if st.button(label_html, key=f"vote_{level}", use_container_width=True):
+                        _save_fear_vote(level, user_id)
+                        st.rerun()
     else:
         thanks_html = """
 <div style="background:rgba(34,197,94,0.08); border:1px solid #22c55e44; border-radius:8px; padding:0.8rem; margin-top:1rem;">
