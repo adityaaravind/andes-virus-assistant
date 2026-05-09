@@ -304,6 +304,7 @@ clear official communications and verified data.
 
     # Voting buttons section below the visualization
     if not user_voted_today:
+        st.markdown("<br>", unsafe_allow_html=True)
         v_cols = st.columns(5, gap="small")
         for i, level in enumerate(range(1, 6)):
             info = FEAR_LEVELS[level]
