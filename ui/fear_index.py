@@ -258,13 +258,9 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
             l_color = info['color']
             target_col = v_grid_top[i] if i < 3 else v_grid_bot[i-3]
             with target_col:
-                label_html = f"""
-                    <div style="width:100%; text-align:left;">
-                        <span style="color:{l_color}; font-size:1.0rem; font-weight:950; text-transform:uppercase; display:block; text-shadow: 0 0 10px {l_color}44; line-height:1;">{info['label']}</span>
-                        <span style="color:var(--gray-300); font-size:0.55rem; font-weight:500; text-transform:none; opacity:0.8; display:block; margin-top:2px; line-height:1.1;">{info['desc']}</span>
-                    </div>
-                """
-                if st.button(label_html, key=f"vote_dist_{level}", use_container_width=True, disabled=user_voted_today):
+                # Use plain text for button to avoid code leakage
+                # The label is the label_info['label']. Subtext is added via CSS.
+                if st.button(info['label'].upper(), key=f"vote_dist_{level}", use_container_width=True, disabled=user_voted_today):
                     _save_fear_vote(level, user_id)
                     st.rerun()
 

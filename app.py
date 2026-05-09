@@ -389,7 +389,7 @@ def main() -> None:
         st.markdown(
             """
             <div style='display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin-bottom: 0.5rem; padding-top: 10px;'>
-                <h1 class='glowing-title' style='margin:0; display: inline-block;'>🧬 Andes Virus Research Assistant <small style='font-size:0.5em; color:var(--gray-400); vertical-align: middle; text-shadow:none;'>v1.1</small></h1>
+                <h1 class='glowing-title' style='margin:0; display: inline-block;'>🧬 Andes Virus Research Assistant <span class='v11-feature-tag' style='vertical-align: middle; margin-left: 10px;'>v1.1</span></h1>
                 <div class='outbreak-badge'>OUTBREAK ACTIVE</div>
             </div>
             <p class='glowing-title' style='font-size:0.85rem; margin:0; margin-bottom: 1rem; opacity: 0.9;'>

@@ -109,8 +109,8 @@ div[data-testid="stButton"] button[key*="vote_"] {
     backdrop-filter: blur(12px) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
     border-radius: 12px !important;
-    min-height: 100px !important;
-    padding: 1rem !important;
+    min-height: 90px !important;
+    padding: 0.8rem !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: flex-start !important;
@@ -119,20 +119,26 @@ div[data-testid="stButton"] button[key*="vote_"] {
     box-shadow: 0 8px 32px rgba(0,0,0,0.4) !important;
 }
 
-div[data-testid="stButton"] button[key*="vote_"]:hover:not(:disabled) {
-    transform: translateY(-4px) !important;
-    background: rgba(15, 23, 42, 0.85) !important;
-    border-color: var(--teal-light) !important;
-}
+/* Individual Vote Card Colors & Text Shadows */
+div[data-testid="stButton"] button[key*="vote_dist_1"] { color: #22c55e !important; text-shadow: 0 0 10px rgba(34, 197, 94, 0.5) !important; }
+div[data-testid="stButton"] button[key*="vote_dist_2"] { color: #f59e0b !important; text-shadow: 0 0 10px rgba(245, 158, 11, 0.5) !important; }
+div[data-testid="stButton"] button[key*="vote_dist_3"] { color: #ef4444 !important; text-shadow: 0 0 10px rgba(239, 68, 68, 0.5) !important; }
+div[data-testid="stButton"] button[key*="vote_dist_4"] { color: #dc2626 !important; text-shadow: 0 0 10px rgba(220, 38, 38, 0.5) !important; }
+div[data-testid="stButton"] button[key*="vote_dist_5"] { color: #991b1b !important; text-shadow: 0 0 10px rgba(153, 27, 27, 0.5) !important; }
 
-div[data-testid="stButton"] button[key*="vote_"]:disabled {
-    opacity: 0.4 !important;
-    cursor: not-allowed !important;
-    filter: grayscale(0.8);
-}
+/* Add descriptions via CSS content to prevent HTML leakage in button labels */
+div[data-testid="stButton"] button[key*="vote_dist_1"]::after { content: 'Not worried'; font-size: 0.6rem; color: var(--gray-300); opacity: 0.8; font-weight: 500; margin-top: 4px; text-transform: none; text-shadow: none; }
+div[data-testid="stButton"] button[key*="vote_dist_2"]::after { content: 'Slightly worried'; font-size: 0.6rem; color: var(--gray-300); opacity: 0.8; font-weight: 500; margin-top: 4px; text-transform: none; text-shadow: none; }
+div[data-testid="stButton"] button[key*="vote_dist_3"]::after { content: 'Moderately fearful'; font-size: 0.6rem; color: var(--gray-300); opacity: 0.8; font-weight: 500; margin-top: 4px; text-transform: none; text-shadow: none; }
+div[data-testid="stButton"] button[key*="vote_dist_4"]::after { content: 'Very worried'; font-size: 0.6rem; color: var(--gray-300); opacity: 0.8; font-weight: 500; margin-top: 4px; text-transform: none; text-shadow: none; }
+div[data-testid="stButton"] button[key*="vote_dist_5"]::after { content: 'Extremely fearful'; font-size: 0.6rem; color: var(--gray-300); opacity: 0.8; font-weight: 500; margin-top: 4px; text-transform: none; text-shadow: none; }
 
-div[data-testid="stButton"] button div[data-testid="stMarkdownContainer"] p {
+div[data-testid="stButton"] button[key*="vote_"] div[data-testid="stMarkdownContainer"] p {
+    font-size: 1.1rem !important;
+    font-weight: 950 !important;
+    text-transform: uppercase !important;
     margin: 0 !important;
+    line-height: 1 !important;
 }
 
 /* ── Interactive Elements ── */
@@ -191,6 +197,55 @@ div[data-testid="stButton"] button div[data-testid="stMarkdownContainer"] p {
     border-bottom: 1px solid rgba(148, 163, 184, 0.1);
     font-size: clamp(0.85rem, 1.1vw, 1rem);
     font-weight: 700;
+}
+
+.v11-scroller-content {
+    display: inline-block;
+    animation: v11-scroll-reverse 35s linear infinite;
+    padding-right: 100%;
+}
+
+.scroller-reverse {
+    display: inline-block;
+    animation: v11-scroll 45s linear infinite;
+    padding-left: 100%;
+}
+
+@keyframes v11-scroll {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(-100%, 0); }
+}
+
+@keyframes v11-scroll-reverse {
+    0% { transform: translate(-100%, 0); }
+    100% { transform: translate(0, 0); }
+}
+
+.v11-feature-tag {
+    background: var(--teal);
+    color: var(--navy);
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 10px;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    font-weight: 950;
+}
+
+.nav-tag {
+    color: var(--white);
+    font-weight: 800;
+    margin-right: 8px;
+    text-transform: uppercase;
+    font-size: 0.65rem;
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 1px 5px;
+    border-radius: 3px;
+}
+
+.v11-feature-item {
+    margin-right: 70px;
+    display: inline-block;
 }
 
 /* ── Mobile Overrides ── */
