@@ -127,16 +127,17 @@ def render_stats_panel() -> None:
         return ""
 
     cards = [
-        (str(stats.get("confirmed_cases", 0)), "Confirmed Cases", get_glow(stats.get("confirmed_cases"), "cases")),
-        (str(stats.get("suspected_cases", 0)), "Suspected Cases", get_glow(stats.get("suspected_cases"), "cases")),
-        (str(stats.get("deaths", 0)), "Deaths", get_glow(stats.get("deaths"), "deaths")),
-        (str(stats.get("nationalities", 0)), "Nationalities Affected", get_glow(stats.get("nationalities"), "nationalities")),
-        (stats.get("ship_status", "Unknown"), "Ship Current Status", "glow-green"),
+        (str(stats.get("confirmed_cases", 0)), "Confirmed Cases", get_glow(stats.get("confirmed_cases"), "cases"), "Lab-verified PCR results"),
+        (str(stats.get("suspected_cases", 0)), "Suspected Cases", get_glow(stats.get("suspected_cases"), "cases"), "Clinical symptoms awaiting confirmation"),
+        (str(stats.get("deaths", 0)), "Deaths", get_glow(stats.get("deaths"), "deaths"), ""),
+        (str(stats.get("nationalities", 0)), "Nationalities Affected", get_glow(stats.get("nationalities"), "nationalities"), ""),
+        (stats.get("ship_status", "Unknown"), "Ship Current Status", "glow-green", ""),
     ]
 
     # Responsive grid for stat cards
     cards_html = ""
-    for value, label, glow_class in cards:
+    for value, label, glow_class, subtext in cards:
+        subtext_html = f'<div style="font-size:0.55rem; color:var(--gray-500); margin-top:2px; font-weight:400; text-transform:none; letter-spacing:0;">{subtext}</div>' if subtext else ""
         cards_html += (
             f'<div class="stat-card" style="position:relative;">'
             f'<div style="position:absolute; top:8px; right:10px; display:flex; align-items:center; gap:4px; opacity:0.6;">'
@@ -144,7 +145,7 @@ def render_stats_panel() -> None:
             f'<span style="color:#22c55e; font-size:0.5rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em;">Live</span>'
             f'</div>'
             f'<span class="stat-value {glow_class}">{value}</span>'
-            f'<div class="stat-label">{label}</div>'
+            f'<div class="stat-label">{label}{subtext_html}</div>'
             f'</div>'
         )
 
@@ -158,22 +159,15 @@ def render_stats_panel() -> None:
     source_label = "🛡️ VERIFIED SOURCE" if not is_live else "📡 AUTO-SYNC"
     
     dropdown_html = f"""
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
-<details class="cyber-dropdown">
-<summary>{source_label}</summary>
-<div class="cyber-dropdown-content">
-<b>Status:</b> {"Real-time AI extraction active" if is_live else "Human-verified data source"}<br>
-<b>Last Sync:</b> {stats['last_updated']}<br>
-{"Verified from official bulletins" if not is_live else "Automated NLP extraction"}
-</div>
-</details>
-<details class="cyber-dropdown">
-<summary>🔬 CASE DEFINITIONS</summary>
-<div class="cyber-dropdown-content">
-<b>Confirmed:</b> Lab-verified PCR results.<br>
-<b>Suspected:</b> Clinical symptoms awaiting confirmation.
-</div>
-</details>
+<div style="display: flex; justify-content: center; width: 100%;">
+    <details class="cyber-dropdown" style="width: 100%; max-width: 600px;">
+        <summary>{source_label}</summary>
+        <div class="cyber-dropdown-content">
+            <b>Status:</b> {"Real-time AI extraction active" if is_live else "Human-verified data source"}<br>
+            <b>Last Sync:</b> {stats['last_updated']}<br>
+            {"Verified from official bulletins" if not is_live else "Automated NLP extraction"}
+        </div>
+    </details>
 </div>
 """
     st.markdown(dropdown_html, unsafe_allow_html=True)
