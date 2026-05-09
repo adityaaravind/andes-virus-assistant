@@ -145,8 +145,6 @@ def render_fear_index() -> None:
     )
 
     anim = "pulse-fear 2s ease-in-out infinite" if live_fear >= 3.0 else "none"
-    user_weight = 0.6 if vote_count > 0 else 0.0
-    web_weight = 0.4 if vote_count > 0 else 1.0
     
     html_header = f"""
 <div style="background:rgba(15, 23, 42, 0.6); border: 1px solid {color}44; border-radius: 10px; padding: 0.8rem 1.2rem;
@@ -169,16 +167,6 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
 <span style="color:#94a3b8; font-size:0.6rem;">👥 User: <b style="color:white;">{avg_fear:.1f}</b></span>
 <span style="color:#94a3b8; font-size:0.6rem;">📈 Votes: <b style="color:white;">{vote_count}</b></span>
 <span style="color:#64748b; font-size:0.6rem; font-weight:700; text-transform:uppercase;">Live <span class="live-dot" style="width:5px; height:5px; margin-left:3px;"></span></span>
-</div>
-<div style="margin-top: 1rem;">
-<div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
-<span style="color:#64748b; font-size:0.7rem;">🌐 Web Sentiment: {web_sentiment:.1f}</span>
-<span style="color:#64748b; font-size:0.7rem;">👥 Community: {avg_fear if vote_count > 0 else 0:.1f}</span>
-</div>
-<div style="height:4px; background:#1b2e45; border-radius:2px; display:flex; overflow:hidden;">
-<div style="width:{web_weight*100}%; height:100%; background:#38bdf8; opacity:0.8;"></div>
-<div style="width:{user_weight*100}%; height:100%; background:#a78bfa; opacity:0.8;"></div>
-</div>
 </div>
 <div style="display:flex; gap:1.5rem; margin-top:0.9rem; flex-wrap:wrap;
 border-top:1px solid #1b2e45; padding-top:0.7rem;">
@@ -207,73 +195,69 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         st.markdown(
             """
             <style>
+            div[data-testid="column"] { position: relative; overflow: visible !important; }
+
             .premium-tile {
                 background: rgba(15, 23, 42, 0.4);
                 backdrop-filter: blur(8px);
                 border: 1px solid rgba(255, 255, 255, 0.05);
                 border-radius: 12px;
-                width: 72px;
-                height: 72px;
+                width: 66px;
+                height: 66px;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
                 transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-                position: relative;
+                position: absolute;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
                 z-index: 1;
                 pointer-events: none;
-                margin: 0 auto -72px auto;
-            }
-
-            .premium-tile-wrapper:hover .premium-tile:not(.disabled) {
-                background: radial-gradient(circle at center, rgba(255,255,255,0.15) 0%, rgba(15, 23, 42, 0.6) 100%);
-                border-color: rgba(255,255,255,0.2);
-                box-shadow: 0 0 20px rgba(255,255,255,0.1);
-                transform: translateY(-2px);
             }
 
             .premium-tile.active {
                 background: radial-gradient(circle at center, var(--t-color)55 0%, rgba(15, 23, 42, 0.95) 100%) !important;
                 border: 2px solid var(--t-color) !important;
-                box-shadow: 0 0 35px var(--t-color)77, inset 0 0 10px var(--t-color)44 !important;
-                transform: scale(1.1) translateY(-4px) !important;
+                box-shadow: 0 0 30px var(--t-color)66, inset 0 0 10px var(--t-color)44 !important;
+                transform: translateX(-50%) scale(1.1) translateY(-4px) !important;
                 z-index: 2;
                 opacity: 1 !important;
             }
 
-            .premium-tile.disabled { opacity: 0.15; filter: grayscale(1); }
-            .tile-icon { font-size: 1.5rem; line-height: 1; margin-bottom: 2px; }
+            .premium-tile.disabled { opacity: 0.1; filter: grayscale(1); }
+            .tile-icon { font-size: 1.4rem; line-height: 1; margin-bottom: 2px; background: transparent !important; }
             .active .tile-icon { filter: drop-shadow(0 0 8px var(--t-color)); }
 
             .tile-label {
                 font-family: 'Inter', sans-serif;
                 font-weight: 950;
-                font-size: 0.5rem;
+                font-size: 0.46rem;
                 text-transform: uppercase;
                 color: #94a3b8;
                 text-align: center;
                 line-height: 1;
+                white-space: nowrap;
             }
-            .active .tile-label { color: white !important; text-shadow: 0 0 10px var(--t-color); }
+            .active .tile-label { color: white !important; text-shadow: 0 0 8px var(--t-color); }
 
-            div[data-testid="column"] div[data-testid="stButton"] {
-                position: relative;
-                z-index: 10;
-                margin: 0 !important;
-                padding: 0 !important;
-                display: flex;
-                justify-content: center;
-            }
-            
-            div[data-testid="column"] div[data-testid="stButton"] button {
+            div[data-testid="stButton"] { margin: 0 !important; padding: 0 !important; height: 66px !important; display: flex; justify-content: center; }
+            div[data-testid="stButton"] button {
                 background: transparent !important;
                 border: none !important;
                 box-shadow: none !important;
-                height: 72px !important;
-                width: 72px !important;
+                height: 66px !important;
+                width: 66px !important;
                 color: transparent !important;
                 margin: 0 auto !important;
+                z-index: 10 !important;
+            }
+            div[data-testid="stButton"] button:hover:not(:disabled) {
+                background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%) !important;
+            }
+            div[data-testid="stButton"] button:focus, div[data-testid="stButton"] button:active {
+                border: none !important; outline: none !important; box-shadow: none !important;
             }
             </style>
             <p style='color:#94a3b8; font-size:0.7rem; font-weight:800; margin-bottom:0.8rem; letter-spacing:0.1em; opacity:0.8; text-transform:uppercase;'>📡 COMMAND SENTIMENT</p>
@@ -286,8 +270,8 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
             info = FEAR_LEVELS[level_id]
             is_active = (level_id == level_int)
             with cols[i]:
-                st.markdown(f'<div class="premium-tile-wrapper"><div class="premium-tile {"active" if is_active else ""} {"disabled" if user_voted_today and not is_active else ""}" style="--t-color: {info["color"]};"><span class="tile-icon">{icons[level_id]}</span><span class="tile-label">{info["label"][:4].upper()}</span></div></div>', unsafe_allow_html=True)
-                if st.button(" ", key=f"v10_btn_{level_id}", disabled=user_voted_today):
+                st.markdown(f'<div class="premium-tile {"active" if is_active else ""} {"disabled" if user_voted_today and not is_active else ""}" style="--t-color: {info["color"]};"><span class="tile-icon">{icons[level_id]}</span><span class="tile-label">{info["label"].upper()}</span></div>', unsafe_allow_html=True)
+                if st.button(" ", key=f"v12_btn_{level_id}", disabled=user_voted_today):
                     _save_fear_vote(level_id, user_id)
                     st.session_state.fear_slider_input = level_id
                     st.rerun()
