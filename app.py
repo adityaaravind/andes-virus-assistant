@@ -366,7 +366,7 @@ def _render_header() -> None:
                 <h1 class='glowing-title mega-glow' style='margin:0; display: inline-block;'>🧬 Andes Virus Research Assistant <span class='v11-feature-tag' style='vertical-align: middle; margin-left: 10px;'>v1.2.0</span></h1>
                 <div class='outbreak-badge'>OUTBREAK ACTIVE</div>
             </div>
-            <p class='glowing-title' style='font-size:0.32rem !important; margin:0; margin-bottom: 0.8rem; opacity: 0.35; letter-spacing: 0.05em;'>
+            <p class='glowing-title' style='font-size:0.25rem !important; margin:0; margin-bottom: 0.8rem; opacity: 0.3; letter-spacing: 0.05em; line-height: 1;'>
                 MV Hondius Hantavirus Outbreak · Intelligence Dashboard
             </p>
             """,
