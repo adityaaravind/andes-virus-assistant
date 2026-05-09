@@ -244,75 +244,67 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         st.plotly_chart(fig_gauge, use_container_width=True, config={"displayModeBar": False})
 
     with col_dist:
+        # Define the styles locally for maximum override priority
+        vote_styles = """
+        <style>
+        @keyframes v-pulse {
+            0% { box-shadow: 0 0 5px rgba(255,255,255,0.1); transform: scale(1); }
+            50% { box-shadow: 0 0 20px var(--v-color); transform: scale(1.02); }
+            100% { box-shadow: 0 0 5px rgba(255,255,255,0.1); transform: scale(1); }
+        }
+        
+        /* Base button style for all voting tiles */
+        div[data-testid="stButton"] button[key*="vote_dist_"] {
+            height: 60px !important;
+            border-radius: 8px !important;
+            border: 2px solid var(--v-color) !important;
+            background: rgba(15, 23, 42, 0.6) !important;
+            transition: all 0.3s ease !important;
+            animation: v-pulse 2s infinite ease-in-out !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 0 !important;
+        }
+        
+        div[data-testid="stButton"] button[key*="vote_dist_"] p {
+            color: #ffffff !important;
+            font-size: 0.85rem !important;
+            font-weight: 950 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.1em !important;
+            text-shadow: 0 0 10px var(--v-color) !important;
+        }
+
+        div[data-testid="stButton"] button[key*="vote_dist_"]:hover {
+            background: var(--v-color) !important;
+            color: #ffffff !important;
+            transform: translateY(-3px) scale(1.05) !important;
+            box-shadow: 0 10px 30px var(--v-color) !important;
+        }
+
+        /* Color definitions */
+        div[data-testid="stButton"]:has(button[key="vote_dist_1"]) { --v-color: #22c55e; }
+        div[data-testid="stButton"]:has(button[key="vote_dist_2"]) { --v-color: #f59e0b; }
+        div[data-testid="stButton"]:has(button[key="vote_dist_3"]) { --v-color: #ef4444; }
+        div[data-testid="stButton"]:has(button[key="vote_dist_4"]) { --v-color: #dc2626; }
+        div[data-testid="stButton"]:has(button[key="vote_dist_5"]) { --v-color: #991b1b; }
+        </style>
+        """
+        st.markdown(vote_styles, unsafe_allow_html=True)
         st.markdown(
-            """
-            <style>
-            /* 1. Global Container Reset */
-            .vote-tile-area {
-                margin-top: 1rem;
-            }
-            /* 2. Target ALL buttons inside this area */
-            .vote-tile-area [data-testid="stButton"] button {
-                background: rgba(27, 46, 69, 0.4) !important;
-                border: 1px solid rgba(255, 255, 255, 0.15) !important;
-                border-radius: 12px !important;
-                min-height: 70px !important; /* Force Height */
-                width: 100% !important;
-                padding: 0 !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-            }
-            .vote-tile-area [data-testid="stButton"] button p {
-                font-size: 0.75rem !important;
-                font-weight: 950 !important;
-                color: #ffffff !important;
-                text-transform: uppercase !important;
-                margin: 0 !important;
-                letter-spacing: 0.02em !important;
-            }
-            /* 3. Hover / Contact Pop */
-            .vote-tile-area [data-testid="stButton"] button:hover:not(:disabled),
-            .vote-tile-area [data-testid="stButton"] button:active {
-                transform: scale(1.15) !important;
-                z-index: 999 !important;
-                box-shadow: 0 10px 40px rgba(0,0,0,0.5) !important;
-            }
-            /* 4. Level Specific Colors using nth-child on the columns */
-            /* CALM (Green) */
-            .vote-tile-area div[data-testid="column"]:nth-child(1) button:hover { border-color: #22c55e !important; background: radial-gradient(circle, rgba(34,197,94,0.3) 0%, rgba(27,46,69,0.8) 100%) !important; box-shadow: 0 0 25px rgba(34,197,94,0.4) !important; }
-            .vote-tile-area div[data-testid="column"]:nth-child(1) button:hover p { color: #22c55e !important; text-shadow: 0 0 15px #22c55e !important; }
-            /* CONC (Amber) */
-            .vote-tile-area div[data-testid="column"]:nth-child(2) button:hover { border-color: #f59e0b !important; background: radial-gradient(circle, rgba(245,158,11,0.3) 0%, rgba(27,46,69,0.8) 100%) !important; box-shadow: 0 0 25px rgba(245,158,11,0.4) !important; }
-            .vote-tile-area div[data-testid="column"]:nth-child(2) button:hover p { color: #f59e0b !important; text-shadow: 0 0 15px #f59e0b !important; }
-            /* WORR (Red) */
-            .vote-tile-area div[data-testid="column"]:nth-child(3) button:hover { border-color: #ef4444 !important; background: radial-gradient(circle, rgba(239,68,68,0.3) 0%, rgba(27,46,69,0.8) 100%) !important; box-shadow: 0 0 25px rgba(239,68,68,0.4) !important; }
-            .vote-tile-area div[data-testid="column"]:nth-child(3) button:hover p { color: #ef4444 !important; text-shadow: 0 0 15px #ef4444 !important; }
-            /* FEAR (Dark Red) */
-            .vote-tile-area div[data-testid="column"]:nth-child(4) button:hover { border-color: #dc2626 !important; background: radial-gradient(circle, rgba(220,38,38,0.3) 0%, rgba(27,46,69,0.8) 100%) !important; box-shadow: 0 0 25px rgba(220,38,38,0.4) !important; }
-            .vote-tile-area div[data-testid="column"]:nth-child(4) button:hover p { color: #dc2626 !important; text-shadow: 0 0 15px #dc2626 !important; }
-            /* PANI (Deep Maroon) */
-            .vote-tile-area div[data-testid="column"]:nth-child(5) button:hover { border-color: #991b1b !important; background: radial-gradient(circle, rgba(153,27,27,0.3) 0%, rgba(27,46,69,0.8) 100%) !important; box-shadow: 0 0 25px rgba(153,27,27,0.4) !important; }
-            .vote-tile-area div[data-testid="column"]:nth-child(5) button:hover p { color: #991b1b !important; text-shadow: 0 0 15px #991b1b !important; }
-            </style>
-            <div class='vote-tile-area'>
-            <p style='color:#f8fafc; font-size:0.9rem; font-weight:800; margin-bottom:1rem; letter-spacing:0.05em;'>
-            📊 CAST YOUR SENTIMENT</p>
-            """,
+            "<p style='color:#f8fafc; font-size:0.9rem; font-weight:800; margin-bottom:1rem; letter-spacing:0.05em;'>"
+            "📊 CAST YOUR SENTIMENT</p>",
             unsafe_allow_html=True,
         )
         
-        # Grid of voting buttons - 5 columns
         v_grid = st.columns(5, gap="small")
         for i, level in enumerate(range(1, 6)):
             info = FEAR_LEVELS[level]
             with v_grid[i]:
-                label = info['label'].upper()[:4]
-                if st.button(label, key=f"vote_dist_{level}", use_container_width=True, disabled=user_voted_today):
+                if st.button(info['label'].upper()[:4], key=f"vote_dist_{level}", use_container_width=True, disabled=user_voted_today):
                     _save_fear_vote(level, user_id)
                     st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
 
     # Callout boxes matching pandemic panel
     callout_html = f"""
