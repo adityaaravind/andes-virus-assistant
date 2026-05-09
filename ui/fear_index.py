@@ -245,18 +245,19 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
 
     with col_dist:
         st.markdown(
-            "<p style='color:#94a3b8; font-size:0.8rem; margin-bottom:0.5rem;'>"
+            "<p style='color:#94a3b8; font-size:0.8rem; margin-bottom:0.8rem;'>"
             "📊 <b>Cast Your Sentiment</b></p>",
             unsafe_allow_html=True,
         )
         
-        # Grid of voting buttons
-        v_grid = st.columns(3, gap="small")
+        # Grid of voting buttons - 5 columns for square tiles
+        v_grid = st.columns(5, gap="small")
         for i, level in enumerate(range(1, 6)):
             info = FEAR_LEVELS[level]
-            l_color = info['color']
-            with v_grid[i % 3]:
-                if st.button(info['label'].upper(), key=f"vote_dist_{level}", use_container_width=True, disabled=user_voted_today):
+            with v_grid[i]:
+                # Using short labels for square fit
+                label = info['label'].upper()[:4]
+                if st.button(label, key=f"vote_dist_{level}", use_container_width=True, disabled=user_voted_today, help=info['desc']):
                     _save_fear_vote(level, user_id)
                     st.rerun()
 
@@ -303,29 +304,44 @@ clear official communications and verified data.
         l_color = info['color']
         btn_dist_style += f"""
             div[data-testid="stButton"] button[key*="vote_dist_{level}"] {{
-                background: rgba(15, 23, 42, 0.4) !important;
+                background: rgba(15, 23, 42, 0.3) !important;
                 backdrop-filter: blur(8px) !important;
-                border: 1px solid rgba(255, 255, 255, 0.08) !important;
-                border-radius: 10px !important;
-                min-height: 80px !important;
-                padding: 0.6rem !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                border-radius: 12px !important;
+                aspect-ratio: 1 / 1 !important;
+                width: 100% !important;
+                padding: 0 !important;
                 display: flex !important;
                 flex-direction: column !important;
-                align-items: flex-start !important;
+                align-items: center !important;
                 justify-content: center !important;
-                transition: all 0.2s ease !important;
+                transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
                 margin-bottom: 0.5rem !important;
             }}
-            div[data-testid="stButton"] button[key*="vote_dist_{level}"]:hover:not(:disabled) {{
+            div[data-testid="stButton"] button[key*="vote_dist_{level}"] div[data-testid="stMarkdownContainer"] p {{
+                font-size: 0.65rem !important;
+                font-weight: 950 !important;
+                color: #94a3b8 !important;
+                transition: all 0.2s ease !important;
+                text-transform: uppercase !important;
+                margin: 0 !important;
+            }}
+            div[data-testid="stButton"] button[key*="vote_dist_{level}"]:hover:not(:disabled),
+            div[data-testid="stButton"] button[key*="vote_dist_{level}"]:active {{
                 border-color: {l_color} !important;
-                transform: translateY(-2px) !important;
-                background: rgba(15, 23, 42, 0.6) !important;
-                box-shadow: 0 8px 24px {l_color}15 !important;
+                transform: scale(1.1) !important;
+                background: radial-gradient(circle at center, {l_color}33 0%, rgba(15, 23, 42, 0.8) 100%) !important;
+                box-shadow: 0 0 25px {l_color}44, inset 0 0 10px {l_color}22 !important;
+                z-index: 10 !important;
+            }}
+            div[data-testid="stButton"] button[key*="vote_dist_{level}"]:hover div[data-testid="stMarkdownContainer"] p {{
+                color: {l_color} !important;
+                text-shadow: 0 0 15px {l_color}, 0 0 30px {l_color}88 !important;
             }}
             div[data-testid="stButton"] button[key*="vote_dist_{level}"]:disabled {{
-                opacity: 0.4 !important;
+                opacity: 0.3 !important;
                 cursor: not-allowed !important;
-                filter: grayscale(0.8);
+                filter: grayscale(1);
             }}
         """
     st.markdown(f"<style>{btn_dist_style}</style>", unsafe_allow_html=True)
