@@ -545,7 +545,7 @@ def main() -> None:
                     <p style='color:#94a3b8; font-size:0.75rem; margin-top:0.5rem;'>
                         Real-time sentiment trends, research insight sharing, and anonymized community insights feed.
                     </p>
-                    <div style='margin-top:auto;'><span class='v11-feature-tag rich-tag' style='margin-left:0; opacity:1;'>PHASE 2</span></div>
+                    <div style='margin-top:auto;'><span class='v11-feature-tag' style='margin-left:0; opacity:0.6;'>PHASE 2</span></div>
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -558,7 +558,7 @@ def main() -> None:
                     <p style='color:#94a3b8; font-size:0.75rem; margin-top:0.5rem;'>
                         "What If?" Scenario Lab. Adjust viral variables to simulate outbreak progression and response.
                     </p>
-                    <div style='margin-top:auto;'><span class='v11-feature-tag rich-tag' style='margin-left:0; opacity:1;'>PHASE 2</span></div>
+                    <div style='margin-top:auto;'><span class='v11-feature-tag' style='margin-left:0; opacity:0.6;'>PHASE 2</span></div>
                 </div>
                 """,
                 unsafe_allow_html=True
