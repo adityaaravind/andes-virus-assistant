@@ -100,44 +100,9 @@ def build_timeline_chart() -> go.Figure:
 def render_stats_panel() -> None:
     stats  = get_outbreak_stats()
     
-    # Informational note about definitions
-    st.info(
-        "**Case Definitions:** 'Confirmed' refers to laboratory-verified PCR results. 'Suspected' "
-        "includes individuals showing clinical symptoms (fever, respiratory distress) who were "
-        "on board MV Hondius but await final lab confirmation.",
-        icon="🔬"
-    )
-
-    is_live = stats.get("_source") == "auto-extracted"
-
-    if is_live:
-        st.markdown(
-            '<span class="live-dot"></span>'
-            '<span class="live-label">CASE COUNTS AUTO-UPDATED · last: '
-            + stats["last_updated"] + '</span>',
-            unsafe_allow_html=True,
-        )
-    elif stats.get("_source") == "manual-correction":
-        st.markdown(
-            '<div style="background:rgba(59,130,246,0.1);border:1px solid #3b82f644;padding:0.5rem 0.8rem;border-radius:8px;margin-bottom:1rem;">'
-            '<span style="color:#3b82f6;font-size:0.75rem;font-weight:700;font-family:monospace;letter-spacing:0.05em;">'
-            '🛡️ VERIFIED DATA SOURCE</span><br>'
-            '<span style="color:#94a3b8;font-size:0.72rem;">'
-            'Showing verified human-checked data right now, not just what the AI guessed from a news headline. '
-            'Last sync: ' + stats["last_updated"] + '</span>'
-            '</div>',
-            unsafe_allow_html=True,
-        )
-    else:
-        st.markdown(
-            '<span style="color:#f59e0b;font-size:0.7rem;font-weight:700;font-family:monospace;'
-            'letter-spacing:0.05em;">⏸ CASE COUNTS — LAST VERIFIED: '
-            + stats["last_updated"] + ' · awaiting live update</span>',
-            unsafe_allow_html=True,
-        )
-
+    # ── 1. REAL-TIME HEADER & CARDS (TOP PRIORITY) ──
     st.markdown(
-        f'<div style="display:flex; align-items:center; gap:8px; margin-bottom:0.5rem; background:rgba(34,197,94,0.05); padding:4px 12px; border-radius:100px; width:fit-content; border:1px solid rgba(34,197,94,0.1);">'
+        f'<div style="display:flex; align-items:center; gap:8px; margin-bottom:1rem; background:rgba(34,197,94,0.05); padding:4px 12px; border-radius:100px; width:fit-content; border:1px solid rgba(34,197,94,0.1);">'
         f'<span class="live-dot" style="width:8px; height:8px; background:#22c55e; box-shadow: 0 0 8px #22c55e;"></span>'
         f'<span style="color:#22c55e; font-size:0.65rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em;">Real-time Outbreak Tracking Active</span>'
         f'</div>',
@@ -183,11 +148,48 @@ def render_stats_panel() -> None:
             f'</div>'
         )
 
-    
     st.markdown(
         f'<div class="stats-grid">{cards_html}</div>',
         unsafe_allow_html=True,
     )
+
+    # ── 2. DATA SOURCE VERIFICATION (SUPPORTING) ──
+    is_live = stats.get("_source") == "auto-extracted"
+
+    if is_live:
+        st.markdown(
+            '<span class="live-dot"></span>'
+            '<span class="live-label">CASE COUNTS AUTO-UPDATED · last: '
+            + stats["last_updated"] + '</span>',
+            unsafe_allow_html=True,
+        )
+    elif stats.get("_source") == "manual-correction":
+        st.markdown(
+            '<div style="background:rgba(59,130,246,0.1);border:1px solid #3b82f644;padding:0.5rem 0.8rem;border-radius:8px;margin-bottom:1rem;margin-top:0.5rem;">'
+            '<span style="color:#3b82f6;font-size:0.75rem;font-weight:700;font-family:monospace;letter-spacing:0.05em;">'
+            '🛡️ VERIFIED DATA SOURCE</span><br>'
+            '<span style="color:#94a3b8;font-size:0.72rem;">'
+            'Showing verified human-checked data. '
+            'Last sync: ' + stats["last_updated"] + '</span>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            '<span style="color:#f59e0b;font-size:0.7rem;font-weight:700;font-family:monospace;'
+            'letter-spacing:0.05em;">⏸ CASE COUNTS — LAST VERIFIED: '
+            + stats["last_updated"] + ' · awaiting live update</span>',
+            unsafe_allow_html=True,
+        )
+
+    # ── 3. DEFINITIONS (CONTEXTUAL) ──
+    st.info(
+        "**Case Definitions:** 'Confirmed' refers to laboratory-verified PCR results. 'Suspected' "
+        "includes individuals showing clinical symptoms who await final lab confirmation.",
+        icon="🔬"
+    )
+
+    st.markdown("<br>", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
