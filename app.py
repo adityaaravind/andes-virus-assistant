@@ -380,25 +380,41 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
         )
 
 def main() -> None:
-    # ── Widget Mode Detection ──
-    is_widget = st.query_params.get("view") == "widget"
+    # ── Component Widget Mode Detection ──
+    widget_mode = st.query_params.get("widget")
     
-    if is_widget:
-        # Mini-mode for smartphone home screen shortcuts
+    if widget_mode:
+        # Mini-mode for smartphone home screen shortcuts (App-like feel)
         st.markdown(
             """
             <style>
                 .stApp { background: #08111e !important; }
                 header, footer { visibility: hidden !important; }
-                .main .block-container { padding-top: 1rem !important; }
+                .main .block-container { padding: 1rem 0.5rem !important; }
             </style>
             """, 
             unsafe_allow_html=True
         )
-        from ui.stats_panel import render_stats_panel
-        render_stats_panel()
-        from ui.pandemic_risk import render_pandemic_risk_panel
-        render_pandemic_risk_panel()
+        
+        # Auto-refresh widgets every 5 minutes
+        from streamlit_autorefresh import st_autorefresh
+        st_autorefresh(interval=5 * 60 * 1000, key="widget_refresh")
+
+        if widget_mode == "stats":
+            from ui.stats_panel import render_stats_panel
+            render_stats_panel()
+        elif widget_mode == "risk":
+            from ui.pandemic_risk import render_pandemic_risk_panel
+            render_pandemic_risk_panel()
+        elif widget_mode == "fear":
+            from ui.fear_index import render_fear_index
+            render_fear_index()
+            
+        st.markdown(
+            "<div style='text-align:center; margin-top:20px; opacity:0.5; font-size:0.6rem; color:white;'>"
+            "Andes Virus Research Assistant · Live Update</div>", 
+            unsafe_allow_html=True
+        )
         st.stop()
 
     with streamlit_analytics.track(load_from_json="data/analytics.json", save_to_json="data/analytics.json"):

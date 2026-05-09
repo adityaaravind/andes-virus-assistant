@@ -111,8 +111,13 @@ def render_stats_panel() -> None:
             unsafe_allow_html=True
         )
     with col_widget:
-        if st.button("📱 Widget", key="widget_shortcut", use_container_width=True):
-            st.toast("Check the sidebar for widget instructions!", icon="📱")
+        if st.button("📱 Pin to Home", key="pin_stats", use_container_width=True):
+            st.info(
+                "**Install Live Stats Widget:**\n\n"
+                "1. Click the link below to open Widget Mode.\n"
+                "2. In Safari/Chrome, tap **Share** > **Add to Home Screen**."
+            )
+            st.link_button("🚀 Open Stats Widget", "/?widget=stats", use_container_width=True)
 
     # Helper to pick glow class based on thresholds
     def get_glow(val: Any, type: str) -> str:

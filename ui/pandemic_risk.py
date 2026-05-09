@@ -209,6 +209,15 @@ text-align:center; min-width:82px; box-shadow: 0 0 15px {color}10; flex-shrink:0
 """.replace("\n", "").strip()
     st.markdown(header_html, unsafe_allow_html=True)
 
+    col_empty, col_pin = st.columns([4, 1])
+    with col_pin:
+        if st.button("📱 Pin Widget", key="pin_risk", use_container_width=True):
+            st.info(
+                "**Install Risk Widget:**\n\n"
+                "1. Click the link below to open Widget Mode.\n"
+                "2. In Safari/Chrome, tap **Share** > **Add to Home Screen**."
+            )
+            st.link_button("🚀 Open Risk Widget", "/?widget=risk", use_container_width=True)
 
     # ── Gauge + Comparison bars ───────────────────────────────────────────────
     col_gauge, col_bars = st.columns([1, 1.6])
