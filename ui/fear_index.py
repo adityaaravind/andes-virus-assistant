@@ -274,6 +274,11 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
                 padding: 20px 0 0 0 !important;
             }}
             
+            /* Hide the 1, 2, 3, 4, 5 numeric labels and ticks */
+            div[data-testid="stSlider"] [data-baseweb="slider"] > div:last-child {{
+                display: none !important;
+            }}
+            
             /* 2. The Dynamic Track */
             div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child {{
                 height: 5px !important;
