@@ -336,7 +336,7 @@ clear official communications and verified data.
                         _save_fear_vote(level, user_id)
                         st.rerun()
                     st.markdown(
-                        f'<div style="text-align:center; font-size:0.55rem; color:{l_color}; opacity:0.7; margin-top:-8px; font-weight:500;">{info["desc"]}</div>',
+                        f'<div style="text-align:center; font-size:0.65rem; color:var(--gray-300); margin-top:-4px; font-weight:500; text-transform:none; opacity:0.9; line-height:1.2;">{info["desc"]}</div>',
                         unsafe_allow_html=True
                     )
 
@@ -348,24 +348,24 @@ clear official communications and verified data.
                 div[data-testid="stButton"] button[key*="vote_{level}"] {{
                     background: rgba(15, 23, 42, 0.6) !important;
                     backdrop-filter: blur(12px) !important;
-                    border: 1px solid {l_color}33 !important;
+                    border: 1px solid rgba(255, 255, 255, 0.12) !important;
                     color: {l_color} !important;
-                    height: 50px !important;
-                    font-size: 0.75rem !important;
+                    height: 55px !important;
+                    font-size: 0.9rem !important;
                     font-weight: 950 !important;
                     text-transform: uppercase !important;
-                    letter-spacing: 0.05em !important;
-                    border-radius: 10px !important;
+                    letter-spacing: -0.02em !important;
+                    border-radius: 12px !important;
                     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
-                    text-shadow: 0 0 10px {l_color}44 !important;
+                    box-shadow: 0 8px 32px rgba(0,0,0,0.4) !important;
+                    text-shadow: 0 0 15px {l_color}66 !important;
                     padding: 0 !important;
                 }}
                 div[data-testid="stButton"] button[key*="vote_{level}"]:hover {{
                     border-color: {l_color} !important;
                     background: rgba(15, 23, 42, 0.8) !important;
                     transform: translateY(-2px) !important;
-                    box-shadow: 0 0 20px {l_color}22 !important;
+                    box-shadow: 0 12px 40px {l_color}22 !important;
                 }}
             """
         st.markdown(f"<style>{btn_style}</style>", unsafe_allow_html=True)
