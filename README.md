@@ -1,102 +1,64 @@
-# 🧬 Andes Virus Research Assistant `v1.3.0`
+# 🧬 Andes Virus Research Assistant `v1.3.0 Stable`
 
 **Real-time AI Outbreak Intelligence for the MV Hondius Hantavirus Incident.**
 
----
-
-## 🚀 Key Features
-
--   **🤖 AI Research Assistant:** Ask complex questions and get answers cited with original sources (WHO, CDC, PubMed).
--   **🛡️ Command Center:** (v1.3) Luxury-gold animated sidebar tiles for rapid, touch-friendly navigation.
--   **🧠 Memory Watchdog:** (v1.3) Background system monitoring and garbage collection to prevent Streamlit Cloud crashes.
--   **🗺️ Live Outbreak Map:** Interactive global tracking of cases by nationality and geographic spread.
--   **📡 Real-Time News Ticker:** Monitored feeds from WHO, CDC, Reuters, and BBC—updated every 15 minutes.
--   **📈 Pandemic Risk & Fear Index:** Blended sentiment analysis from global media and community voting.
--   **📤 Intelligence Sharing:** (v1.2) Journalist-grade data exports, situation reports, and social media card generation.
--   **📊 Outbreak Analytics:** Detailed statistics on case counts, mortality rates, and source credibility.
+[![Deployment](https://img.shields.io/badge/Deploy-Streamlit%20Cloud-FF4B4B?logo=streamlit)](https://andes-virus-assistant.streamlit.app/)
+[![Stable Version](https://img.shields.io/badge/Release-v1.3.0-00b4d8?logo=github)](https://github.com/adityaaravind/andes-virus-assistant/releases/tag/v1.3.0)
 
 ---
 
-## 📜 v1.3.0 Changelog (Command & Stability Update)
+## 🚀 The Intelligence Platform
 
-- **Official Release v1.3.0 Stable:** Introducing interactive navigation and robust memory management.
-- **Interactive Command Center:** Added animated sidebar tiles with "Luxury Gold" glow and smooth-scroll anchors.
-- **Resource Guardrails:** Implemented Incremental Ingestion and a 30-minute system memory watchdog.
-- **UX Refinement:** Optimized mobile responsiveness, increased "Outbreak Active" visibility, and fluid typography.
-- **Stability:** Fixed background thread leaks and analytics JSON bloat.
+Andes Virus Assistant is a high-performance RAG (Retrieval-Augmented Generation) application designed to bridge the gap between technical epidemiology and real-time news monitoring. Built for researchers, journalists, and public health officials tracking the **MV Hondius Outbreak**.
 
-## 📜 v1.2.0 Changelog (User Engagement & Stability Update)
+### 🛡️ Core Capabilities
 
-
--   **Frontend:** Streamlit (Custom Navy/Teal Design System)
--   **AI Engine:** LangChain + OpenAI GPT-4o-mini
--   **Embeddings:** OpenAI `text-embedding-3-small` (Fallback: HuggingFace `all-MiniLM-L6-v2`)
--   **Vector Database:** Qdrant Cloud (v1.1 with Recommendation Engine) / ChromaDB (Local)
--   **Persistence:** Persistent Analytics & Sentiment tracking via Qdrant Key-Value store.
-
+- **🤖 Research RAG Engine:** Ask complex questions. Get answers cited directly from WHO SITREPs, CDC guidance, and PubMed abstracts.
+- **🧭 Command Center (v1.3):** Luxury-gold sidebar interface with touch-optimized, animated tiles for rapid navigation through intelligence blocks.
+- **📈 Pandemic Risk & Fear Index:** Real-time epidemiologic weighting blended with AI-driven media sentiment analysis.
+- **🗺️ Global Nationality Map:** Interactive tracking of case distribution by nationality and geographic proximity.
+- **🧠 Stability Watchdog:** Custom memory-aware guardrails preventing crashes in low-RAM (1GB) Streamlit environments via incremental ingestion and system-wide cleanup.
+- **📤 Intelligence Sharing:** Journalist-grade situational report generation, CSV data exports, and auto-generated social media cards.
 
 ---
 
-## ⚙️ Quick Start
+## 📜 v1.3.0: The "Command & Stability" Update
 
-### 1. Prerequisites
-- Python 3.9+
-- An OpenAI API Key (for the best AI performance)
-- [Optional] A free Qdrant Cloud cluster (for persistent data on Streamlit Cloud)
+Our most significant leap in UX and performance to date.
 
-### 2. Installation
-```bash
-# Clone the repository
-git clone https://github.com/adityaaravind/andes-virus-assistant.git
-cd andes-virus-assistant
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### 3. Configuration
-Copy the example environment file and add your keys:
-```bash
-cp .env.example .env
-# Edit .env and add:
-# OPENAI_API_KEY=sk-...
-# QDRANT_URL=... (optional)
-```
-
-### 4. Ingest Data
-Run the ingestion pipeline to build your local knowledge base. This fetches data from PubMed, WHO, Wikipedia, and Live News.
-```bash
-python scripts/ingest_all.py
-```
-
-### 5. Launch
-```bash
-streamlit run app.py
-```
+- **[NEW] Sidebar Command Center:** A physical-feel tile grid with `Luxury Gold` hover animations and smooth-scrolling anchors.
+- **[NEW] Memory Guardrail System:**
+    *   **Incremental Ingestion:** Source processing (PubMed → WHO → News) is now sequential and memory-cleared, eliminating cold-start RAM spikes.
+    *   **30-Minute Watchdog:** A background system monitor that detects high RAM usage and forces global garbage collection.
+    *   **Analytics Cap:** Aggressive local file management for `streamlit-analytics2` to maintain sub-3MB memory footprint.
+- **[NEW] Visual Hierarchy 2.0:** 
+    *   **Mega-Glow Title:** Bioluminescent pulsing branding for maximum user engagement.
+    *   **Critical Alert Badge:** Pulsing red "Outbreak Active" indicator with neon bloom effects.
+- **[NEW] Liquid Mobile Responsiveness:** Dynamic layout logic that reconfigures the UI for iPhone/Android (3-column tile grids, fluid typography).
 
 ---
 
-## 📚 Data Sources & Credibility
+## 📜 Historical Milestones
 
-We use a weighted re-ranking algorithm (`similarity_score × credibility_score`) to ensure the most reliable information reaches you first.
+### v1.2.0: User Engagement Update
+- **Intelligence Sharing Suite:** Direct share buttons for Twitter/X, LinkedIn, and WhatsApp.
+- **Situation Reports:** Automated PDF/TXT situational summaries for journalists.
+- **Visual Polish:** Implementation of the "Active Outbreak" aesthetic and initial glowing title classes.
 
-| Source Type | Primary Providers | Credibility |
-| :--- | :--- | :--- |
-| **Official** | WHO, CDC, ECDC, PAHO | **1.0** |
-| **Science** | PubMed, The Lancet, ScienceDaily | **0.9** |
-| **Top Press** | Reuters, BBC Health, Al Jazeera | **0.75** |
-| **General** | Google News, Wikipedia | **0.6** |
+### v1.1.0: Active Intelligence Update
+- **Qdrant Cloud Integration:** Transitioned to hosted vector storage for 24/7 reliability.
+- **Contextual Recommendation Engine:** Leveraging Qdrant’s Recommendation API to map related research.
+- **Semantic Alerting:** Automatic push notifications via `ntfy.sh` when critical research keywords are indexed.
 
 ---
 
-## 🏗️ Project Architecture
+## 🛠️ Technology Stack
 
--   `app.py`: Main entry point & background scheduler.
--   `ingestion/`: Scrapers for PubMed, WHO (PDFs), News (RSS), and Wikipedia.
--   `processing/`: Text chunking, metadata tagging, and embedding logic.
--   `rag/`: LangChain implementation, retrieval logic, and citation formatting.
--   `ui/`: Modular Streamlit components (Map, Fear Index, News Ticker, etc.).
--   `vectorstore/`: Abstraction layer for Qdrant and ChromaDB.
+- **Framework:** Streamlit (Custom Navy/Teal Design System)
+- **AI Orchestration:** LangChain + OpenAI GPT-4o-mini
+- **Vector Database:** Qdrant Cloud (v1.1 with Recommendation Engine)
+- **Memory Management:** psutil + Garbage Collection (GC) watchdog
+- **Analytics:** streamlit-analytics2 (Persistent Qdrant-backed KV storage)
 
 ---
 
@@ -105,20 +67,4 @@ We use a weighted re-ranking algorithm (`similarity_score × credibility_score`)
 
 ---
 
----
-
-## 📜 v1.2.0 Changelog (User Engagement & Stability Update)
-
-- **Official Release v1.2.0 Stable:** Consolidating latest UI and intelligence features.
-- **Enhanced Visual Polish:** Implemented glowing titles, dynamic gauge jitter, and high-contrast status indicators.
-- **Journalist Tools Suite:** Added situational report exports (PDF/TXT), CSV data downloads, and procedurally generated social media cards.
-- **Roadmap Dashboard:** Integrated "Next Intelligence Phases" tracking for Phase 2 (Community & Simulations).
-- **Stability Fixes:** Corrected indentation errors and optimized background refresh logic to reduce Streamlit jitter.
-
-## 📜 v1.1 Changelog (Active Intelligence Update)
-
-- **Semantic Alerting Engine:** Moves beyond keyword thresholds. Automatically alerts if indexed documents contain high-risk concepts like "human-to-human transmission" or "mutation" using vector similarity.
-- **Qdrant Named Vectors:** Implemented dual-vector storage (`summary` vs `detail`). Enables high-level browsing and deep-fact extraction within the same collection.
-- **Recommendation API:** Native Qdrant-powered "Related Research" mapping to bridge disparate data sources.
-- **Persistent Session Memory:** Conversation context is now indexed in Qdrant, allowing the assistant to maintain deeper context across sessions.
-- **Hybrid Search Foundation:** Configured sparse vector support for future keyword+semantic hybrid ranking.
+**Developed with ❤️ by [Aditya Aravind Medepalli](https://www.linkedin.com/in/adityaaravindm/)**
