@@ -182,18 +182,18 @@ def render_pandemic_risk_panel() -> None:
     import textwrap
     anim = "pulse-risk 1.8s ease-in-out infinite" if risk["overall"] >= 40 else "none"
     header_html = f"""
-<div style="background:rgba(15, 23, 42, 0.6); border: 1px solid {color}44; border-radius: 10px; padding: 0.8rem 1.2rem;
-margin-bottom: 0.8rem; position:relative; overflow:hidden; min-height: 120px; display: flex; flex-direction: column; justify-content: space-between; backdrop-filter: blur(10px);">
+<div style="background:rgba(15, 23, 42, 0.6); border: 1px solid {color}33; border-radius: 10px; padding: 0.6rem 1rem;
+margin-bottom: 0.8rem; position:relative; overflow:hidden; display: flex; flex-direction: column; gap: 0.8rem; backdrop-filter: blur(10px);">
 <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px;
 background: linear-gradient(90deg,{color},{color}44,{color}); animation: {anim};"></div>
-<div style="display:flex; align-items:center; gap: 1.5rem; flex-wrap:wrap;">
-<div style="flex-shrink:0;">
+<div style="display:flex; align-items:center; justify-content: space-between; gap: 1rem; flex-wrap:wrap;">
+<div style="flex:1; min-width: 140px;">
 <p style="color:{color}; font-size:0.65rem; font-weight:800; letter-spacing:0.1em; margin:0; font-family:monospace; opacity:0.8;">PANDEMIC RISK</p>
-<h2 style="margin:0; font-size:1.8rem !important; font-weight:950; color:white !important; letter-spacing:-0.03em; line-height: 1;">{label}</h2>
+<h2 style="margin:0; font-size:1.7rem !important; font-weight:950; color:white !important; letter-spacing:-0.03em; line-height: 1.1;">{label}</h2>
 </div>
-<div style="background:{color}15; border:1px solid {color}88; border-radius:6px; padding:0.3rem 0.8rem; 
-text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15;">
-<p style="color:{color}; font-size:1.5rem; font-weight:900; margin:0; line-height:1; text-shadow:0 0 8px {color}88;">{risk['overall']}%</p>
+<div style="background:{color}15; border:1px solid {color}66; border-radius:6px; padding:0.4rem 0.8rem; 
+text-align:center; min-width:85px; box-shadow: 0 0 15px {color}10;">
+<p style="color:{color}; font-size:1.4rem; font-weight:900; margin:0; line-height:1; text-shadow:0 0 8px {color}88;">{risk['overall']}%</p>
 <p style="color:#94a3b8; font-size:0.5rem; font-weight:800; margin:0; text-transform:uppercase; opacity:0.8;">SCORE</p>
 </div>
 </div>
