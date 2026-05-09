@@ -206,52 +206,60 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         st.markdown(
             """
             <style>
-            /* 1. Global Reset for Sentiment Buttons */
+            /* 1. Global Reset for Stat-Style Sentiment Buttons */
             div[data-testid="column"] div[data-testid="stButton"] {
                 margin: 0 !important;
                 padding: 0 !important;
             }
             
             div[data-testid="column"] div[data-testid="stButton"] button {
-                background: rgba(15, 23, 42, 0.4) !important;
-                border: 2px solid rgba(255, 255, 255, 0.05) !important;
-                border-radius: 12px !important;
+                background: rgba(15, 23, 42, 0.6) !important;
+                backdrop-filter: blur(12px) !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                border-radius: 14px !important;
                 width: 100% !important;
                 aspect-ratio: 1/1 !important;
-                height: 75px !important; /* Fixed height for small buttons */
-                padding: 0 !important;
+                height: auto !important;
+                min-height: 100px !important;
+                padding: 1.2rem !important;
                 display: flex !important;
                 flex-direction: column !important;
                 align-items: center !important;
                 justify-content: center !important;
-                transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-                line-height: 1.2 !important;
-                white-space: pre-wrap !important;
-                overflow: hidden !important;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.5) !important;
             }
 
-            /* Custom sizing for labels inside button */
+            /* Custom sizing for labels inside button - MATCHING STAT-LABEL */
             div[data-testid="stButton"] button p {
                 font-family: 'Inter', sans-serif !important;
-                font-weight: 900 !important;
-                font-size: 0.55rem !important;
+                font-weight: 800 !important;
+                font-size: 0.75rem !important;
                 text-transform: uppercase !important;
                 margin: 0 !important;
-                padding-top: 0.2rem !important;
-                letter-spacing: 0.02em !important;
-                color: #94a3b8 !important;
+                padding-top: 0.5rem !important;
+                letter-spacing: 0.06em !important;
+                color: var(--white) !important;
+                opacity: 0.9 !important;
+                line-height: 1.4 !important;
             }
 
-            /* Emoji size adjustment */
-            div[data-testid="stButton"] button::before {
-                font-size: 1.3rem !important;
-                margin-bottom: 2px !important;
-            }}
+            /* Emoji size adjustment - MATCHING STAT-VALUE PROMINENCE */
+            .tile-emoji {
+                font-size: 2.2rem !important;
+                font-weight: 950 !important;
+                line-height: 1 !important;
+                display: block !important;
+                letter-spacing: -0.04em !important;
+                transition: transform 0.3s ease !important;
+            }
 
-            /* Active State - Glow based on button key */
+            /* Hover effect - MATCHING STAT-CARD HOVER */
             div[data-testid="stButton"] button:hover:not(:disabled) {
-                border-color: rgba(255, 255, 255, 0.2) !important;
-                transform: translateY(-2px) !important;
+                border-color: #48cae4 !important; /* teal-light */
+                transform: translateY(-4px) !important;
+                background: rgba(15, 23, 42, 0.85) !important;
+                box-shadow: 0 15px 50px rgba(0, 180, 216, 0.2) !important;
             }
 
             /* Disable other buttons once voted */
@@ -259,9 +267,10 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
                 opacity: 0.2 !important;
                 filter: grayscale(1) !important;
                 cursor: not-allowed !important;
+                box-shadow: none !important;
             }
             </style>
-            <p style='color:#94a3b8; font-size:0.75rem; font-weight:800; margin-bottom:0.8rem; letter-spacing:0.1em; opacity:0.8; text-transform:uppercase;'>📡 SELECT SENTIMENT</p>
+            <p style='color:#94a3b8; font-size:0.75rem; font-weight:800; margin-bottom:1rem; letter-spacing:0.1em; opacity:0.8; text-transform:uppercase;'>📡 SELECT SENTIMENT</p>
             """,
             unsafe_allow_html=True
         )
@@ -271,48 +280,38 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         
         for i, level_id in enumerate(range(1, 6)):
             info = FEAR_LEVELS[level_id]
-            is_active = (level_id == level_int)
-            l_color = info['color']
-            
             with cols[i]:
-                # Full label with slight font size reduction to ensure fit
-                label_text = f"{icons[level_id]}\n{info['label'].upper()}"
+                # Wrap icon in span for easier targeting
+                label_html = f'<span class="tile-emoji">{icons[level_id]}</span>\n{info["label"].upper()}'
                 
-                if st.button(label_text, key=f"tile_v3_{level_id}", disabled=user_voted_today, use_container_width=True):
+                if st.button(label_html, key=f"tile_v5_{level_id}", disabled=user_voted_today, use_container_width=True):
                     _save_fear_vote(level_id, user_id)
                     st.session_state.fear_slider_input = level_id
                     st.rerun()
 
-        # Target the ACTIVE button with high-intensity "Lit" neon glow
-        active_color = FEAR_LEVELS[level_int]['color']
+        # Aggressive Active styling to match 'Confirmed Cases' lit effect
+        active_info = FEAR_LEVELS[level_int]
+        c = active_info['color']
         active_css = f"""
         <style>
-        /* Base inactive hover for better UX */
-        div[data-testid="stButton"] button[key*="tile_v3_"]:hover:not(:disabled) {{
-            background: rgba(255, 255, 255, 0.05) !important;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1) !important;
-        }}
-
-        div[data-testid="stButton"] button[key*="tile_v3_{level_int}"] {{
-            background: radial-gradient(circle at center, {active_color}44 0%, rgba(15, 23, 42, 0.95) 100%) !important;
-            border: 2px solid {active_color} !important;
-            box-shadow: 0 0 40px {active_color}77, inset 0 0 15px {active_color}44 !important;
-            transform: scale(1.1) translateY(-3px) !important;
+        div[data-testid="stButton"] button[key*="tile_v5_{level_int}"] {{
+            background: radial-gradient(circle at center, {c}44 0%, rgba(15, 23, 42, 0.95) 100%) !important;
+            border: 2px solid {c} !important;
+            box-shadow: 0 0 40px {c}77, inset 0 0 15px {c}44 !important;
+            transform: scale(1.1) translateY(-5px) !important;
             opacity: 1 !important;
             filter: none !important;
             z-index: 100 !important;
-            animation: active-pulse 2s infinite ease-in-out !important;
         }}
-        @keyframes active-pulse {{
-            0%, 100% {{ box-shadow: 0 0 30px {active_color}55, inset 0 0 10px {active_color}33; }}
-            50% {{ box-shadow: 0 0 50px {active_color}99, inset 0 0 20px {active_color}66; }}
-        }}
-        div[data-testid="stButton"] button[key*="tile_v3_{level_int}"] p {{
+        div[data-testid="stButton"] button[key*="tile_v5_{level_int}"] p {{
             color: white !important;
-            font-weight: 950 !important;
-            text-shadow: 0 0 15px {active_color}, 0 0 30px {active_color}cc !important;
-            font-size: 0.52rem !important;
             opacity: 1 !important;
+            text-shadow: 0 0 20px {c}, 0 0 40px {c}88 !important;
+            font-weight: 950 !important;
+        }}
+        div[data-testid="stButton"] button[key*="tile_v5_{level_int}"] .tile-emoji {{
+            transform: scale(1.2) !important;
+            filter: drop-shadow(0 0 15px {c});
         }}
         </style>
         """
@@ -326,7 +325,7 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
                 unsafe_allow_html=True
             )
         else:
-            st.markdown("<p style='color:#64748b; font-size:0.6rem; text-align:center; margin-top:1.2rem; font-weight:700;'>TAP TILE TO CAST VOTE</p>", unsafe_allow_html=True)
+            st.markdown("<p style='color:#64748b; font-size:0.6rem; text-align:center; margin-top:1rem; font-weight:700;'>TAP TILE TO CAST VOTE</p>", unsafe_allow_html=True)
 
     # Callouts
     callout_html = """
@@ -337,3 +336,11 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
 </div>
 """.replace("\n", "").strip()
     st.markdown(callout_html, unsafe_allow_html=True)
+
+    if user_voted_today:
+        thanks_html = """
+<div style="background:rgba(34,197,94,0.08); border:1px solid #22c55e44; border-radius:8px; padding:0.8rem; margin-top:0.2rem;">
+<p style="color:#22c55e; font-size:0.8rem; margin:0;">✓ Vote recorded. Thanks for participating!</p>
+</div>
+""".replace("\n", "").strip()
+        st.markdown(thanks_html, unsafe_allow_html=True)
