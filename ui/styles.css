@@ -332,26 +332,22 @@ div[data-testid="stButton"] button[key*="vote_"] div[data-testid="stMarkdownCont
 
 /* ── Live Jitter & Pulse Animations ── */
 @keyframes needle-jitter {
-  0% { transform: rotate(-0.15deg); }
-  25% { transform: rotate(0.1deg); }
-  50% { transform: rotate(-0.05deg); }
-  75% { transform: rotate(0.15deg); }
-  100% { transform: rotate(0deg); }
+  0% { transform: rotate(-0.2deg); }
+  50% { transform: rotate(0.2deg); }
+  100% { transform: rotate(-0.2deg); }
 }
 
 @keyframes text-live-pulse {
-  0%, 100% { opacity: 1; filter: brightness(1); }
-  50% { opacity: 0.85; filter: brightness(1.2); }
+  0%, 100% { opacity: 1; filter: contrast(100%); }
+  50% { opacity: 0.7; filter: contrast(150%); }
 }
 
-/* Target Plotly Gauge Needle (SVG path) */
-.js-plotly-plot .indicator path.needle, 
-.js-plotly-plot .indicator path.threshold {
-  animation: needle-jitter 0.15s infinite linear;
-  transform-origin: center bottom;
+/* Force animations on Plotly Gauge Elements */
+.js-plotly-plot .indicator path {
+  animation: needle-jitter 0.1s infinite ease-in-out !important;
+  transform-origin: center !important;
 }
 
-/* Target the main number in Plotly Gauges */
-.js-plotly-plot .indicator text.numbers {
-  animation: text-live-pulse 2s infinite ease-in-out;
+.js-plotly-plot .indicator text {
+  animation: text-live-pulse 1.5s infinite ease-in-out !important;
 }

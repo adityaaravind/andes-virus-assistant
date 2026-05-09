@@ -152,7 +152,7 @@ def _build_fear_gauge(avg_fear: float, color: str) -> go.Figure:
         paper_bgcolor="rgba(0,0,0,0)",
         font={"color": "#f8fafc"},
         margin=dict(l=20, r=20, t=30, b=10),
-        height=260,
+        height=280,
     )
     return fig
 
