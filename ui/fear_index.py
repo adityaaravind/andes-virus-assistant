@@ -195,15 +195,15 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         st.markdown(
             """
             <style>
-            div[data-testid="column"] { position: relative; overflow: visible !important; }
+            div[data-testid="column"] { position: relative; overflow: visible !important; min-width: 0 !important; }
 
             .premium-tile {
                 background: rgba(15, 23, 42, 0.4);
                 backdrop-filter: blur(8px);
                 border: 1px solid rgba(255, 255, 255, 0.05);
-                border-radius: 12px;
-                width: 66px;
-                height: 66px;
+                border-radius: 10px;
+                width: 60px;
+                height: 60px;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -220,47 +220,49 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
             .premium-tile.active {
                 background: radial-gradient(circle at center, var(--t-color)55 0%, rgba(15, 23, 42, 0.95) 100%) !important;
                 border: 2px solid var(--t-color) !important;
-                box-shadow: 0 0 30px var(--t-color)66, inset 0 0 10px var(--t-color)44 !important;
-                transform: translateX(-50%) scale(1.1) translateY(-4px) !important;
+                box-shadow: 0 0 25px var(--t-color)66;
+                transform: translateX(-50%) scale(1.08) translateY(-3px) !important;
                 z-index: 2;
                 opacity: 1 !important;
             }
 
             .premium-tile.disabled { opacity: 0.1; filter: grayscale(1); }
-            .tile-icon { font-size: 1.4rem; line-height: 1; margin-bottom: 2px; background: transparent !important; }
-            .active .tile-icon { filter: drop-shadow(0 0 8px var(--t-color)); }
-
+            .tile-icon { font-size: 1.2rem; line-height: 1; margin-bottom: 1px; background: transparent !important; }
             .tile-label {
                 font-family: 'Inter', sans-serif;
-                font-weight: 950;
-                font-size: 0.46rem;
+                font-weight: 900;
+                font-size: 0.42rem;
                 text-transform: uppercase;
                 color: #94a3b8;
                 text-align: center;
                 line-height: 1;
                 white-space: nowrap;
             }
-            .active .tile-label { color: white !important; text-shadow: 0 0 8px var(--t-color); }
 
-            div[data-testid="stButton"] { margin: 0 !important; padding: 0 !important; height: 66px !important; display: flex; justify-content: center; }
+            div[data-testid="stButton"] { margin: 0 !important; padding: 0 !important; height: 60px !important; display: flex; justify-content: center; }
             div[data-testid="stButton"] button {
                 background: transparent !important;
                 border: none !important;
                 box-shadow: none !important;
-                height: 66px !important;
-                width: 66px !important;
+                height: 60px !important;
+                width: 60px !important;
                 color: transparent !important;
                 margin: 0 auto !important;
                 z-index: 10 !important;
             }
-            div[data-testid="stButton"] button:hover:not(:disabled) {
-                background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%) !important;
-            }
-            div[data-testid="stButton"] button:focus, div[data-testid="stButton"] button:active {
-                border: none !important; outline: none !important; box-shadow: none !important;
+
+            @media (max-width: 768px) {
+                .premium-tile { width: 45px; height: 45px; border-radius: 8px; }
+                .premium-tile.active { transform: translateX(-50%) scale(1.05) translateY(-2px) !important; }
+                .tile-icon { font-size: 1rem; }
+                .tile-label { font-size: 0.36rem; }
+                div[data-testid="stButton"] { height: 45px !important; }
+                div[data-testid="stButton"] button { height: 45px !important; width: 45px !important; }
+                .sentiment-header { font-size: 0.6rem !important; }
+                .vote-critical { font-size: 0.45rem !important; }
             }
             </style>
-            <p style='color:#94a3b8; font-size:0.7rem; font-weight:800; margin-bottom:0.8rem; letter-spacing:0.1em; opacity:0.8; text-transform:uppercase;'>📡 COMMAND SENTIMENT</p>
+            <p class='sentiment-header' style='color:#94a3b8; font-size:0.7rem; font-weight:800; margin-bottom:0.8rem; letter-spacing:0.1em; opacity:0.8; text-transform:uppercase;'>📡 SENTIMENT</p>
             """,
             unsafe_allow_html=True
         )
@@ -271,17 +273,17 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
             is_active = (level_id == level_int)
             with cols[i]:
                 st.markdown(f'<div class="premium-tile {"active" if is_active else ""} {"disabled" if user_voted_today and not is_active else ""}" style="--t-color: {info["color"]};"><span class="tile-icon">{icons[level_id]}</span><span class="tile-label">{info["label"].upper()}</span></div>', unsafe_allow_html=True)
-                if st.button(" ", key=f"v12_btn_{level_id}", disabled=user_voted_today):
+                if st.button(" ", key=f"v13_btn_{level_id}", disabled=user_voted_today):
                     _save_fear_vote(level_id, user_id)
                     st.session_state.fear_slider_input = level_id
                     st.rerun()
 
         if user_voted_today:
-            st.markdown(f"<div style='background:rgba(34,197,94,0.05); border:1px solid #22c55e33; border-radius:10px; padding:0.8rem; margin-top:1.2rem; text-align:center;'><p style='color:#22c55e; font-size:0.75rem; font-weight:950; margin:0;'>✓ SENTIMENT ANCHORED: {FEAR_LEVELS[level_int]['label'].upper()}</p></div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='background:rgba(34,197,94,0.05); border:1px solid #22c55e33; border-radius:10px; padding:0.6rem; margin-top:1rem; text-align:center;'><p style='color:#22c55e; font-size:0.7rem; font-weight:950; margin:0;'>✓ SENTIMENT ANCHORED</p></div>", unsafe_allow_html=True)
         else:
             st.markdown(
-                "<p style='color:#38bdf8; font-size:0.55rem; text-align:center; margin-top:1rem; font-weight:950; letter-spacing:0.05em; text-shadow: 0 0 12px rgba(56,189,248,0.5);'>"
-                "⚡ TAP TILE TO CAST VOTE — CRITICAL FOR ACCURATE OUTBREAK RISK MODELING"
+                "<p class='vote-critical' style='color:#38bdf8; font-size:0.52rem; text-align:center; margin-top:0.8rem; font-weight:950; letter-spacing:0.03em; text-shadow: 0 0 10px rgba(56,189,248,0.4);'>"
+                "⚡ TAP TILE TO VOTE — CRITICAL FOR RISK MODELING"
                 "</p>", 
                 unsafe_allow_html=True
             )
