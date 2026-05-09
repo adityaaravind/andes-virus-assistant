@@ -379,21 +379,7 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
             unsafe_allow_html=True,
         )
 
-
 def main() -> None:
-    # ── Scroll Indicator (Fixed position via CSS) ──
-    st.markdown(
-        """
-        <div class="scroll-indicator">
-            <div class="scroll-mouse">
-                <div class="scroll-wheel"></div>
-            </div>
-            <div class="scroll-text">Scroll</div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
     # ── v1.1 Feature Scroller (ABSOLUTE TOP) ──
     st.markdown(
         """
@@ -438,10 +424,26 @@ def main() -> None:
         )
 
         st.divider()
+
         # ── LIVE STATS (MOVED TO TOP FOR MOBILE) ──
         from ui.stats_panel import render_stats_panel
         render_stats_panel()
+
+        # ── Dynamic Scroll Guide (CENTERED FLOW) ──
+        st.markdown(
+            """
+            <div class="scroll-guide-container">
+                <div class="scroll-pill">
+                    <span class="scroll-text-dynamic">Explore Intelligence</span>
+                    <span class="scroll-chevron">↓</span>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
         st.divider()
+
 
         st.warning("⚠️ **NOT MEDICAL ADVICE** • For emergencies contact local health authorities")
 
