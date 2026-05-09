@@ -381,9 +381,51 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
 
 def main() -> None:
     with streamlit_analytics.track(load_from_json="data/analytics.json", save_to_json="data/analytics.json"):
-        # Auto-refresh page every 15 mins so stats and headlines stay live
+        # Auto-refresh page every 5 seconds for 'True Live' motion
         from streamlit_autorefresh import st_autorefresh
-        st_autorefresh(interval=15 * 60 * 1000, key="stats_refresh")
+        st_autorefresh(interval=5 * 1000, key="live_motion_refresh")
+
+        # ── Mutation Observer for Forced Gauge Jitter ──
+        st.markdown(
+            """
+            <script>
+                function applyJitter() {
+                    const needles = document.querySelectorAll('.indicator path.needle, .indicator path.threshold');
+                    const numbers = document.querySelectorAll('.indicator text.numbers');
+                    
+                    const now = Date.now() / 100;
+                    
+                    needles.forEach(n => {
+                        const jitterX = Math.sin(now * 1.5) * 0.5;
+                        const jitterY = Math.cos(now * 1.3) * 0.5;
+                        const jitterR = Math.sin(now * 1.7) * 0.2;
+                        n.style.transform = `translate(${jitterX}px, ${jitterY}px) rotate(${jitterR}deg)`;
+                        n.style.transformOrigin = 'center bottom';
+                    });
+                    
+                    numbers.forEach(num => {
+                        const jX = Math.cos(now * 2) * 0.3;
+                        const jY = Math.sin(now * 2.2) * 0.3;
+                        num.style.transform = `translate(${jX}px, ${jY}px)`;
+                    });
+                    
+                    requestAnimationFrame(applyJitter);
+                }
+
+                // Start observing the body for Plotly charts
+                const observer = new MutationObserver((mutations) => {
+                    if (document.querySelector('.js-plotly-plot')) {
+                        applyJitter();
+                    }
+                });
+                
+                observer.observe(document.body, { childList: true, subtree: true });
+                // Initial kickstart
+                setTimeout(applyJitter, 2000);
+            </script>
+            """,
+            unsafe_allow_html=True
+        )
 
         # ── Branding & Header (ABSOLUTE TOP) ──
         from ui.author_card import render_author_card

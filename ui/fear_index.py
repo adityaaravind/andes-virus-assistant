@@ -161,6 +161,11 @@ def render_fear_index() -> None:
     """Render fear index voting panel."""
     avg_fear, vote_count, label, desc, color, web_sentiment = _calculate_fear_average()
 
+    import time
+    import math
+    fluctuation = math.sin(time.time() * 2.5) * 0.05  # Tiny oscillation
+    live_fear = round(avg_fear + fluctuation, 2)
+
     # Generate unique user ID based on session + browser fingerprint
     if "user_id" not in st.session_state:
         browser_info = str(st.session_state) + str(hash(str(datetime.utcnow().date())))
@@ -183,7 +188,7 @@ def render_fear_index() -> None:
         dist[v["level"]] += 1
 
     # Horizontal card layout matching pandemic card
-    anim = "pulse-fear 2s ease-in-out infinite" if avg_fear >= 3.0 else "none"
+    anim = "pulse-fear 2s ease-in-out infinite" if live_fear >= 3.0 else "none"
     
     # Calculate percentages for the breakdown bar
     user_weight = 0.6 if vote_count > 0 else 0.0
@@ -201,7 +206,7 @@ background: linear-gradient(90deg,{color},{color}44,{color}); animation: {anim};
 </div>
 <div style="background:{color}15; border:1px solid {color}; border-radius:6px; padding:0.3rem 0.8rem; 
 text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-content;">
-<p style="color:{color}; font-size:1.5rem; font-weight:900; margin:0; line-height:1; font-family:monospace; text-shadow:0 0 8px {color}88;">{avg_fear:.1f}<small style="font-size:0.5em; opacity:0.7;">/5</small></p>
+<p style="color:{color}; font-size:1.5rem; font-weight:900; margin:0; line-height:1; font-family:monospace; text-shadow:0 0 8px {color}88;">{live_fear:.2f}<small style="font-size:0.5em; opacity:0.7;">/5</small></p>
 <p style="color:#94a3b8; font-size:0.5rem; font-weight:800; margin:0; text-transform:uppercase; opacity:0.8;">SCORE</p>
 </div>
 </div>
@@ -239,7 +244,7 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
     col_gauge, col_dist = st.columns([1, 1.6])
 
     with col_gauge:
-        fig_gauge = _build_fear_gauge(avg_fear, color)
+        fig_gauge = _build_fear_gauge(live_fear, color)
         st.plotly_chart(fig_gauge, use_container_width=True, config={"displayModeBar": False})
 
     with col_dist:
