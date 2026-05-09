@@ -245,43 +245,99 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
 
     with col_dist:
         st.markdown(
-            "<p style='color:#f8fafc; font-size:1rem; font-weight:800; margin-bottom:1.5rem; letter-spacing:0.05em;'>"
-            "📊 SLIDE TO CAST SENTIMENT</p>",
+            """
+            <style>
+            /* 1. Hide default Streamlit slider visuals but keep hit area */
+            div[data-testid="stSlider"] [data-baseweb="slider"] {
+                height: 40px !important;
+                padding-top: 20px !important;
+            }
+            /* The Track */
+            div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child {
+                height: 8px !important;
+                background: linear-gradient(90deg, #22c55e 0%, #f59e0b 50%, #991b1b 100%) !important;
+                border-radius: 10px !important;
+                position: relative !important;
+            }
+            /* The Thumb (The Ship) */
+            div[data-testid="stSlider"] [role="slider"] {
+                background: transparent !important;
+                border: none !important;
+                width: 45px !important;
+                height: 45px !important;
+                top: -5px !important;
+                box-shadow: none !important;
+            }
+            div[data-testid="stSlider"] [role="slider"]::after {
+                content: '🚢';
+                font-size: 2.2rem;
+                display: block;
+                filter: drop-shadow(0 0 10px rgba(0, 180, 216, 0.8));
+                transition: transform 0.2s ease;
+            }
+            div[data-testid="stSlider"] [role="slider"]:hover::after {
+                transform: scale(1.2) translateY(-5px);
+            }
+            /* Wave Animation for the track */
+            @keyframes track-wave {
+                0% { background-position: 0% 50%; }
+                100% { background-position: 100% 50%; }
+            }
+            
+            div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child::before {
+                content: '';
+                position: absolute;
+                top: -15px; left: 0; right: 0; bottom: 0;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z' fill='%2300b4d8' fill-opacity='0.2'%3E%3C/path%3E%3C/svg%3E");
+                background-size: 400px 60px;
+                height: 40px;
+                opacity: 0.5;
+                animation: track-wave 10s linear infinite;
+                pointer-events: none;
+            }
+            </style>
+            <p style='color:#f8fafc; font-size:1rem; font-weight:800; margin-bottom:0.5rem; letter-spacing:0.05em;'>
+            📊 SHIP YOUR SENTIMENT</p>
+            """,
             unsafe_allow_html=True,
         )
         
-        # Define labels and mapping
-        slider_labels = ["CALM", "CONCERNED", "WORRIED", "FEARFUL", "PANICKED"]
-        label_to_level = {l: i+1 for i, l in enumerate(slider_labels)}
-        
-        # Local state for slider if not yet voted
-        current_fear_label = slider_labels[int(live_fear-1)] if 1 <= live_fear <= 5 else "CALM"
-        
-        # Use st.select_slider for better UX
-        selected_label = st.select_slider(
-            "How worried are you about the outbreak?",
-            options=slider_labels,
-            value=current_fear_label,
+        # Numeric slider for the logic
+        level = st.slider(
+            "Fear Level",
+            min_value=1,
+            max_value=5,
+            value=int(live_fear) if 1 <= live_fear <= 5 else 1,
+            step=1,
             disabled=user_voted_today,
             label_visibility="collapsed",
             key="fear_slider_input"
         )
         
-        # Auto-register vote on change
-        if not user_voted_today and selected_label != current_fear_label:
-            _save_fear_vote(label_to_level[selected_label], user_id)
-            st.toast(f"Vote registered: {selected_label}! 📡", icon="✅")
-            st.rerun()
+        # Display large active label
+        slider_labels = {1: "CALM", 2: "CONCERNED", 3: "WORRIED", 4: "FEARFUL", 5: "PANICKED"}
+        current_label = slider_labels[level]
+        l_color = FEAR_LEVELS[level]['color']
+        
+        st.markdown(
+            f"<h2 style='color:{l_color}; text-align:center; margin-top:0; font-family:monospace; text-shadow: 0 0 15px {l_color}88;'>{current_label}</h2>",
+            unsafe_allow_html=True
+        )
 
-        if user_voted_today:
+        # Auto-register vote logic
+        if not user_voted_today:
+            # We use a button to "Lock In" the ship's position to avoid accidental jitter votes
+            if st.button("⚓ LOCK IN SENTIMENT", use_container_width=True, type="primary"):
+                _save_fear_vote(level, user_id)
+                st.toast(f"Outbreak sentiment locked: {current_label}!", icon="🚢")
+                st.rerun()
+        else:
             st.markdown(
-                f"<div style='background:rgba(34,197,94,0.1); border:1px solid #22c55e44; border-radius:8px; padding:0.8rem; margin-top:1rem; text-align:center;'>"
-                f"<p style='color:#22c55e; font-size:0.85rem; font-weight:700; margin:0;'>✓ SENTIMENT RECORDED: {selected_label}</p>"
+                f"<div style='background:rgba(34,197,94,0.1); border:1px solid #22c55e44; border-radius:8px; padding:0.8rem; margin-top:0.5rem; text-align:center;'>"
+                f"<p style='color:#22c55e; font-size:0.85rem; font-weight:700; margin:0;'>✓ SHIP ANCHORED: {current_label}</p>"
                 f"</div>",
                 unsafe_allow_html=True
             )
-        else:
-            st.caption("Slide to your current fear level to contribute to the index.")
 
     # Callout boxes matching pandemic panel
     callout_html = f"""
