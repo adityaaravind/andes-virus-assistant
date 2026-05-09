@@ -158,24 +158,24 @@ def render_stats_panel() -> None:
     source_label = "🛡️ VERIFIED SOURCE" if not is_live else "📡 AUTO-SYNC"
     
     dropdown_html = f"""
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
-        <details class="cyber-dropdown">
-            <summary>{source_label}</summary>
-            <div class="cyber-dropdown-content">
-                <b>Status:</b> {"Real-time AI extraction active" if is_live else "Human-verified data source"}<br>
-                <b>Last Sync:</b> {stats['last_updated']}<br>
-                {"Verified from official bulletins" if not is_live else "Automated NLP extraction"}
-            </div>
-        </details>
-        <details class="cyber-dropdown">
-            <summary>🔬 CASE DEFINITIONS</summary>
-            <div class="cyber-dropdown-content">
-                <b>Confirmed:</b> Lab-verified PCR results.<br>
-                <b>Suspected:</b> Clinical symptoms awaiting confirmation.
-            </div>
-        </details>
-    </div>
-    """
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+<details class="cyber-dropdown">
+<summary>{source_label}</summary>
+<div class="cyber-dropdown-content">
+<b>Status:</b> {"Real-time AI extraction active" if is_live else "Human-verified data source"}<br>
+<b>Last Sync:</b> {stats['last_updated']}<br>
+{"Verified from official bulletins" if not is_live else "Automated NLP extraction"}
+</div>
+</details>
+<details class="cyber-dropdown">
+<summary>🔬 CASE DEFINITIONS</summary>
+<div class="cyber-dropdown-content">
+<b>Confirmed:</b> Lab-verified PCR results.<br>
+<b>Suspected:</b> Clinical symptoms awaiting confirmation.
+</div>
+</details>
+</div>
+"""
     st.markdown(dropdown_html, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)

@@ -296,15 +296,18 @@ h3 { font-size: 1rem !important; font-weight: 700 !important; }
 .cyber-dropdown summary {
     padding: 0.8rem 1rem;
     list-style: none;
+    list-style-type: none;
     cursor: pointer;
     font-size: 0.7rem;
     font-weight: 800;
     color: var(--gray-300);
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
     gap: 12px;
     outline: none;
     position: relative;
