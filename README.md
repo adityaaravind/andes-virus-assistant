@@ -1,4 +1,4 @@
-# 🧬 Andes Virus Research Assistant `v1.1`
+# 🧬 Andes Virus Research Assistant `v1.2.0`
 
 **Real-time AI Outbreak Intelligence for the MV Hondius Hantavirus Incident.**
 
@@ -10,6 +10,8 @@
 -   **🗺️ Live Outbreak Map:** Interactive global tracking of cases by nationality and geographic spread.
 -   **📡 Real-Time News Ticker:** Monitored feeds from WHO, CDC, Reuters, and BBC—updated every 15 minutes.
 -   **📈 Pandemic Risk & Fear Index:** Blended sentiment analysis from global media and community voting.
+-   **📤 Intelligence Sharing:** (v1.2) Journalist-grade data exports, situation reports, and social media card generation.
+-   **🚀 Roadmap & Phases:** (v1.2) Transparent intelligence development roadmap with placeholders for Phase 2 Community & Simulation tools.
 -   **📊 Outbreak Analytics:** Detailed statistics on case counts, mortality rates, and source credibility.
 -   **🔗 v1.1: Contextual Recommendations:** Leveraging Qdrant's Recommendation API to map related research and bridge data silos.
 
@@ -93,6 +95,16 @@ We use a weighted re-ranking algorithm (`similarity_score × credibility_score`)
 *This tool is for research and informational purposes only. It is not a substitute for professional medical advice. For emergencies, contact your local health authorities.*
 
 ---
+
+---
+
+## 📜 v1.2.0 Changelog (User Engagement & Stability Update)
+
+- **Official Release v1.2.0 Stable:** Consolidating latest UI and intelligence features.
+- **Enhanced Visual Polish:** Implemented glowing titles, dynamic gauge jitter, and high-contrast status indicators.
+- **Journalist Tools Suite:** Added situational report exports (PDF/TXT), CSV data downloads, and procedurally generated social media cards.
+- **Roadmap Dashboard:** Integrated "Next Intelligence Phases" tracking for Phase 2 (Community & Simulations).
+- **Stability Fixes:** Corrected indentation errors and optimized background refresh logic to reduce Streamlit jitter.
 
 ## 📜 v1.1 Changelog (Active Intelligence Update)
 

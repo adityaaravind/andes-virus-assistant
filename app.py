@@ -436,7 +436,7 @@ def main() -> None:
             st.markdown(
                 """
                 <div style='display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin-bottom: 0.5rem;'>
-                    <h1 class='glowing-title' style='margin:0; display: inline-block;'>🧬 Andes Virus Research Assistant <span class='v11-feature-tag' style='vertical-align: middle; margin-left: 10px;'>v1.1.0</span></h1>
+                    <h1 class='glowing-title' style='margin:0; display: inline-block;'>🧬 Andes Virus Research Assistant <span class='v11-feature-tag' style='vertical-align: middle; margin-left: 10px;'>v1.2.0</span></h1>
                     <div class='outbreak-badge'>OUTBREAK ACTIVE</div>
                 </div>
                 <p class='glowing-title' style='font-size:0.35rem; margin:0; margin-bottom: 0.8rem; opacity: 0.45; text-shadow: 0 0 5px rgba(0, 180, 216, 0.05);'>
