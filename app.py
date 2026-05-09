@@ -530,7 +530,7 @@ def main() -> None:
             st.markdown(
                 """
                 <div class='stat-card' style='border-color: rgba(167, 139, 250, 0.3); min-height: 140px;'>
-                    <p class='stat-label' style='color:#a78bfa;'>Community & Social Proof</p>
+                    <p class='stat-label glowing-title' style='color:#a78bfa; font-size: 0.9rem !important;'>Community & Social Proof</p>
                     <p style='color:#94a3b8; font-size:0.75rem; margin-top:0.5rem;'>
                         Real-time sentiment trends, research insight sharing, and anonymized community insights feed.
                     </p>
@@ -543,11 +543,11 @@ def main() -> None:
             st.markdown(
                 """
                 <div class='stat-card' style='border-color: rgba(0, 180, 216, 0.3); min-height: 140px;'>
-                    <p class='stat-label' style='color:#00b4d8;'>Interactive Simulations</p>
+                    <p class='stat-label glowing-title' style='color:#00b4d8; font-size: 0.9rem !important;'>Interactive Simulations</p>
                     <p style='color:#94a3b8; font-size:0.75rem; margin-top:0.5rem;'>
                         "What If?" Scenario Lab. Adjust viral variables to simulate outbreak progression and response.
                     </p>
-                    <div style='margin-top:auto;'><span class='v11-feature-tag' style='margin-left:0; opacity:0.6;'>PHASE 3</span></div>
+                    <div style='margin-top:auto;'><span class='v11-feature-tag' style='margin-left:0; opacity:0.6;'>PHASE 2</span></div>
                 </div>
                 """,
                 unsafe_allow_html=True
