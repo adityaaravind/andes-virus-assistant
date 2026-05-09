@@ -178,19 +178,18 @@ def render_pandemic_risk_panel() -> None:
     risk      = _compute_risk(cases, countries)
     color, label, desc = _risk_meta(risk["overall"])
 
-    # ── Flashy header ────────────────────────────────────────────────────────
+    # ── Standardized Header ───────────────────────────────────────────────────
     import textwrap
     anim = "pulse-risk 1.8s ease-in-out infinite" if risk["overall"] >= 40 else "none"
     header_html = f"""
 <div style="background:rgba(15, 23, 42, 0.4); border: 2px solid {color}44; border-radius: 12px; padding: 1.2rem 1.4rem;
-margin-bottom: 1rem; position:relative; overflow:hidden; min-height: 120px; display: flex; flex-direction: column; justify-content: center;">
+margin-bottom: 1rem; position:relative; overflow:hidden; height: 160px; display: flex; flex-direction: column; justify-content: space-between;">
 <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px;
 background: linear-gradient(90deg,{color},{color}44,{color}); animation: {anim};"></div>
-<div style="display:flex; align-items:center; justify-content: space-between; gap:1rem; flex-wrap:wrap;">
-<div style="flex:1; min-width: 150px;">
-<p style="color:{color};font-size:0.7rem;font-weight:800;letter-spacing:0.12em;margin:0;font-family:monospace;opacity:0.9;">
-GLOBAL PANDEMIC RISK ASSESSMENT</p>
-<h2 style="margin:0.1rem 0 0;font-size:2.1rem !important;font-weight:900;color:white !important;letter-spacing:-0.02em; line-height: 1.1;">{label}</h2>
+<div style="display:flex; align-items:center; justify-content: space-between; gap:1rem;">
+<div style="flex:1;">
+<p style="color:{color}; font-size:0.7rem; font-weight:800; letter-spacing:0.12em; margin:0; font-family:monospace; opacity:0.9;">GLOBAL PANDEMIC RISK ASSESSMENT</p>
+<h2 style="margin:0.1rem 0 0; font-size:2.1rem !important; font-weight:900; color:white !important; letter-spacing:-0.02em; line-height: 1.1;">{label}</h2>
 </div>
 <div style="background:{color}15; border:2px solid {color}88; border-radius:10px; padding:0.5rem 1rem; 
 text-align:center; min-width:110px; box-shadow: 0 0 20px {color}15; height: fit-content;">
@@ -198,11 +197,11 @@ text-align:center; min-width:110px; box-shadow: 0 0 20px {color}15; height: fit-
 <p style="color:#94a3b8; font-size:0.55rem; font-weight:800; margin:2px 0 0; text-transform:uppercase; letter-spacing:0.05em; opacity:0.8;">RISK SCORE</p>
 </div>
 </div>
-<div style="display:flex;gap:1.2rem;margin-top:1rem;flex-wrap:wrap;border-top:1px solid rgba(148,163,184,0.1);padding-top:0.6rem;">
-<span style="color:#94a3b8;font-size:0.7rem;">📅 Day <b style="color:white;">{risk['days']}</b></span>
-<span style="color:#94a3b8;font-size:0.7rem;">🧪 Cases: <b style="color:white;">{cases}</b></span>
-<span style="color:#94a3b8;font-size:0.7rem;">📈 R₀: <b style="color:white;">{ANDES_FIXED['r0']}</b></span>
-<span style="color:#94a3b8;font-size:0.7rem;">💀 CFR: <b style="color:white;">{ANDES_FIXED['cfr_pct']}%</b></span>
+<div style="display:flex; gap:1.2rem; flex-wrap:wrap; border-top:1px solid rgba(148,163,184,0.1); padding-top:0.6rem;">
+<span style="color:#94a3b8; font-size:0.7rem;">📅 Day <b style="color:white;">{risk['days']}</b></span>
+<span style="color:#94a3b8; font-size:0.7rem;">🧪 Cases: <b style="color:white;">{cases}</b></span>
+<span style="color:#94a3b8; font-size:0.7rem;">📈 R₀: <b style="color:white;">{ANDES_FIXED['r0']}</b></span>
+<span style="color:#94a3b8; font-size:0.7rem;">💀 CFR: <b style="color:white;">{ANDES_FIXED['cfr_pct']}%</b></span>
 </div>
 </div>
 <style>

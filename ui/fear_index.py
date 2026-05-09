@@ -220,11 +220,11 @@ def render_fear_index() -> None:
     
     html_content = f"""
 <div style="background:rgba(15, 23, 42, 0.4); border: 2px solid {color}44; border-radius: 12px; padding: 1.2rem 1.4rem;
-margin-bottom: 1rem; position: relative; overflow: hidden; min-height: 120px; display: flex; flex-direction: column; justify-content: center;">
+margin-bottom: 1rem; position: relative; overflow: hidden; height: 160px; display: flex; flex-direction: column; justify-content: space-between;">
 <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px;
 background: linear-gradient(90deg,{color},{color}44,{color}); animation: {anim};"></div>
-<div style="display:flex; align-items:center; justify-content: space-between; gap:1rem; flex-wrap:wrap;">
-<div style="flex:1; min-width: 150px;">
+<div style="display:flex; align-items:center; justify-content: space-between; gap:1rem;">
+<div style="flex:1;">
 <p style="color:#94a3b8; font-size:0.7rem; font-weight:800; letter-spacing:0.12em; margin:0; font-family:monospace; opacity:0.9;">📡 PUBLIC FEAR INDEX</p>
 <h2 style="margin:0.1rem 0 0; font-size:2.1rem !important; font-weight:900; color:white !important; letter-spacing:-0.02em; line-height: 1.1;">{label.upper()}</h2>
 </div>
@@ -234,10 +234,12 @@ text-align:center; min-width:110px; box-shadow: 0 0 20px {color}15; height: fit-
 <p style="color:#94a3b8; font-size:0.55rem; font-weight:800; margin:2px 0 0; text-transform:uppercase; letter-spacing:0.05em; opacity:0.8;">FEAR SCORE</p>
 </div>
 </div>
-<p style="color:#64748b; font-size:0.65rem; margin:0.8rem 0 0; font-weight:700;">
+<div style="display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap; border-top:1px solid rgba(148,163,184,0.1); padding-top:0.6rem;">
+<p style="color:#64748b; font-size:0.65rem; margin:0; font-weight:700;">
 Blended Sentiment: Media + Community &nbsp;&nbsp;<span class="live-dot" style="width:6px; height:6px;"></span>
 <span class="live-label" style="font-size:0.6rem;">LIVE ASSESSMENT</span>
 </p>
+</div>
 </div>
 <div style="margin-top: 1rem;">
 <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
