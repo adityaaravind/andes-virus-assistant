@@ -386,19 +386,19 @@ def main() -> None:
         """
         <div class='v11-scroller-container'>
             <div class='v11-scroller-content'>
-                <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 🧠 Semantic Alerting</span>
-                <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 🔗 Recommendation Engine</span>
-                <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 📑 Named Vectors</span>
-                <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 💾 Session Memory</span>
-                <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> ⚡ Search Fallbacks</span>
+                <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 🧠 Semantic Alerting: Detect transmission concerns via concept matching</span>
+                <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 🔗 Recommendation Engine: Map related research via Qdrant similarity</span>
+                <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 📑 Named Vectors: Dual-embedding (Summary + Detail) for precision retrieval</span>
+                <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 💾 Session Memory: Persist conversation context across user sessions</span>
+                <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> ⚡ Search Fallbacks: Improved reliability across multi-version clients</span>
             </div>
         </div>
         <div class='nav-scroller-container'>
             <div class='scroller-reverse'>
-                <span class='v11-feature-item'><span class='nav-tag'>GUIDE</span> Real-time intelligence</span>
-                <span class='v11-feature-item'><span class='nav-tag'>NAV</span> Scroll for metrics</span>
-                <span class='v11-feature-item'><span class='nav-tag'>NAV</span> Use AI chat</span>
-                <span class='v11-feature-item'><span class='nav-tag'>DATA</span> WHO CDC PubMed</span>
+                <span class='v11-feature-item'><span class='nav-tag'>GUIDE</span> Real-time intelligence dashboard</span>
+                <span class='v11-feature-item'><span class='nav-tag'>NAV</span> Scroll for metrics and map</span>
+                <span class='v11-feature-item'><span class='nav-tag'>NAV</span> Use AI assistant for queries</span>
+                <span class='v11-feature-item'><span class='nav-tag'>DATA</span> Official WHO, CDC, PubMed feeds</span>
             </div>
         </div>
         """,
