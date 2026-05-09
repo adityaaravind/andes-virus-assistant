@@ -236,7 +236,7 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
     st.markdown(html_content, unsafe_allow_html=True)
 
     # Gauge + Distribution visualization
-    col_gauge, col_dist = st.columns([1, 1.2])
+    col_gauge, col_dist = st.columns([1, 1.6])
 
     with col_gauge:
         fig_gauge = _build_fear_gauge(avg_fear, color)
@@ -250,16 +250,11 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         )
         
         # Grid of voting buttons
-        v_grid_top = st.columns(3, gap="small")
-        v_grid_bot = st.columns(2, gap="small")
-        
+        v_grid = st.columns(3, gap="small")
         for i, level in enumerate(range(1, 6)):
             info = FEAR_LEVELS[level]
             l_color = info['color']
-            target_col = v_grid_top[i] if i < 3 else v_grid_bot[i-3]
-            with target_col:
-                # Use plain text for button to avoid code leakage
-                # The label is the label_info['label']. Subtext is added via CSS.
+            with v_grid[i % 3]:
                 if st.button(info['label'].upper(), key=f"vote_dist_{level}", use_container_width=True, disabled=user_voted_today):
                     _save_fear_vote(level, user_id)
                     st.rerun()
