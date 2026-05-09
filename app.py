@@ -411,22 +411,20 @@ def main() -> None:
         st_autorefresh(interval=15 * 60 * 1000, key="stats_refresh")
 
         # ── Compact Header ──
-        col_title, col_status = st.columns([4, 1])
-        with col_title:
-            st.markdown(
-                "<h1 style='margin:0;'>🧬 Andes Virus Research Assistant <small style='font-size:0.5em; color:var(--gray-400);'>v1.1</small></h1>"
-                "<p style='color:var(--gray-300); font-size:0.85rem; margin:0;'>"
-                "MV Hondius Hantavirus Outbreak · Intelligence Dashboard</p>",
-                unsafe_allow_html=True
-            )
-        with col_status:
-            st.markdown(
-                "<div style='text-align:right;'><span class='outbreak-badge'>OUTBREAK ACTIVE</span></div>",
-                unsafe_allow_html=True
-            )
+        st.markdown(
+            """
+            <div style='display: flex; flex-wrap: wrap; align-items: center; gap: 15px; margin-bottom: 0.2rem;'>
+                <h1 style='margin:0; display: inline-block;'>🧬 Andes Virus Research Assistant <small style='font-size:0.5em; color:var(--gray-400); vertical-align: middle;'>v1.1</small></h1>
+                <div class='outbreak-badge'>OUTBREAK ACTIVE</div>
+            </div>
+            <p style='color:var(--gray-300); font-size:0.85rem; margin:0;'>
+                MV Hondius Hantavirus Outbreak · Intelligence Dashboard
+            </p>
+            """,
+            unsafe_allow_html=True
+        )
 
         st.divider()
-
         # ── LIVE STATS (MOVED TO TOP FOR MOBILE) ──
         from ui.stats_panel import render_stats_panel
         render_stats_panel()
