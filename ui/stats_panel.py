@@ -136,23 +136,41 @@ def render_stats_panel() -> None:
             unsafe_allow_html=True,
         )
 
+    # Helper to pick glow class based on thresholds
+    def get_glow(val: Any, type: str) -> str:
+        if not isinstance(val, (int, float)): return ""
+        if type == "cases":
+            if val < 5: return "glow-green"
+            if val < 15: return "glow-amber"
+            return "glow-red"
+        if type == "deaths":
+            if val == 0: return "glow-green"
+            if val < 3: return "glow-amber"
+            return "glow-red"
+        if type == "nationalities":
+            if val < 10: return "glow-green"
+            if val < 25: return "glow-amber"
+            return "glow-red"
+        return ""
+
     cards = [
-        ("🧪", str(stats.get("confirmed_cases", 0)), "Confirmed Cases"),
-        ("⚠️", str(stats.get("suspected_cases", 0)), "Suspected Cases"),
-        ("💀", str(stats.get("deaths", 0)), "Deaths"),
-        ("🌍", str(stats.get("nationalities", 0)), "Nationalities"),
-        ("🚢", stats.get("ship_status", "Unknown"), "Ship Status"),
+        (str(stats.get("confirmed_cases", 0)), "Confirmed Cases", get_glow(stats.get("confirmed_cases"), "cases")),
+        (str(stats.get("suspected_cases", 0)), "Suspected Cases", get_glow(stats.get("suspected_cases"), "cases")),
+        (str(stats.get("deaths", 0)), "Deaths", get_glow(stats.get("deaths"), "deaths")),
+        (str(stats.get("nationalities", 0)), "Nationalities Affected", get_glow(stats.get("nationalities"), "nationalities")),
+        (stats.get("ship_status", "Unknown"), "Ship Current Status", "glow-green"),
     ]
 
     # Responsive grid for stat cards
     cards_html = ""
-    for icon, value, label in cards:
+    for value, label, glow_class in cards:
         cards_html += (
             f'<div class="stat-card">'
-            f'<div class="stat-value">{icon} {value}</div>'
+            f'<span class="stat-value {glow_class}">{value}</span>'
             f'<div class="stat-label">{label}</div>'
             f'</div>'
         )
+
     
     st.markdown(
         f'<div class="stats-grid">{cards_html}</div>',
