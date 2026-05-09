@@ -160,11 +160,7 @@ def _build_fear_gauge(avg_fear: float, color: str) -> go.Figure:
 def render_fear_index() -> None:
     """Render fear index voting panel."""
     avg_fear, vote_count, label, desc, color, web_sentiment = _calculate_fear_average()
-
-    import time
-    import math
-    fluctuation = math.sin(time.time() * 2.5) * 0.05  # Tiny oscillation
-    live_fear = round(avg_fear + fluctuation, 2)
+    live_fear = round(avg_fear, 2)
 
     # Generate unique user ID based on session + browser fingerprint
     if "user_id" not in st.session_state:

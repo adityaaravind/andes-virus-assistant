@@ -381,9 +381,9 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
 
 def main() -> None:
     with streamlit_analytics.track(load_from_json="data/analytics.json", save_to_json="data/analytics.json"):
-        # Auto-refresh page every 5 seconds for 'True Live' motion
+        # Auto-refresh page every 15 mins so stats and headlines stay live
         from streamlit_autorefresh import st_autorefresh
-        st_autorefresh(interval=5 * 1000, key="live_motion_refresh")
+        st_autorefresh(interval=15 * 60 * 1000, key="stats_refresh")
 
         # ── Mutation Observer for Forced Gauge Jitter ──
         st.markdown(

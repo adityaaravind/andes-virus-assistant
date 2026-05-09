@@ -177,11 +177,7 @@ def render_pandemic_risk_panel() -> None:
     countries = stats["nationalities"]
     risk      = _compute_risk(cases, countries)
     color, label, desc = _risk_meta(risk["overall"])
-
-    import time
-    import math
-    fluctuation = math.sin(time.time() * 2) * 0.15  # Tiny oscillation
-    risk_score = round(risk["overall"] + fluctuation, 1)
+    risk_score = risk["overall"]
 
     # ── Standardized Header (Full Title + Optimized Fit) ──
     import textwrap
