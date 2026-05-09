@@ -281,3 +281,57 @@ h3 { font-size: 1rem !important; font-weight: 700 !important; }
     80% { opacity: 1; }
     100% { top: 0%; opacity: 0; }
 }
+
+/* --- Cyber Dropdowns (Details/Summary) --- */
+.cyber-dropdown {
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(8px);
+}
+
+.cyber-dropdown summary {
+    padding: 0.6rem 1rem;
+    list-style: none;
+    cursor: pointer;
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--gray-300);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    outline: none;
+}
+
+.cyber-dropdown summary::-webkit-details-marker {
+    display: none;
+}
+
+.cyber-dropdown summary:hover {
+    color: var(--teal);
+    background: rgba(0, 180, 216, 0.05);
+}
+
+.cyber-dropdown[open] {
+    border-color: rgba(0, 180, 216, 0.4);
+    box-shadow: 0 0 15px rgba(0, 180, 216, 0.1);
+}
+
+.cyber-dropdown-content {
+    padding: 0.8rem 1rem;
+    font-size: 0.72rem;
+    color: var(--gray-100);
+    line-height: 1.5;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    animation: slide-down 0.3s ease-out;
+}
+
+@keyframes slide-down {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}

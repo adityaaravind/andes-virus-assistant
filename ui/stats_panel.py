@@ -153,28 +153,30 @@ def render_stats_panel() -> None:
         unsafe_allow_html=True,
     )
 
-    # ── 2. INTERACTIVE METADATA (HAVE TO CLICK TO SEE) ──
-    col_v, col_d = st.columns(2)
+    # ── 2. INTERACTIVE METADATA (CYBER DROPDOWNS) ──
+    is_live = stats.get("_source") == "auto-extracted"
+    source_label = "🛡️ VERIFIED SOURCE" if not is_live else "📡 AUTO-SYNC"
     
-    with col_v:
-        is_live = stats.get("_source") == "auto-extracted"
-        source_label = "🛡️ VERIFIED SOURCE" if not is_live else "📡 AUTO-SYNC"
-        with st.expander(source_label, expanded=False):
-            if is_live:
-                st.markdown(f"**Status:** Real-time AI extraction active.\n\n**Last Sync:** {stats['last_updated']}")
-            else:
-                st.markdown(
-                    f"**Status:** Human-verified data source.\n\n"
-                    f"**Last Sync:** {stats['last_updated']}\n\n"
-                    "Showing verified checked data from official bulletins."
-                )
-
-    with col_d:
-        with st.expander("🔬 CASE DEFINITIONS", expanded=False):
-            st.markdown(
-                "**Confirmed:** Laboratory-verified PCR results.\n\n"
-                "**Suspected:** Individuals showing clinical symptoms who await final lab confirmation."
-            )
+    dropdown_html = f"""
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+        <details class="cyber-dropdown">
+            <summary>{source_label}</summary>
+            <div class="cyber-dropdown-content">
+                <b>Status:</b> {"Real-time AI extraction active" if is_live else "Human-verified data source"}<br>
+                <b>Last Sync:</b> {stats['last_updated']}<br>
+                {"Verified from official bulletins" if not is_live else "Automated NLP extraction"}
+            </div>
+        </details>
+        <details class="cyber-dropdown">
+            <summary>🔬 CASE DEFINITIONS</summary>
+            <div class="cyber-dropdown-content">
+                <b>Confirmed:</b> Lab-verified PCR results.<br>
+                <b>Suspected:</b> Clinical symptoms awaiting confirmation.
+            </div>
+        </details>
+    </div>
+    """
+    st.markdown(dropdown_html, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
