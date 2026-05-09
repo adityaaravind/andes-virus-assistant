@@ -435,7 +435,7 @@ def main() -> None:
         with header_col:
             st.markdown(
                 """
-                <div style='display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin-bottom: 0.5rem; padding-top: 10px;'>
+                <div style='display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin-bottom: 0.5rem;'>
                     <h1 class='glowing-title' style='margin:0; display: inline-block;'>🧬 Andes Virus Research Assistant <span class='v11-feature-tag' style='vertical-align: middle; margin-left: 10px;'>v1.1.0</span></h1>
                     <div class='outbreak-badge'>OUTBREAK ACTIVE</div>
                 </div>

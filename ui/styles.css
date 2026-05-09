@@ -22,8 +22,13 @@
 }
 
 .main .block-container {
-  padding: 1.5rem 2rem;
+  padding: 0rem 2rem 2rem 2rem !important;
   max-width: 1200px;
+}
+
+/* Hide Streamlit Header for absolute top alignment */
+header[data-testid="stHeader"] {
+    background: transparent !important;
 }
 
 div[data-testid="stVerticalBlock"] > div {
