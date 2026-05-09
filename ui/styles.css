@@ -81,10 +81,28 @@ h3 { font-size: 1rem !important; font-weight: 700 !important; }
 .live-label { color: var(--green-ok); font-size: 0.65rem; font-weight: 800; font-family: monospace; }
 
 .outbreak-badge {
-  background: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 6px; padding: 2px 8px; font-size: 0.65rem;
-  font-weight: 800; color: var(--red-alert);
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--red-alert);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.outbreak-badge::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: var(--red-alert);
+  border-radius: 50%;
+  animation: live-blink 1s infinite;
 }
 
 /* ── Sidebar ── */
@@ -102,21 +120,21 @@ h3 { font-size: 1rem !important; font-weight: 700 !important; }
 
 /* --- Version 1.1 Dual Scroller System --- */
 .v11-scroller-container {
-    background: #08111e;
-    color: #38bdf8;
-    padding: 6px 0;
+    background: transparent;
+    color: var(--teal);
+    padding: 8px 0 4px 0;
     overflow: hidden;
     white-space: nowrap;
-    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+    border-bottom: 1px solid rgba(0, 180, 216, 0.15);
     font-size: 0.8rem;
     font-weight: 700;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.03em;
 }
 
 .nav-scroller-container {
-    background: #0d1b2a;
-    color: #94a3b8;
-    padding: 5px 0;
+    background: transparent;
+    color: var(--gray-300);
+    padding: 2px 0 8px 0;
     overflow: hidden;
     white-space: nowrap;
     border-bottom: 1px solid rgba(148, 163, 184, 0.1);
@@ -147,21 +165,25 @@ h3 { font-size: 1rem !important; font-weight: 700 !important; }
 }
 
 .v11-feature-tag {
-    background: #0ea5e9;
-    color: white;
+    background: var(--teal);
+    color: var(--navy);
     padding: 1px 6px;
     border-radius: 3px;
     margin-right: 8px;
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     text-transform: uppercase;
     font-weight: 900;
 }
 
 .nav-tag {
-    color: #00b4d8;
+    color: var(--white);
     font-weight: 800;
     margin-right: 6px;
     text-transform: uppercase;
+    font-size: 0.6rem;
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 0px 4px;
+    border-radius: 2px;
 }
 
 .v11-feature-item {
