@@ -312,16 +312,16 @@ div[data-testid="stButton"] button[key*="vote_dist_"] div[data-testid="stMarkdow
 
 .outbreak-badge {
   background: rgba(239, 68, 68, 0.2);
-  border: 3px solid #ff4d4d;
-  border-radius: 8px;
-  padding: 10px 22px;
-  font-size: 1.1rem;
+  border: 2px solid #ff4d4d;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
   font-weight: 950;
   color: #ffffff;
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  letter-spacing: 0.15em;
+  gap: 8px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   animation: critical-pulse 2s infinite ease-in-out;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
