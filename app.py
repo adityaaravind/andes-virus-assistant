@@ -381,33 +381,34 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
 
 
 def main() -> None:
+    # ── v1.1 Feature Scroller (ABSOLUTE TOP) ──
+    st.markdown(
+        """
+        <div class='v11-scroller-container'>
+            <div class='v11-scroller-content'>
+                <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 🧠 Semantic Alerting</span>
+                <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 🔗 Recommendation Engine</span>
+                <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 📑 Named Vectors</span>
+                <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 💾 Session Memory</span>
+                <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> ⚡ Search Fallbacks</span>
+            </div>
+        </div>
+        <div class='nav-scroller-container'>
+            <div class='scroller-reverse'>
+                <span class='v11-feature-item'><span class='nav-tag'>GUIDE</span> Real-time intelligence</span>
+                <span class='v11-feature-item'><span class='nav-tag'>NAV</span> Scroll for metrics</span>
+                <span class='v11-feature-item'><span class='nav-tag'>NAV</span> Use AI chat</span>
+                <span class='v11-feature-item'><span class='nav-tag'>DATA</span> WHO CDC PubMed</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
     with streamlit_analytics.track(load_from_json="data/analytics.json", save_to_json="data/analytics.json"):
         # Auto-refresh page every 15 mins so stats and headlines stay live
         from streamlit_autorefresh import st_autorefresh
         st_autorefresh(interval=15 * 60 * 1000, key="stats_refresh")
-
-        # ── v1.1 Feature Scroller ──
-        st.markdown(
-            """
-            <div class='v11-scroller-container'>
-                <div class='v11-scroller-content'>
-                    <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1 UPDATE</span> 🧠 Semantic Alerting: Detect transmission concerns via concept matching</span>
-                    <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1 UPDATE</span> 🔗 Recommendation Engine: Find related research via Qdrant similarity</span>
-                    <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1 UPDATE</span> 📑 Named Vectors: Dual-embedding (Summary + Detail) for precision retrieval</span>
-                    <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1 UPDATE</span> 💾 Session Memory: Assistant now persists conversation context in Qdrant</span>
-                    <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1 UPDATE</span> ⚡ Search Fallbacks: Improved reliability across different Qdrant versions</span>
-                </div>
-            </div>
-            <div class='nav-scroller-container'>
-                <div class='scroller-reverse'>
-                    <span class='v11-feature-item'><span class='nav-tag'>GUIDE</span> Real-time case tracking, AI evidence review, and live news monitoring from WHO, CDC, and major scientific journals</span>
-                    <span class='v11-feature-item'><span class='nav-tag'>NAV</span> Scroll for live metrics and maps. Use the AI chat below to query the latest research or outbreak data</span>
-                    <span class='v11-feature-item'><span class='nav-tag'>INFO</span> v1.1 Upgrade: Now using Qdrant Recommendation API for deeper context mapping</span>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
 
         # ── Compact Header ──
         col_title, col_status = st.columns([4, 1])
