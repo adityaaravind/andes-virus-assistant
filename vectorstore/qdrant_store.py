@@ -86,6 +86,35 @@ def add_documents(chunks: list[dict[str, Any]]) -> int:
 upsert_chunks = add_documents
 
 
+def recommend_similar_chunks(
+    chunk_id: int,
+    limit: int = 5,
+    where: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    """Qdrant Recommendation API: find chunks similar to a specific point."""
+    client = _client()
+    qdrant_filter = None
+    if where:
+        conditions = [
+            FieldCondition(key=k, match=MatchValue(value=v))
+            for k, v in where.items()
+        ]
+        qdrant_filter = Filter(must=conditions)
+
+    try:
+        results = client.recommend(
+            collection_name=COLLECTION_NAME,
+            positive=[chunk_id],
+            limit=limit,
+            query_filter=qdrant_filter,
+            with_payload=True,
+        )
+        return _format_results(results)
+    except Exception as e:
+        logging.warning("Recommendation failed: %s", e)
+        return []
+
+
 def similarity_search(
     query_embedding: list[float],
     k: int = 6,
