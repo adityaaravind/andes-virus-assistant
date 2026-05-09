@@ -475,16 +475,16 @@ def main() -> None:
                 window.addEventListener('touchstart', showGuide);
                 window.addEventListener('keydown', showGuide);
                 
-                # Show on initial load
-                        setTimeout(showGuide, 1500);
-                    </script>
-                    """,
-                    unsafe_allow_html=True
-                )
-                st.divider()
+                // Show on initial load
+                setTimeout(showGuide, 1500);
+            </script>
+            """,
+            unsafe_allow_html=True
+        )
+        st.divider()
 
-                # ── LIVE STATS (BELOW HEADER) ──
-                from ui.stats_panel import render_stats_panel
+        # ── LIVE STATS (BELOW HEADER) ──
+        from ui.stats_panel import render_stats_panel
         render_stats_panel()
 
         st.warning("⚠️ **NOT MEDICAL ADVICE** • For emergencies contact local health authorities")
