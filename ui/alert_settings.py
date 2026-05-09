@@ -11,6 +11,27 @@ from alerts.alert_manager import add_subscription, get_alert_history, load_subsc
 from alerts.notifier import send_ntfy, send_email
 
 
+# ── Funny Zomato-style Welcome Messages ──
+FUNNY_WELCOME_MESSAGES = [
+    ("🧼 Hand Wash Protocol", "Wash your hands like you're scrubbing for a million-dollar surgery. We'll handle the data, you handle the soap!"),
+    ("🤖 AI vs Virus", "Our AI is currently arguing with the Andes virus. The AI is winning. You're in safe hands!"),
+    ("🛡️ Defense Force", "You're now part of the elite Andes Defense Force. First rule: No sharing drinks with rodents. Stay safe!"),
+    ("🥤 Hydration Check", "We're tracking the virus so you can focus on tracking your weekend plans. Stay safe and stay hydrated!"),
+    ("🦸‍♂️ Superhero Status", "If knowledge is power, you just became a superhero. Your notification shield is now ACTIVATED!"),
+    ("🍎 Vitamin Boost", "Eating an apple today? Good. Reading our alerts today? Even better. Let's keep that health score high!"),
+    ("🐀 Ratatouille Warning", "Rodents are only cute in movies. In real life, they don't cook, they just bring trouble. Stay alert!"),
+    ("🧴 Squeaky Clean", "Your phone is now a hantavirus-free zone. (We can't actually clean your screen, but we're working on it)."),
+    ("🍕 Pizza Logic", "Like a good pizza, our alerts are hot, fresh, and delivered right to your lock screen. Stay safe!"),
+]
+
+
+def _send_welcome_ping(topic: str) -> None:
+    if not topic:
+        return
+    title, msg = random.choice(FUNNY_WELCOME_MESSAGES)
+    send_ntfy(topic, f"✨ {title}", msg, level="info")
+
+
 def render_alert_settings() -> None:
     st.markdown(
         '<div style="background:linear-gradient(135deg,rgba(13,27,42,0.95),rgba(27,46,69,0.95));'
@@ -38,14 +59,15 @@ def render_alert_settings() -> None:
             "last_known": {},
         }
         add_subscription(sub)
+        _send_welcome_ping("HANTAVIRUS")
 
         st.markdown(
             '<div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);'
             'border-radius:8px;padding:0.8rem;margin:0.5rem 0;">'
-            '<p style="color:#22c55e;font-size:0.9rem;font-weight:600;margin:0 0 0.4rem;">✅ Subscribed to outbreak alerts!</p>'
-            '<p style="color:#e2e8f0;font-size:0.75rem;margin:0 0 0.3rem;">Install ntfy app → subscribe to <strong>HANTAVIRUS</strong> topic</p>'
+            '<p style="color:#22c55e;font-size:0.9rem;font-weight:600;margin:0 0 0.4rem;">✅ Subscribed! Check your notifications.</p>'
+            '<p style="color:#e2e8f0;font-size:0.75rem;margin:0 0 0.3rem;">We just sent you a welcome ping to <strong>HANTAVIRUS</strong>.</p>'
             '<p style="color:#94a3b8;font-size:0.7rem;margin:0;">'
-            'Download: <a href="https://ntfy.sh" target="_blank" style="color:#00b4d8;">ntfy.sh</a></p>'
+            'App: <a href="https://ntfy.sh" target="_blank" style="color:#00b4d8;">ntfy.sh</a></p>'
             '</div>',
             unsafe_allow_html=True,
         )
@@ -86,23 +108,6 @@ def render_alert_settings() -> None:
         'Works on Chrome, Safari (iOS 16.4+), and Android browsers. Your privacy is protected; no personal data is shared.</p></div>',
         unsafe_allow_html=True,
     )
-
-    # ── Funny Welcome Ping Button ──
-    if st.button("🚀 Get a Welcome Ping", use_container_width=True):
-        messages = [
-            ("🧼 Hand Wash Protocol", "Wash your hands like you're scrubbing for a million-dollar surgery. We'll handle the data, you handle the soap!"),
-            ("🤖 AI vs Virus", "Our AI is currently arguing with the Andes virus. The AI is winning. You're in safe hands!"),
-            ("🛡️ Defense Force", "You're now part of the elite Andes Defense Force. First rule: No sharing drinks with rodents. Stay safe!"),
-            ("🥤 Hydration Check", "We're tracking the virus so you can focus on tracking your weekend plans. Stay safe and stay hydrated!"),
-            ("🦸‍♂️ Superhero Status", "If knowledge is power, you just became a superhero. Your notification shield is now ACTIVATED!"),
-            ("🍎 Vitamin Boost", "Eating an apple today? Good. Reading our alerts today? Even better. Let's keep that health score high!"),
-        ]
-        title, msg = random.choice(messages)
-        ok = send_ntfy("HANTAVIRUS", f"✨ {title}", msg, level="info")
-        if ok:
-            st.toast("Ping sent! Check your notifications. 🚀", icon="✅")
-        else:
-            st.error("Ping failed. Make sure you're subscribed!")
 
     st.markdown(
         '<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);'
@@ -161,7 +166,7 @@ def render_alert_settings() -> None:
                 if not ntfy_topic and not email_addr:
                     st.error("Enter ntfy.sh topic or email")
                 else:
-                    sub = {
+                            sub = {
                         "ntfy_topic": ntfy_topic.strip(),
                         "email": email_addr.strip(),
                         "alerts": {
@@ -174,7 +179,8 @@ def render_alert_settings() -> None:
                         "last_known": {},
                     }
                     add_subscription(sub)
-                    st.success("Subscription saved. You'll be notified on next change.")
+                    _send_welcome_ping(ntfy_topic.strip())
+                    st.success("Subscription saved. We've sent you a welcome ping!")
 
         with col_test:
             if st.button("🔔 Test notification", use_container_width=True, key="test_alert"):
