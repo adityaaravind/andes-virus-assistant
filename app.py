@@ -525,7 +525,7 @@ def main() -> None:
 
         # ── ROADMAP (COMING SOON) ───────────────────────────────────────────────
         st.markdown("### 🚀 Next Intelligence Phases (coming soon)")
-        col_road1, col_road2 = st.columns(2)
+        col_road1, col_road2, col_road3 = st.columns(3)
         with col_road1:
             st.markdown(
                 """
@@ -546,6 +546,19 @@ def main() -> None:
                     <p class='stat-label glowing-title' style='color:#00b4d8; font-size: 0.9rem !important;'>Interactive Simulations</p>
                     <p style='color:#94a3b8; font-size:0.75rem; margin-top:0.5rem;'>
                         "What If?" Scenario Lab. Adjust viral variables to simulate outbreak progression and response.
+                    </p>
+                    <div style='margin-top:auto;'><span class='v11-feature-tag' style='margin-left:0; opacity:0.6;'>PHASE 2</span></div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+        with col_road3:
+            st.markdown(
+                """
+                <div class='stat-card' style='border-color: rgba(34, 197, 94, 0.3); min-height: 140px;'>
+                    <p class='stat-label glowing-title' style='color:#22c55e; font-size: 0.9rem !important;'>Guided Onboarding</p>
+                    <p style='color:#94a3b8; font-size:0.75rem; margin-top:0.5rem;'>
+                        Interactive tour and AI-driven onboarding to help you master the research tools and RAG assistant.
                     </p>
                     <div style='margin-top:auto;'><span class='v11-feature-tag' style='margin-left:0; opacity:0.6;'>PHASE 2</span></div>
                 </div>
