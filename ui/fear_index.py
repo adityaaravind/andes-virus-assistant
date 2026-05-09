@@ -244,60 +244,81 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         st.plotly_chart(fig_gauge, use_container_width=True, config={"displayModeBar": False})
 
     with col_dist:
+        # Calculate intensity percentage for CSS (0% at CALM, 100% at PANICKED)
+        intensity = (level - 1) / 4
+        
         st.markdown(
-            """
+            f"""
             <style>
-            /* 1. Shrunken Track Styling */
-            div[data-testid="stSlider"] [data-baseweb="slider"] {
-                height: 35px !important;
-                padding: 15px 0 0 0 !important;
-            }
+            :root {{ 
+                --v-active-color: {current_l_color}; 
+                --v-intensity: {intensity};
+            }}
+
+            /* 1. Fluid Slider Container */
+            div[data-testid="stSlider"] [data-baseweb="slider"] {{
+                height: 45px !important;
+                padding: 20px 0 0 0 !important;
+            }}
             
-            /* The Line - Blinking restricted here */
-            @keyframes line-blink {
-                0%, 100% { filter: brightness(1) drop-shadow(0 0 2px var(--v-active-color)); }
-                50% { filter: brightness(1.8) drop-shadow(0 0 10px var(--v-active-color)); }
-            }
-
-            div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child {
-                height: 5px !important;
-                background: linear-gradient(90deg, #22c55e 0%, #f59e0b 50%, #991b1b 100%) !important;
+            /* 2. The Dynamic Track - Morphs from line to zigzag */
+            div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child {{
+                height: 4px !important;
+                background: rgba(255,255,255,0.05) !important;
                 border-radius: 10px !important;
-                animation: line-blink 2s infinite ease-in-out;
-            }
+                position: relative !important;
+                overflow: visible !important;
+            }}
 
-            /* Constant Intense Line Glow during interaction */
-            div[data-testid="stSlider"] [data-baseweb="slider"]:active > div:first-child {
-                animation: none !important;
-                filter: brightness(1.5) !important;
-                box-shadow: 0 0 20px var(--v-active-color) !important;
-            }
+            /* The "Storm" Overlay - Becomes zigzag via clip-path */
+            div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child::after {{
+                content: '';
+                position: absolute;
+                top: -15px; left: 0; right: 0; bottom: -15px;
+                background: linear-gradient(90deg, #22c55e 0%, #f59e0b 50%, #991b1b 100%);
+                
+                /* Zigzag Clip Path - POINTY waves */
+                clip-path: polygon(
+                    0% 50%, 
+                    10% calc(50% - (15px * var(--v-intensity))),
+                    20% 50%,
+                    30% calc(50% + (15px * var(--v-intensity))),
+                    40% 50%,
+                    50% calc(50% - (20px * var(--v-intensity))),
+                    60% 50%,
+                    70% calc(50% + (20px * var(--v-intensity))),
+                    80% 50%,
+                    90% calc(50% - (15px * var(--v-intensity))),
+                    100% 50%
+                );
+                
+                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                opacity: calc(0.3 + (0.7 * var(--v-intensity)));
+            }}
 
-            /* 2. Shrunken Thumb (The Ship) */
-            div[data-testid="stSlider"] [role="slider"] {
+            /* 3. Fluid Ship Motion */
+            div[data-testid="stSlider"] [role="slider"] {{
                 background: transparent !important;
                 border: none !important;
-                width: 35px !important;
-                height: 35px !important;
-                top: -12px !important;
+                width: 50px !important;
+                height: 50px !important;
+                top: -15px !important;
                 box-shadow: none !important;
-            }
-            div[data-testid="stSlider"] [role="slider"]::after {
+                /* Ensures ship glides rather than snaps */
+                transition: left 0.4s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
+            }}
+            
+            div[data-testid="stSlider"] [role="slider"]::after {{
                 content: '🚢';
-                font-size: 1.8rem; /* Smaller for mobile compatibility */
+                font-size: 2.2rem;
                 display: block;
-                filter: drop-shadow(0 0 10px var(--v-active-color));
-                transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            }
-            div[data-testid="stSlider"] [role="slider"]:active::after {
-                transform: scale(1.3) translateY(-3px);
-            }
+                filter: drop-shadow(0 0 15px var(--v-active-color));
+                transition: all 0.3s ease;
+            }}
 
-            /* 3. Mobile Specific Adjustments */
-            @media (max-width: 768px) {
-                div[data-testid="stSlider"] [role="slider"]::after { font-size: 1.5rem; }
-                .sentiment-label h2 { font-size: 1.5rem !important; }
-            }
+            div[data-testid="stSlider"] [role="slider"]:active::after {{
+                transform: scale(1.2) rotate(calc(-12deg * var(--v-intensity)));
+            }}
             </style>
             """,
             unsafe_allow_html=True,
@@ -309,12 +330,8 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
             _save_fear_vote(new_val, user_id)
             st.toast(f"Sentiment shared! 🚢", icon="⚓")
 
-        # Initial color setup
-        l_color = FEAR_LEVELS[int(live_fear) if 1 <= live_fear <= 5 else 1]['color']
-        st.markdown(f"<style>:root {{ --v-active-color: {l_color}; }}</style>", unsafe_allow_html=True)
-
         st.markdown(
-            "<p style='color:#94a3b8; font-size:0.75rem; font-weight:800; margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:0.1em;'>🌊 SHIP YOUR SENTIMENT</p>",
+            "<p style='color:#94a3b8; font-size:0.75rem; font-weight:800; margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:0.1em;'>🌊 DYNAMIC FEAR TRACKER</p>",
             unsafe_allow_html=True,
         )
 
@@ -334,7 +351,6 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         slider_labels = {1: "CALM", 2: "CONCERNED", 3: "WORRIED", 4: "FEARFUL", 5: "PANICKED"}
         current_label = slider_labels[level]
         current_l_color = FEAR_LEVELS[level]['color']
-        st.markdown(f"<style>:root {{ --v-active-color: {current_l_color}; }}</style>", unsafe_allow_html=True)
         
         st.markdown(
             f"<div class='sentiment-label'><h2 style='color:{current_l_color}; text-align:center; margin:0.3rem 0; font-family:monospace; text-shadow: 0 0 20px {current_l_color}; font-weight:950; font-size:1.8rem !important;'>{current_label}</h2></div>",
@@ -350,7 +366,7 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
             )
         else:
             st.markdown(
-                "<p style='color:#64748b; font-size:0.6rem; text-align:center; margin-top:0.2rem; opacity:0.7;'>DRAG SHIP TO VOTE</p>",
+                "<p style='color:#64748b; font-size:0.6rem; text-align:center; margin-top:0.2rem; opacity:0.7;'>DRAG SHIP TO CHANGE COURSE</p>",
                 unsafe_allow_html=True
             )
 
