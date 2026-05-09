@@ -166,7 +166,7 @@ def render_alert_settings() -> None:
                 if not ntfy_topic and not email_addr:
                     st.error("Enter ntfy.sh topic or email")
                 else:
-                            sub = {
+                    sub = {
                         "ntfy_topic": ntfy_topic.strip(),
                         "email": email_addr.strip(),
                         "alerts": {
