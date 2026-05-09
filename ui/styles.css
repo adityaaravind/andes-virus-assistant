@@ -139,3 +139,35 @@ h3 { font-size: 1rem !important; font-weight: 700 !important; }
     margin-right: 80px;
     display: inline-block;
 }
+
+/* --- Dual-Direction Scroller Logic --- */
+.nav-scroller-container {
+    background: rgba(15, 23, 42, 0.5);
+    color: #94a3b8;
+    padding: 4px 0;
+    overflow: hidden;
+    white-space: nowrap;
+    border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+    margin-bottom: 1.5rem;
+    font-size: 0.75rem;
+    font-style: italic;
+}
+
+.scroller-reverse {
+    display: inline-block;
+    animation: v11-scroll-reverse 50s linear infinite;
+    padding-right: 100%;
+}
+
+@keyframes v11-scroll-reverse {
+    0% { transform: translate(-100%, 0); }
+    100% { transform: translate(0, 0); }
+}
+
+.nav-tag {
+    color: #38bdf8;
+    font-weight: 800;
+    margin-right: 8px;
+    text-transform: uppercase;
+    font-style: normal;
+}

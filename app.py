@@ -398,6 +398,13 @@ def main() -> None:
                     <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1 UPDATE</span> ⚡ Search Fallbacks: Improved reliability across different Qdrant versions</span>
                 </div>
             </div>
+            <div class='nav-scroller-container'>
+                <div class='scroller-reverse'>
+                    <span class='v11-feature-item'><span class='nav-tag'>GUIDE</span> Real-time case tracking, AI evidence review, and live news monitoring from WHO, CDC, and major scientific journals</span>
+                    <span class='v11-feature-item'><span class='nav-tag'>NAV</span> Scroll for live metrics and maps. Use the AI chat below to query the latest research or outbreak data</span>
+                    <span class='v11-feature-item'><span class='nav-tag'>INFO</span> v1.1 Upgrade: Now using Qdrant Recommendation API for deeper context mapping</span>
+                </div>
+            </div>
             """,
             unsafe_allow_html=True
         )
@@ -423,30 +430,6 @@ def main() -> None:
         from ui.stats_panel import render_stats_panel
         render_stats_panel()
         st.divider()
-
-        # ── Information Panels ──
-        feat_col, use_col = st.columns(2)
-        with feat_col:
-            st.markdown(
-                "<div class='panel-card'>"
-                "<h3 style='margin:0 0 0.5rem 0;'>🔍 Intelligence Summary</h3>"
-                "<p style='font-size:0.8rem; color:var(--gray-100); line-height:1.4; margin:0;'>"
-                "Real-time case tracking, AI evidence review, and live news monitoring "
-                "from WHO, CDC, and major scientific journals. "
-                "<b>v1.1 Upgrade:</b> Now using Qdrant Recommendation API for deeper context mapping.</p>"
-                "</div>",
-                unsafe_allow_html=True
-            )
-        with use_col:
-            st.markdown(
-                "<div class='panel-card'>"
-                "<h3 style='margin:0 0 0.5rem 0;'>💡 Navigation</h3>"
-                "<p style='font-size:0.8rem; color:var(--gray-100); line-height:1.4; margin:0;'>"
-                "Scroll for live metrics and maps. Use the AI chat below to query the "
-                "latest research or outbreak data.</p>"
-                "</div>",
-                unsafe_allow_html=True
-            )
 
         st.warning("⚠️ **NOT MEDICAL ADVICE** • For emergencies contact local health authorities")
 
