@@ -201,6 +201,12 @@ div[data-testid="stButton"] button[key*="vote_dist_"] div[data-testid="stMarkdow
     align-items: center;
     z-index: 9999;
     pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.8s ease-in-out;
+}
+
+.sidebar-scroll-guide.active {
+    opacity: 1;
 }
 
 .scroll-line {

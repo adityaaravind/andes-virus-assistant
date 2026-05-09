@@ -426,11 +426,28 @@ def main() -> None:
         # ── Sidebar Scroll Guide ──
         st.markdown(
             """
-            <div class="sidebar-scroll-guide">
+            <div id="scroll-guide" class="sidebar-scroll-guide">
                 <div class="scroll-line">
                     <div class="scroll-dot"></div>
                 </div>
             </div>
+            <script>
+                const guide = document.getElementById('scroll-guide');
+                let timeout;
+
+                function showGuide() {
+                    guide.classList.add('active');
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => {
+                        guide.classList.remove('active');
+                    }, 2500);
+                }
+
+                // Show on scroll
+                window.addEventListener('scroll', showGuide);
+                // Show on initial load
+                setTimeout(showGuide, 1000);
+            </script>
             """,
             unsafe_allow_html=True
         )
