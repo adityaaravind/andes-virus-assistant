@@ -380,6 +380,11 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
         )
 
 def main() -> None:
+    # ── LIVE STATS (ABSOLUTE TOP FOR MOBILE) ──
+    from ui.stats_panel import render_stats_panel
+    render_stats_panel()
+    st.divider()
+
     # ── Sidebar Scroll Guide ──
     st.markdown(
         """
@@ -435,12 +440,6 @@ def main() -> None:
             """,
             unsafe_allow_html=True
         )
-
-        st.divider()
-
-        # ── LIVE STATS (MOVED TO TOP FOR MOBILE) ──
-        from ui.stats_panel import render_stats_panel
-        render_stats_panel()
 
         st.divider()
 

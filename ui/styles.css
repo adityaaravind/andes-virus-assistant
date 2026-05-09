@@ -101,12 +101,13 @@ h3 { font-size: 1rem !important; font-weight: 700 !important; }
 }
 
 /* ── Indicators ── */
-@keyframes live-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+@keyframes live-blink { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
 .live-dot {
-  display: inline-block; width: 7px; height: 7px; border-radius: 50%;
-  background: var(--green-ok); animation: live-blink 1.5s infinite;
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  background: #22c55e; animation: live-blink 1.5s infinite;
+  box-shadow: 0 0 10px #22c55e;
 }
-.live-label { color: var(--green-ok); font-size: 0.65rem; font-weight: 800; font-family: monospace; }
+.live-label { color: #22c55e; font-size: 0.65rem; font-weight: 800; font-family: monospace; }
 
 .glowing-title {
     color: var(--white);

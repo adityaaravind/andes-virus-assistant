@@ -136,6 +136,14 @@ def render_stats_panel() -> None:
             unsafe_allow_html=True,
         )
 
+    st.markdown(
+        f'<div style="display:flex; align-items:center; gap:8px; margin-bottom:0.5rem; background:rgba(34,197,94,0.05); padding:4px 12px; border-radius:100px; width:fit-content; border:1px solid rgba(34,197,94,0.1);">'
+        f'<span class="live-dot" style="width:8px; height:8px; background:#22c55e; box-shadow: 0 0 8px #22c55e;"></span>'
+        f'<span style="color:#22c55e; font-size:0.65rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em;">Real-time Outbreak Tracking Active</span>'
+        f'</div>',
+        unsafe_allow_html=True
+    )
+
     # Helper to pick glow class based on thresholds
     def get_glow(val: Any, type: str) -> str:
         if not isinstance(val, (int, float)): return ""
@@ -165,7 +173,11 @@ def render_stats_panel() -> None:
     cards_html = ""
     for value, label, glow_class in cards:
         cards_html += (
-            f'<div class="stat-card">'
+            f'<div class="stat-card" style="position:relative;">'
+            f'<div style="position:absolute; top:8px; right:10px; display:flex; align-items:center; gap:4px; opacity:0.6;">'
+            f'<span class="live-dot" style="width:5px; height:5px; background:#22c55e;"></span>'
+            f'<span style="color:#22c55e; font-size:0.5rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em;">Live</span>'
+            f'</div>'
             f'<span class="stat-value {glow_class}">{value}</span>'
             f'<div class="stat-label">{label}</div>'
             f'</div>'
