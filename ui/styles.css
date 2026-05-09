@@ -420,6 +420,28 @@ div[data-testid="stButton"] button[key*="vote_dist_"] div[data-testid="stMarkdow
     box-shadow: 0 0 15px rgba(0, 119, 181, 0.6);
 }
 
+/* ── Branding ── */
+.glowing-title {
+    background: linear-gradient(135deg, #00f5ff, var(--teal-light), #ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 25px rgba(0, 245, 255, 0.4), 0 0 50px rgba(0, 180, 216, 0.2);
+    font-weight: 950;
+    font-size: clamp(1.6rem, 5vw, 2.8rem) !important;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+}
+
+@keyframes mega-pulse {
+    0% { filter: brightness(1) drop-shadow(0 0 5px rgba(0, 245, 255, 0.2)); }
+    50% { filter: brightness(1.4) drop-shadow(0 0 35px rgba(0, 245, 255, 0.8)); }
+    100% { filter: brightness(1) drop-shadow(0 0 5px rgba(0, 245, 255, 0.2)); }
+}
+
+.mega-glow {
+    animation: mega-pulse 2.5s infinite ease-in-out;
+}
+
 /* ── Sidebar Toggle Animation ── */
 @keyframes sidebar-pulse {
     0% { transform: scale(1); filter: brightness(1); }
