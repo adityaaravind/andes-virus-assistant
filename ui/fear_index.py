@@ -148,7 +148,7 @@ def render_fear_index() -> None:
     user_weight = 0.6 if vote_count > 0 else 0.0
     web_weight = 0.4 if vote_count > 0 else 1.0
     
-    html_content = f"""
+    html_header = f"""
 <div style="background:rgba(15, 23, 42, 0.6); border: 1px solid {color}44; border-radius: 10px; padding: 0.8rem 1.2rem;
 margin-bottom: 0.8rem; position: relative; overflow: hidden; min-height: 120px; display: flex; flex-direction: column; justify-content: space-between; backdrop-filter: blur(10px);">
 <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px;
@@ -190,7 +190,7 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
 <style>@keyframes pulse-fear {{ 0%,100% {{ opacity:1; }} 50% {{ opacity:0.4; }} }}</style>
 </div>
 """.replace("\n", "").strip()
-    st.markdown(html_content, unsafe_allow_html=True)
+    st.markdown(html_header, unsafe_allow_html=True)
 
     col_gauge, col_dist = st.columns([1, 1.6])
     with col_gauge:
@@ -206,129 +206,114 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         st.markdown(
             """
             <style>
-            .sentiment-grid {
-                display: flex;
-                justify-content: space-between;
-                gap: 0.5rem;
-                margin: 1.5rem 0;
-                padding: 0.5rem;
+            /* 1. Global Reset for Sentiment Buttons */
+            div[data-testid="column"] div[data-testid="stButton"] {
+                margin: 0 !important;
+                padding: 0 !important;
             }
             
-            .sentiment-tile {
-                flex: 1;
-                aspect-ratio: 1;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                background: rgba(15, 23, 42, 0.4);
-                border: 2px solid rgba(255, 255, 255, 0.05);
-                border-radius: 12px;
-                cursor: pointer;
-                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-                position: relative;
-            }
-
-            .sentiment-tile.active {
-                background: rgba(15, 23, 42, 0.8);
-                border-color: var(--l-color);
-                box-shadow: 0 0 25px var(--l-color-low), inset 0 0 10px var(--l-color-low);
-                transform: scale(1.05);
-            }
-
-            .sentiment-tile.disabled {
-                opacity: 0.3;
-                filter: grayscale(0.8);
-                cursor: not-allowed;
-            }
-
-            .tile-label {
-                font-family: 'Inter', sans-serif;
-                font-weight: 900;
-                font-size: 0.6rem;
-                letter-spacing: 0.05em;
-                color: #64748b;
-                text-align: center;
-                margin-top: 0.4rem;
-                text-transform: uppercase;
-            }
-            
-            .active .tile-label {
-                color: white;
-                text-shadow: 0 0 8px var(--l-color);
-            }
-
-            .tile-icon {
-                font-size: 1.2rem;
-                transition: transform 0.3s ease;
-            }
-            .active .tile-icon {
-                transform: scale(1.2);
-            }
-
-            /* Hidden Streamlit Button Overlay */
-            div[data-testid="stButton"] button[key^="tile_btn_"] {
-                position: absolute;
-                inset: 0;
-                background: transparent !important;
-                border: none !important;
-                color: transparent !important;
-                z-index: 10;
-                height: 100% !important;
+            div[data-testid="column"] div[data-testid="stButton"] button {
+                background: rgba(15, 23, 42, 0.4) !important;
+                border: 2px solid rgba(255, 255, 255, 0.05) !important;
+                border-radius: 12px !important;
                 width: 100% !important;
+                aspect-ratio: 1/1 !important;
+                height: 75px !important; /* Fixed height for small buttons */
+                padding: 0 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+                line-height: 1.2 !important;
+                white-space: pre-wrap !important;
+                overflow: hidden !important;
+            }
+
+            /* Custom sizing for labels inside button */
+            div[data-testid="stButton"] button p {
+                font-family: 'Inter', sans-serif !important;
+                font-weight: 900 !important;
+                font-size: 0.55rem !important;
+                text-transform: uppercase !important;
+                margin: 0 !important;
+                padding-top: 0.2rem !important;
+                letter-spacing: 0.02em !important;
+                color: #94a3b8 !important;
+            }
+
+            /* Emoji size adjustment */
+            div[data-testid="stButton"] button::before {
+                font-size: 1.3rem !important;
+                margin-bottom: 2px !important;
+            }}
+
+            /* Active State - Glow based on button key */
+            div[data-testid="stButton"] button:hover:not(:disabled) {
+                border-color: rgba(255, 255, 255, 0.2) !important;
+                transform: translateY(-2px) !important;
+            }
+
+            /* Disable other buttons once voted */
+            div[data-testid="stButton"] button:disabled {
+                opacity: 0.2 !important;
+                filter: grayscale(1) !important;
+                cursor: not-allowed !important;
             }
             </style>
-            <p style='color:#94a3b8; font-size:0.75rem; font-weight:800; margin-bottom:0.5rem; letter-spacing:0.1em; opacity:0.8; text-transform:uppercase;'>📡 SELECT SENTIMENT</p>
+            <p style='color:#94a3b8; font-size:0.75rem; font-weight:800; margin-bottom:0.8rem; letter-spacing:0.1em; opacity:0.8; text-transform:uppercase;'>📡 SELECT SENTIMENT</p>
             """,
             unsafe_allow_html=True
         )
 
-        def on_tile_click(level_id):
-            _save_fear_vote(level_id, user_id)
-            st.session_state.fear_slider_input = level_id
-            st.toast(f"Sentiment: {FEAR_LEVELS[level_id]['label'].upper()}! 📡", icon="✅")
-
-        st.markdown('<div class="sentiment-grid">', unsafe_allow_html=True)
-        
         icons = {1: "🟢", 2: "🟡", 3: "🟠", 4: "🔴", 5: "💀"}
-        
-        # We use a horizontal layout of buttons
         cols = st.columns(5, gap="small")
+        
         for i, level_id in enumerate(range(1, 6)):
             info = FEAR_LEVELS[level_id]
             is_active = (level_id == level_int)
             l_color = info['color']
-            l_color_low = l_color + "44"
             
             with cols[i]:
-                # Visual Tile
-                st.markdown(
-                    f"""
-                    <div class="sentiment-tile {'active' if is_active else ''} {'disabled' if user_voted_today and not is_active else ''}" 
-                         style="--l-color: {l_color}; --l-color-low: {l_color_low};">
-                        <span class="tile-icon">{icons[level_id]}</span>
-                        <span class="tile-label">{info['label'][:4].upper()}</span>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
+                # Combine icon and text for the button label
+                # Note: Streamlit buttons display text in a <p> tag inside the <button>
+                label_text = f"{icons[level_id]}\n{info['label'][:4].upper()}"
                 
-                # Invisible triggering button
-                if st.button("", key=f"tile_btn_{level_id}", disabled=user_voted_today):
-                    on_tile_click(level_id)
+                if st.button(label_text, key=f"tile_v3_{level_id}", disabled=user_voted_today, use_container_width=True):
+                    _save_fear_vote(level_id, user_id)
+                    st.session_state.fear_slider_input = level_id
                     st.rerun()
 
-        st.markdown('</div>', unsafe_allow_html=True)
+        # Target the ACTIVE button with aggressive CSS
+        active_color = FEAR_LEVELS[level_int]['color']
+        active_css = f"""
+        <style>
+        div[data-testid="stButton"] button[key*="tile_v3_{level_int}"] {{
+            background: rgba(15, 23, 42, 0.9) !important;
+            border: 2px solid {active_color} !important;
+            box-shadow: 0 0 25px {active_color}66, inset 0 0 10px {active_color}44 !important;
+            transform: scale(1.1) !important;
+            opacity: 1 !important;
+            filter: none !important;
+            z-index: 100 !important;
+        }}
+        div[data-testid="stButton"] button[key*="tile_v3_{level_int}"] p {{
+            color: white !important;
+            text-shadow: 0 0 8px {active_color} !important;
+        }}
+        </style>
+        """
+        st.markdown(active_css, unsafe_allow_html=True)
 
         if user_voted_today:
             st.markdown(
-                f"<div style='background:rgba(34,197,94,0.05); border:1px solid #22c55e33; border-radius:12px; padding:0.8rem; margin-top:0.5rem; text-align:center;'>"
+                f"<div style='background:rgba(34,197,94,0.05); border:1px solid #22c55e33; border-radius:12px; padding:0.8rem; margin-top:1.5rem; text-align:center;'>"
                 f"<p style='color:#22c55e; font-size:0.75rem; font-weight:950; margin:0;'>✓ SENTIMENT ANCHORED: {FEAR_LEVELS[level_int]['label'].upper()}</p>"
                 f"</div>",
                 unsafe_allow_html=True
             )
         else:
-            st.markdown("<p style='color:#64748b; font-size:0.6rem; text-align:center; margin-top:0.5rem; font-weight:700;'>TAP TILE TO CAST VOTE</p>", unsafe_allow_html=True)
+            st.markdown("<p style='color:#64748b; font-size:0.6rem; text-align:center; margin-top:1.2rem; font-weight:700;'>TAP TILE TO CAST VOTE</p>", unsafe_allow_html=True)
 
     # Callouts
     callout_html = """
