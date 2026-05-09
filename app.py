@@ -380,67 +380,67 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
         )
 
 def main() -> None:
-    # ── Tickers (ABSOLUTE TOP) ──
-    st.markdown(
-        """
-        <div class='v11-scroller-container'>
-            <div class='v11-scroller-content'>
-                <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 🧠 Semantic Alerting: Detect transmission concerns via concept matching</span>
-                <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 🔗 Recommendation Engine: Map related research via Qdrant similarity</span>
-                <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 📑 Named Vectors: Dual-embedding (Summary + Detail) for precision retrieval</span>
-                <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 💾 Session Memory: Persist conversation context across user sessions</span>
-                <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> ⚡ Search Fallbacks: Improved reliability across multi-version clients</span>
-            </div>
-        </div>
-        <div class='nav-scroller-container'>
-            <div class='scroller-reverse'>
-                <span class='v11-feature-item'><span class='nav-tag'>GUIDE</span> Real-time intelligence dashboard</span>
-                <span class='v11-feature-item'><span class='nav-tag'>NAV</span> Scroll for metrics and map</span>
-                <span class='v11-feature-item'><span class='nav-tag'>NAV</span> Use AI assistant for queries</span>
-                <span class='v11-feature-item'><span class='nav-tag'>DATA</span> Official WHO, CDC, PubMed feeds</span>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # ── Sidebar Scroll Guide ──
-    st.markdown(
-        """
-        <div class="sidebar-scroll-guide">
-            <div class="scroll-line">
-                <div class="scroll-dot"></div>
-            </div>
-            <div style="color:var(--teal); font-size:0.5rem; font-weight:800; transform:rotate(90deg); margin-top:20px;">SCROLL</div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # ── LIVE STATS (MOVED BELOW TICKERS) ──
-    from ui.stats_panel import render_stats_panel
-    render_stats_panel()
-    st.divider()
-
     with streamlit_analytics.track(load_from_json="data/analytics.json", save_to_json="data/analytics.json"):
         # Auto-refresh page every 15 mins so stats and headlines stay live
         from streamlit_autorefresh import st_autorefresh
         st_autorefresh(interval=15 * 60 * 1000, key="stats_refresh")
 
-        # ── Compact Header ──
+        # ── Branding & Header (ABSOLUTE TOP) ──
         st.markdown(
             """
             <div style='display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin-bottom: 0.5rem; padding-top: 10px;'>
                 <h1 class='glowing-title' style='margin:0; display: inline-block;'>🧬 Andes Virus Research Assistant <small style='font-size:0.5em; color:var(--gray-400); vertical-align: middle; text-shadow:none;'>v1.1</small></h1>
                 <div class='outbreak-badge'>OUTBREAK ACTIVE</div>
             </div>
-            <p style='color:var(--gray-300); font-size:0.85rem; margin:0;'>
+            <p style='color:var(--gray-300); font-size:0.85rem; margin:0; margin-bottom: 1rem;'>
                 MV Hondius Hantavirus Outbreak · Intelligence Dashboard
             </p>
             """,
             unsafe_allow_html=True
         )
 
+        # ── Tickers (BELOW TITLE) ──
+        st.markdown(
+            """
+            <div class='v11-scroller-container'>
+                <div class='v11-scroller-content'>
+                    <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 🧠 Semantic Alerting: Detect transmission concerns via concept matching</span>
+                    <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 🔗 Recommendation Engine: Map related research via Qdrant similarity</span>
+                    <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 📑 Named Vectors: Dual-embedding (Summary + Detail) for precision retrieval</span>
+                    <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> 💾 Session Memory: Persist conversation context across user sessions</span>
+                    <span class='v11-feature-item'><span class='v11-feature-tag'>v1.1</span> ⚡ Search Fallbacks: Improved reliability across multi-version clients</span>
+                </div>
+            </div>
+            <div class='nav-scroller-container'>
+                <div class='scroller-reverse'>
+                    <span class='v11-feature-item'><span class='nav-tag'>GUIDE</span> Real-time intelligence dashboard</span>
+                    <span class='v11-feature-item'><span class='nav-tag'>NAV</span> Scroll for metrics and map</span>
+                    <span class='v11-feature-item'><span class='nav-tag'>NAV</span> Use AI assistant for queries</span>
+                    <span class='v11-feature-item'><span class='nav-tag'>DATA</span> Official WHO, CDC, PubMed feeds</span>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        # ── Sidebar Scroll Guide ──
+        st.markdown(
+            """
+            <div class="sidebar-scroll-guide">
+                <div class="scroll-line">
+                    <div class="scroll-dot"></div>
+                </div>
+                <div style="color:var(--teal); font-size:0.5rem; font-weight:800; transform:rotate(90deg); margin-top:20px;">SCROLL</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.divider()
+
+        # ── LIVE STATS (BELOW TICKERS) ──
+        from ui.stats_panel import render_stats_panel
+        render_stats_panel()
         st.divider()
 
         st.warning("⚠️ **NOT MEDICAL ADVICE** • For emergencies contact local health authorities")
