@@ -244,8 +244,14 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         st.plotly_chart(fig_gauge, use_container_width=True, config={"displayModeBar": False})
 
     with col_dist:
+        # Pre-initialize level for CSS calculation
+        level = int(live_fear) if 1 <= live_fear <= 5 else 1
+        if "fear_slider_input" in st.session_state:
+            level = st.session_state.fear_slider_input
+            
         # Calculate intensity percentage for CSS (0% at CALM, 100% at PANICKED)
         intensity = (level - 1) / 4
+        current_l_color = FEAR_LEVELS[level]['color']
         
         st.markdown(
             f"""
@@ -339,7 +345,7 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
             "Fear Level",
             min_value=1,
             max_value=5,
-            value=int(live_fear) if 1 <= live_fear <= 5 else 1,
+            value=level,
             step=1,
             disabled=user_voted_today,
             label_visibility="collapsed",
