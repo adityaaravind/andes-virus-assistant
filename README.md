@@ -1,9 +1,9 @@
-# 🧬 Andes Virus Research Assistant `v1.3.0 Stable`
+# 🧬 Andes Virus Research Assistant `v1.3.1 Stable`
 
 **Real-time AI Outbreak Intelligence for the MV Hondius Hantavirus Incident.**
 
 [![Deployment](https://img.shields.io/badge/Deploy-Streamlit%20Cloud-FF4B4B?logo=streamlit)](https://andes-virus-assistant.streamlit.app/)
-[![Stable Version](https://img.shields.io/badge/Release-v1.3.0-00b4d8?logo=github)](https://github.com/adityaaravind/andes-virus-assistant/releases/tag/v1.3.0)
+[![Stable Version](https://img.shields.io/badge/Release-v1.3.1-00b4d8?logo=github)](https://github.com/adityaaravind/andes-virus-assistant/releases/tag/v1.3.1)
 
 ---
 
@@ -46,11 +46,20 @@ Andes Virus Assistant is a high-performance RAG (Retrieval-Augmented Generation)
 
 ---
 
+## 📜 v1.3.1: The "Premium UX & Mobile Polish" Update
+
+Focusing on high-fidelity interactions and fluid responsiveness.
+
+- **[NEW] Ultra-Compact Sentiment Tiles:** Redesigned sentiment selector with high-intensity neon glow and radial hover effects.
+- **[NEW] Mobile-First Vertical Grid:** Dynamic layout engine that forces vertical stacking on mobile browsers for optimal touch engagement.
+- **[NEW] Instant Vote Registration:** Zero-latency voting logic using prioritized session-state updates to bypass background IO delays.
+- **[FIX] Ghost Box Elimination:** Removed residual Streamlit button borders and artifacts for a pure "physical tile" feel.
+- **[FIX] Icon Rendering:** Resolved background artifacts on emoji icons across various mobile browsers.
+
 ---
 
 ## 📜 v1.3.0: The "Command & Stability" Update
-
-Our most significant leap in UX and performance to date.
+...
 
 - **[NEW] Sidebar Command Center:** A physical-feel tile grid with `Luxury Gold` hover animations and smooth-scrolling anchors.
 - **[NEW] Memory Guardrail System:**
