@@ -101,13 +101,18 @@ def render_stats_panel() -> None:
     stats  = get_outbreak_stats()
     
     # ── 1. REAL-TIME HEADER & CARDS (TOP PRIORITY) ──
-    st.markdown(
-        f'<div style="display:flex; align-items:center; gap:8px; margin-bottom:1rem; background:rgba(34,197,94,0.05); padding:4px 12px; border-radius:100px; width:fit-content; border:1px solid rgba(34,197,94,0.1);">'
-        f'<span class="live-dot" style="width:8px; height:8px; background:#22c55e; box-shadow: 0 0 8px #22c55e;"></span>'
-        f'<span style="color:#22c55e; font-size:0.65rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em;">Real-time Outbreak Tracking Active</span>'
-        f'</div>',
-        unsafe_allow_html=True
-    )
+    col_live, col_widget = st.columns([3, 1])
+    with col_live:
+        st.markdown(
+            f'<div style="display:flex; align-items:center; gap:8px; margin-bottom:1rem; background:rgba(34,197,94,0.05); padding:4px 12px; border-radius:100px; width:fit-content; border:1px solid rgba(34,197,94,0.1);">'
+            f'<span class="live-dot" style="width:8px; height:8px; background:#22c55e; box-shadow: 0 0 8px #22c55e;"></span>'
+            f'<span style="color:#22c55e; font-size:0.65rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em;">Real-time Outbreak Tracking Active</span>'
+            f'</div>',
+            unsafe_allow_html=True
+        )
+    with col_widget:
+        if st.button("📱 Widget", key="widget_shortcut", use_container_width=True):
+            st.toast("Check the sidebar for widget instructions!", icon="📱")
 
     # Helper to pick glow class based on thresholds
     def get_glow(val: Any, type: str) -> str:
