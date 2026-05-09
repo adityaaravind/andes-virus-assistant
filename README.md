@@ -1,4 +1,4 @@
-# 🧬 Andes Virus Research Assistant `v1.2.0`
+# 🧬 Andes Virus Research Assistant `v1.3.0`
 
 **Real-time AI Outbreak Intelligence for the MV Hondius Hantavirus Incident.**
 
@@ -7,17 +7,26 @@
 ## 🚀 Key Features
 
 -   **🤖 AI Research Assistant:** Ask complex questions and get answers cited with original sources (WHO, CDC, PubMed).
+-   **🛡️ Command Center:** (v1.3) Luxury-gold animated sidebar tiles for rapid, touch-friendly navigation.
+-   **🧠 Memory Watchdog:** (v1.3) Background system monitoring and garbage collection to prevent Streamlit Cloud crashes.
 -   **🗺️ Live Outbreak Map:** Interactive global tracking of cases by nationality and geographic spread.
 -   **📡 Real-Time News Ticker:** Monitored feeds from WHO, CDC, Reuters, and BBC—updated every 15 minutes.
 -   **📈 Pandemic Risk & Fear Index:** Blended sentiment analysis from global media and community voting.
 -   **📤 Intelligence Sharing:** (v1.2) Journalist-grade data exports, situation reports, and social media card generation.
--   **🚀 Roadmap & Phases:** (v1.2) Transparent intelligence development roadmap with placeholders for Phase 2 Community & Simulation tools.
 -   **📊 Outbreak Analytics:** Detailed statistics on case counts, mortality rates, and source credibility.
--   **🔗 v1.1: Contextual Recommendations:** Leveraging Qdrant's Recommendation API to map related research and bridge data silos.
 
 ---
 
-## 🛠️ The Tech Stack
+## 📜 v1.3.0 Changelog (Command & Stability Update)
+
+- **Official Release v1.3.0 Stable:** Introducing interactive navigation and robust memory management.
+- **Interactive Command Center:** Added animated sidebar tiles with "Luxury Gold" glow and smooth-scroll anchors.
+- **Resource Guardrails:** Implemented Incremental Ingestion and a 30-minute system memory watchdog.
+- **UX Refinement:** Optimized mobile responsiveness, increased "Outbreak Active" visibility, and fluid typography.
+- **Stability:** Fixed background thread leaks and analytics JSON bloat.
+
+## 📜 v1.2.0 Changelog (User Engagement & Stability Update)
+
 
 -   **Frontend:** Streamlit (Custom Navy/Teal Design System)
 -   **AI Engine:** LangChain + OpenAI GPT-4o-mini
