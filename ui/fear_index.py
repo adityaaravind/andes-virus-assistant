@@ -32,6 +32,10 @@ def _load_fear_data() -> dict[str, Any]:
 
 def _save_fear_vote(level: int, user_id: str) -> None:
     """Save a new fear vote to persistent store (background)."""
+    # FAST REGISTRATION: Update session state immediately before background IO
+    st.session_state.fear_slider_input = level
+    st.session_state.user_voted_today = True
+    
     try:
         data = _load_fear_data()
         data["votes"] = [v for v in data["votes"] if v.get("user_id") != user_id]
@@ -42,6 +46,7 @@ def _save_fear_vote(level: int, user_id: str) -> None:
         })
         data["votes"] = data["votes"][-1000:]
         data["last_updated"] = datetime.utcnow().isoformat()
+        # Fire and forget
         bg_kv_set(_FEAR_KEY, data)
     except Exception:
         pass
@@ -137,12 +142,15 @@ def render_fear_index() -> None:
         st.session_state.user_id = f"user_{user_hash}"
     user_id = st.session_state.user_id
 
-    data = _load_fear_data()
-    user_voted_today = any(
-        v.get("user_id") == user_id and
-        v.get("timestamp", "").startswith(datetime.utcnow().strftime("%Y-%m-%d"))
-        for v in data.get("votes", [])
-    )
+    # OPTIMIZED CHECK: Prioritize session state over disk read
+    if "user_voted_today" not in st.session_state:
+        data = _load_fear_data()
+        st.session_state.user_voted_today = any(
+            v.get("user_id") == user_id and
+            v.get("timestamp", "").startswith(datetime.utcnow().strftime("%Y-%m-%d"))
+            for v in data.get("votes", [])
+        )
+    user_voted_today = st.session_state.user_voted_today
 
     anim = "pulse-fear 2s ease-in-out infinite" if live_fear >= 3.0 else "none"
     
@@ -195,34 +203,33 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
         st.markdown(
             """
             <style>
-            /* 1. Layout Engine - Force wrapping for columns */
+            /* 1. FORCE VERTICAL ON MOBILE */
             div[data-testid="stHorizontalBlock"] {
                 display: flex !important;
                 flex-wrap: wrap !important;
                 justify-content: center !important;
-                gap: 8px !important;
+                gap: 12px !important;
             }
 
             div[data-testid="column"] {
-                flex: 1 1 15% !important;
-                min-width: 60px !important;
+                flex: 1 1 18% !important;
+                min-width: 65px !important;
                 position: relative;
                 overflow: visible !important;
             }
 
-            /* 2. Visual Layer */
             .premium-tile {
                 background: rgba(15, 23, 42, 0.4);
                 backdrop-filter: blur(8px);
                 border: 1px solid rgba(255, 255, 255, 0.05);
-                border-radius: 10px;
-                width: 60px;
-                height: 60px;
+                border-radius: 12px;
+                width: 65px;
+                height: 65px;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
                 position: absolute;
                 top: 0;
                 left: 50%;
@@ -233,60 +240,41 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
 
             .premium-tile.active {
                 background: radial-gradient(circle at center, var(--t-color)55 0%, rgba(15, 23, 42, 0.95) 100%) !important;
-                border: 2px solid var(--t-color) !important;
-                box-shadow: 0 0 25px var(--t-color)66;
-                transform: translateX(-50%) scale(1.08) translateY(-3px) !important;
+                border: 2.5px solid var(--t-color) !important;
+                box-shadow: 0 0 30px var(--t-color)77;
+                transform: translateX(-50%) scale(1.1) translateY(-4px) !important;
                 z-index: 2;
                 opacity: 1 !important;
             }
 
             .premium-tile.disabled { opacity: 0.1; filter: grayscale(1); }
-            .tile-icon { font-size: 1.2rem; line-height: 1; margin-bottom: 1px; }
-            .tile-label {
-                font-family: 'Inter', sans-serif;
-                font-weight: 900;
-                font-size: 0.4rem;
-                text-transform: uppercase;
-                color: #94a3b8;
-                text-align: center;
-                white-space: nowrap;
-            }
+            .tile-icon { font-size: 1.4rem; line-height: 1; }
+            .tile-label { font-family: 'Inter', sans-serif; font-weight: 900; font-size: 0.45rem; text-transform: uppercase; color: #94a3b8; }
 
-            /* 3. Invisible Button Layer */
-            div[data-testid="stButton"] { height: 60px !important; display: flex; justify-content: center; margin: 0 !important; }
+            div[data-testid="stButton"] { height: 65px !important; display: flex; justify-content: center; }
             div[data-testid="stButton"] button {
                 background: transparent !important;
                 border: none !important;
                 box-shadow: none !important;
-                height: 60px !important;
-                width: 60px !important;
+                height: 65px !important;
+                width: 65px !important;
                 color: transparent !important;
                 z-index: 10 !important;
             }
 
-            /* 4. MOBILE: 2x3 DYNAMIC GRID */
-            @media (max-width: 768px) {
-                div[data-testid="column"] { flex: 0 0 30% !important; min-width: 70px !important; }
-                
-                div[data-testid="column"]:nth-child(1),
-                div[data-testid="column"]:nth-child(2) {
-                    flex: 0 0 44% !important;
-                }
-                
-                div[data-testid="column"]:nth-child(3),
-                div[data-testid="column"]:nth-child(4),
-                div[data-testid="column"]:nth-child(5) {
-                    flex: 0 0 30% !important;
-                }
-
-                .premium-tile { width: 55px; height: 55px; border-radius: 8px; }
-                div[data-testid="stButton"] { height: 55px !important; }
-                div[data-testid="stButton"] button { height: 55px !important; width: 55px !important; }
-                .tile-icon { font-size: 1.1rem; }
-                .tile-label { font-size: 0.38rem; }
+            /* MOBILE: VERTICAL STACK FOR CLARITY */
+            @media (max-width: 600px) {
+                div[data-testid="stHorizontalBlock"] { flex-direction: column !important; align-items: center !important; }
+                div[data-testid="column"] { flex: 0 0 70px !important; width: 100% !important; height: 70px !important; }
+                .premium-tile { width: 100%; max-width: 280px; height: 55px; flex-direction: row; gap: 15px; border-radius: 10px; }
+                .premium-tile.active { transform: translateX(-50%) scale(1.02) !important; }
+                div[data-testid="stButton"] { height: 55px !important; width: 100%; max-width: 280px; }
+                div[data-testid="stButton"] button { height: 55px !important; width: 100% !important; }
+                .tile-icon { font-size: 1.5rem; }
+                .tile-label { font-size: 0.7rem; letter-spacing: 0.1em; }
             }
             </style>
-            <p style='color:#94a3b8; font-size:0.7rem; font-weight:800; margin-bottom:0.8rem; letter-spacing:0.1em; opacity:0.8; text-transform:uppercase;'>📡 SENTIMENT INDEX</p>
+            <p style='color:#94a3b8; font-size:0.75rem; font-weight:800; margin-bottom:1rem; letter-spacing:0.1em; opacity:0.8; text-transform:uppercase;'>📡 SENTIMENT INDEX</p>
             """,
             unsafe_allow_html=True
         )
@@ -297,16 +285,15 @@ border-top:1px solid #1b2e45; padding-top:0.7rem;">
             is_active = (level_id == level_int)
             with cols[i]:
                 st.markdown(f'<div class="premium-tile {"active" if is_active else ""} {"disabled" if user_voted_today and not is_active else ""}" style="--t-color: {info["color"]};"><span class="tile-icon">{icons[level_id]}</span><span class="tile-label">{info["label"].upper()}</span></div>', unsafe_allow_html=True)
-                if st.button(" ", key=f"v15_btn_{level_id}", disabled=user_voted_today):
+                if st.button(" ", key=f"v16_btn_{level_id}", disabled=user_voted_today):
                     _save_fear_vote(level_id, user_id)
-                    st.session_state.fear_slider_input = level_id
                     st.rerun()
 
         if user_voted_today:
-            st.markdown(f"<div style='background:rgba(34,197,94,0.05); border:1px solid #22c55e33; border-radius:10px; padding:0.6rem; margin-top:1rem; text-align:center;'><p style='color:#22c55e; font-size:0.7rem; font-weight:950; margin:0;'>✓ SENTIMENT ANCHORED</p></div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='background:rgba(34,197,94,0.05); border:1px solid #22c55e33; border-radius:10px; padding:0.8rem; margin-top:1rem; text-align:center;'><p style='color:#22c55e; font-size:0.75rem; font-weight:950; margin:0;'>✓ SENTIMENT ANCHORED</p></div>", unsafe_allow_html=True)
         else:
             st.markdown(
-                "<p style='color:#38bdf8; font-size:0.52rem; text-align:center; margin-top:1.2rem; font-weight:950; letter-spacing:0.03em; text-shadow: 0 0 10px rgba(56,189,248,0.4);'>"
+                "<p style='color:#38bdf8; font-size:0.55rem; text-align:center; margin-top:1rem; font-weight:950; letter-spacing:0.03em; text-shadow: 0 0 10px rgba(56,189,248,0.4);'>"
                 "⚡ TAP TILE TO VOTE — CRITICAL FOR RISK MODELING"
                 "</p>", 
                 unsafe_allow_html=True
