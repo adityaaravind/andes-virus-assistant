@@ -326,24 +326,23 @@ def _bootstrap_if_empty() -> None:
 
 def _render_header() -> None:
     from ui.author_card import render_author_card
-    col_logo, col_title, col_author = st.columns([1, 5, 3])
-    with col_logo:
+    header_col, author_col = st.columns([3, 1])
+    
+    with header_col:
         st.markdown(
-            "<div style='font-size:2.8rem;line-height:1;padding-top:0.2rem;'>🧬</div>",
-            unsafe_allow_html=True,
+            """
+            <div style='display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin-bottom: 0.5rem;'>
+                <h1 class='glowing-title mega-glow' style='margin:0; display: inline-block;'>🧬 Andes Virus Research Assistant <span class='v11-feature-tag' style='vertical-align: middle; margin-left: 10px;'>v1.2.0</span></h1>
+                <div class='outbreak-badge'>OUTBREAK ACTIVE</div>
+            </div>
+            <p class='glowing-title' style='font-size:0.65rem !important; margin:0; margin-bottom: 0.8rem; opacity: 0.55; text-shadow: 0 0 10px rgba(0, 180, 216, 0.2);'>
+                MV Hondius Hantavirus Outbreak · Intelligence Dashboard
+            </p>
+            """,
+            unsafe_allow_html=True
         )
-    with col_title:
-        st.markdown(
-            "<h1 style='margin:0;padding:0;font-size:1.6rem;color:#f8fafc;'>"
-            "Andes Virus Research Assistant</h1>"
-            "<p style='margin:0;color:#94a3b8;font-size:0.85rem;'>"
-            "MV Hondius Hantavirus Outbreak · AI-Powered Evidence Review</p>"
-            "<div style='margin-top:0.4rem;'>"
-            "<span class='outbreak-badge'><span class='dot'></span>OUTBREAK ACTIVE</span>"
-            "</div>",
-            unsafe_allow_html=True,
-        )
-    with col_author:
+    
+    with author_col:
         render_author_card()
 
 
@@ -453,27 +452,8 @@ def main() -> None:
             unsafe_allow_html=True
         )
 
-        # ── Branding & Header (ABSOLUTE TOP) ──
-        from ui.author_card import render_author_card
-        
-        header_col, author_col = st.columns([3, 1])
-        
-        with header_col:
-            st.markdown(
-                """
-                <div style='display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin-bottom: 0.5rem;'>
-                    <h1 class='glowing-title mega-glow' style='margin:0; display: inline-block;'>🧬 Andes Virus Research Assistant <span class='v11-feature-tag' style='vertical-align: middle; margin-left: 10px;'>v1.2.0</span></h1>
-                    <div class='outbreak-badge'>OUTBREAK ACTIVE</div>
-                </div>
-                <p class='glowing-title mega-glow' style='font-size:0.9rem !important; margin:0; margin-bottom: 0.8rem; opacity: 1; text-shadow: 0 0 20px rgba(0, 180, 216, 0.4);'>
-                    MV Hondius Hantavirus Outbreak · Intelligence Dashboard
-                </p>
-                """,
-                unsafe_allow_html=True
-            )
-        
-        with author_col:
-            render_author_card()
+        # ── Branding & Header ──
+        _render_header()
 
         # ── Sidebar Scroll Guide ──
         st.markdown(
@@ -565,7 +545,7 @@ def main() -> None:
                     <p style='color:#94a3b8; font-size:0.75rem; margin-top:0.5rem;'>
                         Real-time sentiment trends, research insight sharing, and anonymized community insights feed.
                     </p>
-                    <div style='margin-top:auto;'><span class='v11-feature-tag' style='margin-left:0; opacity:0.6;'>PHASE 2</span></div>
+                    <div style='margin-top:auto;'><span class='v11-feature-tag rich-tag' style='margin-left:0; opacity:1;'>PHASE 2</span></div>
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -578,7 +558,7 @@ def main() -> None:
                     <p style='color:#94a3b8; font-size:0.75rem; margin-top:0.5rem;'>
                         "What If?" Scenario Lab. Adjust viral variables to simulate outbreak progression and response.
                     </p>
-                    <div style='margin-top:auto;'><span class='v11-feature-tag' style='margin-left:0; opacity:0.6;'>PHASE 2</span></div>
+                    <div style='margin-top:auto;'><span class='v11-feature-tag rich-tag' style='margin-left:0; opacity:1;'>PHASE 2</span></div>
                 </div>
                 """,
                 unsafe_allow_html=True

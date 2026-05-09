@@ -304,20 +304,29 @@ div[data-testid="stButton"] button[key*="vote_dist_"] div[data-testid="stMarkdow
 }
 
 /* ── Outbreak Badge & Indicators ── */
+@keyframes critical-pulse {
+  0% { transform: scale(1); box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); border-color: rgba(239, 68, 68, 0.6); }
+  50% { transform: scale(1.05); box-shadow: 0 0 35px rgba(239, 68, 68, 0.9), inset 0 0 15px rgba(239, 68, 68, 0.4); border-color: #ff0000; background: rgba(239, 68, 68, 0.3); }
+  100% { transform: scale(1); box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); border-color: rgba(239, 68, 68, 0.6); }
+}
+
 .outbreak-badge {
-  background: rgba(239, 68, 68, 0.15);
-  border: 2px solid var(--red-alert);
-  border-radius: 6px;
-  padding: 6px 14px;
-  font-size: 0.8rem;
-  font-weight: 900;
-  color: #ff4d4d;
+  background: rgba(239, 68, 68, 0.2);
+  border: 3px solid #ff4d4d;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-size: 1.1rem;
+  font-weight: 950;
+  color: #ffffff;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  letter-spacing: 0.1em;
+  gap: 12px;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+  animation: critical-pulse 2s infinite ease-in-out;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  cursor: default;
+  z-index: 10;
 }
 
 @keyframes live-blink { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
