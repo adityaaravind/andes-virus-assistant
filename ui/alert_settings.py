@@ -54,24 +54,21 @@ def render_alert_settings() -> None:
         '<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);'
         'border-radius:8px;padding:0.7rem 0.8rem;margin:0.7rem 0;">'
         '<p style="color:#ef4444;font-size:0.72rem;font-weight:700;margin:0 0 0.3rem;'
-        'text-transform:uppercase;letter-spacing:0.05em;">📡 Mobile Push Alerts</p>'
+        'text-transform:uppercase;letter-spacing:0.05em;">📡 Instant Outbreak Alerts</p>'
         '<p style="color:#f1f5f9;font-size:0.78rem;margin:0 0 0.5rem;">'
-        'Get instant outbreak alerts on your phone — no account or signup needed.</p>'
+        'Get real-time push notifications in your browser. <b>No app or signup required.</b></p>'
         
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin:0.5rem 0;">'
-        '<a href="https://apps.apple.com/app/ntfy/id1622393045" target="_blank" style="text-decoration:none;">'
-        '<div style="background:#1b2e45;padding:0.4rem;border-radius:6px;text-align:center;color:#00b4d8;font-size:0.7rem;font-weight:700;border:1px solid rgba(0,180,216,0.2);">🍎 iOS App</div></a>'
-        '<a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" target="_blank" style="text-decoration:none;">'
-        '<div style="background:#1b2e45;padding:0.4rem;border-radius:6px;text-align:center;color:#00b4d8;font-size:0.7rem;font-weight:700;border:1px solid rgba(0,180,216,0.2);">🤖 Android</div></a>'
-        '</div>'
+        '<a href="https://ntfy.sh/HANTAVIRUS" target="_blank" style="display:block;background:#ef4444;color:white;text-align:center;padding:0.6rem;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:800;margin-top:0.5rem;box-shadow: 0 4px 15px rgba(239,68,68,0.3);">'
+        '🔔 Subscribe in Browser</a>'
 
-        '<p style="color:#cbd5e1;font-size:0.75rem;margin:0.4rem 0 0.3rem;">'
-        '1. Install <b>ntfy</b> app<br>'
-        '2. Tap "Subscribe to topic"<br>'
-        '3. Enter <b>HANTAVIRUS</b></p>'
+        '<p style="color:#cbd5e1;font-size:0.7rem;margin:0.6rem 0 0;">'
+        '<b>How it works:</b> Click above → Tap <b>Subscribe</b> on the ntfy page → Enable notifications. '
+        'Works on Chrome, Safari (iOS 16.4+), and Android.</p>'
         
-        '<a href="https://ntfy.sh/HANTAVIRUS" target="_blank" style="display:block;background:#ef4444;color:white;text-align:center;padding:0.5rem;border-radius:6px;text-decoration:none;font-size:0.75rem;font-weight:800;margin-top:0.5rem;">'
-        '🔔 View Live Alert Feed</a>'
+        '<div style="margin-top:0.8rem;padding-top:0.6rem;border-top:1px solid rgba(239,68,68,0.2);">'
+        '<p style="color:#94a3b8;font-size:0.65rem;margin:0;">'
+        'Prefer an app? Get <b>ntfy</b> on <a href="https://apps.apple.com/app/ntfy/id1622393045" target="_blank" style="color:#00b4d8;">iOS</a> or <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" target="_blank" style="color:#00b4d8;">Android</a> and subscribe to <b>HANTAVIRUS</b>.'
+        '</p></div>'
         '</div>',
         unsafe_allow_html=True,
     )
