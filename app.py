@@ -407,6 +407,37 @@ def main() -> None:
         with author_col:
             render_author_card()
 
+        # ── Sidebar Scroll Guide ──
+        st.markdown(
+            """
+            <div id="scroll-guide" class="sidebar-scroll-guide">
+                <div class="scroll-line">
+                    <div class="scroll-dot"></div>
+                </div>
+            </div>
+            <script>
+                const guide = document.getElementById('scroll-guide');
+                let timeout;
+
+                function showGuide() {
+                    guide.classList.add('active');
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => {
+                        guide.classList.remove('active');
+                    }, 2500);
+                }
+
+                // Show on activity
+                window.addEventListener('scroll', showGuide);
+                window.addEventListener('mousemove', showGuide);
+                window.addEventListener('touchstart', showGuide);
+                
+                // Show on initial load
+                setTimeout(showGuide, 1500);
+            </script>
+            """,
+            unsafe_allow_html=True
+        )
         st.divider()
 
         # ── LIVE STATS (BELOW HEADER) ──
