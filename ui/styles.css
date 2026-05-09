@@ -478,20 +478,21 @@ section[data-testid="stSidebar"] button[data-testid="stSidebarCollapseButton"] {
 
 .nav-tile:hover, .nav-tile:active {
     transform: scale(1.15) !important;
-    background: radial-gradient(circle at center, rgba(0, 180, 216, 0.25) 0%, rgba(27, 46, 69, 0.95) 100%) !important;
-    border-color: var(--teal-light) !important;
-    box-shadow: 0 12px 45px rgba(0, 180, 216, 0.7), inset 0 0 15px rgba(0, 180, 216, 0.3) !important;
+    background: radial-gradient(circle at center, rgba(255, 215, 0, 0.15) 0%, rgba(27, 46, 69, 0.95) 100%) !important;
+    border-color: #ffd700 !important;
+    box-shadow: 0 12px 45px rgba(255, 215, 0, 0.4), inset 0 0 15px rgba(255, 215, 0, 0.2) !important;
     z-index: 100 !important;
 }
 
 .nav-tile:hover .nav-tile-icon {
-    text-shadow: 0 0 20px rgba(0, 180, 216, 0.8) !important;
-    transform: translateY(-2px) !important;
+    text-shadow: 0 0 25px rgba(255, 215, 0, 0.9) !important;
+    transform: translateY(-3px) !important;
 }
 
 .nav-tile:hover .nav-tile-label {
-    color: var(--teal-light) !important;
-    text-shadow: 0 0 10px rgba(0, 180, 216, 0.4) !important;
+    color: #ffd700 !important;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.8), 0 0 30px rgba(255, 215, 0, 0.4) !important;
+    letter-spacing: 0.1em !important;
 }
 
 .nav-tile-icon {
