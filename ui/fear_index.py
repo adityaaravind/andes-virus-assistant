@@ -306,33 +306,20 @@ clear official communications and verified data.
     if not user_voted_today:
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # Use a hidden radio or selectbox to capture the click from the HTML
-        # But actually, the most reliable way in pure Streamlit without complex components
-        # is to keep the buttons but hide their default styling so completely that ONLY our card CSS shows.
-        
-        lbl_col, btn_col = st.columns([1, 4])
-        
-        with lbl_col:
-            st.markdown(
-                f'<div style="height: 110px; display: flex; align-items: center;">'
-                f'<p style="color:#94a3b8; font-size:0.85rem; font-weight:700; margin:0;">'
-                f'🗳️ <b>CAST YOUR VOTE:</b></p></div>',
-                unsafe_allow_html=True
-            )
-        
-        with btn_col:
-            v_cols = st.columns(5)
-            for i, level in enumerate(range(1, 6)):
-                info = FEAR_LEVELS[level]
-                l_color = info['color']
-                with v_cols[i]:
-                    label_html = f"""
-                        <span style="color:{l_color}; font-size:1.2rem; font-weight:950; text-transform:uppercase; display:block; text-shadow: 0 0 15px {l_color}66; margin-bottom:4px;">{info['label']}</span>
-                        <span style="color:var(--gray-300); font-size:0.65rem; font-weight:500; text-transform:none; opacity:0.9; display:block;">{info['desc']}</span>
-                    """
-                    if st.button(label_html, key=f"vote_card_{level}", use_container_width=True):
-                        _save_fear_vote(level, user_id)
-                        st.rerun()
+        # ── Refined Voting Layout ──
+        # Occupy full width without the label on the left
+        v_cols = st.columns(5)
+        for i, level in enumerate(range(1, 6)):
+            info = FEAR_LEVELS[level]
+            l_color = info['color']
+            with v_cols[i]:
+                label_html = f"""
+                    <span style="color:{l_color}; font-size:1.2rem; font-weight:950; text-transform:uppercase; display:block; text-shadow: 0 0 15px {l_color}66; margin-bottom:4px;">{info['label']}</span>
+                    <span style="color:var(--gray-300); font-size:0.65rem; font-weight:500; text-transform:none; opacity:0.9; display:block;">{info['desc']}</span>
+                """
+                if st.button(label_html, key=f"vote_card_{level}", use_container_width=True):
+                    _save_fear_vote(level, user_id)
+                    st.rerun()
 
         # Update CSS to match stat-card style exactly but more compact
         btn_card_style = ""
