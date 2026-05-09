@@ -13,12 +13,38 @@ Andes Virus Assistant is a high-performance RAG (Retrieval-Augmented Generation)
 
 ### 🛡️ Core Capabilities
 
-- **🤖 Research RAG Engine:** Ask complex questions. Get answers cited directly from WHO SITREPs, CDC guidance, and PubMed abstracts.
-- **🧭 Command Center (v1.3):** Luxury-gold sidebar interface with touch-optimized, animated tiles for rapid navigation through intelligence blocks.
-- **📈 Pandemic Risk & Fear Index:** Real-time epidemiologic weighting blended with AI-driven media sentiment analysis.
-- **🗺️ Global Nationality Map:** Interactive tracking of case distribution by nationality and geographic proximity.
-- **🧠 Stability Watchdog:** Custom memory-aware guardrails preventing crashes in low-RAM (1GB) Streamlit environments via incremental ingestion and system-wide cleanup.
-- **📤 Intelligence Sharing:** Journalist-grade situational report generation, CSV data exports, and auto-generated social media cards.
+<table style="width: 100%; border-collapse: collapse;">
+<tr>
+<td width="50%" style="border: none; padding: 10px;">
+<div style="background: rgba(0, 180, 216, 0.08); border: 1px solid #00b4d844; border-radius: 12px; padding: 1.5rem; height: 160px;">
+<p style="color: #00b4d8; font-weight: 800; font-size: 0.9rem; margin-top: 0; text-transform: uppercase;">🤖 RESEARCH RAG ENGINE</p>
+<p style="color: #94a3b8; font-size: 0.85rem; line-height: 1.5;">Ask complex questions. Get answers cited directly from WHO SITREPs, CDC guidance, and PubMed abstracts.</p>
+</div>
+</td>
+<td width="50%" style="border: none; padding: 10px;">
+<div style="background: rgba(255, 215, 0, 0.08); border: 1px solid #ffd70044; border-radius: 12px; padding: 1.5rem; height: 160px;">
+<p style="color: #ffd700; font-weight: 800; font-size: 0.9rem; margin-top: 0; text-transform: uppercase;">🧭 COMMAND CENTER (v1.3)</p>
+<p style="color: #94a3b8; font-size: 0.85rem; line-height: 1.5;">Luxury-gold sidebar interface with touch-optimized, animated tiles for rapid navigation through intelligence blocks.</p>
+</div>
+</td>
+</tr>
+<tr>
+<td width="50%" style="border: none; padding: 10px;">
+<div style="background: rgba(239, 68, 68, 0.08); border: 1px solid #ef444444; border-radius: 12px; padding: 1.5rem; height: 160px;">
+<p style="color: #ef4444; font-weight: 800; font-size: 0.9rem; margin-top: 0; text-transform: uppercase;">📈 RISK & FEAR INDEX</p>
+<p style="color: #94a3b8; font-size: 0.85rem; line-height: 1.5;">Real-time epidemiologic weighting blended with AI-driven media sentiment analysis and community voting.</p>
+</div>
+</td>
+<td width="50%" style="border: none; padding: 10px;">
+<div style="background: rgba(34, 197, 94, 0.08); border: 1px solid #22c55e44; border-radius: 12px; padding: 1.5rem; height: 160px;">
+<p style="color: #22c55e; font-weight: 800; font-size: 0.9rem; margin-top: 0; text-transform: uppercase;">🧠 STABILITY WATCHDOG</p>
+<p style="color: #94a3b8; font-size: 0.85rem; line-height: 1.5;">Memory-aware guardrails preventing crashes in low-RAM (1GB) environments via incremental ingestion.</p>
+</div>
+</td>
+</tr>
+</table>
+
+---
 
 ---
 
