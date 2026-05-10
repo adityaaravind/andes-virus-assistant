@@ -363,7 +363,7 @@ def _render_header() -> None:
         st.markdown(
             """
             <div style='display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin-bottom: 0.5rem;'>
-                <h1 class='glowing-title mega-glow' style='margin:0; display: inline-block;'>🧬 Andes Virus Research Assistant <span class='v11-feature-tag' style='vertical-align: middle; margin-left: 10px;'>v1.3.6</span></h1>
+                <h1 class='glowing-title mega-glow' style='margin:0; display: inline-block;'>🧬 Andes Virus Research Assistant <span class='v11-feature-tag' style='vertical-align: middle; margin-left: 10px;'>v2.0.0</span></h1>
                 <div class='outbreak-badge'>OUTBREAK ACTIVE</div>
             </div>
             <p style='font-size:0.85rem !important; margin:0; margin-bottom: 0.8rem; opacity: 0.7; color: #48cae4; letter-spacing: 0.05em; font-family: sans-serif; text-shadow: 0 0 10px rgba(0, 180, 216, 0.4);'>
