@@ -12,11 +12,14 @@ def render_community_feed() -> None:
     feed = data.get("feed", [])
     history = data.get("history", [])
     
-    # 1. HEADER (High Contrast)
+    # 1. HEADER (High Contrast with Tooltip)
     st.markdown(
         """
-        <div style='display:flex; align-items:center; gap:12px; margin-bottom:1rem; background:rgba(0,180,216,0.03); padding:10px; border-radius:8px; border-left:4px solid #00b4d8;'>
-            <h3 style='margin:0; font-size:0.85rem !important; letter-spacing:0.12em; color:#ffffff; text-shadow:0 0 10px rgba(0,180,216,0.4);'>📡 COMMUNITY INTEL</h3>
+        <div class="cyber-header" title="Collective intelligence stream tracking real-time community activity, researcher citations, and global news sentiment trends.">
+            <div style='display:flex; align-items:center; gap:12px; background:rgba(0,180,216,0.03); padding:10px; border-radius:8px; border-left:4px solid #00b4d8; cursor:help;'>
+                <h3 style='margin:0; font-size:0.85rem !important; letter-spacing:0.12em; color:#ffffff; text-shadow:0 0 10px rgba(0,180,216,0.4);'>📡 COMMUNITY INTEL</h3>
+                <span style='color:#00b4d8; font-size:0.6rem; font-weight:900; opacity:0.6; border:1px solid #00b4d844; padding:1px 5px; border-radius:4px;'>PHASE 2</span>
+            </div>
         </div>
         """,
         unsafe_allow_html=True
