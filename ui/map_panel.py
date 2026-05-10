@@ -206,7 +206,7 @@ def render_map_panel() -> None:
     except: geojson = {"features": []}
 
     # Manual interpolation
-    globe_html = globe_template.replace("__HOTSPOTS__", json.dumps(hotspots))
+    globe_html = globe_template.replace("__HOTSPOTS__", json.dumps(HOTSPOTS))
     globe_html = globe_html.replace("__GEOJSON__", json.dumps(geojson))
     globe_html = globe_html.replace("__FEAR__", f"{fear:.2f}")
 
