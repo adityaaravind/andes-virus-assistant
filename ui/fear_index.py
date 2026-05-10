@@ -153,19 +153,19 @@ def _build_sentiment_trend(history: list[dict[str, Any]]) -> go.Figure:
     fig.add_trace(go.Scatter(
         x=dates, y=scores,
         mode="lines",
-        line=dict(color="#00b4d8", width=2, shape="spline"),
+        line=dict(color="#00f5ff", width=3, shape="spline"),
         fill="tozeroy",
-        fillcolor="rgba(0,180,216,0.1)",
+        fillcolor="rgba(0,245,255,0.15)",
         hovertemplate="Score: %{y:.2f}<br>%{x|%b %d, %H:%M}<extra></extra>"
     ))
     
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        margin=dict(l=0, r=0, t=10, b=0),
-        height=60,
+        margin=dict(l=10, r=10, t=10, b=10),
+        height=100,
         xaxis=dict(visible=False),
-        yaxis=dict(visible=False, range=[0.8, 5.2]),
+        yaxis=dict(visible=False, range=[0.5, 5.5]),
         showlegend=False,
     )
     return fig

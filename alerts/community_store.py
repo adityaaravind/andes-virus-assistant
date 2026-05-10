@@ -55,7 +55,15 @@ def get_community_data() -> dict[str, Any]:
     history = get_persisted_value(SENTIMENT_HISTORY_KEY, [])
     feed = get_persisted_value(INSIGHTS_FEED_KEY, [])
     
-    # SYSTEM BASELINE: Ensure feed isn't empty on first load
+    # SEED DATA: Ensure chart and feed aren't empty on first load
+    if not history:
+        now = datetime.utcnow()
+        history = [
+            {"timestamp": (now - timedelta(days=2)).isoformat(), "score": 2.1},
+            {"timestamp": (now - timedelta(days=1)).isoformat(), "score": 2.4},
+            {"timestamp": now.isoformat(), "score": 2.2},
+        ]
+
     if not feed:
         feed = [
             {
