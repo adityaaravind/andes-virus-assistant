@@ -11,12 +11,11 @@ def render_community_feed() -> None:
     data = get_community_data()
     feed = data.get("feed", [])
     
-    # Header with a subtle neon anchor
+    # Header with a striking neon anchor
     st.markdown(
         """
-        <div style='display:flex; align-items:center; gap:10px; margin-bottom:1rem;'>
-            <div style='width:3px; height:15px; background:#00b4d8; box-shadow:0 0 10px #00b4d8;'></div>
-            <h3 style='margin:0; font-size:0.85rem !important; letter-spacing:0.1em; color:#00b4d8;'>COMMUNITY INTEL</h3>
+        <div style='display:flex; align-items:center; gap:12px; margin-bottom:1.2rem; background:rgba(0,180,216,0.05); padding:8px 12px; border-radius:8px; border-left:4px solid #00b4d8;'>
+            <h3 style='margin:0; font-size:0.95rem !important; letter-spacing:0.15em; color:#ffffff; text-shadow:0 0 10px rgba(0,180,216,0.5);'>📡 COMMUNITY INTEL</h3>
         </div>
         """,
         unsafe_allow_html=True

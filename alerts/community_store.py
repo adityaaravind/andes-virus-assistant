@@ -51,8 +51,28 @@ def add_insight(insight_type: str, content: str, user_id: str = "anon") -> None:
     bg_kv_set(INSIGHTS_FEED_KEY, feed)
 
 def get_community_data() -> dict[str, Any]:
-    """Retrieve all Phase 2 data for UI rendering."""
+    """Retrieve all Phase 2 data for UI rendering with fallback defaults."""
+    history = get_persisted_value(SENTIMENT_HISTORY_KEY, [])
+    feed = get_persisted_value(INSIGHTS_FEED_KEY, [])
+    
+    # SYSTEM BASELINE: Ensure feed isn't empty on first load
+    if not feed:
+        feed = [
+            {
+                "timestamp": datetime.utcnow().isoformat(),
+                "type": "alert",
+                "content": "Phase 2 Intelligence Stream Online",
+                "user_id": "SYSTEM"
+            },
+            {
+                "timestamp": (datetime.utcnow() - timedelta(minutes=5)).isoformat(),
+                "type": "search",
+                "content": "indexed latest WHO situation reports",
+                "user_id": "SYSTEM"
+            }
+        ]
+        
     return {
-        "history": get_persisted_value(SENTIMENT_HISTORY_KEY, []),
-        "feed": get_persisted_value(INSIGHTS_FEED_KEY, [])
+        "history": history,
+        "feed": feed
     }
