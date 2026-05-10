@@ -69,7 +69,7 @@ def build_replica_map() -> go.Figure:
             mode="markers+text",
             marker=dict(size=14, color="#1a1a1a", line=dict(color=color, width=2)),
             text=[str(loc["cases"])],
-            textfont=dict(family="Inter, sans-serif", color=color, size=9, bold=True),
+            textfont=dict(family="Inter, sans-serif", color=color, size=9),
             hovertext=f"<b>{loc['label']}</b><br>Cases: {loc['cases']}<br>Type: {loc['type'].upper()}",
             hoverinfo="text"
         ))
