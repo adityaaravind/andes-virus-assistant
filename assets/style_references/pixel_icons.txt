@@ -1,0 +1,4 @@
+Style Reference: Streamline Pixel Icons
+URL: https://www.streamlinehq.com/icons/pixel?ref=Awwwards&tab=all
+Description: High-contrast, minimalist 24x24 pixel-art inspired vector icons. Perfect for the dashboard's retro-futuristic/cyber aesthetic.
+Planned Use: Phase 3 icons, Red-Teaming status indicators, and advanced telemetry UI elements.
