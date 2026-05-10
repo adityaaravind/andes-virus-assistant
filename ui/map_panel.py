@@ -150,14 +150,29 @@ def render_map_panel() -> None:
             unsafe_allow_html=True
         )
         
-        signals = [
-            ("SIGNAL_ALPHA", "Johannesburg Cluster", "28.04E, 26.20S", "#00f5ff"),
-            ("SIGNAL_BETA", "MV Hondius Port Hold", "23.51W, 14.93N", "#00f5ff"),
-            ("FATAL_EVENT", "Case 4 Confirmation", "São Vicente, CV", "#ef4444"),
-            ("SHIP_LINK", "SAT-LINK Established", "MV HONDIUS", "#fbbf24"),
-        ]
+        # DYNAMIC SIGNALS: Fetch from live news headlines
+        try:
+            from ui.news_ticker import fetch_headlines
+            headlines = fetch_headlines()
+            # Pick 4 highly relevant signals
+            display_signals = []
+            for art in headlines[:20]:
+                text = art.get("title", "").upper()
+                source = art.get("source", "OSINT")
+                if "WHO" in source: sig_id, color = "WHO_SIGNAL", "#fbbf24"
+                elif "Hantavirus" in text or "Andes" in text: sig_id, color = "VECTOR_UPDATE", "#00f5ff"
+                else: sig_id, color = "OSINT_SIGNAL", "#94a3b8"
+                
+                # Format a coordinates-style meta string from source/time
+                meta = f"{source} // {datetime.now().strftime('%H:%M')} UTC"
+                display_signals.append((sig_id, art.get("title")[:40] + "...", meta, color))
+                if len(display_signals) >= 4: break
+        except Exception:
+            display_signals = [
+                ("SIGNAL_ALPHA", "Connection Error", "Re-syncing...", "#ef4444"),
+            ]
         
-        for name, desc, meta, color in signals:
+        for name, desc, meta, color in display_signals:
             st.markdown(
                 f"""
                 <div style="background:rgba(15, 23, 42, 0.6); border-left:2px solid {color}; padding: 8px 12px; border-radius: 4px; margin-bottom: 8px;">
@@ -165,8 +180,8 @@ def render_map_panel() -> None:
                         <span style="color:{color}; font-size:0.55rem; font-weight:900; font-family:monospace;">{name}</span>
                         <span class="live-dot" style="width:4px; height:4px; background:{color}; box-shadow: 0 0 5px {color};"></span>
                     </div>
-                    <div style="color:#ffffff; font-size:0.7rem; font-weight:700; margin-top:2px;">{desc}</div>
-                    <div style="color:#475569; font-size:0.55rem; font-family:monospace; margin-top:1px;">{meta}</div>
+                    <div style="color:#ffffff; font-size:0.65rem; font-weight:700; margin-top:2px; line-height:1.2;">{desc}</div>
+                    <div style="color:#475569; font-size:0.5rem; font-family:monospace; margin-top:2px;">{meta}</div>
                 </div>
                 """,
                 unsafe_allow_html=True
