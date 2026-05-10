@@ -1,4 +1,4 @@
-"""Community & Social Proof Panel — Phase 2 (Minimalist Redesign)."""
+"""Community & Social Proof Panel — Phase 2 (Bug Fix & Optimization)."""
 from __future__ import annotations
 
 import streamlit as st
@@ -7,25 +7,26 @@ from typing import Any
 from alerts.community_store import get_community_data
 
 def render_community_feed() -> None:
-    """Render a minimalist, high-contrast community activity stream."""
+    """Render a robust, minimalist community activity stream without layout bugs."""
     data = get_community_data()
     feed = data.get("feed", [])
+    history = data.get("history", [])
     
-    # Header with a striking neon anchor
+    # 1. HEADER (High Contrast)
     st.markdown(
         """
-        <div style='display:flex; align-items:center; gap:12px; margin-bottom:1.2rem; background:rgba(0,180,216,0.05); padding:8px 12px; border-radius:8px; border-left:4px solid #00b4d8;'>
-            <h3 style='margin:0; font-size:0.95rem !important; letter-spacing:0.15em; color:#ffffff; text-shadow:0 0 10px rgba(0,180,216,0.5);'>📡 COMMUNITY INTEL</h3>
+        <div style='display:flex; align-items:center; gap:12px; margin-bottom:1rem; background:rgba(0,180,216,0.03); padding:10px; border-radius:8px; border-left:4px solid #00b4d8;'>
+            <h3 style='margin:0; font-size:0.85rem !important; letter-spacing:0.12em; color:#ffffff; text-shadow:0 0 10px rgba(0,180,216,0.4);'>📡 COMMUNITY INTEL</h3>
         </div>
         """,
         unsafe_allow_html=True
     )
     
     if not feed:
-        st.caption("Awaiting community transmission...")
+        st.caption("Awaiting transmission...")
         return
 
-    # 1. Trending Strip (Minimalist Tags)
+    # 2. TRENDING TAGS
     citations = {}
     for item in feed:
         if item["type"] == "citation":
@@ -34,33 +35,34 @@ def render_community_feed() -> None:
     
     if citations:
         sorted_citations = sorted(citations.items(), key=lambda x: x[1], reverse=True)
-        tags_html = "<div style='display:flex; flex-wrap:wrap; gap:8px; margin-bottom:1.5rem;'>"
-        for title, count in sorted_citations[:4]:
-            tags_html += f"""<div style="background:rgba(167, 139, 250, 0.1); border:1px solid rgba(167, 139, 250, 0.4); padding:3px 10px; border-radius:15px; font-size:0.65rem; color:#a78bfa; font-weight:700;"><span style="opacity:0.6;">#</span> {title[:35]}... <span style="margin-left:5px; opacity:0.8;">({count})</span></div>"""
+        tags_html = "<div style='display:flex; flex-wrap:wrap; gap:6px; margin-bottom:1rem;'>"
+        for title, count in sorted_citations[:3]: # Even more minimalist
+            tags_html += f"<span style='background:rgba(167,139,250,0.08); border:1px solid rgba(167,139,250,0.3); padding:2px 8px; border-radius:4px; font-size:0.62rem; color:#a78bfa; font-weight:700;'># {title[:25]}... ({count})</span>"
         tags_html += "</div>"
         st.markdown(tags_html, unsafe_allow_html=True)
 
-    # 2. Activity Stream (Sleek Terminal Style)
-    log_html = "<div style='border-left: 1px solid rgba(255,255,255,0.1); padding-left:15px; margin-left:5px; display:flex; flex-direction:column; gap:12px;'>"
-    for item in feed[:8]: # Just the top 8 for minimalism
+    # 3. ACTIVITY STREAM (Consolidated to prevent HTML leak)
+    log_inner = ""
+    for item in feed[:6]: # 6 items is enough for minimalism
         ts = datetime.fromisoformat(item["timestamp"]).strftime("%H:%M")
         color = "#38bdf8" if item["type"] == "search" else "#ef4444" if item["type"] == "alert" else "#a78bfa"
-        
-        # Determine a more minimalist display content
         content = item['content']
         if item['type'] == 'citation':
-            content = f"verified {content.split(':')[-1].strip()[:50]}..."
+            content = f"verified {content.split(':')[-1].strip()[:45]}..."
             
-        log_html += f"""<div style="font-family: monospace; font-size: 0.72rem; line-height: 1.2;"><span style="color:#475569; font-weight:700;">[{ts}]</span> <span style="color:{color}; font-weight:900;">{item['user_id']}</span><span style="color:#94a3b8;"> {content}</span></div>"""
-    log_html += "</div>"
-    st.markdown(log_html, unsafe_allow_html=True)
+        log_inner += f"<div style='font-family:monospace; font-size:0.7rem; line-height:1.4; margin-bottom:4px;'><span style='color:#475569;'>[{ts}]</span> <span style='color:{color}; font-weight:800;'>{item['user_id']}</span> <span style='color:#94a3b8;'>{content}</span></div>"
+
+    st.markdown(
+        f"<div style='border-left:1px solid rgba(255,255,255,0.1); padding-left:12px; margin-bottom:1.5rem;'>{log_inner}</div>",
+        unsafe_allow_html=True
+    )
     
-    # 3. Sentiment Sparkline (Historical Trend)
-    history = data.get("history", [])
+    # 4. SENTIMENT VELOCITY (Sparkline with no gap)
     if history:
-        st.markdown("<br><p style='color:#64748b; font-size:0.55rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:5px;'>Community Sentiment Velocity (7D)</p>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#64748b; font-size:0.5rem; font-weight:900; text-transform:uppercase; letter-spacing:0.08em; margin:0;'>Sentiment Velocity (7D)</p>", unsafe_allow_html=True)
         from ui.fear_index import _build_sentiment_trend
         fig_trend = _build_sentiment_trend(history)
+        # Force a very small height in Plotly container
         st.plotly_chart(fig_trend, use_container_width=True, config={"displayModeBar": False})
-
-    st.markdown("<br>", unsafe_allow_html=True)
+    
+    st.markdown("<div style='margin-bottom:-1rem;'></div>", unsafe_allow_html=True) # Tighten spacing
