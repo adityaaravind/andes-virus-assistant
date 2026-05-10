@@ -97,6 +97,14 @@ def render_map_panel() -> None:
             }
             .leaflet-popup-tip { background: #0d1b2a !important; }
             .leaflet-popup-content { margin: 12px !important; line-height: 1.4 !important; }
+
+            /* TOOLTIP STYLING */
+            .custom-tooltip {
+                background: rgba(13, 27, 42, 0.9) !important;
+                color: #fff !important;
+                border: 1px solid #1b2e45 !important;
+                box-shadow: 0 0 15px rgba(0,0,0,0.5) !important;
+            }
         </style>
     </head>
     <body>
@@ -132,7 +140,7 @@ def render_map_panel() -> None:
             const shipPos = [14.93, -23.51];
             const affectedCodes = ["ARG", "ZAF", "ESP", "GBR", "NLD", "PHL", "CHL", "NOR", "ITA"];
 
-            // Affected Country Shading
+            // Affected Country Shading with Hover Intelligence
             fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
                 .then(res => res.json())
                 .then(geojson => {
@@ -140,14 +148,19 @@ def render_map_panel() -> None:
                         style: function(feature) {
                             const code = feature.id || feature.properties.ISO_A3;
                             if (affectedCodes.includes(code)) {
-                                return {
-                                    fillColor: '#4a1212',
-                                    fillOpacity: 0.5,
-                                    color: '#00b4d8',
-                                    weight: 1
-                                };
+                                return { fillColor: '#4a1212', fillOpacity: 0.5, color: '#00b4d8', weight: 1 };
                             }
                             return { fillOpacity: 0, weight: 0.5, color: '#222' };
+                        },
+                        onEachFeature: function(feature, layer) {
+                            const code = feature.id || feature.properties.ISO_A3;
+                            const h = hotspots.find(x => x.name.includes(code) || (code === "ARG" && x.name.includes("ARGENTINA")) || (code === "ZAF" && x.name.includes("SOUTH_AFRICA")) || (code === "ESP" && x.name.includes("SPAIN")) || (code === "GBR" && x.name.includes("UK")));
+                            
+                            if (h) {
+                                layer.bindTooltip(`<div style="font-family:monospace; color:#fff; font-size:10px;"><b>ZONE: ${feature.properties.name}</b><br/>REASON: ${h.relation}</div>`, { sticky: true, className: 'custom-tooltip' });
+                                layer.on('mouseover', function() { this.setStyle({ fillOpacity: 0.7, weight: 2 }); });
+                                layer.on('mouseout', function() { this.setStyle({ fillOpacity: 0.5, weight: 1 }); });
+                            }
                         }
                     }).addTo(map);
                 });
