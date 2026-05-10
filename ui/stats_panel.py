@@ -148,16 +148,17 @@ def render_stats_panel() -> None:
             f'</div>'
         )
 
-    # SHIP TELEMETRY CARD (Special Phase 2 Feature)
-    from ui.ship_telemetry import get_ship_card_html
-    ship_status = stats.get("ship_status", "In Transit")
-    ship_card = get_ship_card_html(ship_status)
-    
     st.markdown(
-        f'<style>.stats-grid {{ grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important; }}</style>'
-        f'<div class="stats-grid">{cards_html}{ship_card}</div>',
+        f'<div class="stats-grid">{cards_html}</div>',
         unsafe_allow_html=True,
     )
+
+    # SHIP TELEMETRY BAR (Full Width underneath cards)
+    from ui.ship_telemetry import get_ship_bar_html
+    ship_status = stats.get("ship_status", "In Transit")
+    ship_bar = get_ship_bar_html(ship_status)
+    
+    st.markdown(ship_bar, unsafe_allow_html=True)
 
 
 def render_timeline_chart() -> None:
