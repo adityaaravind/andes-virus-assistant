@@ -1,4 +1,4 @@
-"""3D Intelligence Globe — Multi-mode orbital projection with Day/Night switching."""
+"""3D Intelligence Globe — Professional multi-mode projection with robust template isolation."""
 from __future__ import annotations
 
 import json
@@ -79,22 +79,23 @@ def render_map_panel() -> None:
 
     template = GLOBE_TEMPLATES[selected_mode]
 
-    globe_html = f"""
+    # NO F-STRING HERE: Use standard string with manual interpolation to prevent NameError
+    globe_template = """
     <head>
       <style> 
-        body {{ margin: 0; background: #000; overflow: hidden; font-family: monospace; }} 
-        #telemetry-box {{
+        body { margin: 0; background: #000; overflow: hidden; font-family: monospace; } 
+        #telemetry-box {
             position: absolute; bottom: 20px; left: 20px;
             background: rgba(15, 23, 42, 0.9); border: 1px solid #22c55e; border-radius: 10px;
             padding: 15px; z-index: 100; min-width: 240px; backdrop-filter: blur(10px);
             box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
-        }}
-        .t-header {{ color: #64748b; font-size: 10px; font-weight: 900; margin-bottom: 8px; letter-spacing: 1px; }}
-        .t-vessel {{ color: #ffffff; font-size: 15px; font-weight: 900; display: flex; align-items: center; gap: 10px; }}
-        .t-coords {{ color: #48cae4; font-size: 12px; margin-top: 4px; }}
-        .t-status {{ color: #22c55e; font-size: 11px; font-weight: 900; margin-top: 10px; border-top: 1px solid #222; padding-top: 8px; }}
-        .blink-dot {{ width: 10px; height: 10px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 15px #22c55e; animation: blinker 0.8s linear infinite; }}
-        @keyframes blinker {{ 50% {{ opacity: 0.1; transform: scale(0.8); }} }}
+        }
+        .t-header { color: #64748b; font-size: 10px; font-weight: 900; margin-bottom: 8px; letter-spacing: 1px; }
+        .t-vessel { color: #ffffff; font-size: 15px; font-weight: 900; display: flex; align-items: center; gap: 10px; }
+        .t-coords { color: #48cae4; font-size: 12px; margin-top: 4px; }
+        .t-status { color: #22c55e; font-size: 11px; font-weight: 900; margin-top: 10px; border-top: 1px solid #222; padding-top: 8px; }
+        .blink-dot { width: 10px; height: 10px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 15px #22c55e; animation: blinker 0.8s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0.1; transform: scale(0.8); } }
       </style>
       <script src="//unpkg.com/three"></script>
       <script src="//unpkg.com/globe.gl"></script>
@@ -104,18 +105,18 @@ def render_map_panel() -> None:
           <div class="t-header">🛰️ VESSEL TELEMETRY</div>
           <div class="t-vessel"><div class="blink-dot"></div> MV HONDIUS</div>
           <div class="t-coords">LAT: 14.9316° N // LON: 23.5125° W</div>
-          <div class="t-status">STATUS: {state.get('ship_status', 'Transit').upper()}</div>
-          <div style="color:#64748b; font-size:9px; margin-top:4px;">PROJECTION: {selected_mode.upper()}</div>
+          <div class="t-status">STATUS: __STATUS__</div>
+          <div style="color:#64748b; font-size:9px; margin-top:4px;">PROJECTION: __MODE__</div>
       </div>
       <div id="globeViz"></div>
       <script>
-        const hotspots = {json.dumps(HOTSPOT_DATA)};
+        const hotspots = __HOTSPOTS__;
         const world = Globe()
           (document.getElementById('globeViz'))
-          .globeImageUrl('{template["img"]}')
-          .backgroundImageUrl('{template["bg"]}')
+          .globeImageUrl('__IMG__')
+          .backgroundImageUrl('__BG__')
           .showAtmosphere(true)
-          .atmosphereColor('{template["atmo"]}')
+          .atmosphereColor('__ATMO__')
           .atmosphereDaylightAlpha(0.3)
           .ringsData(hotspots)
           .ringColor(d => d.color)
@@ -132,33 +133,42 @@ def render_map_panel() -> None:
           .labelColor(d => d.color)
           .labelDotRadius(0)
           .pointTooltip(d => `
-            <div style="background: rgba(13, 27, 42, 0.95); border: 1px solid ${{d.color}}; padding: 12px; border-radius: 8px; font-family: monospace; min-width: 250px;">
+            <div style="background: rgba(13, 27, 42, 0.95); border: 1px solid ${d.color}; padding: 12px; border-radius: 8px; font-family: monospace; min-width: 250px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <b style="color:${{d.color}}; font-size:12px;">\${d.name}</b>
+                    <b style="color:${d.color}; font-size:12px;">${d.name}</b>
                     <span style="color:#22c55e; font-size:10px; font-weight:800;">LOCK: TRUE</span>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom:10px;">
                     <div style="background:rgba(255,255,255,0.03); padding:5px; border-radius:4px;">
                         <div style="color:#64748b; font-size:8px;">CASES</div>
-                        <div style="color:#ffffff; font-size:14px; font-weight:900;">\${d.cases}</div>
+                        <div style="color:#ffffff; font-size:14px; font-weight:900;">${d.cases}</div>
                     </div>
                     <div style="background:rgba(255,255,255,0.03); padding:5px; border-radius:4px;">
                         <div style="color:#64748b; font-size:8px;">FEAR_INDEX</div>
-                        <div style="color:#fbbf24; font-size:14px; font-weight:900;">{fear:.2f}/5</div>
+                        <div style="color:#fbbf24; font-size:14px; font-weight:900;">__FEAR__/5</div>
                     </div>
                 </div>
             </div>
           `);
         world.controls().autoRotate = true;
         world.controls().autoRotateSpeed = 0.5;
-        world.pointOfView({{ lat: 20, lng: -20, altitude: 2.2 }}, 0);
+        world.pointOfView({ lat: 20, lng: -20, altitude: 2.2 }, 0);
       </script>
     </body>
     """
     
+    # Manual interpolation
+    globe_html = globe_template.replace("__HOTSPOTS__", json.dumps(HOTSPOT_DATA))
+    globe_html = globe_html.replace("__STATUS__", state.get('ship_status', 'Transit').upper())
+    globe_html = globe_html.replace("__MODE__", selected_mode.upper())
+    globe_html = globe_html.replace("__IMG__", template["img"])
+    globe_html = globe_html.replace("__BG__", template["bg"])
+    globe_html = globe_html.replace("__ATMO__", template["atmo"])
+    globe_html = globe_html.replace("__FEAR__", f"{fear:.2f}")
+
     components.html(globe_html, height=750)
     
     st.markdown(
-        "<div style='text-align:right; opacity:0.6;'><p style='color:#475569; font-size:0.5rem; font-family:monospace;'>ORBITAL_RECO_SYS v6.5 // MULTI_MODE: ACTIVE</p></div>",
+        "<div style='text-align:right; opacity:0.6;'><p style='color:#475569; font-size:0.5rem; font-family:monospace;'>ORBITAL_RECO_SYS v6.6 // TEMPLATE_ISOLATION: LOCKED</p></div>",
         unsafe_allow_html=True
     )
