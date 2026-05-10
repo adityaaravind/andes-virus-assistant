@@ -1,4 +1,4 @@
-"""High-fidelity 3D Intelligence Globe — custom JS implementation with geocoding and live effects."""
+"""CesiumJS 3D Intelligence Globe — professional-grade orbital tracking."""
 from __future__ import annotations
 
 import json
@@ -10,10 +10,10 @@ LIVE_FILE = Path("data/outbreak_live.json")
 
 # Core Telemetry
 HOTSPOTS = [
-    {"lat": -34.60, "lon": -58.38, "cases": 3, "name": "ARGENTINA_CLUSTER"},
-    {"lat": -26.20, "lon": 28.04,  "cases": 2, "name": "ZA_EVAC_SITE"},
-    {"lat": 14.93,  "lon": -23.51, "cases": 5, "name": "MV_HONDIUS_MOORED"},
-    {"lat": 40.41,  "lon": -3.70,  "cases": 2, "name": "ESP_SIGNAL"},
+    {"lat": -34.60, "lon": -58.38, "cases": 3, "name": "ARGENTINA_CLUSTER", "type": "local"},
+    {"lat": -26.20, "lon": 28.04,  "cases": 2, "name": "ZA_EVAC_SITE", "type": "local"},
+    {"lat": 14.93,  "lon": -23.51, "cases": 5, "name": "MV_HONDIUS_MOORED", "type": "vessel"},
+    {"lat": 40.41,  "lon": -3.70,  "cases": 2, "name": "ESP_SIGNAL", "type": "imported"},
 ]
 
 # Compatibility data export
@@ -22,121 +22,122 @@ NATIONALITIES_DATA = [
     {"country": "United Kingdom","code": "GBR", "passengers": 20, "crew": 0,  "cases": 1, "deaths": 0},
     {"country": "Netherlands",   "code": "NLD", "passengers": 12, "crew": 5,  "cases": 1, "deaths": 1},
     {"country": "Argentina",     "code": "ARG", "passengers": 4,  "crew": 0,  "cases": 1, "deaths": 0},
+    {"country": "South Africa",  "code": "ZAF", "passengers": 0,  "crew": 16, "cases": 0, "deaths": 0},
 ]
 
 def render_map_panel() -> None:
     st.markdown(
         """
-        <div style='border-left: 3px solid #00f5ff; padding-left:15px; margin-bottom:1.5rem;'>
-            <h2 style='margin:0; font-size:1rem; letter-spacing:0.1em; color:#ffffff;'>ORBITAL INTELLIGENCE ARRAY</h2>
-            <p style='margin:0; font-size:0.6rem; color:#00f5ff; font-family:monospace; font-weight:800;'>HIGH-FIDELITY 3D TELEMETRY // SEARCH ACTIVE</p>
+        <div style='border-left: 3px solid #ff4d4d; padding-left:15px; margin-bottom:1.5rem;'>
+            <h2 style='margin:0; font-size:1rem; letter-spacing:0.1em; color:#ffffff;'>CESIUM ORBITAL PROJECTION</h2>
+            <p style='margin:0; font-size:0.6rem; color:#64748b; font-family:monospace; font-weight:800;'>TACTICAL 3D SENSORS // TOKEN-FREE OSINT INTERFACE</p>
         </div>
         """, unsafe_allow_html=True
     )
 
-    # Fetch Mapbox Token from Streamlit Secrets (DO NOT HARDCODE FOR SECURITY)
-    map_js_token = st.secrets.get("MAPBOX_ACCESS_TOKEN", "PUBLIC_TOKEN_REQUIRED")
-
-    # Use a high-performance 3D Globe via Leaflet + GL (bypassing Mapbox token requirements for free use)
-    # This provides a React-like experience with 3D terrain and glowing effects.
-    map_html = f"""
+    cesium_html = f"""
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>Intelligence Globe</title>
-        <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
-        <link href="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css" rel="stylesheet">
-        <script src="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js"></script>
-        <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
-        <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css">
+        <script src="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Cesium.js"></script>
+        <link href="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
         <style>
-            body {{ margin: 0; padding: 0; background: transparent; overflow: hidden; }}
-            #map {{ position: absolute; top: 0; bottom: 0; width: 100%; border-radius: 12px; }}
-            .mapboxgl-canvas {{ outline: none; }}
+            html, body, #cesiumContainer {{
+                width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;
+                background-color: #000;
+            }}
+            .cesium-viewer-bottom {{ display: none !important; }} /* Hide credits for cleaner UI */
             
-            /* Custom Glowing Markers */
-            .marker {{
-                width: 20px; height: 20px;
-                border-radius: 50%; border: 2px solid #ffffff;
-                box-shadow: 0 0 15px #00f5ff, inset 0 0 10px #00f5ff;
-                cursor: pointer;
+            /* Custom CSS for Popup */
+            .cesium-infoBox {{
+                background: rgba(13, 27, 42, 0.9) !important;
+                border: 1px solid #00f5ff !important;
+                color: white !important;
             }}
-            .ship-marker {{
-                width: 25px; height: 25px;
-                background: #fbbf24; border-radius: 4px;
-                border: 2px solid white;
-                animation: blink 1.5s infinite;
-                box-shadow: 0 0 20px #fbbf24;
-            }}
-            @keyframes blink {{
-                0% {{ opacity: 1; transform: scale(1); }}
-                50% {{ opacity: 0.3; transform: scale(0.8); }}
-                100% {{ opacity: 1; transform: scale(1); }}
-            }}
-            
-            /* High-tech Geocoder */
-            .mapboxgl-ctrl-geocoder {{
-                background-color: rgba(13, 27, 42, 0.9) !important;
-                border: 1px solid #00f5ff33 !important;
-                color: #fff !important;
-                box-shadow: none !important;
-            }}
-            .mapboxgl-ctrl-geocoder--input {{ color: white !important; font-family: monospace !important; }}
         </style>
     </head>
     <body>
-    <div id="map"></div>
+    <div id="cesiumContainer"></div>
     <script>
-        mapboxgl.accessToken = '{map_js_token}';
+        // Initialize Cesium with an open-source style (No token required for basic imagery)
+        const viewer = new Cesium.Viewer('cesiumContainer', {{
+            imageryProvider: new Cesium.OpenStreetMapImageryProvider({{
+                url : 'https://a.tile.openstreetmap.org/'
+            }}),
+            baseLayerPicker: false,
+            geocoder: true,
+            homeButton: false,
+            infoBox: true,
+            sceneModePicker: true,
+            selectionIndicator: true,
+            navigationHelpButton: false,
+            timeline: false,
+            animation: false,
+            scene3DOnly: true,
+            skyAtmosphere: new Cesium.SkyAtmosphere(),
+        }});
+
+        // High-tech styling: Enable stars and black space
+        viewer.scene.skyBox.show = true;
+        viewer.scene.sun.show = false;
+        viewer.scene.moon.show = false;
         
-        const map = new mapboxgl.Map({{
-            container: 'map',
-            style: 'mapbox://styles/mapbox/dark-v11',
-            center: [-20, 15],
-            zoom: 1.5,
-            projection: 'globe'
-        }});
-
-        map.on('style.load', () => {{
-            map.setFog({{
-                color: 'rgb(10, 20, 35)', // Lower atmosphere
-                'high-color': 'rgb(0, 0, 0)', // Upper atmosphere
-                'horizon-blend': 0.1, // Atmosphere thickness
-                'space-color': 'rgb(0, 0, 0)', // Background color
-                'star-intensity': 0.5 // Background star brightness
-            }});
-        }});
-
-        // Add Geocoder (Search)
-        const geocoder = new MapboxGeocoder({{
-            accessToken: mapboxgl.accessToken,
-            mapboxgl: mapboxgl,
-            marker: false,
-            placeholder: 'SEARCH VECTOR LOCATIONS...'
-        }});
-        map.addControl(geocoder, 'top-right');
-
-        // Hotspots
         const hotspots = {json.dumps(HOTSPOTS)};
+        
         hotspots.forEach(h => {{
-            const el = document.createElement('div');
-            el.className = h.name.includes('HONDIUS') ? 'ship-marker' : 'marker';
+            const color = h.type === 'vessel' ? Cesium.Color.GOLD : (h.type === 'local' ? Cesium.Color.RED : Cesium.Color.WHITE);
             
-            new mapboxgl.Marker(el)
-                .setLngLat([h.lon, h.lat])
-                .setPopup(new mapboxgl.Popup({{ offset: 25 }})
-                    .setHTML('<b>' + h.name + '</b><br>CASES: ' + h.cases))
-                .addTo(map);
+            // 1. Core Point
+            const entity = viewer.entities.add({{
+                position: Cesium.Cartesian3.fromDegrees(h.lon, h.lat),
+                point: {{
+                    pixelSize: h.type === 'vessel' ? 12 : 8,
+                    color: color,
+                    outlineColor: Cesium.Color.BLACK,
+                    outlineWidth: 2,
+                    disableDepthTestDistance: Number.POSITIVE_INFINITY // Always on top
+                }},
+                name: h.name,
+                description: '<b>DETECTED CASES:</b> ' + h.cases + '<br/><b>COORDS:</b> ' + h.lat + ', ' + h.lon
+            }});
+
+            // 2. Pulse / Glow Ring
+            viewer.entities.add({{
+                position: Cesium.Cartesian3.fromDegrees(h.lon, h.lat),
+                ellipse: {{
+                    semiMinorAxis: 150000.0,
+                    semiMajorAxis: 150000.0,
+                    material: new Cesium.ColorMaterialProperty(color.withAlpha(0.2)),
+                    outline: true,
+                    outlineColor: color.withAlpha(0.5),
+                    height: 0
+                }}
+            }});
+
+            if (h.type === 'vessel') {{
+                // Blinking effect for vessel via JS Interval
+                let visible = true;
+                setInterval(() => {{
+                    visible = !visible;
+                    entity.show = visible;
+                }}, 800);
+            }}
+        }});
+
+        // Set initial view
+        viewer.camera.flyTo({{
+            destination: Cesium.Cartesian3.fromDegrees(-20, 15, 15000000.0),
+            duration: 0
         }});
     </script>
     </body>
     </html>
     """
     
-    components.html(map_html, height=600)
+    components.html(cesium_html, height=600)
     
     st.markdown(
-        "<div style='text-align:center; padding:10px;'><p style='color:#475569; font-size:0.5rem; font-family:monospace;'>ORBITAL SENSORS: 3D PROJECTION ACTIVE // ROTATION ENABLED</p></div>",
+        "<div style='text-align:center; padding:10px;'><p style='color:#475569; font-size:0.5rem; font-family:monospace;'>ORBITAL ENGINE: CESIUM_CORE // 3D SATELLITE MODE: ENABLED</p></div>",
         unsafe_allow_html=True
     )
