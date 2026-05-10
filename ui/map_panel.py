@@ -99,20 +99,23 @@ def render_map_panel() -> None:
           .atmosphereColor('#22c55e')
           .atmosphereDaylightAlpha(0.2)
 
-          // 1. ROBUST POINTS (Pillars)
-          .pointsData(hotspots)
-          .pointLat('lat')
-          .pointLng('lng')
-          .pointColor('color')
-          .pointAltitude(d => d.size * 0.1)
-          .pointRadius(0.8)
-          
+          // 1. ROBUST LABELS (The primary indicators)
+          .labelsData(hotspots)
+          .labelLat(d => d.lat)
+          .labelLng(d => d.lng)
+          .labelText(d => d.name.includes('HONDIUS') ? 'Target: MV HONDIUS' : 'Signal: ' + d.cases)
+          .labelSize(d => d.size * 1.5)
+          .labelDotRadius(d => d.size * 0.8)
+          .labelColor(d => d.color)
+          .labelResolution(3)
+          .labelIncludeDot(true)
+
           // 2. ROBUST RINGS (Glow)
           .ringsData(hotspots)
           .ringColor(d => d.color)
-          .ringMaxRadius(d => d.size * 5)
+          .ringMaxRadius(d => d.size * 10)
           .ringPropagationSpeed(2)
-          .ringRepeatPeriod(1000)
+          .ringRepeatPeriod(800)
 
           // 3. TRANSIT ARC
           .arcsData(shipPath)
@@ -120,7 +123,7 @@ def render_map_panel() -> None:
           .arcDashLength(0.4)
           .arcDashGap(2)
           .arcDashAnimateTime(2000)
-          .arcStroke(1.5)
+          .arcStroke(2.0)
 
           // 4. HTML BLINKING MARKERS (Ensuring absolute visibility)
           .htmlElementsData(hotspots)
