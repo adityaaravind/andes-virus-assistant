@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from alerts.persist_helper import bg_kv_set, get_persisted_value
+from alerts.community_store import log_sentiment_snapshot, get_community_data
 
 _FEAR_KEY = "fear_index_votes"
 
@@ -132,9 +133,51 @@ def _build_fear_gauge(avg_fear: float, color: str) -> go.Figure:
     return fig
 
 
+@st.cache_data(ttl=60, show_spinner=False)
+def _build_sentiment_trend(history: list[dict[str, Any]]) -> go.Figure:
+    """Sparkline area chart for sentiment trends."""
+    if not history:
+        return go.Figure()
+        
+    dates = [datetime.fromisoformat(p["timestamp"]) for p in history]
+    scores = [p["score"] for p in history]
+    
+    # Fill colors based on level
+    colors = []
+    for s in scores:
+        if s < 2: colors.append("#22c55e")
+        elif s < 3: colors.append("#f59e0b")
+        else: colors.append("#ef4444")
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=dates, y=scores,
+        mode="lines",
+        line=dict(color="#00b4d8", width=2, shape="spline"),
+        fill="tozeroy",
+        fillcolor="rgba(0,180,216,0.1)",
+        hovertemplate="Score: %{y:.2f}<br>%{x|%b %d, %H:%M}<extra></extra>"
+    ))
+    
+    fig.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=0, r=0, t=10, b=0),
+        height=60,
+        xaxis=dict(visible=False),
+        yaxis=dict(visible=False, range=[0.8, 5.2]),
+        showlegend=False,
+    )
+    return fig
+
+
 def render_fear_index() -> None:
     avg_fear, vote_count, label, desc, color, web_sentiment = _calculate_fear_average()
     live_fear = round(avg_fear, 2)
+    
+    # PHASE 2: Log current state for trend analysis
+    log_sentiment_snapshot(live_fear)
+    community = get_community_data()
 
     if "user_id" not in st.session_state:
         browser_info = str(st.session_state) + str(hash(str(datetime.utcnow().date())))
@@ -176,17 +219,16 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
 <span style="color:#94a3b8; font-size:0.6rem;">📈 Votes: <b style="color:white;">{vote_count}</b></span>
 <span style="color:#64748b; font-size:0.6rem; font-weight:700; text-transform:uppercase;">Live <span class="live-dot" style="width:5px; height:5px; margin-left:3px;"></span></span>
 </div>
-<div style="display:flex; gap:1.5rem; margin-top:0.9rem; flex-wrap:wrap;
-border-top:1px solid #1b2e45; padding-top:0.7rem;">
-<span style="color:#94a3b8; font-size:0.77rem;">😰 Final Score: <b style="color:{color};">{avg_fear:.1f}/5</b></span>
-<span style="color:#94a3b8; font-size:0.77rem;">🌍 Media Data: <b style="color:#38bdf8;">Active</b></span>
-<span style="color:#94a3b8; font-size:0.77rem;">📈 Responses: <b style="color:#f8fafc;">{vote_count}</b></span>
-<span style="color:#94a3b8; font-size:0.77rem;">⏱ Updated: <b style="color:#f8fafc;">{datetime.now().strftime('%H:%M')}</b></span>
+<div style="margin-top: 0.8rem; margin-bottom: -0.5rem; opacity: 0.8;">
+    <p style="color:#64748b; font-size:0.5rem; font-weight:800; margin:0 0 2px 0; text-transform:uppercase; letter-spacing:0.05em;">7-Day Sentiment Velocity</p>
 </div>
-<style>@keyframes pulse-fear {{ 0%,100% {{ opacity:1; }} 50% {{ opacity:0.4; }} }}</style>
 </div>
 """.replace("\n", "").strip()
     st.markdown(html_header, unsafe_allow_html=True)
+    
+    # Sparkline chart (Phase 2)
+    fig_trend = _build_sentiment_trend(community["history"])
+    st.plotly_chart(fig_trend, use_container_width=True, config={"displayModeBar": False})
 
     col_gauge, col_dist = st.columns([1, 1.6])
     with col_gauge:

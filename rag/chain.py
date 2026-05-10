@@ -10,6 +10,7 @@ from langchain_openai import ChatOpenAI
 from rag.prompt_templates import build_rag_prompt
 from rag.retriever import retrieve
 from rag.citation_formatter import format_sources_list
+from alerts.community_store import add_insight
 
 
 load_dotenv()
@@ -58,6 +59,15 @@ class FallbackRAGChain:
             answer_parts.append(f"\n{i}. {text}...")
 
         sources = [chunk.get("metadata", {}) for chunk in chunks]
+
+        import streamlit as st
+        user_id = st.session_state.get("user_id", "anon")
+        add_insight("search", f"queried knowledge base: '{question[:60]}...'", user_id)
+        
+        for source in sources:
+             title = source.get("title")
+             if title:
+                 add_insight("citation", f"extracted evidence: {title}", user_id)
 
         return {
             "answer": "\n".join(answer_parts),
@@ -139,9 +149,17 @@ class RAGChain:
             save_session_context("default_session", summary, q_emb)
         except: pass
 
+        import streamlit as st
+        user_id = st.session_state.get("user_id", "anon")
+        add_insight("search", f"isolated intel: '{question[:60]}...'", user_id)
+        
+        for source in sources:
+             title = source.get("title")
+             if title:
+                 add_insight("citation", f"verified source: {title}", user_id)
+
         return {
             "answer":      response.content,
-
             "sources":     sources,
             "chunks_used": len(chunks),
             "raw_chunks":  chunks,

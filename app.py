@@ -363,7 +363,7 @@ def _render_header() -> None:
         st.markdown(
             """
             <div style='display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin-bottom: 0.5rem;'>
-                <h1 class='glowing-title mega-glow' style='margin:0; display: inline-block;'>🧬 Andes Virus Research Assistant <span class='v11-feature-tag' style='vertical-align: middle; margin-left: 10px;'>v1.3.5</span></h1>
+                <h1 class='glowing-title mega-glow' style='margin:0; display: inline-block;'>🧬 Andes Virus Research Assistant <span class='v11-feature-tag' style='vertical-align: middle; margin-left: 10px;'>v1.3.6</span></h1>
                 <div class='outbreak-badge'>OUTBREAK ACTIVE</div>
             </div>
             <p style='font-size:0.85rem !important; margin:0; margin-bottom: 0.8rem; opacity: 0.7; color: #48cae4; letter-spacing: 0.05em; font-family: sans-serif; text-shadow: 0 0 10px rgba(0, 180, 216, 0.4);'>
@@ -564,6 +564,11 @@ def main() -> None:
         render_journalist_tools()
         st.divider()
 
+        # ── COMMUNITY INTELLIGENCE (PHASE 2) ────────────────────────────────────
+        from ui.community_feed import render_community_feed
+        render_community_feed()
+        st.divider()
+
         # ── ROADMAP (COMING SOON) ───────────────────────────────────────────────
         st.markdown("<div id='roadmap'></div>", unsafe_allow_html=True)
         st.markdown("### 🚀 Next Intelligence Phases (coming soon)")
@@ -571,12 +576,12 @@ def main() -> None:
         with col_road1:
             st.markdown(
                 """
-                <div class='stat-card' style='border-color: rgba(167, 139, 250, 0.3); min-height: 140px;'>
-                    <p class='stat-label glowing-title' style='color:#a78bfa; font-size: 0.9rem !important;'>Community & Social Proof</p>
+                <div class='stat-card' style='border-color: rgba(34, 197, 94, 0.3); min-height: 140px;'>
+                    <p class='stat-label glowing-title' style='color:#22c55e; font-size: 0.9rem !important;'>Automated Red-Teaming</p>
                     <p style='color:#94a3b8; font-size:0.75rem; margin-top:0.5rem;'>
-                        Real-time sentiment trends, research insight sharing, and anonymized community insights feed.
+                        AI agents stress-test official reports against leaked data to identify informational gaps.
                     </p>
-                    <div style='margin-top:auto;'><span class='v11-feature-tag' style='margin-left:0; opacity:0.6;'>PHASE 2</span></div>
+                    <div style='margin-top:auto;'><span class='v11-feature-tag' style='margin-left:0; opacity:0.6;'>PHASE 3</span></div>
                 </div>
                 """,
                 unsafe_allow_html=True
