@@ -118,6 +118,27 @@ def render_map_panel() -> None:
 
             const hotspots = __HOTSPOTS__;
             const shipPos = [14.93, -23.51];
+            const affectedCodes = ["ARG", "ZAF", "ESP", "GBR", "NLD", "PHL", "CHL", "NOR", "ITA"];
+
+            // Affected Country Shading
+            fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
+                .then(res => res.json())
+                .then(geojson => {
+                    L.geoJSON(geojson, {
+                        style: function(feature) {
+                            const code = feature.id || feature.properties.ISO_A3;
+                            if (affectedCodes.includes(code)) {
+                                return {
+                                    fillColor: '#4a1212',
+                                    fillOpacity: 0.5,
+                                    color: '#00b4d8',
+                                    weight: 1
+                                };
+                            }
+                            return { fillOpacity: 0, weight: 0.5, color: '#222' };
+                        }
+                    }).addTo(map);
+                });
 
             hotspots.forEach(h => {
                 const isShip = h.name.includes('HONDIUS');
