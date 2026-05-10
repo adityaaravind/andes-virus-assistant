@@ -29,15 +29,15 @@ HOTSPOT_DATA = [
 ]
 
 GLOBE_TEMPLATES = {
-    "Night Ops (High-Res)": {
-        "img": "//unpkg.com/three-globe/example/img/earth-night.jpg",
-        "bg": "//unpkg.com/three-globe/example/img/night-sky.png",
-        "atmo": "#00f5ff"
-    },
     "Daylight Intelligence": {
         "img": "//unpkg.com/three-globe/example/img/earth-blue-marble.jpg",
         "bg": "rgba(10, 25, 45, 1)",
         "atmo": "#ffffff"
+    },
+    "Night Ops (High-Res)": {
+        "img": "//unpkg.com/three-globe/example/img/earth-night.jpg",
+        "bg": "//unpkg.com/three-globe/example/img/night-sky.png",
+        "atmo": "#00f5ff"
     },
     "Topological Scan": {
         "img": "//unpkg.com/three-globe/example/img/earth-topology.png",
