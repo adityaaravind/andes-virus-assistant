@@ -1,4 +1,4 @@
-"""Stable 2D Intelligence Map — High-fidelity tactical tracking with guaranteed visibility."""
+"""Stable 2D Intelligence Map — Robust template isolation for guaranteed performance."""
 from __future__ import annotations
 
 import json
@@ -54,7 +54,8 @@ def render_map_panel() -> None:
         """, unsafe_allow_html=True
     )
 
-    map_html = f"""
+    # NO F-STRING: Manual interpolation to prevent NameError
+    map_template = """
     <!DOCTYPE html>
     <html>
     <head>
@@ -62,32 +63,26 @@ def render_map_panel() -> None:
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
         <style>
-            html, body {{ margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; font-family: monospace; }}
-            #map {{ width: 100%; height: 100vh; background: #050505; }}
-            
-            /* High-Intensity Markers */
-            .ring-marker {{
+            html, body { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; font-family: monospace; }
+            #map { width: 100%; height: 100vh; background: #050505; }
+            .ring-marker {
                 width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ffffff;
                 position: relative; display: flex; align-items: center; justify-content: center;
                 background: rgba(0,0,0,0.4);
-            }}
-            .local-ring {{ box-shadow: 0 0 20px #fbbf24, inset 0 0 10px #fbbf24; }}
-            .vessel-ring {{ border-color: #22c55e !important; box-shadow: 0 0 25px #22c55e, inset 0 0 15px #22c55e; animation: blinker 1s linear infinite; }}
-            
-            .badge {{
+            }
+            .local-ring { box-shadow: 0 0 20px #fbbf24, inset 0 0 10px #fbbf24; }
+            .vessel-ring { border-color: #22c55e !important; box-shadow: 0 0 25px #22c55e, inset 0 0 15px #22c55e; animation: blinker 1s linear infinite; }
+            .badge {
                 position: absolute; top: -10px; right: -10px; background: #ffffff; color: #000;
                 border-radius: 50%; width: 16px; height: 16px; font-size: 11px; font-weight: 900;
                 display: flex; align-items: center; justify-content: center; border: 1px solid #000;
-            }}
-            
-            @keyframes blinker {{ 50% {{ opacity: 0.3; transform: scale(0.9); }} }}
-
-            /* Telemetry Box */
-            #telemetry {{
+            }
+            @keyframes blinker { 50% { opacity: 0.3; transform: scale(0.9); } }
+            #telemetry {
                 position: absolute; bottom: 30px; left: 20px; z-index: 1000;
                 background: rgba(15, 23, 42, 0.95); border: 1px solid #22c55e; border-radius: 10px;
                 padding: 15px; min-width: 220px; color: white; border-left: 5px solid #22c55e;
-            }}
+            }
         </style>
     </head>
     <body>
@@ -96,38 +91,41 @@ def render_map_panel() -> None:
             <div style="font-size:16px; font-weight:900; margin:5px 0;">MV HONDIUS LOCK</div>
             <div style="color:#48cae4; font-size:12px;">LAT: 14.9316° N / LON: 23.5125° W</div>
             <div style="height:1px; background:rgba(255,255,255,0.1); margin:10px 0;"></div>
-            <div style="color:#22c55e; font-size:11px; font-weight:900;">STATUS: {state.get('ship_status', 'Transit').upper()}</div>
+            <div style="color:#22c55e; font-size:11px; font-weight:900;">STATUS: __STATUS__</div>
         </div>
         <div id="map"></div>
         <script>
-            const map = L.map('map', {{ zoomControl: false, attributionControl: false }}).setView([15, -20], 3);
-            
-            L.tileLayer('https://{{s}}.basemaps.cartocdn.com/dark_all/{{z}}/{{x}}/{{y}}{{r}}.png', {{ maxZoom: 19 }}).addTo(map);
+            const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([15, -20], 3);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
 
-            const hotspots = {json.dumps(HOTSPOT_DATA)};
-            hotspots.forEach(h => {{
+            const hotspots = __HOTSPOTS__;
+            hotspots.forEach(h => {
                 const ringClass = h.type === 'vessel' ? 'vessel-ring' : 'local-ring';
-                const icon = L.divIcon({{
+                const icon = L.divIcon({
                     className: '',
-                    html: `<div class="ring-marker ${{ringClass}}"><div class="badge">${{h.cases}}</div></div>`,
+                    html: `<div class="ring-marker ${ringClass}"><div class="badge">${h.cases}</div></div>`,
                     iconSize: [24, 24], iconAnchor: [12, 12]
-                }});
+                });
                 
-                L.marker([h.lat, h.lng], {{ icon: icon }}).addTo(map)
-                 .bindPopup(`<b style="color:${{h.color}};">\${h.name}</b><br/>CASES: \${h.cases}<br/>FEAR_INDEX: {fear:.2f}/5`, {{ className: 'custom-popup' }});
-            }});
+                L.marker([h.lat, h.lng], { icon: icon }).addTo(map)
+                 .bindPopup(`<b style="color:${h.color};">${h.name}</b><br/>CASES: ${h.cases}<br/>FEAR_INDEX: __FEAR__/5`);
+            });
 
-            // Ship Trajectory
             const path = [[-54.8, -68.3], [-54.3, -36.5], [-37.1, -12.3], [-15.9, -5.7], [14.93, -23.51]];
-            L.polyline(path, {{ color: '#00f5ff', weight: 2, dashArray: '8, 8', opacity: 0.6 }}).addTo(map);
+            L.polyline(path, { color: '#00f5ff', weight: 2, dashArray: '8, 8', opacity: 0.6 }).addTo(map);
         </script>
     </body>
     </html>
     """
-    
+
+    # Manual Replacement
+    map_html = map_template.replace("__HOTSPOTS__", json.dumps(HOTSPOT_DATA))
+    map_html = map_html.replace("__STATUS__", state.get('ship_status', 'Transit').upper())
+    map_html = map_html.replace("__FEAR__", f"{fear:.2f}")
+
     components.html(map_html, height=750)
     
     st.markdown(
-        "<div style='text-align:right; opacity:0.6;'><p style='color:#475569; font-size:0.5rem; font-family:monospace;'>ENGINE: LEAFLET_TACTICAL // VISIBILITY: 100% // SYNC: LOCKED</p></div>",
+        "<div style='text-align:right; opacity:0.6;'><p style='color:#475569; font-size:0.5rem; font-family:monospace;'>ENGINE: LEAFLET_TACTICAL // TEMPLATE_ISOLATION: LOCKED</p></div>",
         unsafe_allow_html=True
     )
