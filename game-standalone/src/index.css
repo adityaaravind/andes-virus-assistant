@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --navy: #0a0a0a;
+  --navy-mid: #121212;
+  --navy-light: #1a1a1a;
+  --teal: #00b4d8;
+  --teal-light: #48cae4;
+  --white: #e0e0e0;
+  --gray-100: #d1d5db;
+  --gray-300: #9ca3af;
+  --gray-500: #6b7280;
+  --red-alert: #ef4444;
+  --green-ok: #22c55e;
+  --amber: #f59e0b;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--navy);
+  color: var(--white);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  overflow: hidden;
+}
+
+.rts-panel {
+  background: rgba(18, 18, 18, 0.95);
+  border: 1px solid #333;
+  border-top: 2px solid var(--teal);
+  border-radius: 0px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+  transition: border-color 0.2s ease;
+}
+
+.rts-panel:hover {
+  border-color: var(--teal);
+}
+
+.hud-label {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+}
+
+.hud-value {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.75rem;
+  color: var(--teal);
+}
+
+/* ── Custom Scrollbar for Containers ── */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--teal);
+  border-radius: 10px;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--navy);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--navy-light);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--teal);
+}

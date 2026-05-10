@@ -20,15 +20,26 @@ from ingestion.wikipedia_loader import load_wikipedia_articles
 from processing.chunker import chunk_documents
 from processing.embedder import embed_chunks, get_embedding_provider
 from processing.metadata_tagger import tag_chunks
-from vectorstore.store import add_documents, get_stats
+from vectorstore.store import add_documents, get_stats, get_existing_ids, _chunk_id
 
 
 console = Console()
 
 
-def run_ingestion() -> None:
+def run_ingestion(fast: bool = False) -> None:
     import gc
+    import os
     console.rule("[bold blue]Andes Virus Research Assistant — Incremental Ingestion Pipeline")
+    if fast:
+        console.print("[bold yellow]⚡ FAST MODE ACTIVE: Reducing scrape depth[/bold yellow]")
+
+    # Cache existing IDs to avoid re-embedding
+    try:
+        existing_ids = get_existing_ids()
+        console.print(f"  [dim]Found {len(existing_ids)} existing chunks in DB[/dim]")
+    except Exception:
+        existing_ids = set()
+        console.print("  [dim]Could not retrieve existing IDs, assuming empty DB[/dim]")
 
     def _process_batch(source_name: str, docs: list[dict[str, Any]]) -> None:
         if not docs:
@@ -36,11 +47,24 @@ def run_ingestion() -> None:
         console.print(f"  [blue]→ Processing batch: {source_name} ({len(docs)} docs)[/blue]")
         chunks = chunk_documents(docs)
         if chunks:
-            chunks = tag_chunks(chunks)
+            # FILTER NEW CHUNKS BEFORE TAGGING AND EMBEDDING
+            new_chunks = []
+            for c in chunks:
+                cid = _chunk_id(c)
+                # Qdrant IDs are often ints or stored differently, handle both
+                if cid not in existing_ids and str(int(cid, 16) % (2**63)) not in existing_ids:
+                    new_chunks.append(c)
+            
+            if not new_chunks:
+                console.print(f"  [dim]✓ {source_name}: All {len(chunks)} chunks already indexed[/dim]")
+                return
+
+            console.print(f"  [dim]  {len(new_chunks)} / {len(chunks)} are new. Tagging and embedding...[/dim]")
+            new_chunks = tag_chunks(new_chunks)
             try:
-                chunks = embed_chunks(chunks)
-                added = add_documents(chunks)
-                console.print(f"  [green]✓ {source_name} batch complete:[/green] {added} chunks stored")
+                new_chunks = embed_chunks(new_chunks)
+                added = add_documents(new_chunks)
+                console.print(f"  [green]✓ {source_name} batch complete:[/green] {added} new chunks stored")
             except Exception as e:
                 console.print(f"  [red]✖ {source_name} batch failed:[/red] {e}")
         
@@ -51,14 +75,18 @@ def run_ingestion() -> None:
 
     # 1. PubMed
     try:
-        pubmed_docs = fetch_abstracts(max_results=200)
+        limit = 20 if fast else 200
+        pubmed_docs = fetch_abstracts(max_results=limit)
         _process_batch("PubMed", pubmed_docs)
     except Exception as exc:
         console.print(f"  [yellow]⚠ PubMed failed:[/yellow] {exc}")
 
     # 2. WHO PDFs
     try:
-        download_who_pdfs()
+        # Skip PDFs in fast mode if they already exist
+        pdf_dir = Path("data/raw/who_reports")
+        if not fast or not any(pdf_dir.glob("*.pdf")):
+            download_who_pdfs()
         pdf_docs = parse_all_pdfs()
         _process_batch("WHO_PDFs", pdf_docs)
     except Exception as exc:
@@ -67,28 +95,24 @@ def run_ingestion() -> None:
     # 3. News RSS
     try:
         news_docs = scrape_all_feeds()
+        if fast:
+            news_docs = news_docs[:30] # Cap news in fast mode
         _process_batch("News_RSS", news_docs)
     except Exception as exc:
         console.print(f"  [yellow]⚠ News scraping failed:[/yellow] {exc}")
 
     # 4. Wikipedia
     try:
-        wiki_docs = load_wikipedia_articles()
-        _process_batch("Wikipedia", wiki_docs)
+        if not fast:
+            wiki_docs = load_wikipedia_articles()
+            _process_batch("Wikipedia", wiki_docs)
     except Exception as exc:
         console.print(f"  [yellow]⚠ Wikipedia failed:[/yellow] {exc}")
 
-    # Summary table
-    stats = get_stats()
-    table = Table(title="Vector Store Stats", show_header=True)
-    table.add_column("Metric", style="cyan")
-    table.add_column("Value", style="green")
-    table.add_row("Total chunks in DB", str(stats["total_chunks"]))
-    table.add_row("Collection", stats["collection_name"])
-    table.add_row("Status", stats["status"])
-    console.print(table)
-    console.rule("[bold green]Ingestion complete — ready to launch app")
-
 
 if __name__ == "__main__":
-    run_ingestion()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--fast", action="store_true", help="Fast ingestion mode")
+    args = parser.parse_args()
+    run_ingestion(fast=args.fast)

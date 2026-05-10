@@ -156,10 +156,8 @@ def render_journalist_tools() -> None:
     for col, (label, url, bg, fg) in zip(cols, share_links):
         with col:
             st.markdown(
-                f'<a href="{url}" target="_blank" rel="noopener" style="display:block;text-align:center;'
-                f'background:{bg};color:{fg};border-radius:8px;padding:0.45rem 0.3rem;font-size:0.72rem;'
-                f'font-weight:700;text-decoration:none;border:1px solid rgba(255,255,255,0.1);">'
-                f'{label}</a>',
+                f'<a href="{url}" target="_blank" rel="noopener" class="share-button" style="'
+                f'background:{bg}; color:{fg};">{label}</a>',
                 unsafe_allow_html=True,
             )
 

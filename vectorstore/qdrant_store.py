@@ -47,6 +47,29 @@ def _ensure_collection(client: QdrantClient) -> None:
         logging.info("Qdrant: created collection %s with Named Vectors", COLLECTION_NAME)
 
 
+def get_existing_ids() -> set[str]:
+    client = _client()
+    _ensure_collection(client)
+    # Qdrant scroll to get all IDs (simplified for large collections, but works here)
+    ids = set()
+    offset = None
+    while True:
+        points, next_offset = client.scroll(
+            collection_name=COLLECTION_NAME,
+            with_payload=False,
+            with_vectors=False,
+            limit=10000,
+            offset=offset,
+        )
+        for p in points:
+            # Convert back to hex-like string if needed, or keep as int
+            ids.add(str(p.id))
+        if not next_offset:
+            break
+        offset = next_offset
+    return ids
+
+
 def add_documents(chunks: list[dict[str, Any]]) -> int:
     if not chunks:
         return 0

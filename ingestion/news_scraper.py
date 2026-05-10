@@ -65,15 +65,21 @@ def _is_2026_relevant(text: str) -> bool:
     return True
 
 
-def scrape_all_feeds() -> list[dict[str, Any]]:
+def scrape_all_feeds(fast: bool = False) -> list[dict[str, Any]]:
     seen_urls: set[str] = set()
     articles: list[dict[str, Any]] = []
 
-    for feed_config in RSS_FEEDS:
+    # Limit feeds in fast mode
+    feeds = RSS_FEEDS[:5] if fast else RSS_FEEDS
+
+    for feed_config in feeds:
         try:
-            articles.extend(_parse_feed(feed_config, seen_urls))
+            articles.extend(_parse_feed(feed_config, seen_urls, fast=fast))
         except Exception:
             continue
+
+    if fast:
+        return articles # Skip heavy APIs in fast mode
 
     # EuropePMC — research papers on hantavirus 2026
     try:
@@ -253,11 +259,14 @@ def _scrape_gnews(api_key: str, seen_urls: set[str]) -> list[dict[str, Any]]:
     return results
 
 
-def _parse_feed(config: dict[str, str], seen_urls: set[str]) -> list[dict[str, Any]]:
+def _parse_feed(config: dict[str, str], seen_urls: set[str], fast: bool = False) -> list[dict[str, Any]]:
     feed = feedparser.parse(config["url"])
     results: list[dict[str, Any]] = []
 
-    for entry in feed.entries:
+    # Limit entries in fast mode
+    entries = feed.entries[:10] if fast else feed.entries
+
+    for entry in entries:
         title   = entry.get("title", "")
         url     = entry.get("link", "")
         summary = entry.get("summary", "")
@@ -269,7 +278,13 @@ def _parse_feed(config: dict[str, str], seen_urls: set[str]) -> list[dict[str, A
             continue
 
         seen_urls.add(url)
-        full_text = _fetch_article_text(url) or summary
+        
+        # Skip full text fetch in fast mode
+        full_text = None
+        if not fast:
+            full_text = _fetch_article_text(url)
+        
+        full_text = full_text or summary
 
         results.append({
             "title":    title,

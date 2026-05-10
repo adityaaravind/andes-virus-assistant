@@ -43,6 +43,11 @@ def get_collection(client=None):
     )
 
 
+def get_existing_ids() -> set[str]:
+    collection = get_collection()
+    return set(collection.get()["ids"])
+
+
 def add_documents(chunks: list[dict[str, Any]]) -> int:
     collection = get_collection()
     existing_ids = set(collection.get()["ids"])

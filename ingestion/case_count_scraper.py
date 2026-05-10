@@ -17,32 +17,43 @@ LIVE_FILE = Path("data/outbreak_live.json")
 
 OUTBREAK_KWS = {"hantavirus", "hondius", "andes virus", "andes orthohantavirus", "hanta"}
 
+# Map of words to integers to handle narrative-style reporting
+WORD_TO_NUM = {
+    "zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, 
+    "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
+    "eleven": 11, "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15
+}
+
 CASE_PATTERNS = [
-    r"(\d+)\s+confirmed\s+case",
-    r"confirmed\s+(\d+)\s+case",
-    r"(\d+)\s+total\s+case",
-    r"total\s+of\s+(\d+)\s+case",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+confirmed\s+case",
+    r"confirmed\s+(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+case",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+(?:of the\s+\d+|total)\s+cases?\s+(?:have\s+been\s+)?confirmed",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+total\s+case",
+    r"total\s+of\s+(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+case",
 ]
 
 SUSPECTED_PATTERNS = [
-    r"(\d+)\s+suspected\s+case",
-    r"suspected\s+(\d+)\s+case",
-    r"(\d+)\s+(?:passengers?|crew|people).{0,30}(?:infected|positive|ill|sick)",
-    r"(?:infected|positive|ill|sick).{0,30}(\d+)\s+(?:passengers?|crew|people)",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+suspected\s+case",
+    r"suspected\s+(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+case",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+cases?\s+(?:have\s+been\s+)?reported",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+total\s+cases?",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+(?:passengers?|crew|people).{0,30}(?:infected|positive|ill|sick)",
+    r"(?:infected|positive|ill|sick).{0,30}(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+(?:passengers?|crew|people)",
 ]
 
 DEATH_PATTERNS = [
-    r"(\d+)\s+death",
-    r"(\d+)\s+fatal(?:it)?",
-    r"(\d+)\s+(?:have\s+)?died",
-    r"killed\s+(\d+)",
-    r"(\d+)\s+killed",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+death",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+fatal(?:it)?",
+    r"including\s+(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+death",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+(?:have\s+)?died",
+    r"killed\s+(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+killed",
 ]
 
 COUNTRY_PATTERNS = [
-    r"(\d+)\s+countr",
-    r"(\d+)\s+nationalit",
-    r"from\s+(\d+)\s+(?:different\s+)?countr",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+countr",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+nationalit",
+    r"from\s+(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+(?:different\s+)?countr",
 ]
 
 
@@ -51,17 +62,25 @@ def _nums(text: str, patterns: list[str], lo: int, hi: int) -> list[int]:
     for p in patterns:
         for m in re.finditer(p, text, re.IGNORECASE):
             # Check for percentage symbol immediately after the number to avoid CFR confusion
-            start, end = m.span(1)
-            if end < len(text) and text[end] == "%":
-                continue
-            
-            for g in m.groups():
-                try:
+            try:
+                # Groups might vary based on pattern, but we generally want the first capture
+                g = m.group(1)
+                
+                # Check for percentage suffix immediately following the match
+                match_end = m.end(1)
+                if match_end < len(text) and text[match_end] == "%":
+                    continue
+                
+                # Convert word to integer if necessary
+                if g.lower() in WORD_TO_NUM:
+                    n = WORD_TO_NUM[g.lower()]
+                else:
                     n = int(g)
-                    if lo <= n <= hi:
-                        out.append(n)
-                except (ValueError, TypeError):
-                    pass
+                
+                if lo <= n <= hi:
+                    out.append(n)
+            except (ValueError, TypeError, IndexError):
+                pass
     return out
 
 
@@ -84,16 +103,24 @@ def extract_and_save(articles: list[dict[str, Any]]) -> dict[str, Any]:
         logging.info("No high-credibility articles found for case count extraction.")
         return {}
 
-    all_cases, all_deaths, all_countries = [], [], []
+    all_cases, all_suspected, all_deaths, all_countries = [], [], [], []
     for art in trusted:
         text = (art.get("title", "") + " " + art.get("summary", "")).lower()
-        all_cases    += _nums(text, CASE_PATTERNS, 1, 500)
-        all_deaths   += _nums(text, DEATH_PATTERNS, 0, 200)
-        all_countries += _nums(text, COUNTRY_PATTERNS, 1, 50)
+        extracted_cases = _nums(text, CASE_PATTERNS, 1, 500)
+        extracted_suspected = _nums(text, SUSPECTED_PATTERNS, 1, 500)
+        extracted_deaths = _nums(text, DEATH_PATTERNS, 0, 200)
+        extracted_countries = _nums(text, COUNTRY_PATTERNS, 1, 50)
+        
+        all_cases     += extracted_cases
+        all_suspected += extracted_suspected
+        all_deaths    += extracted_deaths
+        all_countries += extracted_countries
 
     extracted: dict[str, Any] = {}
     if all_cases:
         extracted["confirmed_cases"] = max(all_cases)
+    if all_suspected:
+        extracted["suspected_cases"] = max(all_suspected)
     if all_deaths:
         extracted["deaths"] = max(all_deaths)
     if all_countries:
@@ -124,11 +151,5 @@ def extract_and_save(articles: list[dict[str, Any]]) -> dict[str, Any]:
         LIVE_FILE.parent.mkdir(parents=True, exist_ok=True)
         LIVE_FILE.write_text(json.dumps(merged, indent=2))
         logging.info("Case count live update: %s", {k: merged[k] for k in ("confirmed_cases","deaths","nationalities") if k in merged})
-
-    return extracted if changed else {}
-nt live update: %s", {k: merged[k] for k in ("confirmed_cases","deaths","nationalities") if k in merged})
-
-    return extracted if changed else {}
-nationalities") if k in merged})
 
     return extracted if changed else {}
