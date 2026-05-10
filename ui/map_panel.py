@@ -82,9 +82,21 @@ def render_map_panel() -> None:
             @keyframes blinker { 50% { opacity: 0.2; } }
 
             .ring-marker { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #ffffff; position: relative; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); }
-            .vessel-ring { border-color: #22c55e !important; box-shadow: 0 0 25px #22c55e; animation: pulse 1.5s infinite; }
+            .vessel-ring { border-color: #22c55e !important; box-shadow: 0 0 25px #22c55e, inset 0 0 15px #22c55e; animation: pulse 1.5s infinite; }
             .badge { position: absolute; top: -9px; right: -9px; background: #ffffff; color: #000; border-radius: 50%; width: 15px; height: 15px; font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center; border: 1px solid #000; }
             @keyframes pulse { 0% { transform: scale(0.6); opacity: 1; } 100% { transform: scale(2.2); opacity: 0; } }
+
+            /* POPUP STYLING - FIX WHITE BACKGROUND */
+            .leaflet-popup-content-wrapper {
+                background: rgba(13, 27, 42, 0.98) !important;
+                color: #fff !important;
+                border: 1px solid rgba(0, 180, 216, 0.4) !important;
+                border-radius: 8px !important;
+                box-shadow: 0 0 25px rgba(0,0,0,0.8) !important;
+                font-family: monospace !important;
+            }
+            .leaflet-popup-tip { background: #0d1b2a !important; }
+            .leaflet-popup-content { margin: 12px !important; line-height: 1.4 !important; }
         </style>
     </head>
     <body>
@@ -148,8 +160,26 @@ def render_map_panel() -> None:
                     iconSize: [22, 22], iconAnchor: [11, 11]
                 });
                 
-                L.marker([h.lat, h.lng], { icon: icon }).addTo(map)
-                 .bindPopup(`<div style="font-family:monospace; color:#fff;"><b>${h.name}</b><br/>Relation: ${h.relation}<br/>Fear: __FEAR__/5</div>`);
+                const marker = L.marker([h.lat, h.lng], { icon: icon }).addTo(map);
+                
+                const popupContent = `
+                    <div style="min-width:200px; font-family:monospace;">
+                        <b style="color:${h.color}; font-size:12px; letter-spacing:1px;">${h.name}</b><br/>
+                        <div style="color:#94a3b8; font-size:10px; margin:5px 0;">${h.relation}</div>
+                        <div style="height:1px; background:#333; margin:8px 0;"></div>
+                        <div style="font-size:10px; color:#cbd5e1; line-height:1.3;">"${h.intel}"</div>
+                        <div style="margin-top:10px; display:flex; justify-content:space-between;">
+                            <span style="color:#64748b; font-size:9px;">CASES: <b style="color:#fff;">${h.cases}</b></span>
+                            <span style="color:#64748b; font-size:9px;">FEAR: <b style="color:#fbbf24;">__FEAR__/5</b></span>
+                        </div>
+                    </div>
+                `;
+
+                marker.bindPopup(popupContent, { closeButton: false, offset: [0, -10] });
+
+                // TRIGGER ON HOVER
+                marker.on('mouseover', function(e) { this.openPopup(); });
+                marker.on('mouseout', function(e) { this.closePopup(); });
 
                 if (!isShip) {
                     L.polyline([[h.lat, h.lng], shipPos], { color: h.color, weight: 1, dashArray: '5, 10', opacity: 0.3 }).addTo(map);
