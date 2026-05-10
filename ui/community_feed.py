@@ -36,12 +36,7 @@ def render_community_feed() -> None:
         sorted_citations = sorted(citations.items(), key=lambda x: x[1], reverse=True)
         tags_html = "<div style='display:flex; flex-wrap:wrap; gap:8px; margin-bottom:1.5rem;'>"
         for title, count in sorted_citations[:4]:
-            tags_html += f"""
-            <div style="background:rgba(167, 139, 250, 0.1); border:1px solid rgba(167, 139, 250, 0.4); 
-            padding:3px 10px; border-radius:15px; font-size:0.65rem; color:#a78bfa; font-weight:700;">
-                <span style="opacity:0.6;">#</span> {title[:35]}... <span style="margin-left:5px; opacity:0.8;">({count})</span>
-            </div>
-            """
+            tags_html += f"""<div style="background:rgba(167, 139, 250, 0.1); border:1px solid rgba(167, 139, 250, 0.4); padding:3px 10px; border-radius:15px; font-size:0.65rem; color:#a78bfa; font-weight:700;"><span style="opacity:0.6;">#</span> {title[:35]}... <span style="margin-left:5px; opacity:0.8;">({count})</span></div>"""
         tags_html += "</div>"
         st.markdown(tags_html, unsafe_allow_html=True)
 
@@ -56,13 +51,7 @@ def render_community_feed() -> None:
         if item['type'] == 'citation':
             content = f"verified {content.split(':')[-1].strip()[:50]}..."
             
-        log_html += f"""
-        <div style="font-family: monospace; font-size: 0.72rem; line-height: 1.2;">
-            <span style="color:#475569; font-weight:700;">[{ts}]</span> 
-            <span style="color:{color}; font-weight:900;">{item['user_id']}</span>
-            <span style="color:#94a3b8;"> {content}</span>
-        </div>
-        """
+        log_html += f"""<div style="font-family: monospace; font-size: 0.72rem; line-height: 1.2;"><span style="color:#475569; font-weight:700;">[{ts}]</span> <span style="color:{color}; font-weight:900;">{item['user_id']}</span><span style="color:#94a3b8;"> {content}</span></div>"""
     log_html += "</div>"
     st.markdown(log_html, unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
