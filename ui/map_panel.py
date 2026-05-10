@@ -30,6 +30,14 @@ HOTSPOT_DATA = [
     {"lat": -26.2, "lng": 28.04,  "cases": 2, "name": "ZA_CLUSTER", "type": "local"},
 ]
 
+# Historical Ship Path for the glowing dotted line
+SHIP_PATH = [
+    {"startLat": -54.8, "startLng": -68.3, "endLat": -54.3, "endLng": -36.5, "color": ["#ff4d4d", "#ff4d4d"]}, # Ushuaia to S.Georgia
+    {"startLat": -54.3, "startLng": -36.5, "endLat": -37.1, "endLng": -12.3, "color": ["#ff4d4d", "#ff4d4d"]}, # S.Georgia to Tristan
+    {"startLat": -37.1, "startLng": -12.3, "endLat": -15.9, "endLng": -5.7,  "color": ["#ff4d4d", "#ff4d4d"]}, # Tristan to St. Helena
+    {"startLat": -15.9, "startLng": -5.7,  "endLat": 14.93, "endLng": -23.51, "color": ["#ff4d4d", "#fbbf24"]}, # St. Helena to current
+]
+
 GLOBE_MODES = {
     "Daylight Intelligence": {
         "img": "//unpkg.com/three-globe/example/img/earth-blue-marble.jpg",
@@ -120,6 +128,8 @@ def render_map_panel() -> None:
       <div id="globeViz"></div>
       <script>
         const hotspots = __HOTSPOTS__;
+        const shipPath = __SHIP_PATH__;
+
         const world = Globe()
           (document.getElementById('globeViz'))
           .globeImageUrl('__IMG__')
@@ -137,7 +147,15 @@ def render_map_panel() -> None:
           })
           .polygonStrokeColor(() => 'rgba(255, 255, 255, 0.1)')
 
-          // 2. ROBUST HTML INDICATORS
+          // 2. GLOWING DOTTED TRANSIT LINE (Ship Timeline)
+          .arcsData(shipPath)
+          .arcColor('color')
+          .arcDashLength(0.4)
+          .arcDashGap(2)
+          .arcDashAnimateTime(2000)
+          .arcStroke(1.5)
+
+          // 3. ROBUST HTML INDICATORS
           .htmlElementsData(hotspots)
           .htmlElement(d => {
             const el = document.createElement('div');
@@ -191,6 +209,7 @@ def render_map_panel() -> None:
 
     # Manual interpolation
     globe_html = globe_template.replace("__HOTSPOTS__", json.dumps(HOTSPOT_DATA))
+    globe_html = globe_html.replace("__SHIP_PATH__", json.dumps(SHIP_PATH))
     globe_html = globe_html.replace("__GEOJSON__", json.dumps(geojson))
     globe_html = globe_html.replace("__STATUS__", state.get('ship_status', 'Transit').upper())
     globe_html = globe_html.replace("__IMG__", template["img"])
