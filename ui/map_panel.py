@@ -179,31 +179,31 @@ def render_map_panel() -> None:
           
           // PROFESSIONAL HOVER TOOLTIP
           .labelTooltip(d => `
-            <div style="background: rgba(13, 27, 42, 0.95); border: 1px solid ${{d.color}}; padding: 12px; border-radius: 8px; font-family: monospace; min-width: 250px; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
+            <div style="background: rgba(13, 27, 42, 0.95); border: 1px solid ${d.color}; padding: 12px; border-radius: 8px; font-family: monospace; min-width: 250px; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <b style="color:${{d.color}}; font-size:12px;">\${d.name}</b>
+                    <b style="color:${d.color}; font-size:12px;">${d.name}</b>
                     <span style="color:#22c55e; font-size:10px; font-weight:800;">LIVE_LOCK</span>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom:10px;">
                     <div style="background:rgba(255,255,255,0.03); padding:5px; border-radius:4px;">
                         <div style="color:#64748b; font-size:8px;">CASES</div>
-                        <div style="color:#ffffff; font-size:14px; font-weight:900;">\${d.cases}</div>
+                        <div style="color:#ffffff; font-size:14px; font-weight:900;">${d.cases}</div>
                     </div>
                     <div style="background:rgba(255,255,255,0.03); padding:5px; border-radius:4px;">
                         <div style="color:#64748b; font-size:8px;">FATAL</div>
-                        <div style="color:#ff4d4d; font-size:14px; font-weight:900;">\${d.deaths}</div>
+                        <div style="color:#ff4d4d; font-size:14px; font-weight:900;">${d.deaths}</div>
                     </div>
                 </div>
                 <div style="margin-bottom:8px;">
                     <div style="color:#64748b; font-size:8px;">COMMUNITY INTEL</div>
-                    <div style="color:#48cae4; font-size:10px;">Sentiment: <b>\${d.sentiment}</b> | Fear Index: <b>{fear:.2f}/5</b></div>
+                    <div style="color:#48cae4; font-size:10px;">Sentiment: <b>${d.sentiment}</b> | Fear Index: <b>{fear:.2f}/5</b></div>
                 </div>
                 <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:8px;">
-                    <div style="color:#fbbf24; font-size:9px; font-weight:900; margin-bottom:2px;">LOCAL SOURCE: \${d.channel.toUpperCase()}</div>
-                    <div style="color:#94a3b8; font-size:9px; line-height:1.2;">"\${d.article}"</div>
+                    <div style="color:#fbbf24; font-size:9px; font-weight:900; margin-bottom:2px;">LOCAL SOURCE: ${d.channel.toUpperCase()}</div>
+                    <div style="color:#94a3b8; font-size:9px; line-height:1.2;">"${d.article}"</div>
                 </div>
             </div>
-          `);
+          `.replace(/\\$/g, '$'));
 
         world.controls().autoRotate = true;
         world.controls().autoRotateSpeed = 0.5;
