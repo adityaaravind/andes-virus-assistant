@@ -58,7 +58,7 @@ def build_cinematic_map() -> go.Figure:
     fig.add_trace(go.Choropleth(
         locations=codes,
         z=cases,
-        colorscale=[[0, "#08111e"], [1, "#00f5ff44"]],
+        colorscale=[[0, "#08111e"], [1, "#0077b6"]],
         showscale=False,
         marker=dict(line=dict(color="#00b4d8", width=1)),
         hoverinfo="skip",
