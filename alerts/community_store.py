@@ -12,23 +12,23 @@ INSIGHTS_FEED_KEY = "community_insights_feed"
 MAX_HISTORY_POINTS = 168  # 1 week if hourly
 MAX_FEED_ITEMS = 50
 
-def log_sentiment_snapshot(score: float) -> None:
-    """Record a point-in-time sentiment score for trend analysis."""
+def log_sentiment_snapshot(user_score: float, web_score: float) -> None:
+    """Record dual-stream sentiment scores for trend analysis."""
     history = get_persisted_value(SENTIMENT_HISTORY_KEY, [])
     
-    # Only snapshot if last one is > 30 mins old to avoid clutter
     now = datetime.utcnow()
     if history:
         try:
             last_ts = datetime.fromisoformat(history[-1]["timestamp"])
-            if now - last_ts < timedelta(minutes=30):
+            if now - last_ts < timedelta(minutes=15): # Log more frequently for 'real-time' feel
                 return
         except (ValueError, KeyError, IndexError):
             pass
 
     history.append({
         "timestamp": now.isoformat(),
-        "score": round(score, 2)
+        "user_score": round(user_score, 2),
+        "web_score": round(web_score, 2)
     })
     
     # Keep rolling window
@@ -59,9 +59,9 @@ def get_community_data() -> dict[str, Any]:
     if not history:
         now = datetime.utcnow()
         history = [
-            {"timestamp": (now - timedelta(days=2)).isoformat(), "score": 2.1},
-            {"timestamp": (now - timedelta(days=1)).isoformat(), "score": 2.4},
-            {"timestamp": now.isoformat(), "score": 2.2},
+            {"timestamp": (now - timedelta(days=2)).isoformat(), "user_score": 1.8, "web_score": 2.2},
+            {"timestamp": (now - timedelta(days=1)).isoformat(), "user_score": 2.1, "web_score": 2.5},
+            {"timestamp": now.isoformat(), "user_score": 2.0, "web_score": 2.4},
         ]
 
     if not feed:

@@ -135,38 +135,63 @@ def _build_fear_gauge(avg_fear: float, color: str) -> go.Figure:
 
 @st.cache_data(ttl=60, show_spinner=False)
 def _build_sentiment_trend(history: list[dict[str, Any]]) -> go.Figure:
-    """Sparkline area chart for sentiment trends."""
+    """Advanced dual-stream sentiment tracker with glowing neon aesthetics."""
     if not history:
         return go.Figure()
         
     dates = [datetime.fromisoformat(p["timestamp"]) for p in history]
-    scores = [p["score"] for p in history]
     
-    # Fill colors based on level
-    colors = []
-    for s in scores:
-        if s < 2: colors.append("#22c55e")
-        elif s < 3: colors.append("#f59e0b")
-        else: colors.append("#ef4444")
+    # Handle both old single-score data and new dual-score data
+    user_scores = [p.get("user_score", p.get("score", 2.5)) for p in history]
+    web_scores = [p.get("web_score", p.get("score", 2.5)) for p in history]
 
     fig = go.Figure()
+
+    # 1. USER CONSENSUS (Glowing Cyan)
     fig.add_trace(go.Scatter(
-        x=dates, y=scores,
+        x=dates, y=user_scores,
+        name="User Consensus",
         mode="lines",
-        line=dict(color="#00f5ff", width=3, shape="spline"),
+        line=dict(color="#00f5ff", width=4, shape="spline"),
         fill="tozeroy",
-        fillcolor="rgba(0,245,255,0.15)",
-        hovertemplate="Score: %{y:.2f}<br>%{x|%b %d, %H:%M}<extra></extra>"
+        fillcolor="rgba(0,245,255,0.05)",
+        hovertemplate="User: %{y:.2f}<extra></extra>"
+    ))
+
+    # 2. WEB SENTIMENT (Neon Purple)
+    fig.add_trace(go.Scatter(
+        x=dates, y=web_scores,
+        name="Web Sentiment",
+        mode="lines",
+        line=dict(color="#a78bfa", width=2, shape="spline", dash="dot"),
+        hovertemplate="Web: %{y:.2f}<extra></extra>"
     ))
     
+    # 3. LIVE INDICATOR (Green dot at current point)
+    if dates:
+        fig.add_trace(go.Scatter(
+            x=[dates[-1]], y=[user_scores[-1]],
+            mode="markers+text",
+            marker=dict(color="#22c55e", size=10, line=dict(color="#ffffff", width=2)),
+            text=[" LIVE"],
+            textposition="middle right",
+            textfont=dict(color="#22c55e", size=10, family="monospace"),
+            showlegend=False
+        ))
+
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        margin=dict(l=10, r=10, t=10, b=10),
-        height=100,
-        xaxis=dict(visible=False),
-        yaxis=dict(visible=False, range=[0.5, 5.5]),
+        margin=dict(l=10, r=40, t=10, b=10),
+        height=140,
+        xaxis=dict(visible=False, showgrid=False),
+        yaxis=dict(
+            visible=True, range=[0.5, 5.5], showgrid=True, gridcolor="rgba(255,255,255,0.05)",
+            tickmode="array", tickvals=[1, 3, 5], ticktext=["CALM", "WARN", "CRIT"],
+            tickfont=dict(color="#475569", size=8)
+        ),
         showlegend=False,
+        hovermode="x unified"
     )
     return fig
 
@@ -175,8 +200,8 @@ def render_fear_index() -> None:
     avg_fear, vote_count, label, desc, color, web_sentiment = _calculate_fear_average()
     live_fear = round(avg_fear, 2)
     
-    # PHASE 2: Log current state for trend analysis
-    log_sentiment_snapshot(live_fear)
+    # PHASE 2: Log current dual-stream state
+    log_sentiment_snapshot(avg_fear, web_sentiment)
     community = get_community_data()
 
     if "user_id" not in st.session_state:
