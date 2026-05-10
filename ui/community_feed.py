@@ -54,4 +54,13 @@ def render_community_feed() -> None:
         log_html += f"""<div style="font-family: monospace; font-size: 0.72rem; line-height: 1.2;"><span style="color:#475569; font-weight:700;">[{ts}]</span> <span style="color:{color}; font-weight:900;">{item['user_id']}</span><span style="color:#94a3b8;"> {content}</span></div>"""
     log_html += "</div>"
     st.markdown(log_html, unsafe_allow_html=True)
+    
+    # 3. Sentiment Sparkline (Historical Trend)
+    history = data.get("history", [])
+    if history:
+        st.markdown("<br><p style='color:#64748b; font-size:0.55rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:5px;'>Community Sentiment Velocity (7D)</p>", unsafe_allow_html=True)
+        from ui.fear_index import _build_sentiment_trend
+        fig_trend = _build_sentiment_trend(history)
+        st.plotly_chart(fig_trend, use_container_width=True, config={"displayModeBar": False})
+
     st.markdown("<br>", unsafe_allow_html=True)
