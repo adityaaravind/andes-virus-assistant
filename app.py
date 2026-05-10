@@ -431,15 +431,18 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
         )
 
 def main() -> None:
+    import gc
+    gc.collect() # Immediate cleanup on reload
+    
     with streamlit_analytics.track(load_from_json="data/analytics.json", save_to_json="data/analytics.json"):
         if "citation_cards" not in st.session_state:
             st.session_state.citation_cards = []
 
         _render_sidebar(st.session_state.citation_cards)
 
-        # Auto-refresh page every 15 mins so stats and headlines stay live
+        # REDUCED REFRESH: Every 30 mins instead of 15 to save RAM
         from streamlit_autorefresh import st_autorefresh
-        st_autorefresh(interval=15 * 60 * 1000, key="stats_refresh")
+        st_autorefresh(interval=30 * 60 * 1000, key="stats_refresh")
 
         # ── Mutation Observer for Forced Gauge Jitter ──
         st.markdown(

@@ -37,7 +37,9 @@ def _embed_texts(texts: list[str]) -> list[list[float]]:
     api_key = os.getenv("OPENAI_API_KEY", "")
     if api_key and api_key != "your_key_here":
         return _openai_embed(texts, api_key)
-    return _huggingface_embed(texts)
+    # FORCE DISABLE local models on Streamlit Cloud to save RAM
+    print(f"CRITICAL: OpenAI key missing. Local models disabled to prevent OOM crash.")
+    return [[0.0] * 1536 for _ in texts]
 
 
 def _openai_embed(texts: list[str], api_key: str) -> list[list[float]]:
