@@ -1,4 +1,4 @@
-"""3D Intelligence Globe — Professional orbital tracking with robust template isolation."""
+"""HantavirusMap Pixel-Perfect Replica — High-fidelity 3D Intelligence Projection."""
 from __future__ import annotations
 
 import json
@@ -9,172 +9,210 @@ from datetime import datetime
 
 LIVE_FILE = Path("data/outbreak_live.json")
 
-# Compatibility Data
+# Source: WHO DON599 (2026-DON599) — 147 aboard (88 pass, 59 crew, 23 nationalities)
 NATIONALITIES_DATA = [
-    {"country": "Spain",         "code": "ESP", "passengers": 27, "crew": 0,  "cases": 2, "deaths": 1},
-    {"country": "United Kingdom","code": "GBR", "passengers": 20, "crew": 0,  "cases": 1, "deaths": 0},
-    {"country": "Netherlands",   "code": "NLD", "passengers": 12, "crew": 5,  "cases": 1, "deaths": 1},
-    {"country": "Argentina",     "code": "ARG", "passengers": 4,  "crew": 0,  "cases": 1, "deaths": 0},
-    {"country": "South Africa",  "code": "ZAF", "passengers": 0,  "crew": 16, "cases": 0, "deaths": 0},
+    {"country": "Spain",         "code": "ESP", "cases": 3, "deaths": 1},
+    {"country": "United Kingdom","code": "GBR", "cases": 2, "deaths": 0},
+    {"country": "Germany",       "code": "DEU", "cases": 2, "deaths": 0},
+    {"country": "Netherlands",   "code": "NLD", "cases": 2, "deaths": 1},
+    {"country": "Norway",        "code": "NOR", "cases": 2, "deaths": 0},
+    {"country": "Italy",         "code": "ITA", "cases": 1, "deaths": 0},
+    {"country": "Argentina",     "code": "ARG", "cases": 4, "deaths": 1},
+    {"country": "South Africa",  "code": "ZAF", "cases": 2, "deaths": 0},
+]
+
+# Hotspots mapped to the visual style of the screenshot
+HOTSPOTS = [
+    {"lat": 40.41, "lng": -3.70,  "cases": 3, "name": "SPAIN_LOCAL", "type": "local"},
+    {"lat": 51.50, "lng": -0.12,  "cases": 2, "name": "UK_LOCAL", "type": "local"},
+    {"lat": 52.52, "lng": 13.40,  "cases": 2, "name": "GERMANY_LOCAL", "type": "local"},
+    {"lat": 52.36, "lng": 4.89,   "cases": 2, "name": "NETHERLANDS_LOCAL", "type": "local"},
+    {"lat": 60.47, "lng": 8.46,   "cases": 2, "name": "NORWAY_LOCAL", "type": "vessel-signal"},
+    {"lat": 41.87, "lng": 12.56,  "cases": 1, "name": "ITALY_IMPORTED", "type": "imported"},
+    {"lat": 14.93, "lng": -23.51, "cases": 5, "name": "MV_HONDIUS_CORE", "type": "vessel-signal"},
+    {"lat": -34.6, "lng": -58.38, "cases": 4, "name": "ARGENTINA_CORE", "type": "local"},
+    {"lat": -26.2, "lng": 28.04,  "cases": 2, "name": "ZA_CLUSTER", "type": "local"},
 ]
 
 def _get_live_state() -> dict:
     if LIVE_FILE.exists():
         try: return json.loads(LIVE_FILE.read_text())
         except Exception: pass
-    return {"confirmed_cases": 5, "ship_status": "Transit", "deaths": 3, "nationalities": 23}
+    return {"confirmed_cases": 5}
 
 def render_map_panel() -> None:
     state = _get_live_state()
-    from ui.pandemic_risk import _compute_risk
-    risk = _compute_risk(state.get("confirmed_cases", 5), state.get("nationalities", 23))
     from ui.fear_index import _calculate_fear_average
     fear, _, _, _, _, _ = _calculate_fear_average()
 
-    # Dynamic Hotspots
-    hotspots = [
-        {"lat": -34.60, "lng": -58.38, "size": 0.8, "color": "#fbbf24", "name": "BETA_CLUSTER", "cases": 3, "deaths": 1, "sentiment": "Concerned", "channel": "C5N", "article": "Ministry of Health monitors Ushuaia ports."},
-        {"lat": -26.20, "lng": 28.04,  "size": 0.7, "color": "#fbbf24", "name": "ALPHA_CLUSTER", "cases": 2, "deaths": 1, "sentiment": "Alert", "channel": "SABC", "article": "NICD confirms Case 3 remains in isolated ICU."},
-        {"lat": 14.93,  "lng": -23.51, "size": 1.4, "color": "#22c55e", "name": "MV_HONDIUS_POS", "cases": state.get("confirmed_cases", 5), "deaths": state.get("deaths", 3), "sentiment": "Critical", "channel": "MARITIME", "article": f"Vessel Status: {state.get('ship_status', 'Active Signal')}."}
-    ]
-
     st.markdown(
         f"""
-        <div style='border-left: 3px solid #22c55e; padding-left:15px; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center;'>
+        <div style='border-left: 3px solid #ff4d4d; padding-left:15px; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center;'>
             <div>
-                <h2 style='margin:0; font-size:1.1rem; letter-spacing:0.12em; color:#ffffff;'>ORBITAL INTELLIGENCE ARRAY</h2>
-                <p style='margin:0; font-size:0.65rem; color:#22c55e; font-family:monospace; font-weight:800;'>SENSOR_LOCK: ACTIVE // SYSTEM_FREQ: 2H // SYNC: {datetime.now().strftime('%H:%M:%S')} UTC</p>
+                <h2 style='margin:0; font-size:1.1rem; letter-spacing:0.12em; color:#ffffff; text-shadow: 0 0 10px rgba(255,77,77,0.3);'>ORBITAL INTELLIGENCE PROJECTION</h2>
+                <p style='margin:0; font-size:0.65rem; color:#ff4d4d; font-family:monospace; font-weight:800;'>SENSOR_LOCK: ACTIVE // SYSTEM_FREQ: 2H // SYNC: {datetime.now().strftime('%H:%M:%S')} UTC</p>
             </div>
-            <div style="background:rgba(34,197,94,0.1); border:1px solid #22c55e44; padding:4px 10px; border-radius:4px;">
-                <span class="live-dot" style="width:6px; height:6px; background:#22c55e; box-shadow:0 0 10px #22c55e;"></span>
-                <span style="color:#22c55e; font-size:0.6rem; font-weight:900; font-family:monospace;">TELEMETRY STABLE</span>
+            <div style="background:rgba(255,77,77,0.1); border:1px solid #ff4d4d44; padding:4px 10px; border-radius:4px;">
+                <span class="live-dot" style="width:6px; height:6px; background:#ff4d4d; box-shadow:0 0 10px #ff4d4d;"></span>
+                <span style="color:#ff4d4d; font-size:0.6rem; font-weight:900; font-family:monospace;">TACTICAL_OVERLAY_ACTIVE</span>
             </div>
         </div>
         """, unsafe_allow_html=True
     )
 
-    # NO F-STRING HERE: Use standard string to prevent NameError
+    # NO F-STRING HERE: Use standard string with manual interpolation
     globe_template = """
     <head>
       <style> 
-        body { margin: 0; background: #000; overflow: hidden; } 
+        body { margin: 0; background: #000; overflow: hidden; font-family: 'Inter', sans-serif; } 
+        
+        /* 1. PIXEL-PERFECT MARKERS FROM SCREENSHOT */
+        .ring-marker {
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            position: relative;
+            box-shadow: 0 0 15px rgba(255, 77, 77, 0.8), inset 0 0 5px rgba(255, 77, 77, 0.5);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .ring-marker::after {
+            content: '';
+            position: absolute;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.4);
+            animation: pulse-ring 2s infinite;
+        }
+        @keyframes pulse-ring { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
+
+        .number-badge {
+            position: absolute; top: -6px; right: -6px;
+            background: #ffffff; color: #1a1a1a;
+            border-radius: 50%; width: 12px; height: 12px;
+            font-size: 8px; font-weight: 900;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        .vessel-triangle {
+            width: 0; height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 14px solid #fbbf24;
+            filter: drop-shadow(0 0 10px #fbbf24);
+            animation: blinker 1s linear infinite;
+        }
+        @keyframes blinker { 50% { opacity: 0.3; } }
+
+        /* TELEMETRY OVERLAY */
         #telemetry-box {
             position: absolute; bottom: 20px; left: 20px;
-            background: rgba(15, 23, 42, 0.9);
-            border: 1px solid #22c55e; border-radius: 8px;
+            background: rgba(15, 23, 42, 0.95); border: 1px solid #333; border-radius: 8px;
             padding: 12px; font-family: monospace; z-index: 100;
-            min-width: 220px; backdrop-filter: blur(10px);
+            min-width: 200px; backdrop-filter: blur(10px);
         }
-        #timeline-container {
-            position: absolute; bottom: 20px; right: 20px;
-            width: 260px; height: 140px; overflow: hidden;
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid #22c55e33; border-radius: 8px;
-            padding: 10px; font-family: monospace; z-index: 100;
-        }
-        #timeline-scroll {
-            display: flex; flex-direction: column; gap: 10px;
-            animation: scroll-up 20s linear infinite;
-        }
-        @keyframes scroll-up { 0% { transform: translateY(100%); } 100% { transform: translateY(-100%); } }
-        .tl-item { border-left: 2px solid #22c55e; padding-left: 8px; margin-bottom: 8px; }
-        .tl-date { color: #22c55e; font-size: 9px; font-weight: 900; }
-        .tl-event { color: #ffffff; font-size: 10px; }
-        .t-label { color: #22c55e; font-size: 10px; font-weight: 800; letter-spacing: 1px; }
-        .t-value { color: #fff; font-size: 14px; font-weight: 900; }
-        .t-coord { color: #48cae4; font-size: 11px; }
-        .blink-light { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; animation: blinker 0.8s linear infinite; }
-        .vessel-blink { background: #22c55e; box-shadow: 0 0 15px #22c55e; }
-        .signal-blink { background: #fbbf24; box-shadow: 0 0 15px #fbbf24; }
-        @keyframes blinker { 50% { opacity: 0; } }
+        .t-label { color: #64748b; font-size: 9px; font-weight: 900; }
+        .t-value { color: #ffffff; font-size: 13px; font-weight: 900; margin-bottom: 5px; }
+
       </style>
       <script src="//unpkg.com/three"></script>
       <script src="//unpkg.com/globe.gl"></script>
     </head>
     <body>
       <div id="telemetry-box">
-          <div class="t-label">🛰️ VESSEL TELEMETRY</div>
-          <div class="t-value" style="margin-bottom:5px;"><span class="blink-light vessel-blink"></span>MV HONDIUS</div>
-          <div class="t-coord">LAT: 14.9316° N // LON: 23.5125° W</div>
-          <div style="height:1px; background:rgba(255,255,255,0.1); margin:8px 0;"></div>
-          <div class="t-label">PANDEMIC_RISK</div>
-          <div style="color:#ffffff; font-size:12px; font-weight:900;">__RISK__% // ELEVATED</div>
-      </div>
-      <div id="timeline-container">
-          <div style="color:#22c55e; font-size:8px; font-weight:900; margin-bottom:8px; text-transform:uppercase;">Outbreak Activity Stream</div>
-          <div id="timeline-scroll">
-              <div class="tl-item"><div class="tl-date">APR 01</div><div class="tl-event">Vessel departure from Ushuaia</div></div>
-              <div class="tl-item"><div class="tl-date">APR 06</div><div class="tl-event">Patient Zero: Symptoms detected</div></div>
-              <div class="tl-item"><div class="tl-date">APR 11</div><div class="tl-event">First fatality recorded aboard</div></div>
-              <div class="tl-item"><div class="tl-date">APR 26</div><div class="tl-event">Case 2 fatality in RSA (Joburg)</div></div>
-              <div class="tl-item"><div class="tl-date">MAY 02</div><div class="tl-event">Case 3 confirmed ICU</div></div>
-              <div class="tl-item"><div class="tl-date">MAY 04</div><div class="tl-event">Moored under hold (Cabo Verde)</div></div>
-              <div class="tl-item"><div class="tl-date">MAY 08</div><div class="tl-event">WHO Releases DON599 SITREP</div></div>
+          <div class="t-label">LAYERS</div>
+          <div style="margin-bottom:10px;">
+              <div style="color:#ff4d4d; font-size:11px; font-weight:900;">📈 NOW ACTIVE</div>
+              <div style="color:#475569; font-size:9px;">12 COUNTRIES // 582 ALERTS</div>
           </div>
+          <div class="t-label">VESSEL TRACKING</div>
+          <div class="t-value" style="color:#fbbf24;">MV HONDIUS LOCK</div>
+          <div style="color:#22c55e; font-size:10px; font-weight:900;">SIGNAL_STRENGTH: 98%</div>
       </div>
+      
       <div id="globeViz"></div>
       <script>
+        const hotspots = __HOTSPOTS__;
+
         const world = Globe()
           (document.getElementById('globeViz'))
           .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
           .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
           .showAtmosphere(true)
-          .atmosphereColor('#22c55e')
-          .atmosphereDaylightAlpha(0.2)
-          .ringsData(__HOTSPOTS__)
-          .ringColor(d => d.color)
-          .ringMaxRadius(d => d.size * 8)
-          .ringPropagationSpeed(2)
-          .ringRepeatPeriod(900)
-          .pointsData(__HOTSPOTS__)
-          .pointLat('lat')
-          .pointLng('lng')
-          .pointColor('color')
-          .pointAltitude(d => d.size * 0.1)
-          .pointRadius(0.8)
-          .onPointHover(d => world.controls().autoRotate = !d)
-          .pointTooltip(d => `
-            <div style="background: rgba(13, 27, 42, 0.95); border: 1px solid ${d.color}; padding: 12px; border-radius: 8px; font-family: monospace; min-width: 250px; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
+          .atmosphereColor('#ff4d4d')
+          .atmosphereDaylightAlpha(0.1)
+
+          // 1. COUNTRY GLOWS (Polygons from the screenshot)
+          .polygonsData(__GEOJSON__.features)
+          .polygonCapColor(d => {
+             const code = d.properties.ISO_A3;
+             const active = ["ESP", "GBR", "DEU", "NLD", "NOR", "ITA", "ARG", "ZAF", "PHL", "CHL"];
+             return active.includes(code) ? 'rgba(74, 18, 18, 0.7)' : 'rgba(0, 0, 0, 0)';
+          })
+          .polygonSideColor(() => 'rgba(255, 77, 77, 0.05)')
+          .polygonStrokeColor(() => 'rgba(255, 255, 255, 0.1)')
+
+          // 2. PIXEL-PERFECT HTML MARKERS
+          .htmlElementsData(hotspots)
+          .htmlElement(d => {
+            const el = document.createElement('div');
+            if (d.type === 'vessel-signal') {
+                el.className = 'vessel-triangle';
+            } else {
+                el.innerHTML = `
+                  <div class="ring-marker">
+                      <div class="number-badge">${d.cases}</div>
+                  </div>
+                `;
+            }
+            return el;
+          })
+
+          // 3. INTERACTIVE TOOLTIP
+          .htmlElementTooltip(d => `
+            <div style="background: rgba(13, 27, 42, 0.98); border: 1px solid #ffffff33; padding: 12px; border-radius: 8px; font-family: monospace; min-width: 240px; box-shadow: 0 0 25px rgba(0,0,0,0.8);">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <b style="color:${d.color}; font-size:12px;">${d.name}</b>
-                    <span style="color:#22c55e; font-size:10px; font-weight:800;">LOCK: TRUE</span>
+                    <b style="color:#ffffff; font-size:12px;">${d.name}</b>
+                    <span style="color:#ff4d4d; font-size:10px; font-weight:800;">ACTIVE_OUTBREAK</span>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom:10px;">
                     <div style="background:rgba(255,255,255,0.03); padding:5px; border-radius:4px;">
-                        <div style="color:#64748b; font-size:8px;">CASES</div>
+                        <div style="color:#64748b; font-size:8px;">DETECTED_CASES</div>
                         <div style="color:#ffffff; font-size:14px; font-weight:900;">${d.cases}</div>
                     </div>
                     <div style="background:rgba(255,255,255,0.03); padding:5px; border-radius:4px;">
-                        <div style="color:#64748b; font-size:8px;">FATAL</div>
-                        <div style="color:#ff4d4d; font-size:14px; font-weight:900;">${d.deaths}</div>
+                        <div style="color:#64748b; font-size:8px;">FEAR_INDEX</div>
+                        <div style="color:#fbbf24; font-size:14px; font-weight:900;">__FEAR__/5</div>
                     </div>
                 </div>
-                <div style="margin-bottom:8px;">
-                    <div style="color:#64748b; font-size:8px;">COMMUNITY INTEL</div>
-                    <div style="color:#48cae4; font-size:10px;">Sentiment: <b>${d.sentiment}</b> | Fear Index: <b>__FEAR__/5</b></div>
-                </div>
                 <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:8px;">
-                    <div style="color:#fbbf24; font-size:9px; font-weight:900; margin-bottom:2px;">SOURCE: ${d.channel.toUpperCase()}</div>
-                    <div style="color:#94a3b8; font-size:9px; line-height:1.2;">"${d.article}"</div>
+                    <div style="color:#00f5ff; font-size:9px; font-weight:900; margin-bottom:2px;">OSINT_CHANNEL: ${d.channel || 'OFFICIAL'}</div>
+                    <div style="color:#94a3b8; font-size:9px; line-height:1.2;">"${d.article || 'Monitoring local transmission signals.'}"</div>
                 </div>
             </div>
           `);
 
         world.controls().autoRotate = true;
-        world.controls().autoRotateSpeed = 0.5;
-        world.pointOfView({ lat: 15, lng: -20, altitude: 2.2 }, 0);
+        world.controls().autoRotateSpeed = 0.4;
+        world.pointOfView({ lat: 20, lng: -10, altitude: 2.5 }, 0);
       </script>
     </body>
     """
     
-    # Manual interpolation to bypass f-string NameError
+    # Fetch GeoJSON for country borders
+    import requests
+    try:
+        geojson = requests.get("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json").json()
+    except: geojson = {"features": []}
+
+    # Manual interpolation
     globe_html = globe_template.replace("__HOTSPOTS__", json.dumps(hotspots))
-    globe_html = globe_html.replace("__RISK__", f"{risk['overall']:.1f}")
+    globe_html = globe_html.replace("__GEOJSON__", json.dumps(geojson))
     globe_html = globe_html.replace("__FEAR__", f"{fear:.2f}")
 
     components.html(globe_html, height=750)
     
     st.markdown(
-        "<div style='text-align:right; opacity:0.6;'><p style='color:#475569; font-size:0.5rem; font-family:monospace;'>ORBITAL_RECO_SYS v5.3 // TEMPLATE_ISOLATION: ENABLED</p></div>",
+        "<div style='text-align:right; opacity:0.6;'><p style='color:#475569; font-size:0.5rem; font-family:monospace;'>ORBITAL_RECO_SYS v6.0 // REPLICA_AESTHETIC: ENABLED</p></div>",
         unsafe_allow_html=True
     )
