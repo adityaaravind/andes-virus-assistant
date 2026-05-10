@@ -131,7 +131,6 @@ def render_stats_panel() -> None:
         (str(stats.get("suspected_cases", 0)), "Suspected Cases", get_glow(stats.get("suspected_cases"), "cases"), "Clinical symptoms awaiting confirmation"),
         (str(stats.get("deaths", 0)), "Deaths", get_glow(stats.get("deaths"), "deaths"), ""),
         (str(stats.get("nationalities", 0)), "Nationalities Affected", get_glow(stats.get("nationalities"), "nationalities"), ""),
-        (stats.get("ship_status", "Unknown"), "Ship Current Status", "glow-green", ""),
     ]
 
     # Responsive grid for stat cards
@@ -149,8 +148,14 @@ def render_stats_panel() -> None:
             f'</div>'
         )
 
+    # SHIP TELEMETRY CARD (Special Phase 2 Feature)
+    from ui.ship_telemetry import get_ship_card_html
+    ship_status = stats.get("ship_status", "In Transit")
+    ship_card = get_ship_card_html(ship_status)
+    
     st.markdown(
-        f'<div class="stats-grid">{cards_html}</div>',
+        f'<style>.stats-grid {{ grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important; }}</style>'
+        f'<div class="stats-grid">{cards_html}{ship_card}</div>',
         unsafe_allow_html=True,
     )
 
