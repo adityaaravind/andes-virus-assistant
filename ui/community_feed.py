@@ -63,6 +63,6 @@ def render_community_feed() -> None:
         from ui.fear_index import _build_sentiment_trend
         fig_trend = _build_sentiment_trend(history)
         # Force a very small height in Plotly container
-        st.plotly_chart(fig_trend, use_container_width=True, config={"displayModeBar": False})
+        st.plotly_chart(fig_trend, use_container_width=True, config={"displayModeBar": False}, key="community_velocity_chart")
     
     st.markdown("<div style='margin-bottom:-1rem;'></div>", unsafe_allow_html=True) # Tighten spacing
