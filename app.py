@@ -584,6 +584,10 @@ def main() -> None:
         chain = _init_rag_chain()
 
 
+        from ui.faq_panel import render_faq_panel
+        render_faq_panel(chain)
+        st.divider()
+
         # ── Stats + map ──────────────────────────────────────────────────────────
         st.markdown("<div id='map'></div>", unsafe_allow_html=True)
         from ui.map_panel import render_map_panel
@@ -594,9 +598,6 @@ def main() -> None:
 
         def update_sources(cards: list[dict[str, Any]]) -> None:
             st.session_state.citation_cards = cards
-
-        from ui.faq_panel import render_faq_panel
-        render_faq_panel(chain)
 
         from ui.suggestion_box import render_suggestion_box
         render_suggestion_box()

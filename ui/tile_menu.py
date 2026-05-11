@@ -8,7 +8,6 @@ NAV_ITEMS = [
     {"label": "Outbreak Stats", "icon": "📊", "anchor": "stats"},
     {"label": "Live News",      "icon": "📰", "anchor": "news"},
     {"label": "Global Map",     "icon": "🌍", "anchor": "map"},
-    {"label": "Sharing Tools",  "icon": "📤", "anchor": "journalist"},
 ]
 
 

@@ -204,14 +204,14 @@ def render_map_panel() -> None:
                                     return base.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                                 }
 
-                                let tooltipHtml = `<div><b style="color:#4ade80; font-size:13px; letter-spacing:1px;">📡 ${name} SAFETY CHECK</b><br/>`;
-                                tooltipHtml += `<div style="display:flex; justify-content:space-between; gap:25px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px; margin-bottom:10px;">`;
-                                tooltipHtml += `<div><div style="color:#94a3b8; font-size:9px;">REAL-TIME CHANCE</div><div style="color:#fff; font-size:14px; font-weight:900;">\${hantaRisk}%</div></div>`;
-                                tooltipHtml += `<div><div style="color:#94a3b8; font-size:9px;">PROJECTED COVID __DAY__</div><div style="color:#fff; font-size:14px; font-weight:900;">\${covidRisk.toFixed(1)}%</div></div></div>`;
+                                let tooltipHtml = '<div><b style="color:#4ade80; font-size:13px; letter-spacing:1px;">📡 ' + name + ' SAFETY CHECK</b><br/>';
+                                tooltipHtml += '<div style="display:flex; justify-content:space-between; gap:25px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px; margin-bottom:10px;">';
+                                tooltipHtml += '<div><div style="color:#94a3b8; font-size:9px;">REAL-TIME CHANCE</div><div style="color:#fff; font-size:14px; font-weight:900;">' + hantaRisk + '%</div></div>';
+                                tooltipHtml += '<div><div style="color:#94a3b8; font-size:9px;">PROJECTED COVID ' + __DAY__ + '</div><div style="color:#fff; font-size:14px; font-weight:900;">' + covidRisk.toFixed(1) + '%</div></div></div>';
                                 
-                                tooltipHtml += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">`;
-                                tooltipHtml += `<div><div style="color:#ef4444; font-size:9px; font-weight:800;">REAL-TIME FEAR INDEX</div><div style="color:#ef4444; font-size:14px; font-weight:900;">\${fear}%</div></div>`;
-                                tooltipHtml += `<div style="text-align:right;"><div style="color:#64748b; font-size:8px;">VERIFIED STATUS</div><div style="color:#cbd5e1; font-size:10px;">WHO SYNC</div></div></div>`;
+                                tooltipHtml += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">';
+                                tooltipHtml += '<div><div style="color:#ef4444; font-size:9px; font-weight:800;">REAL-TIME FEAR INDEX</div><div style="color:#ef4444; font-size:14px; font-weight:900;">' + fear + '%</div></div>';
+                                tooltipHtml += '<div style="text-align:right;"><div style="color:#64748b; font-size:8px;">VERIFIED STATUS</div><div style="color:#cbd5e1; font-size:10px;">WHO SYNC</div></div></div>';
 
                                 if (covidRisk === 0) {
                                     const proofDate = onsetDay > 0 ? getProofDate(onsetDay) : "later date";
@@ -226,9 +226,24 @@ def render_map_panel() -> None:
                     });
                 hotspots.forEach(h => {
                     const isShip = h.code === 'SHIP';
-                    const icon = L.divIcon({ className: '', html: `<div class="ring-marker blink-active" style="border-color:\${h.color}; color:\${h.color};"><div class="badge">\${h.cases}</div></div>`, iconSize: [24, 24], iconAnchor: [12, 12] });
+                    const icon = L.divIcon({ 
+                        className: '', 
+                        html: '<div class="ring-marker blink-active" style="border-color:' + h.color + '; color:' + h.color + ';"><div class="badge">' + h.cases + '</div></div>', 
+                        iconSize: [24, 24], 
+                        iconAnchor: [12, 12] 
+                    });
                     const marker = L.marker([h.lat, h.lng], { icon: icon }).addTo(map);
-                    let popupHtml = `<div style="padding:15px; min-width:260px; font-family:sans-serif;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><b style="color:\${h.color}; font-size:14px;">📡 \${h.name}</b><span style="color:#94a3b8; font-size:9px;">\${h.timestamp}</span></div><div style="color:#ffffff; font-size:11px; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; font-weight:600;">\${h.relation}</div><div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:12px;"><div><div class="intel-label">FEAR INDEX</div><div style="color:#ef4444; font-size:18px; font-weight:900;">\${h.fear}%</div></div><div><div class="intel-label">TOTAL CASES</div><div style="color:#fff; font-size:18px; font-weight:900;">\${h.cases}</div></div></div><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;"><div><div class="intel-label">HOSPITAL / CLINIC</div><div style="color:#4ade80; font-size:10px; font-weight:900;">\${h.admitted}</div></div><div><div class="intel-label">LATEST NOTES</div><div style="color:#cbd5e1; font-size:9px; font-style:italic; line-height:1.2;">\${h.notes}</div></div></div></div>`;
+                    let popupHtml = '<div style="padding:15px; min-width:260px; font-family:sans-serif;">' +
+                        '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">' +
+                        '<b style="color:' + h.color + '; font-size:14px;">📡 ' + h.name + '</b>' +
+                        '<span style="color:#94a3b8; font-size:9px;">' + h.timestamp + '</span></div>' +
+                        '<div style="color:#ffffff; font-size:11px; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; font-weight:600;">' + h.relation + '</div>' +
+                        '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:12px;">' +
+                        '<div><div class="intel-label">FEAR INDEX</div><div style="color:#ef4444; font-size:18px; font-weight:900;">' + h.fear + '%</div></div>' +
+                        '<div><div class="intel-label">TOTAL CASES</div><div style="color:#fff; font-size:18px; font-weight:900;">' + h.cases + '</div></div></div>' +
+                        '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;">' +
+                        '<div><div class="intel-label">HOSPITAL / CLINIC</div><div style="color:#4ade80; font-size:10px; font-weight:900;">' + h.admitted + '</div></div>' +
+                        '<div><div class="intel-label">LATEST NOTES</div><div style="color:#cbd5e1; font-size:9px; font-style:italic; line-height:1.2;">' + h.notes + '</div></div></div></div>';
                     marker.bindPopup(popupHtml, { closeButton: false, offset: [0, -10] });
                     marker.on('mouseover', function() { this.openPopup(); });
                     marker.on('mouseout', function() { this.closePopup(); });
