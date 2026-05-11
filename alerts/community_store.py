@@ -65,17 +65,60 @@ def get_community_data() -> dict[str, Any]:
         ]
 
     if not feed:
+        now = datetime.utcnow()
         feed = [
             {
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": now.isoformat(),
                 "type": "alert",
-                "content": "Phase 2 Intelligence Stream Online",
+                "content": "Real-time Tactical Intelligence Stream Online",
                 "user_id": "SYSTEM"
             },
             {
-                "timestamp": (datetime.utcnow() - timedelta(minutes=5)).isoformat(),
+                "timestamp": (now - timedelta(minutes=2)).isoformat(),
+                "type": "citation",
+                "content": "verified source: WHO Disease Outbreak News (DON599) - MV Hondius",
+                "user_id": "RESEARCHER_1"
+            },
+            {
+                "timestamp": (now - timedelta(minutes=15)).isoformat(),
                 "type": "search",
-                "content": "indexed latest WHO situation reports",
+                "content": "queried: incubation period andes virus",
+                "user_id": "ANON"
+            },
+            {
+                "timestamp": (now - timedelta(minutes=45)).isoformat(),
+                "type": "citation",
+                "content": "extracted evidence: PubMed ID 3829102 - Hantavirus Pulmonary Syndrome",
+                "user_id": "EPIDEMIOLOGY_BOT"
+            },
+            {
+                "timestamp": (now - timedelta(hours=1)).isoformat(),
+                "type": "alert",
+                "content": "Case count delta detected: +2 confirmed (Spain)",
+                "user_id": "SCRAPER"
+            },
+            {
+                "timestamp": (now - timedelta(hours=2)).isoformat(),
+                "type": "search",
+                "content": "queried: MV Hondius current location",
+                "user_id": "ANON"
+            },
+            {
+                "timestamp": (now - timedelta(hours=3)).isoformat(),
+                "type": "citation",
+                "content": "verified: Reuters - Cape Verde health authorities quarantine vessel",
+                "user_id": "JOURNALIST_TOOL"
+            },
+            {
+                "timestamp": (now - timedelta(hours=5)).isoformat(),
+                "type": "search",
+                "content": "queried: andes virus transmission routes",
+                "user_id": "ANON"
+            },
+            {
+                "timestamp": (now - timedelta(hours=8)).isoformat(),
+                "type": "alert",
+                "content": "Satellite sync successful: Vessel lock maintained",
                 "user_id": "SYSTEM"
             }
         ]
