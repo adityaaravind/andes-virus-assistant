@@ -369,7 +369,7 @@ def _render_header() -> None:
                 </div>
                 <h1 class='glowing-title mega-glow' style='margin:0; font-size: 2.4rem !important; letter-spacing: -0.02em !important; line-height: 1.1;'>MV Hondius Hantavirus Outbreak</h1>
                 <p style='font-size:0.9rem !important; margin:0; opacity: 0.8; color: #94a3b8; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;'>
-                    Tactical Intelligence Dashboard · Joint Task Force Operations
+                    Strain: Andes orthohantavirus (ANDV) · Lineage: Patagonian/Hondius · Intel Class: CRITICAL/RED
                 </p>
             </div>
             <style>
