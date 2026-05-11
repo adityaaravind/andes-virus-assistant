@@ -178,7 +178,12 @@ def render_map_panel() -> None:
                     .then(res => res.json())
                     .then(geojson => {
                         L.geoJSON(geojson, {
-                            style: feature => ({ fillOpacity: 0.1, weight: 0.5, color: '#222', fillColor: '#111' }),
+                            style: feature => {
+                                const code = feature.id || feature.properties.ISO_A3;
+                                const isAffected = ["ARG", "ESP", "GBR", "NLD", "ZAF"].includes(code);
+                                if (isAffected) return { fillColor: '#6b001a', fillOpacity: 0.5, color: '#ff0055', weight: 1.5 };
+                                return { fillOpacity: 0.1, weight: 0.5, color: '#222', fillColor: '#111' };
+                            },
                             onEachFeature: function(feature, layer) {
                                 const code = feature.id || feature.properties.ISO_A3;
                                 const name = feature.properties.name || "AREA";

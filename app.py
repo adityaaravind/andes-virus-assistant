@@ -390,6 +390,8 @@ def _render_header() -> None:
             """,
             unsafe_allow_html=True
         )
+        from ui.news_ticker import render_news_ticker
+        render_news_ticker()
     
     with author_col:
         render_author_card()
