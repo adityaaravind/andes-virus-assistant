@@ -265,7 +265,7 @@ def _start_scheduler() -> None:
 _start_scheduler()
 
 st.set_page_config(
-    page_title="Andes Virus Research Assistant",
+    page_title="Andes Virus Assistant v2.4.3",
     page_icon="🧬",
     layout="wide",
     initial_sidebar_state="expanded",
