@@ -10,6 +10,15 @@ import random
 
 LIVE_FILE = Path("data/outbreak_live.json")
 
+# Simple language data exports
+NATIONALITIES_DATA = [
+    {"country": "Spain",         "code": "ESP", "passengers": 12, "crew": 0, "cases": 3, "deaths": 1},
+    {"country": "United Kingdom","code": "GBR", "passengers": 8,  "crew": 0, "cases": 2, "deaths": 0},
+    {"country": "Netherlands",   "code": "NLD", "passengers": 5,  "crew": 2, "cases": 2, "deaths": 1},
+    {"country": "Argentina",     "code": "ARG", "passengers": 45, "crew": 5, "cases": 4, "deaths": 1},
+    {"country": "South Africa",  "code": "ZAF", "passengers": 0,  "crew": 10,"cases": 2, "deaths": 0},
+]
+
 # Mapping onset days to historical dates (Day 0 = Jan 22, 2020)
 def _get_historical_date(day: int) -> str:
     base = datetime(2020, 1, 22)
