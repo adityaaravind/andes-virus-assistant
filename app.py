@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-VERSION = "1.5.3"
+VERSION = "1.5.5"
 
 # Pull secrets from Streamlit Cloud when .env is absent (production deploy)
 def _load_streamlit_secrets() -> None:
@@ -572,11 +572,10 @@ def main() -> None:
 
         from ui.pandemic_risk import render_pandemic_risk_panel
         from ui.fear_index import render_fear_index
-        from ui.news_ticker import render_news_ticker
+        from ui.threat_feed import render_threat_feed
         from ui.stats_panel import render_timeline_chart
         from ui.map_panel import render_map_panel
         from ui.journalist_tools import render_journalist_tools
-        from ui.war_room import render_war_room_panel
 
         # ── PANDEMIC RISK & FEAR INDEX — equal size cards ────────────────────────
         st.markdown("<div id='risk_fear'></div>", unsafe_allow_html=True)
@@ -587,9 +586,9 @@ def main() -> None:
             render_fear_index()
         st.divider()
 
-        # ── Global News Ticker ────────────────────────────────────────────────────
-        st.markdown("<div id='news'></div>", unsafe_allow_html=True)
-        render_news_ticker()
+        # ── AI THREAT FEED ────────────────────────────────────────────────────────
+        st.markdown("<div id='threat_feed'></div>", unsafe_allow_html=True)
+        render_threat_feed()
         st.divider()
 
 
