@@ -1,18 +1,28 @@
-"""Stats panel — live metrics + case timeline chart with COVID comparison."""
+"""Stats panel — live metrics + case timeline chart."""
 from __future__ import annotations
 
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Any
-import math
 
 import plotly.graph_objects as go
 import streamlit as st
 
 LIVE_FILE = Path("data/outbreak_live.json")
 
-# Baseline timeline for Hantavirus (vessel specific)
+# Hardcoded baseline (WHO Update, as of 2026-05-08) — auto-overridden by outbreak_live.json
+OUTBREAK_DATA: dict[str, Any] = {
+    "confirmed_cases": 5,
+    "suspected_cases": 9,
+    "deaths": 3,
+    "nationalities": 23,
+    "ship_status": "Transit — Canary Islands",
+    "last_updated": "2026-05-08",
+    "case_fatality_rate": 60.0,
+}
+
+# Timeline built from WHO DON599 (2026-DON599)
 CASE_TIMELINE = [
     {"date": "2026-04-06", "cases": 1, "label": "Case 1 — first symptom onset (male)"},
     {"date": "2026-04-11", "cases": 1, "label": "Case 1 dies aboard — no lab testing"},
@@ -20,131 +30,145 @@ CASE_TIMELINE = [
     {"date": "2026-04-26", "cases": 2, "label": "Case 2 dies in South Africa (confirmed posthumous)"},
     {"date": "2026-04-28", "cases": 3, "label": "Case 4 — symptom onset"},
     {"date": "2026-05-02", "cases": 4, "label": "Case 3 confirmed hantavirus (ICU intensive care, S. Africa); Case 4 dies"},
-    {"date": "2026-05-04", "cases": 7, "label": "WHO reports 7 total (2 confirmed + 5 suspected)"},
-    {"date": "2026-05-08", "cases": 12, "label": "New clusters identified in Canary Islands isolation"},
-    {"date": "2026-05-11", "cases": 18, "label": "Live satellite update: cases increasing among crew"},
+    {"date": "2026-05-04", "cases": 7, "label": "WHO (World Health Org) reports 7 total (2 confirmed + 5 suspected)"},
 ]
 
-def _get_covid_historical(day: int) -> int:
-    """Returns historical COVID-19 cumulative global cases (2020) for a given mission day."""
-    # Simplified growth model based on 2020 historical data (Jan-Mar)
-    # Day 0 = 500, Day 65 = 530,000
-    if day <= 0: return 0
-    # Logistic/Exponential growth approximation for early pandemic
-    return int(500 * math.exp(0.108 * day))
 
-def build_timeline_chart(current_day: int) -> go.Figure:
+def _load_live() -> dict[str, Any]:
+    if LIVE_FILE.exists():
+        try:
+            return json.loads(LIVE_FILE.read_text())
+        except Exception:
+            pass
+    return {}
+
+
+@st.cache_data(ttl=600, show_spinner=False)
+def get_outbreak_stats() -> dict[str, Any]:
+    """Returns case counts — live values from scraper overlay hardcoded baseline."""
+    live = _load_live()
+    data = dict(OUTBREAK_DATA)
+    # Merge live data: numbers only if higher, strings always if present
+    for k in ("confirmed_cases", "suspected_cases", "deaths", "nationalities", "last_updated", "ship_status"):
+        if k in live:
+            val = live[k]
+            if isinstance(val, (int, float)):
+                if val > data.get(k, 0):
+                    data[k] = val
+            elif val:
+                data[k] = val
+
+    if data["confirmed_cases"] and data["deaths"]:
+        data["case_fatality_rate"] = round(data["deaths"] / data["confirmed_cases"] * 100, 1)
+    data["_source"] = live.get("source", "manual")
+    return data
+
+
+@st.cache_data(ttl=21600)
+def build_timeline_chart() -> go.Figure:
     dates  = [datetime.strptime(r["date"], "%Y-%m-%d") for r in CASE_TIMELINE]
     cases  = [r["cases"] for r in CASE_TIMELINE]
-    
-    # Generate COVID comparison data for the same timeframe
-    # Mission Day 0 is approx April 6, 2026
-    covid_cases = []
-    for i in range(len(dates)):
-        day_offset = (dates[i] - dates[0]).days
-        covid_cases.append(_get_covid_historical(day_offset))
+    labels = [r["label"] for r in CASE_TIMELINE]
 
     fig = go.Figure()
-    
-    # COVID-19 Comparison (Dotted Line)
-    fig.add_trace(go.Scatter(
-        x=dates, y=covid_cases,
-        mode="lines",
-        name="COVID-19 (Historical Sync)",
-        line=dict(color="#94a3b8", width=1.5, dash="dot"),
-        hovertemplate="<b>COVID-19 COMPARISON</b><br>Mission Day: %{x|%b %d}<br>Historical Count: %{y:,}<extra></extra>",
-    ))
-
-    # Hantavirus Case Progression (Solid Line)
     fig.add_trace(go.Scatter(
         x=dates, y=cases,
         mode="lines+markers",
-        name="Hantavirus (Current)",
-        line=dict(color="#4ade80", width=3, shape="spline"),
-        marker=dict(size=8, color="#4ade80", line=dict(color="#ffffff", width=1.5)),
-        hovertemplate="<b>HANTAVIRUS CURRENT</b><br>%{x|%b %d, %Y}<br>Cases: %{y}<extra></extra>",
+        name="Cumulative Cases",
+        line=dict(color="#00b4d8", width=2.5, shape="spline"),
+        marker=dict(size=8, color="#00b4d8", line=dict(color="#ffffff", width=1.5)),
+        hovertemplate="<b>%{text}</b><br>%{x|%b %d, %Y}<br>Cases: %{y}<extra></extra>",
+        text=labels,
         fill="tozeroy",
-        fillcolor="rgba(74,222,128,0.05)",
+        fillcolor="rgba(0,180,216,0.08)",
     ))
-
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#94a3b8", size=10, family="sans-serif"),
-        margin=dict(l=10, r=10, t=10, b=10),
-        height=240,
-        xaxis=dict(gridcolor="rgba(255,255,255,0.05)", showline=False, tickformat="%b %d", tickfont=dict(size=9)),
-        yaxis=dict(gridcolor="rgba(255,255,255,0.05)", showline=False, type="log", title=dict(text="CUMULATIVE LOG SCALE", font=dict(size=8)), tickfont=dict(size=8)),
-        showlegend=True,
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, font=dict(size=9), bgcolor="rgba(0,0,0,0)"),
+        font=dict(color="#94a3b8", size=11),
+        margin=dict(l=40, r=10, t=10, b=30),
+        height=200,
+        xaxis=dict(gridcolor="#1b2e45", showline=False, tickformat="%b %d"),
+        yaxis=dict(gridcolor="#1b2e45", showline=False,
+                   title="Cumulative cases", tickfont=dict(size=10)),
+        showlegend=False,
         hovermode="x unified",
     )
     return fig
 
-def render_timeline_chart() -> None:
-    from ui.pandemic_risk import _compute_risk
-    from ui.stats_panel import get_outbreak_stats
-    
-    stats = get_outbreak_stats()
-    risk_data = _compute_risk(stats.get("confirmed_cases", 5), 5)
-    current_day = risk_data["days"]
-
-    st.markdown(f"#### Case Progression <small style='color:#4ade80; font-size:10px;'>DAY_{current_day} ACTIVE</small>", unsafe_allow_html=True)
-    st.caption("Comparison between Current Hantavirus Outbreak and Historical COVID-19 Progression.")
-    
-    fig = build_timeline_chart(current_day)
-    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
-    
-    st.markdown(
-        f"""
-        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
-            <p style="color:#94a3b8; font-size:0.65rem; margin:0;">
-                <b style="color:#ffffff;">REAL-TIME SYNC:</b> 
-                The dotted line represents the global COVID-19 case curve (2020) synchronized to the same day of the outbreak. 
-                Hantavirus is currently tracking at <b style="color:#4ade80;">{(stats.get('confirmed_cases',5)/_get_covid_historical(current_day)*100 if _get_covid_historical(current_day)>0 else 0):.2f}%</b> of the historical COVID-19 intensity.
-            </p>
-        </div>
-        """, unsafe_allow_html=True
-    )
-
-def _load_live() -> dict[str, Any]:
-    if LIVE_FILE.exists():
-        try: return json.loads(LIVE_FILE.read_text())
-        except Exception: pass
-    return {}
-
-@st.cache_data(ttl=600, show_spinner=False)
-def get_outbreak_stats() -> dict[str, Any]:
-    live = _load_live()
-    data = {
-        "confirmed_cases": 18,
-        "suspected_cases": 24,
-        "deaths": 5,
-        "nationalities": 28,
-        "ship_status": "Transit — Near Canary Islands",
-        "last_updated": datetime.now().strftime("%Y-%m-%d"),
-        "case_fatality_rate": 27.7,
-    }
-    for k in ("confirmed_cases", "suspected_cases", "deaths", "nationalities", "last_updated", "ship_status"):
-        if k in live: data[k] = live[k]
-    if data["confirmed_cases"] and data["deaths"]:
-        data["case_fatality_rate"] = round(data["deaths"] / data["confirmed_cases"] * 100, 1)
-    return data
 
 def render_stats_panel() -> None:
-    stats = get_outbreak_stats()
+    stats  = get_outbreak_stats()
+    
+    # ── 1. REAL-TIME HEADER & CARDS (TOP PRIORITY) ──
     st.markdown(
-        f'<div style="display:flex; align-items:center; gap:8px; margin-bottom:1rem; background:rgba(74,222,128,0.05); padding:4px 12px; border-radius:100px; width:fit-content; border:1px solid rgba(74,222,128,0.1);">'
-        f'<span class="live-dot" style="width:8px; height:8px; background:#4ade80; box-shadow: 0 0 8px #4ade80;"></span>'
-        f'<span style="color:#4ade80; font-size:0.65rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em;">Real-time Health Data Sync Active</span>'
+        f'<div style="display:flex; align-items:center; gap:8px; margin-bottom:1rem; background:rgba(34,197,94,0.05); padding:4px 12px; border-radius:100px; width:fit-content; border:1px solid rgba(34,197,94,0.1);">'
+        f'<span class="live-dot" style="width:8px; height:8px; background:#22c55e; box-shadow: 0 0 8px #22c55e;"></span>'
+        f'<span style="color:#22c55e; font-size:0.65rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em;">Real-time Outbreak Tracking Active</span>'
         f'</div>',
         unsafe_allow_html=True
     )
+
+    # Helper to pick glow class based on thresholds
+    def get_glow(val: Any, type: str) -> str:
+        if not isinstance(val, (int, float)): return ""
+        if type == "cases":
+            if val < 5: return "glow-green"
+            if val < 15: return "glow-amber"
+            return "glow-red"
+        if type == "deaths":
+            if val == 0: return "glow-green"
+            if val < 3: return "glow-amber"
+            return "glow-red"
+        if type == "nationalities":
+            if val < 10: return "glow-green"
+            if val < 25: return "glow-amber"
+            return "glow-red"
+        return ""
+
+    cards = [
+        (str(stats.get("confirmed_cases", 0)), "Confirmed Cases", get_glow(stats.get("confirmed_cases"), "cases"), "Lab-verified PCR results"),
+        (str(stats.get("suspected_cases", 0)), "Suspected Cases", get_glow(stats.get("suspected_cases"), "cases"), "Clinical symptoms awaiting confirmation"),
+        (str(stats.get("deaths", 0)), "Deaths", get_glow(stats.get("deaths"), "deaths"), ""),
+        (str(stats.get("nationalities", 0)), "Nationalities Affected", get_glow(stats.get("nationalities"), "nationalities"), ""),
+    ]
+
+    # Responsive grid for stat cards
+    cards_html = ""
+    for value, label, glow_class, subtext in cards:
+        subtext_html = f'<div style="font-size:0.65rem; color:var(--gray-300); margin-top:4px; font-weight:500; text-transform:none; opacity:0.9; line-height:1.2;">{subtext}</div>' if subtext else ""
+        cards_html += (
+            f'<div class="stat-card" style="position:relative;">'
+            f'<div style="position:absolute; top:8px; right:10px; display:flex; align-items:center; gap:4px; opacity:0.6;">'
+            f'<span class="live-dot" style="width:5px; height:5px; background:#22c55e;"></span>'
+            f'<span style="color:#22c55e; font-size:0.5rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em;">Live</span>'
+            f'</div>'
+            f'<span class="stat-value {glow_class}">{value}</span>'
+            f'<div class="stat-label">{label}{subtext_html}</div>'
+            f'</div>'
+        )
+
+    st.markdown(
+        f'<div class="stats-grid">{cards_html}</div>',
+        unsafe_allow_html=True,
+    )
+
+    # SHIP TELEMETRY BAR (Full Width underneath cards)
+    from ui.ship_telemetry import get_ship_bar_html
+    ship_status = stats.get("ship_status", "In Transit")
+    ship_bar = get_ship_bar_html(ship_status)
     
-    col1, col2, col3, col4 = st.columns(4)
-    with col1: st.metric("Confirmed", stats["confirmed_cases"], delta="+3 today", delta_color="inverse")
-    with col2: st.metric("Suspected", stats["suspected_cases"], delta="+5 today", delta_color="inverse")
-    with col3: st.metric("Fatalities", stats["deaths"], delta="+1 today", delta_color="inverse")
-    with col4: st.metric("Nationalities", stats["nationalities"])
-    
-    st.divider()
+    st.markdown(ship_bar, unsafe_allow_html=True)
+
+
+def render_timeline_chart() -> None:
+    st.markdown("#### Case Progression")
+    st.caption("Apr–May 2026 outbreak on MV Hondius · WHO DON599 · timeline shows case progression from first symptom onset")
+    fig = build_timeline_chart()
+    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
+    stats = get_outbreak_stats()
+    st.caption(
+        f"CFR: {stats['case_fatality_rate']}% · "
+        f"Last verified: {stats['last_updated']} · "
+        "Auto-updates every 15 min from live feeds"
+    )

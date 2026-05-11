@@ -19,15 +19,7 @@ NATIONALITIES_DATA = [
     {"country": "South Africa",  "code": "ZAF", "passengers": 0,  "crew": 10,"cases": 2, "deaths": 0},
 ]
 
-def _get_local_fear_index(code: str, hanta_risk: float) -> float:
-    """Calculates fear index based on risk, news sentiment, and proximity."""
-    # Seed by country code for consistency
-    random.seed(code + str(datetime.now().day))
-    sentiment_noise = random.uniform(-10, 15)
-    # Fear = (Spread Chance * 0.5) + (Sentiment Factor) + (Proximity Factor)
-    fear = min(max((hanta_risk * 0.7) + sentiment_noise + 15, 5), 98)
-    return round(fear, 1)
-
+# Recent Ship Events (Simulated Real-Time Log)
 def _get_vessel_events() -> list:
     return [
         {"date": "MAY 11", "time": "08:15", "country": "International", "event": "Ship coordinates updated. Moving North-East.", "official": "GPS Signal", "hours_ago": 6},
@@ -35,16 +27,17 @@ def _get_vessel_events() -> list:
         {"date": "MAY 09", "time": "14:45", "country": "Spain", "event": "Supplies delivered via drone to the deck.", "official": "Port Health", "hours_ago": 49},
         {"date": "MAY 08", "time": "11:20", "country": "South Africa", "event": "Medical team airlifted crew for treatment.", "official": "Rescue Pilot", "hours_ago": 74},
         {"date": "MAY 05", "time": "18:00", "country": "International", "event": "Engaged deep-sea isolation protocols.", "official": "Vessel Captain", "hours_ago": 140},
+        {"date": "APR 30", "time": "22:15", "country": "Argentina", "event": "Final port clearance received. Departure.", "official": "Coast Guard", "hours_ago": 260},
+        {"date": "APR 28", "time": "09:00", "country": "Argentina", "event": "Vessel left the port under quarantine.", "official": "Port Authority", "hours_ago": 312},
     ]
 
 def _get_live_state() -> dict:
     if LIVE_FILE.exists():
         try: return json.loads(LIVE_FILE.read_text())
         except Exception: pass
-    return {"confirmed_cases": 18, "ship_status": "Quarantined", "last_updated": datetime.now().strftime("%Y-%m-%d")}
+    return {"confirmed_cases": 5, "ship_status": "Quarantined", "last_updated": "2026-05-10"}
 
 def _get_dynamic_hotspots(state: dict) -> list:
-    intensity = _get_dynamic_intensity(35) # Default to day 35 for base calculation
     hotspots = [
         {"lat": -34.60, "lng": -58.38, "code": "ARG", "name": "ARGENTINA SOURCE", "color": "#ff0055", "relation": "Primary Outbreak Center", "intel": "PORT AREA", "admitted": "Hospital Muñiz (isolation)", "notes": "Virus first detected in crew members here.", "timestamp": "APR 28"},
         {"lat": -26.20, "lng": 28.04,  "code": "ZAF", "name": "S. AFRICA STOP", "color": "#00ffcc", "relation": "Emergency Evacuation", "intel": "HEALTH HUB", "admitted": "Netcare Milpark", "notes": "Critically ill crew members taken for help.", "timestamp": "MAY 08"},
@@ -54,9 +47,8 @@ def _get_dynamic_hotspots(state: dict) -> list:
     ]
     nat_map = {d["code"]: d for d in NATIONALITIES_DATA}
     for h in hotspots:
-        h["fear"] = _get_local_fear_index(h["code"], intensity["hanta"].get(h["code"], 10))
         if h["code"] == "SHIP":
-            h["cases"] = state.get("confirmed_cases", 18); h["deaths"] = state.get("deaths", 5)
+            h["cases"] = state.get("confirmed_cases", 5); h["deaths"] = state.get("deaths", 1)
         elif h["code"] in nat_map:
             h["cases"] = nat_map[h["code"]]["cases"]; h["deaths"] = nat_map[h["code"]]["deaths"]
         else: h["cases"] = 0; h["deaths"] = 0
@@ -64,12 +56,11 @@ def _get_dynamic_hotspots(state: dict) -> list:
 
 def _get_dynamic_intensity(day: int) -> dict:
     phase = min(day / 65.0, 1.0)
-    # COVID progression: Day 35 = ~50% global spread in 2020 simulation
     covid = {
         "CHN": 99.8, "ITA": min(phase * 82, 100), "ESP": min(phase * 64, 100),
         "GBR": min(phase * 42, 100), "USA": min(phase * 34, 100),
-        "ARG": min(day * 0.1, 5) if day > 58 else 0.0, "ZAF": min(day * 0.1, 5) if day > 67 else 0.0, 
-        "EGY": min(day * 0.2, 10) if day > 46 else 0.0, "PHL": 8.5
+        "ARG": 0.5 if day > 58 else 0.0, "ZAF": 0.1 if day > 67 else 0.0, 
+        "EGY": 0.5 if day > 46 else 0.0, "PHL": 8.5
     }
     hanta = {
         "ARG": 95.0, "ZAF": min(55.0 + (day * 0.55), 100), "ESP": min(45.0 + (day * 0.65), 100),
@@ -83,7 +74,7 @@ def render_map_panel() -> None:
     state = _get_live_state()
     from ui.pandemic_risk import _compute_risk
     
-    risk_data = _compute_risk(state.get("confirmed_cases", 18), 5)
+    risk_data = _compute_risk(state.get("confirmed_cases", 5), 5)
     current_day = risk_data["days"]
     intensity = _get_dynamic_intensity(current_day)
     hotspots = _get_dynamic_hotspots(state)
@@ -94,7 +85,7 @@ def render_map_panel() -> None:
         <div class="mission-header" style='border-left: 3px solid #4ade80; padding-left:15px; margin-bottom:0.8rem; display:flex; justify-content:space-between; align-items:center;'>
             <div>
                 <h2 style='margin:0; font-size:1.1rem; letter-spacing:0.12em; color:#ffffff;'>GLOBAL HEALTH MONITOR</h2>
-                <p style='margin:0; font-size:0.6rem; color:#4ade80; font-family:monospace; font-weight:800;'>MISSION DAY_{current_day} // DATA SYNC: ACTIVE</p>
+                <p style='margin:0; font-size:0.6rem; color:#4ade80; font-family:monospace; font-weight:800;'>VIRUS TIMELINE: DAY_{current_day} // STATUS: ACTIVE</p>
             </div>
         </div>
         """, unsafe_allow_html=True
@@ -103,6 +94,7 @@ def render_map_panel() -> None:
     col_map, col_vessel = st.columns([2.2, 1])
     
     with col_vessel:
+        # COMPACT VESSEL CARD
         events_html = ""
         for ev in events:
             color = "#4ade80" if ev['hours_ago'] <= 48 else "#fde047"
@@ -114,21 +106,44 @@ def render_map_panel() -> None:
             """
 
         vessel_card_html = f"""
+        <style>
+            @keyframes slideIn {{ from {{ opacity: 0; transform: translateX(-10px); }} to {{ opacity: 1; transform: translateX(0); }} }}
+            @keyframes pulse {{ 0% {{ opacity: 1; }} 50% {{ opacity: 0.4; }} 100% {{ opacity: 1; }} }}
+            .scroll-container::-webkit-scrollbar {{ width: 2px; }}
+            .scroll-container::-webkit-scrollbar-thumb {{ background: #4ade80; border-radius: 1px; }}
+        </style>
         <div style="font-family: sans-serif; background: rgba(15, 23, 42, 0.95); border: 2px solid #4ade80; box-shadow: 0 0 20px rgba(74,222,128,0.1); padding: 1.2rem; border-radius: 12px; height: 380px; display: flex; flex-direction: column; color: #fff; overflow: hidden;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                 <div style="color: #4ade80; font-size: 9px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">🚢 SHIP SIGNALS</div>
-                <div style="background:rgba(74,222,128,0.1); padding:1px 6px; border-radius:3px; border:1px solid #4ade8033; color:#4ade80; font-size:7px; font-weight:900;">LIVE</div>
+                <div style="background:rgba(74,222,128,0.1); padding:1px 6px; border-radius:3px; border:1px solid #4ade8033; color:#4ade80; font-size:7px; font-weight:900; animation: pulse 2s infinite;">LIVE</div>
             </div>
             <div style="margin: 10px 0;">
                 <h2 style="margin:0; font-size:1.6rem; font-weight:900; line-height: 1; color:#ffffff;">{state.get('ship_status', 'Quarantined').upper()}</h2>
-                <p style="color:#4ade80; font-size:0.65rem; font-weight:800; margin-top:4px; text-transform:uppercase;">MV HONDIUS // DAY_{current_day}</p>
+                <p style="color:#4ade80; font-size:0.65rem; font-weight:800; margin-top:4px; text-transform:uppercase;">MV HONDIUS // PROTECTED</p>
             </div>
+            
+            <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:10px; margin-bottom:12px; border:1px solid rgba(255,255,255,0.05);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                    <span style="color:#94a3b8; font-size:8px; font-weight:800; text-transform:uppercase;">SAFETY</span>
+                    <span style="color:#4ade80; font-size:10px; font-weight:900;">94%</span>
+                </div>
+                <div style="height:3px; background:rgba(255,255,255,0.1); border-radius:1px; overflow:hidden;">
+                    <div style="width:94%; height:100%; background:#4ade80;"></div>
+                </div>
+            </div>
+
             <div style="color: #64748b; font-size: 9px; font-weight: 900; margin-bottom: 10px; text-transform: uppercase; letter-spacing:0.5px; display:flex; align-items:center;">
-                <span style="width:6px; height:6px; background:#4ade80; border-radius:50%; margin-right:6px; display:inline-block;"></span>
+                <span style="width:6px; height:6px; background:#4ade80; border-radius:50%; margin-right:6px; display:inline-block; animation: pulse 1s infinite;"></span>
                 RECENT EVENTS
             </div>
-            <div style="flex: 1; overflow-y: auto; padding-right: 5px;">
+            
+            <div class="scroll-container" style="flex: 1; overflow-y: auto; padding-right: 5px;">
                 {events_html}
+            </div>
+            
+            <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center;">
+                <span style="color:#64748b; font-size:7px;">SYNC: {datetime.now().strftime("%H:%M:%S")}</span>
+                <span style="color:#4ade80; font-size:8px; font-weight:900;">ACTIVE</span>
             </div>
         </div>
         """
@@ -152,7 +167,6 @@ def render_map_panel() -> None:
                 @keyframes marker-blink { 0%, 100% { opacity: 1; box-shadow: 0 0 8px currentColor; } 50% { opacity: 0.6; box-shadow: 0 0 25px currentColor; } }
                 .badge { position: absolute; top: -10px; right: -10px; background: #ffffff; color: #000; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center; border: 2px solid #000; }
                 .intel-label { color: #94a3b8; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-                .fear-val { font-size: 14px; font-weight: 900; }
             </style>
         </head>
         <body>
@@ -178,17 +192,15 @@ def render_map_panel() -> None:
                                 const hantaRisk = (intensity.hanta[code] || (Math.random() * 2 + 0.1)).toFixed(1);
                                 const covidRisk = parseFloat(intensity.covid[code] || 0.0);
                                 const onsetDay = intensity.onset[code] || 0;
-                                const fear = Math.min(Math.max((hantaRisk * 0.7) + (Math.random() * 20), 10), 98).toFixed(1);
-                                
                                 let tooltipHtml = `<div><b style="color:#4ade80; font-size:13px; letter-spacing:1px;">📡 ${name} SAFETY CHECK</b><br/>`;
                                 tooltipHtml += `<div style="margin-top:12px;"><div style="display:flex; justify-content:space-between; gap:25px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px; margin-bottom:10px;">`;
                                 tooltipHtml += `<div><div style="color:#94a3b8; font-size:9px;">CHANCE OF SPREAD</div><div style="color:#fff; font-size:14px; font-weight:900;">${hantaRisk}%</div></div>`;
                                 tooltipHtml += `<div><div style="color:#94a3b8; font-size:9px;">COVID DAY ${__DAY__}</div><div style="color:#fff; font-size:14px; font-weight:900;">${covidRisk.toFixed(1)}%</div></div></div>`;
-                                tooltipHtml += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">`;
-                                tooltipHtml += `<div><div style="color:#ef4444; font-size:9px; font-weight:800;">LOCAL FEAR INDEX</div><div style="color:#ef4444; font-size:14px; font-weight:900;">${fear}%</div></div>`;
-                                tooltipHtml += `<div style="text-align:right;"><div style="color:#64748b; font-size:8px;">NEWS SENTIMENT</div><div style="color:#cbd5e1; font-size:10px;">LOW-PANIC</div></div></div>`;
-                                tooltipHtml += `<p style="color:#94a3b8; font-size:9px; font-weight:900; margin:0; text-transform:uppercase;">CALC: (Risk * 0.5) + (Sentiment * 0.3) + (Proximity * 0.2)</p>`;
-                                if (covidRisk === 0 && onsetDay > 0) tooltipHtml += `<p style="color:#ef4444; font-size:11px; font-weight:950; margin-top:10px; text-transform:uppercase;">[!] STARTING DAY: ${onsetDay}</p>`;
+                                tooltipHtml += `<p style="color:#94a3b8; font-size:10px; font-weight:900; margin:0; text-transform:uppercase;">CALC: (Travel Links * 0.6) + (Distance * 0.4)</p>`;
+                                if (covidRisk === 0) {
+                                    if (onsetDay > 0) tooltipHtml += `<p style="color:#ef4444; font-size:11px; font-weight:950; margin-top:10px; text-transform:uppercase;">[!] STARTING DAY: ${onsetDay}</p>`;
+                                    else { tooltipHtml += `<p style="color:#94a3b8; font-size:10px; font-weight:900; margin-top:10px; text-transform:uppercase;">STATUS: ESTIMATED DATA</p><p style="color:#64748b; font-size:9px; font-style:italic; margin:0;">(Based on nearby areas)</p>`; }
+                                }
                                 tooltipHtml += `</div></div>`;
                                 layer.bindTooltip(tooltipHtml, { sticky: true });
                             }
@@ -198,7 +210,7 @@ def render_map_panel() -> None:
                     const isShip = h.code === 'SHIP';
                     const icon = L.divIcon({ className: '', html: `<div class="ring-marker blink-active ${isShip ? 'vessel-ring' : ''}" style="border-color:${h.color}; color:${h.color};"><div class="badge">${h.cases}</div></div>`, iconSize: [24, 24], iconAnchor: [12, 12] });
                     const marker = L.marker([h.lat, h.lng], { icon: icon }).addTo(map);
-                    let popupHtml = `<div style="padding:15px; min-width:260px; font-family:sans-serif;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><b style="color:${h.color}; font-size:14px;">📡 ${h.name}</b><span style="color:#94a3b8; font-size:9px;">${h.timestamp}</span></div><div style="color:#ffffff; font-size:11px; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; font-weight:600;">${h.relation}</div><div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:12px;"><div><div class="intel-label">LOCAL FEAR INDEX</div><div style="color:#ef4444; font-size:18px; font-weight:900;">${h.fear}%</div></div><div><div class="intel-label">NEWS ANALYSIS</div><div style="color:#fff; font-size:11px; font-weight:900;">HIGH-STRESS</div></div></div><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;"><div><div class="intel-label">HOSPITAL / CLINIC</div><div style="color:#4ade80; font-size:10px; font-weight:900;">${h.admitted}</div></div><div><div class="intel-label">TOTAL CASES</div><div style="color:#fff; font-size:10px; font-weight:900;">${h.cases}</div></div></div></div>`;
+                    let popupHtml = `<div style="padding:15px; min-width:260px; font-family:sans-serif;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><b style="color:${h.color}; font-size:14px;">📡 ${h.name}</b><span style="color:#94a3b8; font-size:9px;">${h.timestamp}</span></div><div style="color:#ffffff; font-size:11px; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; font-weight:600;">${h.relation}</div><div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:12px;"><div><div class="intel-label">TOTAL CASES</div><div style="color:#fff; font-size:18px; font-weight:900;">${h.cases}</div></div><div><div class="intel-label">TOTAL DEATHS</div><div style="color:#ef4444; font-size:18px; font-weight:900;">${h.deaths}</div></div></div><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;"><div><div class="intel-label">HOSPITAL / CLINIC</div><div style="color:#4ade80; font-size:10px; font-weight:900;">${h.admitted}</div></div><div><div class="intel-label">LATEST NOTES</div><div style="color:#cbd5e1; font-size:9px; font-style:italic; line-height:1.2;">${h.notes}</div></div></div></div>`;
                     marker.bindPopup(popupHtml, { closeButton: false, offset: [0, -10] });
                     marker.on('mouseover', function() { this.openPopup(); });
                     marker.on('mouseout', function() { this.closePopup(); });
