@@ -1,6 +1,7 @@
 """Fear index component — user voting on outbreak fear level."""
 from __future__ import annotations
 
+import os
 import hashlib
 import json
 import streamlit as st
@@ -58,7 +59,6 @@ def _save_fear_vote(level: int, user_id: str) -> None:
 
 
 @st.cache_data(ttl=900, show_spinner=False)
-
 def _calculate_web_sentiment() -> float:
     """Analyze recent news to derive a 'media fear' score (1-5)."""
     try:
@@ -210,8 +210,8 @@ def render_fear_index() -> None:
     community = get_community_data()
 
     if "user_id" not in st.session_state:
-        browser_info = str(st.session_state) + str(hash(str(datetime.utcnow().date())))
-        user_hash = hashlib.md5(browser_info.encode()).hexdigest()[:12]
+        # Stable user ID for local browser
+        user_hash = hashlib.md5(str(datetime.utcnow().date()).encode()).hexdigest()[:8]
         st.session_state.user_id = f"user_{user_hash}"
     user_id = st.session_state.user_id
 
@@ -227,21 +227,30 @@ def render_fear_index() -> None:
 
     anim = "pulse-fear 2s ease-in-out infinite" if live_fear >= 3.0 else "none"
     
+    # Status indicator: GREEN if QDRANT_URL set, RED otherwise
+    db_status = "REMOTE" if os.getenv("QDRANT_URL") else "LOCAL"
+    db_color = "#22c55e" if os.getenv("QDRANT_URL") else "#ef4444"
+
     html_header = f"""
 <div style="background:rgba(15, 23, 42, 0.6); border: 1px solid {color}44; border-radius: 10px; padding: 0.8rem 1.2rem;
 margin-bottom: 0.8rem; position: relative; overflow: hidden; min-height: 120px; display: flex; flex-direction: column; justify-content: space-between; backdrop-filter: blur(10px);">
 <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px;
 background: linear-gradient(90deg,{color},{color}44,{color}); animation: {anim};"></div>
-<div style="display:flex; align-items:center; gap: 1.5rem; flex-wrap:wrap;">
-<div style="flex-shrink:0;">
-<p style="color:#94a3b8; font-size:0.65rem; font-weight:800; letter-spacing:0.1em; margin:0; font-family:monospace; opacity:0.8;">📡 FEAR INDEX</p>
-<h2 style="margin:0; font-size:1.8rem !important; font-weight:950; color:white !important; letter-spacing:-0.03em; line-height: 1;">{label.upper()}</h2>
-</div>
-<div style="background:{color}15; border:1px solid {color}; border-radius:6px; padding:0.3rem 0.8rem; 
-text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-content;">
-<p style="color:{color}; font-size:1.5rem; font-weight:900; margin:0; line-height:1; font-family:monospace; text-shadow:0 0 8px {color}88;">{live_fear:.2f}<small style="font-size:0.5em; opacity:0.7;">/5</small></p>
-<p style="color:#94a3b8; font-size:0.5rem; font-weight:800; margin:0; text-transform:uppercase; opacity:0.8;">SCORE</p>
-</div>
+<div style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
+    <div style="display:flex; align-items:center; gap: 1.5rem; flex-wrap:wrap;">
+        <div style="flex-shrink:0;">
+        <p style="color:#94a3b8; font-size:0.65rem; font-weight:800; letter-spacing:0.1em; margin:0; font-family:monospace; opacity:0.8;">📡 FEAR INDEX</p>
+        <h2 style="margin:0; font-size:1.8rem !important; font-weight:950; color:white !important; letter-spacing:-0.03em; line-height: 1;">{label.upper()}</h2>
+        </div>
+        <div style="background:{color}15; border:1px solid {color}; border-radius:6px; padding:0.3rem 0.8rem; 
+        text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-content;">
+        <p style="color:{color}; font-size:1.5rem; font-weight:900; margin:0; line-height:1; font-family:monospace; text-shadow:0 0 8px {color}88;">{live_fear:.2f}<small style="font-size:0.5em; opacity:0.7;">/5</small></p>
+        <p style="color:#94a3b8; font-size:0.5rem; font-weight:800; margin:0; text-transform:uppercase; opacity:0.8;">SCORE</p>
+        </div>
+    </div>
+    <div style="text-align:right;">
+        <span style="color:{db_color}; font-size:0.55rem; font-weight:900; letter-spacing:0.1em; border:1px solid {db_color}44; padding:2px 6px; border-radius:4px;">{db_status} DB</span>
+    </div>
 </div>
 <div style="display:flex; gap:0.9rem; flex-wrap:wrap; border-top:1px solid rgba(255,255,255,0.05); padding-top:0.4rem;">
 <span style="color:#94a3b8; font-size:0.6rem;">🌐 Web: <b style="color:white;">{web_sentiment:.1f}</b></span>

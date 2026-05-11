@@ -34,8 +34,12 @@ def kv_get(key: str, default: Any = None) -> Any:
             result = _client().retrieve(_COLLECTION, ids=[_hash_id(key)], with_payload=True)
             if result:
                 return result[0].payload.get("value", default)
-        except Exception:
-            pass
+            return default # Key not found in Qdrant, return default
+        except Exception as e:
+            # DO NOT fall back to local JSON if Qdrant is configured but failing.
+            # This prevents overwriting remote data with empty local data.
+            raise RuntimeError(f"Qdrant persistence failure: {str(e)}") from e
+    
     path = Path(f"data/kv_{key}.json")
     if path.exists():
         try:
