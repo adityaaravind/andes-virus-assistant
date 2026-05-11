@@ -94,14 +94,14 @@ def render_map_panel() -> None:
     col_map, col_vessel = st.columns([2.2, 1])
     
     with col_vessel:
+        # COMPACT VESSEL CARD
         events_html = ""
         for ev in events:
             color = "#4ade80" if ev['hours_ago'] <= 48 else "#fde047"
             events_html += f"""
-                <div style="border-left: 3px solid {color}; padding-left: 12px; margin-bottom: 15px; animation: slideIn 0.4s ease-out;">
-                    <div style="color: {color}; font-size: 9px; font-weight: 900; letter-spacing: 1px;">{ev['date']} @ {ev['time']}</div>
-                    <div style="color: #ffffff; font-size: 11px; line-height: 1.3; font-weight: 600; margin-top:3px;">{ev['event']}</div>
-                    <div style="color: #64748b; font-size: 8px; margin-top:2px;">Signal Source: {ev['official']}</div>
+                <div style="border-left: 3px solid {color}; padding-left: 12px; margin-bottom: 12px; animation: slideIn 0.4s ease-out;">
+                    <div style="color: {color}; font-size: 8.5px; font-weight: 900; letter-spacing: 0.5px;">{ev['date']} @ {ev['time']}</div>
+                    <div style="color: #ffffff; font-size: 10.5px; line-height: 1.2; font-weight: 600; margin-top:2px;">{ev['event']}</div>
                 </div>
             """
 
@@ -109,42 +109,45 @@ def render_map_panel() -> None:
         <style>
             @keyframes slideIn {{ from {{ opacity: 0; transform: translateX(-10px); }} to {{ opacity: 1; transform: translateX(0); }} }}
             @keyframes pulse {{ 0% {{ opacity: 1; }} 50% {{ opacity: 0.4; }} 100% {{ opacity: 1; }} }}
-            .scroll-container::-webkit-scrollbar {{ width: 3px; }}
-            .scroll-container::-webkit-scrollbar-track {{ background: rgba(0,0,0,0.1); }}
-            .scroll-container::-webkit-scrollbar-thumb {{ background: #4ade80; border-radius: 2px; }}
+            .scroll-container::-webkit-scrollbar {{ width: 2px; }}
+            .scroll-container::-webkit-scrollbar-thumb {{ background: #4ade80; border-radius: 1px; }}
         </style>
-        <div style="font-family: sans-serif; background: rgba(15, 23, 42, 0.95); border: 2px solid #4ade80; box-shadow: 0 0 30px rgba(74,222,128,0.15); padding: 1.5rem; border-radius: 16px; height: 500px; display: flex; flex-direction: column; color: #fff; overflow: hidden;">
+        <div style="font-family: sans-serif; background: rgba(15, 23, 42, 0.95); border: 2px solid #4ade80; box-shadow: 0 0 20px rgba(74,222,128,0.1); padding: 1.2rem; border-radius: 12px; height: 380px; display: flex; flex-direction: column; color: #fff; overflow: hidden;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                <div style="color: #4ade80; font-size: 10px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;">🚢 SHIP SIGNALS</div>
-                <div style="background:rgba(74,222,128,0.1); padding:2px 8px; border-radius:4px; border:1px solid #4ade8044; color:#4ade80; font-size:8px; font-weight:900; animation: pulse 2s infinite;">LIVE_DATA_STREAM</div>
+                <div style="color: #4ade80; font-size: 9px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">🚢 SHIP SIGNALS</div>
+                <div style="background:rgba(74,222,128,0.1); padding:1px 6px; border-radius:3px; border:1px solid #4ade8033; color:#4ade80; font-size:7px; font-weight:900; animation: pulse 2s infinite;">LIVE</div>
             </div>
-            <div style="margin: 15px 0;">
-                <h2 style="margin:0; font-size:2rem; font-weight:900; line-height: 1; letter-spacing:-0.03em; color:#ffffff;">{state.get('ship_status', 'Quarantined').upper()}</h2>
-                <p style="color:#4ade80; font-size:0.7rem; font-weight:800; margin-top:5px; text-transform:uppercase;">MV HONDIUS // SAFETY PROTOCOL ACTIVE</p>
+            <div style="margin: 10px 0;">
+                <h2 style="margin:0; font-size:1.6rem; font-weight:900; line-height: 1; color:#ffffff;">{state.get('ship_status', 'Quarantined').upper()}</h2>
+                <p style="color:#4ade80; font-size:0.65rem; font-weight:800; margin-top:4px; text-transform:uppercase;">MV HONDIUS // PROTECTED</p>
             </div>
-            <div style="background:rgba(255,255,255,0.03); border-radius:12px; padding:12px; margin-bottom:15px; border:1px solid rgba(255,255,255,0.05);">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <span style="color:#94a3b8; font-size:9px; font-weight:800; text-transform:uppercase;">SAFETY RATING</span>
-                    <span style="color:#4ade80; font-size:11px; font-weight:900;">94%</span>
+            
+            <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:10px; margin-bottom:12px; border:1px solid rgba(255,255,255,0.05);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                    <span style="color:#94a3b8; font-size:8px; font-weight:800; text-transform:uppercase;">SAFETY</span>
+                    <span style="color:#4ade80; font-size:10px; font-weight:900;">94%</span>
                 </div>
-                <div style="height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden;">
-                    <div style="width:94%; height:100%; background:#4ade80; box-shadow: 0 0 10px #4ade80;"></div>
+                <div style="height:3px; background:rgba(255,255,255,0.1); border-radius:1px; overflow:hidden;">
+                    <div style="width:94%; height:100%; background:#4ade80;"></div>
                 </div>
             </div>
-            <div style="color: #64748b; font-size: 10px; font-weight: 900; margin-bottom: 12px; text-transform: uppercase; letter-spacing:1px; display:flex; align-items:center;">
-                <span style="width:8px; height:8px; background:#4ade80; border-radius:50%; margin-right:8px; display:inline-block; animation: pulse 1s infinite;"></span>
-                RECENT SHIP EVENTS
+
+            <div style="color: #64748b; font-size: 9px; font-weight: 900; margin-bottom: 10px; text-transform: uppercase; letter-spacing:0.5px; display:flex; align-items:center;">
+                <span style="width:6px; height:6px; background:#4ade80; border-radius:50%; margin-right:6px; display:inline-block; animation: pulse 1s infinite;"></span>
+                RECENT EVENTS
             </div>
-            <div class="scroll-container" style="flex: 1; overflow-y: auto; padding-right: 8px;">
+            
+            <div class="scroll-container" style="flex: 1; overflow-y: auto; padding-right: 5px;">
                 {events_html}
             </div>
-            <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center;">
-                <span style="color:#64748b; font-size:8px;">SYNC_TIME: {datetime.now().strftime("%H:%M:%S")}</span>
-                <span style="color:#4ade80; font-size:9px; font-weight:900;">UPLINK: ACTIVE</span>
+            
+            <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center;">
+                <span style="color:#64748b; font-size:7px;">SYNC: {datetime.now().strftime("%H:%M:%S")}</span>
+                <span style="color:#4ade80; font-size:8px; font-weight:900;">ACTIVE</span>
             </div>
         </div>
         """
-        components.html(vessel_card_html, height=520)
+        components.html(vessel_card_html, height=400)
 
     with col_map:
         map_template = """
@@ -171,11 +174,9 @@ def render_map_panel() -> None:
             <script>
                 const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([12, -25], 2.8);
                 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
-
                 const hotspots = __HOTSPOTS__;
                 const intensity = __INTENSITY__;
                 const shipPos = [14.93, -23.51];
-
                 fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
                     .then(res => res.json())
                     .then(geojson => {
@@ -191,44 +192,25 @@ def render_map_panel() -> None:
                                 const hantaRisk = (intensity.hanta[code] || (Math.random() * 2 + 0.1)).toFixed(1);
                                 const covidRisk = parseFloat(intensity.covid[code] || 0.0);
                                 const onsetDay = intensity.onset[code] || 0;
-
                                 let tooltipHtml = `<div><b style="color:#4ade80; font-size:13px; letter-spacing:1px;">📡 ${name} SAFETY CHECK</b><br/>`;
-                                tooltipHtml += `<div style="margin-top:12px;">`;
-                                tooltipHtml += `<div style="display:flex; justify-content:space-between; gap:25px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px; margin-bottom:10px;">`;
+                                tooltipHtml += `<div style="margin-top:12px;"><div style="display:flex; justify-content:space-between; gap:25px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px; margin-bottom:10px;">`;
                                 tooltipHtml += `<div><div style="color:#94a3b8; font-size:9px;">CHANCE OF SPREAD</div><div style="color:#fff; font-size:14px; font-weight:900;">${hantaRisk}%</div></div>`;
-                                tooltipHtml += `<div><div style="color:#94a3b8; font-size:9px;">COVID DAY ${__DAY__}</div><div style="color:#fff; font-size:14px; font-weight:900;">${covidRisk.toFixed(1)}%</div></div>`;
-                                tooltipHtml += `</div>`;
-                                
+                                tooltipHtml += `<div><div style="color:#94a3b8; font-size:9px;">COVID DAY ${__DAY__}</div><div style="color:#fff; font-size:14px; font-weight:900;">${covidRisk.toFixed(1)}%</div></div></div>`;
                                 tooltipHtml += `<p style="color:#94a3b8; font-size:10px; font-weight:900; margin:0; text-transform:uppercase;">CALC: (Travel Links * 0.6) + (Distance * 0.4)</p>`;
-                                
                                 if (covidRisk === 0) {
-                                    if (onsetDay > 0) {
-                                        tooltipHtml += `<p style="color:#ef4444; font-size:11px; font-weight:950; margin-top:10px; text-transform:uppercase;">[!] STARTING DAY: ${onsetDay}</p>`;
-                                    } else {
-                                        tooltipHtml += `<p style="color:#94a3b8; font-size:10px; font-weight:900; margin-top:10px; text-transform:uppercase;">STATUS: ESTIMATED DATA</p>`;
-                                        tooltipHtml += `<p style="color:#64748b; font-size:9px; font-style:italic; margin:0;">(Based on nearby areas)</p>`;
-                                    }
+                                    if (onsetDay > 0) tooltipHtml += `<p style="color:#ef4444; font-size:11px; font-weight:950; margin-top:10px; text-transform:uppercase;">[!] STARTING DAY: ${onsetDay}</p>`;
+                                    else { tooltipHtml += `<p style="color:#94a3b8; font-size:10px; font-weight:900; margin-top:10px; text-transform:uppercase;">STATUS: ESTIMATED DATA</p><p style="color:#64748b; font-size:9px; font-style:italic; margin:0;">(Based on nearby areas)</p>`; }
                                 }
-                                
                                 tooltipHtml += `</div></div>`;
                                 layer.bindTooltip(tooltipHtml, { sticky: true });
                             }
                         }).addTo(map);
                     });
-
                 hotspots.forEach(h => {
                     const isShip = h.code === 'SHIP';
-                    const icon = L.divIcon({
-                        className: '',
-                        html: `<div class="ring-marker blink-active ${isShip ? 'vessel-ring' : ''}" style="border-color:${h.color}; color:${h.color};"><div class="badge">${h.cases}</div></div>`,
-                        iconSize: [24, 24], iconAnchor: [12, 12]
-                    });
+                    const icon = L.divIcon({ className: '', html: `<div class="ring-marker blink-active ${isShip ? 'vessel-ring' : ''}" style="border-color:${h.color}; color:${h.color};"><div class="badge">${h.cases}</div></div>`, iconSize: [24, 24], iconAnchor: [12, 12] });
                     const marker = L.marker([h.lat, h.lng], { icon: icon }).addTo(map);
-                    let popupHtml = `<div style="padding:15px; min-width:260px; font-family:sans-serif;">`;
-                    popupHtml += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><b style="color:${h.color}; font-size:14px;">📡 ${h.name}</b><span style="color:#94a3b8; font-size:9px;">${h.timestamp}</span></div>`;
-                    popupHtml += `<div style="color:#ffffff; font-size:11px; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; font-weight:600;">${h.relation}</div>`;
-                    popupHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:12px;"><div><div class="intel-label">TOTAL CASES</div><div style="color:#fff; font-size:18px; font-weight:900;">${h.cases}</div></div><div><div class="intel-label">TOTAL DEATHS</div><div style="color:#ef4444; font-size:18px; font-weight:900;">${h.deaths}</div></div></div>`;
-                    popupHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;"><div><div class="intel-label">HOSPITAL / CLINIC</div><div style="color:#4ade80; font-size:10px; font-weight:900;">${h.admitted}</div></div><div><div class="intel-label">LATEST NOTES</div><div style="color:#cbd5e1; font-size:9px; font-style:italic; line-height:1.2;">${h.notes}</div></div></div></div>`;
+                    let popupHtml = `<div style="padding:15px; min-width:260px; font-family:sans-serif;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><b style="color:${h.color}; font-size:14px;">📡 ${h.name}</b><span style="color:#94a3b8; font-size:9px;">${h.timestamp}</span></div><div style="color:#ffffff; font-size:11px; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; font-weight:600;">${h.relation}</div><div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:12px;"><div><div class="intel-label">TOTAL CASES</div><div style="color:#fff; font-size:18px; font-weight:900;">${h.cases}</div></div><div><div class="intel-label">TOTAL DEATHS</div><div style="color:#ef4444; font-size:18px; font-weight:900;">${h.deaths}</div></div></div><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;"><div><div class="intel-label">HOSPITAL / CLINIC</div><div style="color:#4ade80; font-size:10px; font-weight:900;">${h.admitted}</div></div><div><div class="intel-label">LATEST NOTES</div><div style="color:#cbd5e1; font-size:9px; font-style:italic; line-height:1.2;">${h.notes}</div></div></div></div>`;
                     marker.bindPopup(popupHtml, { closeButton: false, offset: [0, -10] });
                     marker.on('mouseover', function() { this.openPopup(); });
                     marker.on('mouseout', function() { this.closePopup(); });
