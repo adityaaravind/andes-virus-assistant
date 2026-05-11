@@ -122,95 +122,93 @@ def render_faq_panel(chain: Any) -> None:
     )
 
     # FAQ Grid Styles
-    st.markdown("""
-        <style>
-            .faq-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-                gap: 1.5rem;
-                margin-bottom: 2rem;
-            }
-            .faq-card {
-                background: rgba(15, 23, 42, 0.7);
-                border: 1px solid rgba(255,255,255,0.08);
-                border-radius: 16px;
-                padding: 1.5rem;
-                backdrop-filter: blur(12px);
-                position: relative;
-                overflow: hidden;
-                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-                display: flex;
-                flex-direction: column;
-                box-shadow: 0 4px 30px rgba(0,0,0,0.3);
-            }
-            .faq-card:hover {
-                border-color: var(--accent-color);
-                background: rgba(15, 23, 42, 0.9);
-                transform: translateY(-4px);
-                box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 20px var(--accent-glow);
-            }
-            .faq-category {
-                font-size: 0.65rem;
-                font-weight: 950;
-                text-transform: uppercase;
-                letter-spacing: 0.15em;
-                margin-bottom: 0.8rem;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                color: var(--accent-color);
-            }
-            .faq-question {
-                color: #f8fafc;
-                font-size: 1.05rem;
-                font-weight: 800;
-                line-height: 1.3;
-                margin-bottom: 1rem;
-                flex-grow: 1;
-            }
-            .faq-answer-box {
-                margin-top: 1rem;
-                padding: 1rem;
-                background: rgba(0,0,0,0.3);
-                border-radius: 10px;
-                border: 1px solid rgba(255,255,255,0.03);
-                color: #94a3b8;
-                font-size: 0.9rem;
-                line-height: 1.6;
-                animation: slideDown 0.3s ease-out;
-            }
-            @keyframes slideDown {
-                from { opacity: 0; transform: translateY(-10px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-            details summary {
-                list-style: none;
-                cursor: pointer;
-                outline: none;
-                color: var(--accent-color);
-                font-size: 0.7rem;
-                font-weight: 900;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                text-transform: uppercase;
-                letter-spacing: 0.1em;
-                opacity: 0.8;
-                transition: opacity 0.2s;
-            }
-            details summary:hover { opacity: 1; }
-            details summary::-webkit-details-marker { display: none; }
-            details[open] summary { color: #f8fafc; margin-bottom: 0.5rem; }
-            details[open] summary::before { content: '▼'; font-size: 8px; }
-            details:not([open]) summary::before { content: '▶'; font-size: 8px; }
-            
-            .faq-icon {
-                font-size: 1.2rem;
-                margin-right: 8px;
-                opacity: 0.9;
-            }
-        </style>
-    """, unsafe_allow_html=True)
+    st.markdown("""<style>
+.faq-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+.faq-card {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 1.5rem;
+    backdrop-filter: blur(12px);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+}
+.faq-card:hover {
+    border-color: var(--accent-color);
+    background: rgba(15, 23, 42, 0.9);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 20px var(--accent-glow);
+}
+.faq-category {
+    font-size: 0.65rem;
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--accent-color);
+}
+.faq-question {
+    color: #f8fafc;
+    font-size: 1.05rem;
+    font-weight: 800;
+    line-height: 1.3;
+    margin-bottom: 1rem;
+    flex-grow: 1;
+}
+.faq-answer-box {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.03);
+    color: #94a3b8;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    animation: slideDown 0.3s ease-out;
+}
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+details summary {
+    list-style: none;
+    cursor: pointer;
+    outline: none;
+    color: var(--accent-color);
+    font-size: 0.7rem;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+details summary:hover { opacity: 1; }
+details summary::-webkit-details-marker { display: none; }
+details[open] summary { color: #f8fafc; margin-bottom: 0.5rem; }
+details[open] summary::before { content: '▼'; font-size: 8px; }
+details:not([open]) summary::before { content: '▶'; font-size: 8px; }
+
+.faq-icon {
+    font-size: 1.2rem;
+    margin-right: 8px;
+    opacity: 0.9;
+}
+</style>""", unsafe_allow_html=True)
 
     CAT_ICONS = {
         "Biology":      "🧬", "Outbreak":     "🚨", "Transmission": "☣️",
@@ -235,25 +233,23 @@ def render_faq_panel(chain: Any) -> None:
         if click_count > 140: # Subagent saw 140+ views in previous audit
             popularity_badge = f'<span style="background:rgba(239,68,68,0.2); color:#f87171; padding:2px 8px; border-radius:6px; font-size:0.55rem; font-weight:950; border:1px solid #f8717144;">HIGH PRIORITY</span>'
         
-        faq_html += f"""
-            <div class="faq-card" style="--accent-color: {c_border}; --accent-glow: {accent_glow};">
-                <div style="position:absolute; top:0; left:0; width:100%; height:4px; background:linear-gradient(90deg, {c_border}, transparent);"></div>
-                <div class="faq-category">
-                    <span><span class="faq-icon">{icon}</span>{cat.upper()}</span>
-                    <div style="display:flex; gap:8px; align-items:center;">
-                        {popularity_badge}
-                        <span style="color:#475569; font-size:0.55rem;">{click_count} ANALYTICS</span>
-                    </div>
-                </div>
-                <div class="faq-question">{item['q']}</div>
-                <details>
-                    <summary>ACCESS INTEL</summary>
-                    <div class="faq-answer-box">
-                        {answer}
-                    </div>
-                </details>
-            </div>
-        """
+        faq_html += f"""<div class="faq-card" style="--accent-color: {c_border}; --accent-glow: {accent_glow};">
+<div style="position:absolute; top:0; left:0; width:100%; height:4px; background:linear-gradient(90deg, {c_border}, transparent);"></div>
+<div class="faq-category">
+<span><span class="faq-icon">{icon}</span>{cat.upper()}</span>
+<div style="display:flex; gap:8px; align-items:center;">
+{popularity_badge}
+<span style="color:#475569; font-size:0.55rem;">{click_count} ANALYTICS</span>
+</div>
+</div>
+<div class="faq-question">{item['q']}</div>
+<details>
+<summary>ACCESS INTEL</summary>
+<div class="faq-answer-box">
+{answer}
+</div>
+</details>
+</div>"""
     
     faq_html += '</div>'
     st.markdown(faq_html, unsafe_allow_html=True)
