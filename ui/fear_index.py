@@ -279,24 +279,42 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
             /* TARGET STANDARD STREAMLIT BUTTONS */
             div.stButton > button {
                 width: 100% !important;
-                height: 85px !important;
-                background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.8)) !important;
+                height: 90px !important;
+                background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9)) !important;
                 backdrop-filter: blur(8px) !important;
                 border: 1px solid rgba(255, 255, 255, 0.1) !important;
                 border-top: 3px solid var(--btn-color) !important;
                 border-radius: 12px !important;
                 color: #f8fafc !important;
-                font-family: 'Inter', monospace !important;
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-                padding: 10px !important;
+                padding: 12px 5px !important;
                 display: flex !important;
                 flex-direction: column !important;
                 align-items: center !important;
                 justify-content: center !important;
-                gap: 4px !important;
+                gap: 2px !important;
                 position: relative !important;
                 overflow: hidden !important;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.4), inset 0 0 20px var(--btn-color)11 !important;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.4) !important;
+            }
+            
+            /* LABEL FIX: Ensure text fits and doesn't wrap awkwardly */
+            div.stButton > button p {
+                margin: 0 !important;
+                line-height: 1.1 !important;
+                white-space: pre-line !important;
+                text-align: center !important;
+                font-family: 'Inter', sans-serif !important;
+                font-weight: 900 !important;
+                font-size: 0.65rem !important;
+                letter-spacing: 0.05em !important;
+                text-transform: uppercase !important;
+            }
+
+            /* EMOJI SIZE FIX */
+            div.stButton > button div[data-testid="stMarkdownContainer"] {
+                font-size: 1.5rem !important;
+                line-height: 1 !important;
             }
             
             /* BACKLIGHT GLOW EFFECT */
