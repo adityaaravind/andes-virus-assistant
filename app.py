@@ -390,10 +390,9 @@ def _render_header() -> None:
             """,
             unsafe_allow_html=True
         )
-        from ui.news_ticker import render_news_ticker
-        render_news_ticker()
     
     with author_col:
+        from ui.author_card import render_author_card
         render_author_card()
 
 
@@ -561,18 +560,18 @@ def main() -> None:
         )
         st.divider()
 
-        # ── LIVE OUTBREAK STATISTICS (CRITICAL DATA) ─────────────────────────────
+        # ── 1. LIVE OUTBREAK STATISTICS (CRITICAL DATA) ─────────────────────────────
         st.markdown("<div id='stats'></div>", unsafe_allow_html=True)
         from ui.stats_panel import render_stats_panel
         render_stats_panel()
 
-        # ── CHANCE OF SPREAD MONITOR (DETECTION BASELINE) ────────────────────────
+        # ── 2. CHANCE OF SPREAD MONITOR (DETECTION BASELINE) ────────────────────────
         st.markdown("<div id='spread_monitor'></div>", unsafe_allow_html=True)
         from ui.pandemic_risk import render_pandemic_risk_panel
         render_pandemic_risk_panel()
         st.divider()
 
-        # ── Global News Ticker ────────────────────────────────────────────────────
+        # ── 3. Global News Ticker ────────────────────────────────────────────────────
         st.markdown("<div id='news'></div>", unsafe_allow_html=True)
         from ui.news_ticker import render_news_ticker
         render_news_ticker()

@@ -87,7 +87,7 @@ def render_map_panel() -> None:
     events = _get_vessel_events()
 
     st.markdown(
-        f"""
+        f\"\"\"
         <div class="mission-header" style='border-left: 3px solid #4ade80; padding-left:15px; margin-bottom:0.8rem; display:flex; justify-content:space-between; align-items:center;'>
             <div>
                 <h2 style='margin:0; font-size:1.1rem; letter-spacing:0.12em; color:#ffffff;'>GLOBAL HEALTH MONITOR</h2>
@@ -97,7 +97,7 @@ def render_map_panel() -> None:
                 <span style="color:#4ade80; font-size:9px; font-weight:900;">VERIFIED HISTORICAL SYNC</span>
             </div>
         </div>
-        """, unsafe_allow_html=True
+        \"\"\", unsafe_allow_html=True
     )
 
     col_map, col_vessel = st.columns([2.2, 1])
@@ -106,38 +106,38 @@ def render_map_panel() -> None:
         events_html = ""
         for ev in events:
             color = "#4ade80" if ev['hours_ago'] <= 48 else "#fde047"
-            events_html += f"""
-                <div style="border-left: 3px solid {color}; padding-left: 12px; margin-bottom: 12px; animation: slideIn 0.4s ease-out;">
-                    <div style="color: {color}; font-size: 8.5px; font-weight: 900; letter-spacing: 0.5px;">{ev['date']} @ {ev['time']}</div>
-                    <div style="color: #ffffff; font-size: 10.5px; line-height: 1.2; font-weight: 600; margin-top:2px;">{ev['event']}</div>
+            events_html += f\"\"\"
+                <div style="border-left: 3px solid {{color}}; padding-left: 12px; margin-bottom: 12px; animation: slideIn 0.4s ease-out;">
+                    <div style="color: {{color}}; font-size: 8.5px; font-weight: 900; letter-spacing: 0.5px;">{{ev['date']}} @ {{ev['time']}}</div>
+                    <div style="color: #ffffff; font-size: 10.5px; line-height: 1.2; font-weight: 600; margin-top:2px;">{{ev['event']}}</div>
                 </div>
-            """
+            \"\"\"
 
-        vessel_card_html = f"""
+        vessel_card_html = f\"\"\"
         <style>
             @keyframes slideIn {{ from {{ opacity: 0; transform: translateX(-10px); }} to {{ opacity: 1; transform: translateX(0); }} }}
             @keyframes pulse {{ 0% {{ opacity: 1; }} 50% {{ opacity: 0.4; }} 100% {{ opacity: 1; }} }}
             .scroll-container::-webkit-scrollbar {{ width: 2px; }}
             .scroll-container::-webkit-scrollbar-thumb {{ background: #4ade80; border-radius: 1px; }}
         </style>
-        <div style="font-family: sans-serif; background: rgba(15, 23, 42, 0.95); border: 2px solid #4ade80; box-shadow: 0 0 20px rgba(74,222,128,0.1); padding: 1.2rem; border-radius: 12px; height: 420px; display: flex; flex-direction: column; color: #fff; overflow: hidden;">
+        <div style="font-family: sans-serif; background: rgba(15, 23, 42, 0.95); border: 2px solid #4ade80; box-shadow: 0 0 20px rgba(74,222,128,0.1); padding: 1.2rem; border-radius: 12px; height: 440px; display: flex; flex-direction: column; color: #fff; overflow: hidden;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                 <div style="color: #4ade80; font-size: 9px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">🚢 VESSEL TELEMETRY</div>
                 <div style="background:rgba(74,222,128,0.1); padding:1px 6px; border-radius:3px; border:1px solid #4ade8033; color:#4ade80; font-size:7px; font-weight:900; animation: pulse 2s infinite;">REAL-TIME</div>
             </div>
             <div style="margin: 10px 0;">
-                <h2 style="margin:0; font-size:1.6rem; font-weight:900; line-height: 1; color:#ffffff;">{state.get('ship_status', 'Quarantined').upper()}</h2>
+                <h2 style="margin:0; font-size:1.6rem; font-weight:900; line-height: 1; color:#ffffff;">{{state.get('ship_status', 'Quarantined').upper()}}</h2>
                 <p style="color:#4ade80; font-size:0.65rem; font-weight:800; margin-top:4px; text-transform:uppercase;">MV HONDIUS // IMO 9524449</p>
             </div>
             
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:12px;">
                 <div style="background:rgba(255,255,255,0.03); border-radius:6px; padding:6px; border:1px solid rgba(255,255,255,0.05);">
                     <p style="color:#94a3b8; font-size:7px; font-weight:800; margin:0;">CURRENT SPEED</p>
-                    <p style="color:#ffffff; font-size:11px; font-weight:900; margin:0;">{events[0]['speed']}</p>
+                    <p style="color:#ffffff; font-size:11px; font-weight:900; margin:0;">{{events[0]['speed']}}</p>
                 </div>
                 <div style="background:rgba(255,255,255,0.03); border-radius:6px; padding:6px; border:1px solid rgba(255,255,255,0.05);">
                     <p style="color:#94a3b8; font-size:7px; font-weight:800; margin:0;">UPLINK STRENGTH</p>
-                    <p style="color:#ffffff; font-size:11px; font-weight:900; margin:0;">{events[0]['uplink']}</p>
+                    <p style="color:#ffffff; font-size:11px; font-weight:900; margin:0;">{{events[0]['uplink']}}</p>
                 </div>
             </div>
 
@@ -146,14 +146,14 @@ def render_map_panel() -> None:
                 LIVE SIGNAL STREAM
             </div>
             <div class="scroll-container" style="flex: 1; overflow-y: auto; padding-right: 5px;">
-                {events_html}
+                {{events_html}}
             </div>
         </div>
-        """
-        components.html(vessel_card_html, height=400)
+        \"\"\"
+        components.html(vessel_card_html, height=450)
 
     with col_map:
-        map_template = """
+        map_template = \"\"\"
         <!DOCTYPE html>
         <html>
         <head>
@@ -176,7 +176,7 @@ def render_map_panel() -> None:
             <div id="map"></div>
             <script>
                 const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([12, -25], 2.8);
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
+                L.tileLayer('https://{{s}}.basemaps.cartocdn.com/dark_all/{{z}}/{{x}}/{{y}}{{r}}.png', { maxZoom: 19 }).addTo(map);
                 const hotspots = __HOTSPOTS__;
                 const intensity = __INTENSITY__;
                 const shipPos = [14.93, -23.51];
@@ -206,16 +206,16 @@ def render_map_panel() -> None:
 
                                 let tooltipHtml = `<div><b style="color:#4ade80; font-size:13px; letter-spacing:1px;">📡 ${name} SAFETY CHECK</b><br/>`;
                                 tooltipHtml += `<div style="display:flex; justify-content:space-between; gap:25px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px; margin-bottom:10px;">`;
-                                tooltipHtml += `<div><div style="color:#94a3b8; font-size:9px;">REAL-TIME CHANCE</div><div style="color:#fff; font-size:14px; font-weight:900;">${hantaRisk}%</div></div>`;
-                                tooltipHtml += `<div><div style="color:#94a3b8; font-size:9px;">PROJECTED COVID ${__DAY__}</div><div style="color:#fff; font-size:14px; font-weight:900;">${covidRisk.toFixed(1)}%</div></div></div>`;
+                                tooltipHtml += `<div><div style="color:#94a3b8; font-size:9px;">REAL-TIME CHANCE</div><div style="color:#fff; font-size:14px; font-weight:900;">\${hantaRisk}%</div></div>`;
+                                tooltipHtml += `<div><div style="color:#94a3b8; font-size:9px;">PROJECTED COVID __DAY__</div><div style="color:#fff; font-size:14px; font-weight:900;">\${covidRisk.toFixed(1)}%</div></div></div>`;
                                 
                                 tooltipHtml += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">`;
-                                tooltipHtml += `<div><div style="color:#ef4444; font-size:9px; font-weight:800;">REAL-TIME FEAR INDEX</div><div style="color:#ef4444; font-size:14px; font-weight:900;">${fear}%</div></div>`;
+                                tooltipHtml += `<div><div style="color:#ef4444; font-size:9px; font-weight:800;">REAL-TIME FEAR INDEX</div><div style="color:#ef4444; font-size:14px; font-weight:900;">\${fear}%</div></div>`;
                                 tooltipHtml += `<div style="text-align:right;"><div style="color:#64748b; font-size:8px;">VERIFIED STATUS</div><div style="color:#cbd5e1; font-size:10px;">WHO SYNC</div></div></div>`;
 
                                 if (covidRisk === 0) {
                                     const proofDate = onsetDay > 0 ? getProofDate(onsetDay) : "later date";
-                                    tooltipHtml += `<p style="color:#64748b; font-size:9px; font-style:italic; margin:4px 0 0;">PROOF: WHO confirmed first case on <b>${proofDate}</b> (Mission Day ${onsetDay}).</p>`;
+                                    tooltipHtml += `<p style="color:#64748b; font-size:9px; font-style:italic; margin:4px 0 0;">PROOF: WHO confirmed first case on <b>\${proofDate}</b> (Mission Day \${onsetDay}).</p>`;
                                 } else {
                                     tooltipHtml += `<p style="color:#94a3b8; font-size:9px; font-weight:900; margin:0; text-transform:uppercase;">CALC: (Travel Links * 0.6) + (Distance * 0.4)</p>`;
                                 }
@@ -226,9 +226,9 @@ def render_map_panel() -> None:
                     });
                 hotspots.forEach(h => {
                     const isShip = h.code === 'SHIP';
-                    const icon = L.divIcon({ className: '', html: `<div class="ring-marker blink-active" style="border-color:${h.color}; color:${h.color};"><div class="badge">${h.cases}</div></div>`, iconSize: [24, 24], iconAnchor: [12, 12] });
+                    const icon = L.divIcon({ className: '', html: `<div class="ring-marker blink-active" style="border-color:\${h.color}; color:\${h.color};"><div class="badge">\${h.cases}</div></div>`, iconSize: [24, 24], iconAnchor: [12, 12] });
                     const marker = L.marker([h.lat, h.lng], { icon: icon }).addTo(map);
-                    let popupHtml = `<div style="padding:15px; min-width:260px; font-family:sans-serif;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><b style="color:${h.color}; font-size:14px;">📡 ${h.name}</b><span style="color:#94a3b8; font-size:9px;">${h.timestamp}</span></div><div style="color:#ffffff; font-size:11px; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; font-weight:600;">${h.relation}</div><div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:12px;"><div><div class="intel-label">FEAR INDEX</div><div style="color:#ef4444; font-size:18px; font-weight:900;">${h.fear}%</div></div><div><div class="intel-label">TOTAL CASES</div><div style="color:#fff; font-size:18px; font-weight:900;">${h.cases}</div></div></div><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;"><div><div class="intel-label">HOSPITAL / CLINIC</div><div style="color:#4ade80; font-size:10px; font-weight:900;">${h.admitted}</div></div><div><div class="intel-label">LATEST NOTES</div><div style="color:#cbd5e1; font-size:9px; font-style:italic; line-height:1.2;">${h.notes}</div></div></div></div>`;
+                    let popupHtml = `<div style="padding:15px; min-width:260px; font-family:sans-serif;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><b style="color:\${h.color}; font-size:14px;">📡 \${h.name}</b><span style="color:#94a3b8; font-size:9px;">\${h.timestamp}</span></div><div style="color:#ffffff; font-size:11px; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; font-weight:600;">\${h.relation}</div><div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:12px;"><div><div class="intel-label">FEAR INDEX</div><div style="color:#ef4444; font-size:18px; font-weight:900;">\${h.fear}%</div></div><div><div class="intel-label">TOTAL CASES</div><div style="color:#fff; font-size:18px; font-weight:900;">\${h.cases}</div></div></div><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;"><div><div class="intel-label">HOSPITAL / CLINIC</div><div style="color:#4ade80; font-size:10px; font-weight:900;">\${h.admitted}</div></div><div><div class="intel-label">LATEST NOTES</div><div style="color:#cbd5e1; font-size:9px; font-style:italic; line-height:1.2;">\${h.notes}</div></div></div></div>`;
                     marker.bindPopup(popupHtml, { closeButton: false, offset: [0, -10] });
                     marker.on('mouseover', function() { this.openPopup(); });
                     marker.on('mouseout', function() { this.closePopup(); });
@@ -237,7 +237,7 @@ def render_map_panel() -> None:
             </script>
         </body>
         </html>
-        """
+        \"\"\"
         map_html = map_template.replace("__HOTSPOTS__", json.dumps(hotspots))
         map_html = map_html.replace("__INTENSITY__", json.dumps(intensity))
         map_html = map_html.replace("__DAY__", str(current_day))
