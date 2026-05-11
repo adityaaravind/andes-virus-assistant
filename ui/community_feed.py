@@ -74,13 +74,12 @@ def render_community_feed() -> None:
         elif item['type'] == 'search':
             content = f"Query: {content.replace('queried: ', '')}"
             
-        log_inner += f"""
-        <div style='font-family:monospace; font-size:0.7rem; line-height:1.4; margin-bottom:8px; display:flex; gap:10px;'>
-            <span style='color:#475569; min-width:60px;'>[{ts}]</span>
-            <span style='color:{color}; font-weight:900; min-width:70px;'>{prefix}</span>
-            <span style='color:#f1f5f9;'>{content}</span>
-        </div>
-        """
+        log_inner += (
+            f"<div style='font-family:monospace; font-size:0.7rem; line-height:1.4; margin-bottom:8px; display:flex; gap:10px;'>"
+            f"<span style='color:#475569; min-width:60px;'>[{ts}]</span>"
+            f"<span style='color:{color}; font-weight:900; min-width:70px;'>{prefix}</span>"
+            f"<span style='color:#f1f5f9;'>{content}</span></div>"
+        )
 
     st.markdown(
         f"<div style='border-left:2px solid rgba(0,180,216,0.2); padding-left:15px; margin-bottom:1rem;'>{log_inner}</div>",
