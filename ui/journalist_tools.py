@@ -9,12 +9,12 @@ from urllib.parse import quote
 
 import streamlit as st
 
-from ui.stats_panel import OUTBREAK_DATA, CASE_TIMELINE
+from ui.stats_panel import get_outbreak_stats, CASE_TIMELINE
 from ui.map_panel import NATIONALITIES_DATA
 
 
 def _summary_text() -> str:
-    d = OUTBREAK_DATA
+    d = get_outbreak_stats()
     return (
         f"🧬 Andes Virus / MV Hondius Outbreak Update ({datetime.utcnow().strftime('%b %d, %Y')})\n\n"
         f"• Confirmed cases: {d['confirmed_cases']}\n"
@@ -44,7 +44,7 @@ def _csv_data() -> str:
 
 
 def _full_report() -> str:
-    d = OUTBREAK_DATA
+    d = get_outbreak_stats()
     lines = [
         "=" * 60,
         "ANDES VIRUS / MV HONDIUS OUTBREAK — SITUATION REPORT",
