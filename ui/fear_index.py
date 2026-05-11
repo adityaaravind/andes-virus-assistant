@@ -320,11 +320,11 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
                 margin-bottom: 5px !important;
             }
 
-            /* MOBILE ADAPTIVE LAYOUT (Compact 3-column grid) */
+            /* MOBILE ADAPTIVE LAYOUT (Compact 2-column button grid) */
             @media (max-width: 600px) {
                 [data-testid="stAppViewContainer"] div[data-testid="stHorizontalBlock"]:has(button[key*="v23_btn_"]) {
                     display: grid !important;
-                    grid-template-columns: 1fr 1fr 1fr !important;
+                    grid-template-columns: 1fr 1fr !important;
                     gap: 0.5rem !important;
                     flex-direction: row !important;
                 }
@@ -334,23 +334,23 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
                 }
                 
                 div.stButton > button { 
-                    height: 60px !important; 
-                    flex-direction: column !important; 
-                    gap: 4px !important;
-                    padding: 8px !important;
-                    border-radius: 10px !important;
+                    height: 50px !important; 
+                    flex-direction: row !important; 
+                    gap: 10px !important;
+                    padding: 5px 15px !important;
+                    border-radius: 25px !important; /* PILL SHAPE */
                     border: 1px solid var(--btn-color) !important;
                     background: rgba(15, 23, 42, 0.9) !important;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.6), inset 0 0 10px var(--btn-color)22 !important;
                 }
                 div.stButton > button div[data-testid="stMarkdownContainer"] {
-                    font-size: 1.3rem !important;
+                    font-size: 1.2rem !important;
                     margin-bottom: 0 !important;
                 }
                 div.stButton > button p {
-                    font-size: 0.52rem !important;
-                    text-align: center !important;
-                    letter-spacing: 0.05em !important;
+                    font-size: 0.6rem !important;
+                    text-align: left !important;
+                    letter-spacing: 0.02em !important;
                     font-weight: 900 !important;
                 }
             }

@@ -104,18 +104,22 @@ def render_map_panel() -> None:
         )
         
         # OSINT SIGNALS CARD
+        from ui.news_ticker import TIER_STYLE
         news_items_html = ""
         for art in headlines:
+            # Map tier colors to articles
+            tier_cfg = TIER_STYLE.get(art['tier'], TIER_STYLE['press'])
+            art['color'] = tier_cfg['border']
+            
             news_items_html += f"""
-            <div style="background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(167, 139, 250, 0.2); padding: 10px; border-radius: 8px; border-left: 3px solid #a78bfa; margin-bottom: 10px; cursor: pointer; transition: all 0.2s ease;" onclick="window.open('{art['url']}', '_blank')">
+            <div style="background: rgba(15, 23, 42, 0.4); border: 1px solid {art.get('color', '#a78bfa')}44; padding: 12px; border-radius: 12px; border-left: 4px solid {art.get('color', '#a78bfa')}; margin-bottom: 12px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.3);" onclick="window.open('{art['url']}', '_blank')">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                    <span style="color: #a78bfa; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">{art['source']}</span>
-                    <span style="color: #64748b; font-size: 7px; font-weight: 700;">{art.get('date', 'LIVE')}</span>
+                    <span style="color: {art.get('color', '#a78bfa')}; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px;">📡 {art['source']} SIGNAL</span>
+                    <span style="color: #64748b; font-size: 7px; font-weight: 700; font-family:monospace;">{art.get('date', 'LIVE')}</span>
                 </div>
-                <div style="font-size: 11px; color: #f1f5f9; line-height: 1.4; font-weight: 500; display: block;">
-                    {art.get('summary', art['title'])[:140]}...
+                <div style="font-size: 11px; color: #f1f5f9; line-height: 1.5; font-weight: 500; display: block; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px;">
+                    {art.get('summary', art['title'])[:160]}...
                 </div>
-                <div style="margin-top:5px; color:#a78bfa; font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:0.05em;">Click to view full intelligence report →</div>
             </div>
             """
             
