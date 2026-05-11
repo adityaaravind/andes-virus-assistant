@@ -115,7 +115,7 @@ def get_outbreak_stats() -> dict[str, Any]:
 def render_stats_panel() -> None:
     stats = get_outbreak_stats()
     
-    # CSS definitions for glows
+    # CSS definitions for glows and definitions
     st.markdown("""
         <style>
             :root {
@@ -126,6 +126,19 @@ def render_stats_panel() -> None:
             .stat-value.glow-green { text-shadow: 0 0 10px rgba(74,222,128,0.5); }
             .stat-value.glow-amber { text-shadow: 0 0 10px rgba(251,191,36,0.5); }
             .stat-value.glow-red { text-shadow: 0 0 10px rgba(248,113,113,0.5); }
+            .stat-def { 
+                font-size: 0.55rem; 
+                font-weight: 700; 
+                color: #64748b; 
+                margin-top: 4px; 
+                font-style: italic;
+                display: block;
+                text-transform: none;
+                letter-spacing: 0;
+            }
+            .glow-def-green { color: rgba(74,222,128,0.8); text-shadow: 0 0 5px rgba(74,222,128,0.3); }
+            .glow-def-amber { color: rgba(251,191,36,0.8); text-shadow: 0 0 5px rgba(251,191,36,0.3); }
+            .glow-def-red { color: rgba(248,113,113,0.8); text-shadow: 0 0 5px rgba(248,113,113,0.3); }
         </style>
     """, unsafe_allow_html=True)
 
@@ -150,19 +163,21 @@ def render_stats_panel() -> None:
         return "glow-green"
 
     cards = [
-        (str(stats["confirmed_cases"]), "Confirmed Cases", get_color(stats["confirmed_cases"], "cases"), get_glow_class(stats["confirmed_cases"], "cases")),
-        (str(stats["suspected_cases"]), "Suspected Cases", "var(--glow-amber)", "glow-amber"),
-        (str(stats["deaths"]), "Total Fatalities", get_color(stats["deaths"], "deaths"), get_glow_class(stats["deaths"], "deaths")),
-        (str(stats["nationalities"]), "Nationalities", "var(--glow-green)", "glow-green"),
+        (str(stats["confirmed_cases"]), "Confirmed Cases", "Verified lab results from South African medical teams.", get_color(stats["confirmed_cases"], "cases"), get_glow_class(stats["confirmed_cases"], "cases")),
+        (str(stats["suspected_cases"]), "Suspected Cases", "Showing symptoms but pending formal viral sequencing.", "var(--glow-amber)", "glow-amber"),
+        (str(stats["deaths"]), "Total Fatalities", "Confirmed deaths directly attributed to pulmonary syndrome.", get_color(stats["deaths"], "deaths"), get_glow_class(stats["deaths"], "deaths")),
+        (str(stats["nationalities"]), "Nationalities", "Countries of origin for passengers currently being monitored.", "var(--glow-green)", "glow-green"),
     ]
 
     cards_html = ""
-    for val, label, color, g_class in cards:
+    for val, label, def_text, color, g_class in cards:
+        def_glow = f"glow-def-{g_class.split('-')[1]}"
         cards_html += (
             f'<div class="stat-card" style="flex:1; min-width:140px; background:rgba(15, 23, 42, 0.6); border:1px solid rgba(255,255,255,0.05); padding:1rem; border-radius:12px; backdrop-filter:blur(10px); position:relative; overflow:hidden;">'
             f'<div style="position:absolute; top:0; left:0; width:100%; height:2px; background:{color}; opacity:0.6;"></div>'
             f'<span class="stat-value {g_class}" style="display:block; font-size:2rem; font-weight:900; color:white; line-height:1;">{val}</span>'
             f'<span class="stat-label" style="display:block; font-size:0.6rem; font-weight:800; color:#94a3b8; margin-top:8px; text-transform:uppercase; letter-spacing:0.05em;">{label}</span>'
+            f'<span class="stat-def {def_glow}">{def_text}</span>'
             f'</div>'
         )
 
