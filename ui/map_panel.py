@@ -136,8 +136,6 @@ def render_map_panel() -> None:
         components.html(vessel_card_html, height=520)
 
     with col_map:
-        # Restore full intensity logic from previous turn
-        from ui.map_panel import _get_dynamic_intensity
         intensity = _get_dynamic_intensity(current_day)
         
         map_template = """
