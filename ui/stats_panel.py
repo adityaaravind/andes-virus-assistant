@@ -163,10 +163,10 @@ def render_stats_panel() -> None:
         return "glow-green"
 
     cards = [
-        (str(stats["confirmed_cases"]), "Confirmed Cases", "Verified lab results from South African medical teams.", get_color(stats["confirmed_cases"], "cases"), get_glow_class(stats["confirmed_cases"], "cases")),
-        (str(stats["suspected_cases"]), "Suspected Cases", "Showing symptoms but pending formal viral sequencing.", "var(--glow-amber)", "glow-amber"),
-        (str(stats["deaths"]), "Total Fatalities", "Confirmed deaths directly attributed to pulmonary syndrome.", get_color(stats["deaths"], "deaths"), get_glow_class(stats["deaths"], "deaths")),
-        (str(stats["nationalities"]), "Nationalities", "Countries of origin for passengers currently being monitored.", "var(--glow-green)", "glow-green"),
+        (str(stats["confirmed_cases"]), "Confirmed Cases", "Verified results from regional health authorities (Spain, South Africa, etc.).", get_color(stats["confirmed_cases"], "cases"), get_glow_class(stats["confirmed_cases"], "cases")),
+        (str(stats["suspected_cases"]), "Suspected Cases", "Showing clinical symptoms; awaiting formal viral sequencing results.", "var(--glow-amber)", "glow-amber"),
+        (str(stats["deaths"]), "Total Fatalities", "Deaths verified by local hospitals as directly linked to the outbreak.", get_color(stats["deaths"], "deaths"), get_glow_class(stats["deaths"], "deaths")),
+        (str(stats["nationalities"]), "Nationalities", "Passport origins for all individuals currently under active medical monitoring.", "var(--glow-green)", "glow-green"),
     ]
 
     cards_html = ""
