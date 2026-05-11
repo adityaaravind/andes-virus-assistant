@@ -51,7 +51,7 @@ def render_community_feed() -> None:
     # 3. TACTICAL SIGNAL STREAM
     st.markdown("<p style='color:#64748b; font-size:0.6rem; font-weight:900; text-transform:uppercase; margin:0.5rem 0 0.4rem;'>📡 Signal Stream</p>", unsafe_allow_html=True)
     log_inner = ""
-    for item in feed[:8]:
+    for item in feed[:20]: # Show up to 20 signals in the scroll window
         ts = datetime.fromisoformat(item["timestamp"]).strftime("%H:%M:%S")
         
         # Color based on signal priority
@@ -75,14 +75,28 @@ def render_community_feed() -> None:
             content = f"Query: {content.replace('queried: ', '')}"
             
         log_inner += (
-            f"<div style='font-family:monospace; font-size:0.7rem; line-height:1.4; margin-bottom:8px; display:flex; gap:10px;'>"
+            f"<div style='font-family:monospace; font-size:0.7rem; line-height:1.4; margin-bottom:6px; display:flex; gap:10px;'>"
             f"<span style='color:#475569; min-width:60px;'>[{ts}]</span>"
-            f"<span style='color:{color}; font-weight:900; min-width:70px;'>{prefix}</span>"
+            f"<span style='color:{color}; font-weight:900; min-width:75px;'>{prefix}</span>"
             f"<span style='color:#f1f5f9;'>{content}</span></div>"
         )
 
     st.markdown(
-        f"<div style='border-left:2px solid rgba(0,180,216,0.2); padding-left:15px; margin-bottom:1rem;'>{log_inner}</div>",
+        f"""
+        <div style='
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 12px;
+            height: 200px;
+            overflow-y: auto;
+            border-left: 3px solid rgba(0,180,216,0.3);
+            scrollbar-width: thin;
+            scrollbar-color: #00b4d8 rgba(0,0,0,0.1);
+        '>
+            {log_inner}
+        </div>
+        """,
         unsafe_allow_html=True
     )
     
