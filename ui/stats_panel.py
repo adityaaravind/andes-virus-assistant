@@ -115,6 +115,20 @@ def get_outbreak_stats() -> dict[str, Any]:
 def render_stats_panel() -> None:
     stats = get_outbreak_stats()
     
+    # CSS definitions for glows
+    st.markdown("""
+        <style>
+            :root {
+                --glow-green: #4ade80;
+                --glow-amber: #fbbf24;
+                --glow-red: #f87171;
+            }
+            .stat-value.glow-green { text-shadow: 0 0 10px rgba(74,222,128,0.5); }
+            .stat-value.glow-amber { text-shadow: 0 0 10px rgba(251,191,36,0.5); }
+            .stat-value.glow-red { text-shadow: 0 0 10px rgba(248,113,113,0.5); }
+        </style>
+    """, unsafe_allow_html=True)
+
     # ── 1. HEADER ──
     st.markdown(
         f'<div style="display:flex; align-items:center; gap:8px; margin-bottom:1.2rem; background:rgba(74,222,128,0.05); padding:4px 12px; border-radius:100px; width:fit-content; border:1px solid rgba(74,222,128,0.1);">'
@@ -124,28 +138,33 @@ def render_stats_panel() -> None:
         unsafe_allow_html=True
     )
 
-    # ── 2. GLOWING STAT CARDS (Re-implemented) ──
-    def get_glow(val: int, type: str) -> str:
+    # ── 2. GLOWING STAT CARDS ──
+    def get_color(val: int, type: str) -> str:
+        if type == "cases": return "var(--glow-amber)" if val < 20 else "var(--glow-red)"
+        if type == "deaths": return "var(--glow-red)" if val > 0 else "var(--glow-green)"
+        return "var(--glow-green)"
+
+    def get_glow_class(val: int, type: str) -> str:
         if type == "cases": return "glow-amber" if val < 20 else "glow-red"
         if type == "deaths": return "glow-red" if val > 0 else "glow-green"
         return "glow-green"
 
     cards = [
-        (str(stats["confirmed_cases"]), "Confirmed Cases", get_glow(stats["confirmed_cases"], "cases")),
-        (str(stats["suspected_cases"]), "Suspected Cases", "glow-amber"),
-        (str(stats["deaths"]), "Total Fatalities", get_glow(stats["deaths"], "deaths")),
-        (str(stats["nationalities"]), "Nationalities", "glow-green"),
+        (str(stats["confirmed_cases"]), "Confirmed Cases", get_color(stats["confirmed_cases"], "cases"), get_glow_class(stats["confirmed_cases"], "cases")),
+        (str(stats["suspected_cases"]), "Suspected Cases", "var(--glow-amber)", "glow-amber"),
+        (str(stats["deaths"]), "Total Fatalities", get_color(stats["deaths"], "deaths"), get_glow_class(stats["deaths"], "deaths")),
+        (str(stats["nationalities"]), "Nationalities", "var(--glow-green)", "glow-green"),
     ]
 
     cards_html = ""
-    for val, label, glow in cards:
-        cards_html += f"""
-        <div class="stat-card" style="flex:1; min-width:150px; background:rgba(15, 23, 42, 0.6); border:1px solid rgba(255,255,255,0.05); padding:1rem; border-radius:12px; backdrop-filter:blur(10px); position:relative; overflow:hidden;">
-            <div style="position:absolute; top:0; left:0; width:100%; height:2px; background:var(--{glow}-color, #4ade80); opacity:0.6;"></div>
-            <span class="stat-value {glow}" style="display:block; font-size:2rem; font-weight:900; color:white; line-height:1;">{val}</span>
-            <span class="stat-label" style="display:block; font-size:0.6rem; font-weight:800; color:#94a3b8; margin-top:8px; text-transform:uppercase; letter-spacing:0.05em;">{label}</span>
-        </div>
-        """
+    for val, label, color, g_class in cards:
+        cards_html += (
+            f'<div class="stat-card" style="flex:1; min-width:140px; background:rgba(15, 23, 42, 0.6); border:1px solid rgba(255,255,255,0.05); padding:1rem; border-radius:12px; backdrop-filter:blur(10px); position:relative; overflow:hidden;">'
+            f'<div style="position:absolute; top:0; left:0; width:100%; height:2px; background:{color}; opacity:0.6;"></div>'
+            f'<span class="stat-value {g_class}" style="display:block; font-size:2rem; font-weight:900; color:white; line-height:1;">{val}</span>'
+            f'<span class="stat-label" style="display:block; font-size:0.6rem; font-weight:800; color:#94a3b8; margin-top:8px; text-transform:uppercase; letter-spacing:0.05em;">{label}</span>'
+            f'</div>'
+        )
 
     st.markdown(
         f'<div style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem;">{cards_html}</div>',
