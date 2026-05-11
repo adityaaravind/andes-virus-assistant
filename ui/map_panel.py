@@ -39,11 +39,11 @@ def _get_live_state() -> dict:
 
 def _get_dynamic_hotspots(state: dict) -> list:
     hotspots = [
-        {"lat": -34.60, "lng": -58.38, "code": "ARG", "name": "ARGENTINA SOURCE", "color": "#ff0055", "relation": "Where it started", "intel": "PORT AREA", "admitted": "City Hospital", "notes": "Virus first found here.", "timestamp": "APR 28"},
-        {"lat": -26.20, "lng": 28.04,  "code": "ZAF", "name": "S. AFRICA STOP", "color": "#00ffcc", "relation": "Emergency Stop", "intel": "HEALTH HUB", "admitted": "Netcare Clinic", "notes": "Crew members taken for help.", "timestamp": "MAY 08"},
-        {"lat": 40.41, "lng": -3.70,  "code": "ESP", "name": "SPAIN MONITOR", "color": "#ffaa00", "relation": "Return Point", "intel": "QUARANTINE", "admitted": "Tenerife Ward", "notes": "People staying in isolation.", "timestamp": "MAY 09"},
-        {"lat": 51.50, "lng": -0.12,  "code": "GBR", "name": "UK MONITOR", "color": "#cc00ff", "relation": "Return Point", "intel": "ISOLATION", "admitted": "Royal London", "notes": "Close monitoring active.", "timestamp": "MAY 11"},
-        {"lat": 14.93, "lng": -23.51, "code": "SHIP", "name": "THE SHIP (MV HONDIUS)", "color": "#4ade80", "relation": "Current Location", "intel": "RESTRICTED", "admitted": "Ship Med-Bay", "notes": "Closed to everyone.", "timestamp": "LIVE"}
+        {"lat": -34.60, "lng": -58.38, "code": "ARG", "name": "ARGENTINA SOURCE", "color": "#ff0055", "relation": "Primary Outbreak Center", "intel": "PORT AREA", "admitted": "Hospital Muñiz (isolation)", "notes": "Virus first detected in crew members here.", "timestamp": "APR 28"},
+        {"lat": -26.20, "lng": 28.04,  "code": "ZAF", "name": "S. AFRICA STOP", "color": "#00ffcc", "relation": "Emergency Evacuation", "intel": "HEALTH HUB", "admitted": "Netcare Milpark", "notes": "Critically ill crew members taken for help.", "timestamp": "MAY 08"},
+        {"lat": 40.41, "lng": -3.70,  "code": "ESP", "name": "SPAIN MONITOR", "color": "#ffaa00", "relation": "Repatriation Monitoring", "intel": "QUARANTINE", "admitted": "Tenerife Isolation Ward", "notes": "Close monitoring for returning passengers.", "timestamp": "MAY 09"},
+        {"lat": 51.50, "lng": -0.12,  "code": "GBR", "name": "UK MONITOR", "color": "#cc00ff", "relation": "Repatriation Monitoring", "intel": "ISOLATION", "admitted": "Royal London Hospital", "notes": "Patients kept in secure isolation wards.", "timestamp": "MAY 11"},
+        {"lat": 14.93, "lng": -23.51, "code": "SHIP", "name": "THE SHIP (MV HONDIUS)", "color": "#4ade80", "relation": "Active Virus Center", "intel": "RESTRICTED", "admitted": "Onboard Med-Bay", "notes": "Ship is closed to all outside contact.", "timestamp": "LIVE"}
     ]
     nat_map = {d["code"]: d for d in NATIONALITIES_DATA}
     for h in hotspots:
@@ -55,7 +55,6 @@ def _get_dynamic_hotspots(state: dict) -> list:
     return hotspots
 
 def _get_dynamic_intensity(day: int) -> dict:
-    """Mathematical global spread model with verified historical anchors."""
     phase = min(day / 65.0, 1.0)
     covid = {
         "CHN": 99.8, "ITA": min(phase * 82, 100), "ESP": min(phase * 64, 100),
@@ -123,7 +122,6 @@ def render_map_panel() -> None:
                 <h2 style="margin:0; font-size:2rem; font-weight:900; line-height: 1; letter-spacing:-0.03em; color:#ffffff;">{state.get('ship_status', 'Quarantined').upper()}</h2>
                 <p style="color:#4ade80; font-size:0.7rem; font-weight:800; margin-top:5px; text-transform:uppercase;">MV HONDIUS // SAFETY PROTOCOL ACTIVE</p>
             </div>
-            
             <div style="background:rgba(255,255,255,0.03); border-radius:12px; padding:12px; margin-bottom:15px; border:1px solid rgba(255,255,255,0.05);">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                     <span style="color:#94a3b8; font-size:9px; font-weight:800; text-transform:uppercase;">SAFETY RATING</span>
@@ -133,16 +131,13 @@ def render_map_panel() -> None:
                     <div style="width:94%; height:100%; background:#4ade80; box-shadow: 0 0 10px #4ade80;"></div>
                 </div>
             </div>
-
             <div style="color: #64748b; font-size: 10px; font-weight: 900; margin-bottom: 12px; text-transform: uppercase; letter-spacing:1px; display:flex; align-items:center;">
                 <span style="width:8px; height:8px; background:#4ade80; border-radius:50%; margin-right:8px; display:inline-block; animation: pulse 1s infinite;"></span>
                 RECENT SHIP EVENTS
             </div>
-            
             <div class="scroll-container" style="flex: 1; overflow-y: auto; padding-right: 8px;">
                 {events_html}
             </div>
-            
             <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center;">
                 <span style="color:#64748b; font-size:8px;">SYNC_TIME: {datetime.now().strftime("%H:%M:%S")}</span>
                 <span style="color:#4ade80; font-size:9px; font-weight:900;">UPLINK: ACTIVE</span>
@@ -163,9 +158,12 @@ def render_map_panel() -> None:
                 html, body { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; font-family: sans-serif; }
                 #map { width: 100%; height: 100%; background: #050505; border-radius: 12px; }
                 .leaflet-tooltip { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(74, 222, 128, 0.4) !important; border-radius: 8px !important; padding: 15px !important; z-index: 1000; }
+                .leaflet-popup-content-wrapper { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(74, 222, 128, 0.4) !important; border-radius: 12px !important; }
                 .ring-marker { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ffffff; position: relative; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); }
                 .blink-active { animation: marker-blink 1.5s infinite ease-in-out; }
                 @keyframes marker-blink { 0%, 100% { opacity: 1; box-shadow: 0 0 8px currentColor; } 50% { opacity: 0.6; box-shadow: 0 0 25px currentColor; } }
+                .badge { position: absolute; top: -10px; right: -10px; background: #ffffff; color: #000; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center; border: 2px solid #000; }
+                .intel-label { color: #94a3b8; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
             </style>
         </head>
         <body>
@@ -215,9 +213,29 @@ def render_map_panel() -> None:
                         iconSize: [24, 24], iconAnchor: [12, 12]
                     });
                     const marker = L.marker([h.lat, h.lng], { icon: icon }).addTo(map);
-                    marker.bindPopup(`<div style="padding:15px; min-width:240px; font-family:sans-serif;"><b style="color:${h.color}; font-size:14px;">${h.name}</b><br/><div style="color:#94a3b8; font-size:10px; margin-top:10px;">TOTAL CASES: <b style="color:#fff;">${h.cases}</b></div></div>`, { closeButton: false, offset: [0, -10] });
+                    
+                    let popupHtml = `<div style="padding:15px; min-width:260px; font-family:sans-serif;">`;
+                    popupHtml += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">`;
+                    popupHtml += `<b style="color:${h.color}; font-size:14px;">📡 ${h.name}</b>`;
+                    popupHtml += `<span style="color:#94a3b8; font-size:9px;">${h.timestamp}</span>`;
+                    popupHtml += `</div>`;
+                    
+                    popupHtml += `<div style="color:#ffffff; font-size:11px; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; font-weight:600;">${h.relation}</div>`;
+                    
+                    popupHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:12px;">`;
+                    popupHtml += `<div><div class="intel-label">TOTAL CASES</div><div style="color:#fff; font-size:18px; font-weight:900;">${h.cases}</div></div>`;
+                    popupHtml += `<div><div class="intel-label">TOTAL DEATHS</div><div style="color:#ef4444; font-size:18px; font-weight:900;">${h.deaths}</div></div>`;
+                    popupHtml += `</div>`;
+                    
+                    popupHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;">`;
+                    popupHtml += `<div><div class="intel-label">HOSPITAL / CLINIC</div><div style="color:#4ade80; font-size:10px; font-weight:900;">${h.admitted}</div></div>`;
+                    popupHtml += `<div><div class="intel-label">LATEST NOTES</div><div style="color:#cbd5e1; font-size:9px; font-style:italic; line-height:1.2;">${h.notes}</div></div>`;
+                    popupHtml += `</div></div>`;
+                    
+                    marker.bindPopup(popupHtml, { closeButton: false, offset: [0, -10] });
                     marker.on('mouseover', function() { this.openPopup(); });
                     marker.on('mouseout', function() { this.closePopup(); });
+
                     if (!isShip) L.polyline([[h.lat, h.lng], shipPos], { color: h.color, weight: 1.5, opacity: 0.8, dashArray: '4, 6' }).addTo(map);
                 });
             </script>
@@ -228,4 +246,3 @@ def render_map_panel() -> None:
         map_html = map_html.replace("__INTENSITY__", json.dumps(intensity))
         map_html = map_html.replace("__DAY__", str(current_day))
         components.html(map_html, height=450)
-
