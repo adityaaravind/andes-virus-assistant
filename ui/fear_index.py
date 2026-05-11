@@ -267,120 +267,139 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
 
         icons = {1: "🟢", 2: "🟡", 3: "🟠", 4: "🔴", 5: "💀"}
         
-        # --- NEW ROBUST TACTICAL SELECTOR ---
+        # --- UNIFIED TACTICAL SELECTOR (v1.4.3) ---
         st.markdown(
             """
             <style>
-            .selector-container {
-                display: flex;
-                flex-direction: column;
+            .sentiment-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
                 gap: 12px;
                 margin-top: 10px;
                 width: 100%;
             }
-            .tactical-btn {
-                background: rgba(15, 23, 42, 0.6);
+            .tactical-choice {
+                background: rgba(15, 23, 42, 0.7);
                 border: 1px solid rgba(255, 255, 255, 0.1);
-                border-left: 4px solid var(--t-color);
-                border-radius: 8px;
-                padding: 12px 20px;
-                display: flex;
-                align-items: center;
-                gap: 15px;
-                transition: all 0.2s ease;
-                cursor: pointer;
-                position: relative;
-                overflow: hidden;
-            }
-            .tactical-btn:hover {
-                background: rgba(255, 255, 255, 0.05);
-                border-color: var(--t-color);
-                transform: translateX(4px);
-            }
-            .tactical-btn.active {
-                background: radial-gradient(circle at left, var(--t-color)22 0%, rgba(15, 23, 42, 0.9) 100%);
-                border-color: var(--t-color);
-                box-shadow: 0 0 20px var(--t-color)33;
-                transform: translateX(8px);
-            }
-            .tactical-btn.disabled {
-                opacity: 0.4;
-                cursor: default;
-                filter: grayscale(0.5);
-            }
-            .tactical-btn.disabled:hover { transform: none; }
-
-            .btn-icon { font-size: 1.5rem; }
-            .btn-text {
+                border-top: 3px solid var(--t-color);
+                border-radius: 10px;
+                padding: 15px;
                 display: flex;
                 flex-direction: column;
+                align-items: center;
+                text-align: center;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                position: relative;
+                overflow: hidden;
+                cursor: pointer;
+                min-height: 110px;
             }
-            .btn-label {
+            .tactical-choice:hover {
+                background: rgba(255, 255, 255, 0.05);
+                border-color: var(--t-color);
+                transform: translateY(-4px);
+                box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+            }
+            .tactical-choice.active {
+                background: radial-gradient(circle at top, var(--t-color)33 0%, rgba(15, 23, 42, 0.95) 100%);
+                border: 2.5px solid var(--t-color);
+                box-shadow: 0 0 30px var(--t-color)44;
+                transform: translateY(-4px) scale(1.02);
+            }
+            .tactical-choice.disabled { opacity: 0.3; cursor: default; filter: grayscale(1); }
+
+            .choice-icon { font-size: 1.8rem; margin-bottom: 8px; }
+            .choice-label {
                 color: #fff;
-                font-weight: 900;
-                font-size: 0.8rem;
+                font-weight: 950;
+                font-size: 0.85rem;
                 letter-spacing: 0.1em;
                 text-transform: uppercase;
+                margin-bottom: 2px;
             }
-            .btn-desc {
+            .choice-desc {
                 color: #94a3b8;
                 font-size: 0.6rem;
-                font-weight: 500;
+                font-weight: 600;
+                line-height: 1.2;
             }
             
-            /* Pulsing prompt */
-            .pulse-prompt {
-                color: #fbbf24;
-                font-size: 0.6rem;
-                font-weight: 900;
-                letter-spacing: 0.05em;
-                margin-bottom: 10px;
-                display: block;
-                animation: blinker 2s linear infinite;
+            /* Invisible overlay button logic */
+            div[data-testid="stButton"] { 
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                z-index: 5 !important;
+                margin: 0 !important;
             }
-            
-            @keyframes blinker { 50% { opacity: 0.3; } }
+            div[data-testid="stButton"] button {
+                background: transparent !important;
+                border: none !important;
+                width: 100% !important;
+                height: 100% !important;
+                color: transparent !important;
+            }
+
+            @media (max-width: 600px) {
+                .sentiment-grid { grid-template-columns: 1fr; }
+                .tactical-choice { 
+                    flex-direction: row; 
+                    text-align: left; 
+                    min-height: 75px; 
+                    padding: 0 20px;
+                    gap: 15px;
+                    border-top: none;
+                    border-left: 4px solid var(--t-color);
+                }
+                .choice-icon { margin-bottom: 0; font-size: 2rem; }
+            }
             </style>
-            <div style="margin-bottom: 1rem; border-bottom: 1px solid rgba(56,189,248,0.2); padding-bottom: 0.5rem;">
-                <p style='color:#38bdf8; font-size:0.7rem; font-weight:800; margin:0; letter-spacing:0.1em; text-transform:uppercase;'>📡 SENTIMENT SELECTOR</p>
+            <div style="margin-bottom: 1rem; border-bottom: 1px solid rgba(56,189,248,0.2); padding-bottom: 0.5rem; display:flex; justify-content:space-between; align-items:center;">
+                <p style='color:#38bdf8; font-size:0.75rem; font-weight:800; margin:0; letter-spacing:0.1em; text-transform:uppercase;'>📡 TACTICAL SENTIMENT INPUT</p>
+                <p style='color:#fbbf24; font-size:0.5rem; font-weight:950; margin:0; animation: blinker 2s infinite;'>[ STATUS: REQUIRED ]</p>
             </div>
+            <div class="sentiment-grid">
             """,
             unsafe_allow_html=True
         )
 
-        if not user_voted_today:
-            st.markdown('<span class="pulse-prompt">● ACTION REQUIRED: SELECT CURRENT OUTBREAK SENTIMENT</span>', unsafe_allow_html=True)
-            
         for level_id in range(1, 6):
             info = FEAR_LEVELS[level_id]
             is_active = (level_id == level_int)
             
-            # Use native Streamlit button with custom CSS class wrapping
-            btn_col1, btn_col2 = st.columns([0.1, 0.9])
+            # Use columns to contain the absolute positioned buttons correctly within the grid context
+            # We don't actually need separate columns here because the grid CSS handles it,
+            # but we need a container that st.button can occupy.
             
-            # Render the tactical visual
             st.markdown(
                 f"""
-                <div class="tactical-btn {'active' if is_active else ''} {'disabled' if user_voted_today and not is_active else ''}" 
-                     style="--t-color: {info['color']};">
-                    <span class="btn-icon">{icons[level_id]}</span>
-                    <div class="btn-text">
-                        <span class="btn-label">{info['label']}</span>
-                        <span class="btn-desc">{info['desc']}</span>
+                <div style="position:relative; height: 100%;">
+                    <div class="tactical-choice {'active' if is_active else ''} {'disabled' if user_voted_today and not is_active else ''}" 
+                         style="--t-color: {info['color']};">
+                        <span class="choice-icon">{icons[level_id]}</span>
+                        <div style="display:flex; flex-direction:column;">
+                            <span class="choice-label">{info['label']}</span>
+                            <span class="choice-desc">{info['desc']}</span>
+                        </div>
                     </div>
-                </div>
                 """, 
                 unsafe_allow_html=True
             )
             
-            # Invisible button for logic - placed immediately after for accessibility
+            # The actual interactive element
             if not user_voted_today:
-                if st.button(f"SELECT {info['label'].upper()}", key=f"v20_sel_{level_id}", use_container_width=True):
+                if st.button(" ", key=f"v21_sel_{level_id}"):
                     _save_fear_vote(level_id, user_id)
                     st.rerun()
+            
+            st.markdown("</div>", unsafe_allow_html=True)
+
+        st.markdown("</div>", unsafe_allow_html=True) # Close grid
 
         if user_voted_today:
-            st.success("✓ YOUR SENTIMENT DATA HAS BEEN ANCHORED FOR RISK MODELING")
+            st.success("✓ SENTIMENT DATA ANCHORED")
 
     callout_html = """
 <style>.fear-callout-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.6rem; margin-top: 0.3rem; }</style>
