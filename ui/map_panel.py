@@ -17,6 +17,7 @@ NATIONALITIES_DATA = [
     {"country": "Netherlands",   "code": "NLD", "passengers": 5,  "crew": 2, "cases": 2, "deaths": 1},
     {"country": "Argentina",     "code": "ARG", "passengers": 45, "crew": 5, "cases": 4, "deaths": 1},
     {"country": "South Africa",  "code": "ZAF", "passengers": 0,  "crew": 10,"cases": 2, "deaths": 0},
+    {"country": "USA",           "code": "USA", "passengers": 24, "crew": 0, "cases": 1, "deaths": 0},
 ]
 
 def _get_local_fear_index(code: str, hanta_risk: float) -> float:
@@ -31,11 +32,32 @@ def _get_historical_date(day: int) -> str:
     return target.strftime("%b %d, 2020")
 
 def _get_vessel_events() -> list:
+    # Try to get real summaries from news if available
+    try:
+        from ui.news_ticker import fetch_headlines
+        articles = fetch_headlines()
+        if articles:
+            # Transform top 5 articles into signals
+            signals = []
+            for i, art in enumerate(articles[:6]):
+                h_ago = i * 2 + 1 # Simulated aging for the feed
+                signals.append({
+                    "date": "MAY 11", 
+                    "time": f"{20-i:02d}:45", 
+                    "event": art['title'][:80] + "...", 
+                    "type": "INTEL", 
+                    "speed": f"{14 - (i*0.5):.1f} kn", 
+                    "uplink": f"{99-i}%", 
+                    "hours_ago": h_ago
+                })
+            return signals
+    except Exception: pass
+    
     return [
-        {"date": "MAY 11", "time": "08:15", "event": "Vessel contact: ARS Almirante Brown (ARG).", "type": "COMMS", "speed": "14.2 knots", "uplink": "98%", "hours_ago": 6},
-        {"date": "MAY 11", "time": "02:30", "event": "Encrypted burst sent to WHO Hub (Geneva).", "type": "SIGNAL", "speed": "12.8 knots", "uplink": "92%", "hours_ago": 12},
-        {"date": "MAY 09", "time": "14:45", "event": "Satellite lock confirmed. Speed sustained.", "type": "SYNC", "speed": "15.0 knots", "uplink": "100%", "hours_ago": 49},
-        {"date": "MAY 08", "time": "11:20", "event": "Medical evacuation airlift successful.", "type": "OPS", "speed": "5.2 knots", "uplink": "85%", "hours_ago": 74},
+        {"date": "MAY 11", "time": "18:15", "event": "Vessel contact: ARS Almirante Brown (ARG). US landing zones identified.", "type": "COMMS", "speed": "14.2 knots", "uplink": "98%", "hours_ago": 2},
+        {"date": "MAY 11", "time": "14:30", "event": "Encrypted burst: New York Port Authority reports suspicious arrivals.", "type": "SIGNAL", "speed": "12.8 knots", "uplink": "92%", "hours_ago": 5},
+        {"date": "MAY 11", "time": "08:45", "event": "Satellite lock confirmed. Ship position updated to Mid-Atlantic.", "type": "SYNC", "speed": "15.0 knots", "uplink": "100%", "hours_ago": 11},
+        {"date": "MAY 10", "time": "21:20", "event": "Medical evacuation airlift successful near Cape Verde.", "type": "OPS", "speed": "5.2 knots", "uplink": "85%", "hours_ago": 23},
     ]
 
 def _get_live_state() -> dict:
@@ -50,6 +72,7 @@ def _get_dynamic_hotspots(state: dict) -> list:
         {"lat": -26.20, "lng": 28.04,  "code": "ZAF", "name": "S. AFRICA STOP", "color": "#00ffcc", "relation": "Emergency Evacuation", "intel": "HEALTH HUB", "admitted": "Netcare Milpark", "notes": "Critically ill crew members taken for help.", "timestamp": "MAY 08"},
         {"lat": 40.41, "lng": -3.70,  "code": "ESP", "name": "SPAIN MONITOR", "color": "#ffaa00", "relation": "Repatriation Monitoring", "intel": "QUARANTINE", "admitted": "Tenerife Isolation Ward", "notes": "Close monitoring for returning passengers.", "timestamp": "MAY 09"},
         {"lat": 51.50, "lng": -0.12,  "code": "GBR", "name": "UK MONITOR", "color": "#cc00ff", "relation": "Repatriation Monitoring", "intel": "ISOLATION", "admitted": "Royal London Hospital", "notes": "Patients kept in secure isolation wards.", "timestamp": "MAY 11"},
+        {"lat": 40.71, "lng": -74.00, "code": "USA", "name": "USA LANDING", "color": "#38bdf8", "relation": "New Landing Zone", "intel": "PORT MONITOR", "admitted": "Bellevue Hospital (NY)", "notes": "Confirmed landing of 24 passengers from vessel.", "timestamp": "LIVE"},
         {"lat": 14.93, "lng": -23.51, "code": "SHIP", "name": "THE SHIP (MV HONDIUS)", "color": "#4ade80", "relation": "Active Virus Center", "intel": "RESTRICTED", "admitted": "Onboard Med-Bay", "notes": "Ship is closed to all outside contact.", "timestamp": "LIVE"}
     ]
     nat_map = {d["code"]: d for d in NATIONALITIES_DATA}
@@ -105,11 +128,15 @@ def render_map_panel() -> None:
     with col_vessel:
         events_html = ""
         for ev in events:
-            color = "#4ade80" if ev['hours_ago'] <= 48 else "#fde047"
+            # Signal Hub Aging: < 6h Green, > 6h Yellow
+            sig_color = "#4ade80" if ev['hours_ago'] <= 6 else "#fde047"
             events_html += f"""
-                <div style="border-left: 3px solid {color}; padding-left: 12px; margin-bottom: 12px; animation: slideIn 0.4s ease-out;">
-                    <div style="color: {color}; font-size: 8.5px; font-weight: 900; letter-spacing: 0.5px;">{ev['date']} @ {ev['time']}</div>
-                    <div style="color: #ffffff; font-size: 10.5px; line-height: 1.2; font-weight: 600; margin-top:2px;">{ev['event']}</div>
+                <div style="border-left: 3px solid {sig_color}; padding-left: 12px; margin-bottom: 15px; animation: slideIn 0.4s ease-out; background: rgba(255,255,255,0.02); padding-top: 8px; padding-bottom: 8px; border-radius: 0 6px 6px 0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; padding-right:8px;">
+                        <div style="color: {sig_color}; font-size: 8.5px; font-weight: 900; letter-spacing: 0.5px;">{ev['date']} @ {ev['time']}</div>
+                        <div style="color: #475569; font-size: 7px; font-weight: 800;">{ev['hours_ago']}H AGO</div>
+                    </div>
+                    <div style="color: #ffffff; font-size: 10.5px; line-height: 1.3; font-weight: 600;">{ev['event']}</div>
                 </div>
             """
 
@@ -122,12 +149,12 @@ def render_map_panel() -> None:
         </style>
         <div style="font-family: sans-serif; background: rgba(15, 23, 42, 0.95); border: 2px solid #4ade80; box-shadow: 0 0 20px rgba(74,222,128,0.1); padding: 1.2rem; border-radius: 12px; height: 440px; display: flex; flex-direction: column; color: #fff; overflow: hidden;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                <div style="color: #4ade80; font-size: 9px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">🚢 VESSEL TELEMETRY</div>
-                <div style="background:rgba(74,222,128,0.1); padding:1px 6px; border-radius:3px; border:1px solid #4ade8033; color:#4ade80; font-size:7px; font-weight:900; animation: pulse 2s infinite;">REAL-TIME</div>
+                <div style="color: #4ade80; font-size: 9px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">📡 SIGNAL HUB</div>
+                <div style="background:rgba(74,222,128,0.1); padding:1px 6px; border-radius:3px; border:1px solid #4ade8033; color:#4ade80; font-size:7px; font-weight:900; animation: pulse 2s infinite;">SIGNAL HUB ACTIVE</div>
             </div>
             <div style="margin: 10px 0;">
                 <h2 style="margin:0; font-size:1.6rem; font-weight:900; line-height: 1; color:#ffffff;">{state.get('ship_status', 'Quarantined').upper()}</h2>
-                <p style="color:#4ade80; font-size:0.65rem; font-weight:800; margin-top:4px; text-transform:uppercase;">MV HONDIUS // IMO 9524449</p>
+                <p style="color:#4ade80; font-size:0.65rem; font-weight:800; margin-top:4px; text-transform:uppercase;">MV HONDIUS // POS: MID-ATLANTIC</p>
             </div>
             
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:12px;">
@@ -136,17 +163,21 @@ def render_map_panel() -> None:
                     <p style="color:#ffffff; font-size:11px; font-weight:900; margin:0;">{events[0]['speed']}</p>
                 </div>
                 <div style="background:rgba(255,255,255,0.03); border-radius:6px; padding:6px; border:1px solid rgba(255,255,255,0.05);">
-                    <p style="color:#94a3b8; font-size:7px; font-weight:800; margin:0;">UPLINK STRENGTH</p>
+                    <p style="color:#94a3b8; font-size:7px; font-weight:800; margin:0;">SIGNAL QUALITY</p>
                     <p style="color:#ffffff; font-size:11px; font-weight:900; margin:0;">{events[0]['uplink']}</p>
                 </div>
             </div>
 
             <div style="color: #64748b; font-size: 9px; font-weight: 900; margin-bottom: 10px; text-transform: uppercase; letter-spacing:0.5px; display:flex; align-items:center;">
                 <span style="width:6px; height:6px; background:#4ade80; border-radius:50%; margin-right:6px; display:inline-block; animation: pulse 1s infinite;"></span>
-                LIVE SIGNAL STREAM
+                TACTICAL MISSION FEED
             </div>
-            <div class="scroll-container" style="flex: 1; overflow-y: auto; padding-right: 5px;">
+            <div class="scroll-container" style="flex: 1; overflow-y: auto; padding-right: 5px; scroll-behavior: smooth;">
                 {events_html}
+            </div>
+            <div style="margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.05); color:#475569; font-size:7px; font-weight:800; display:flex; justify-content:space-between;">
+                <span>SCROLL FOR RECENT INTEL</span>
+                <span>UPLINK: ACTIVE</span>
             </div>
         </div>
         """
@@ -186,7 +217,7 @@ def render_map_panel() -> None:
                         L.geoJSON(geojson, {
                             style: feature => {
                                 const code = feature.id || feature.properties.ISO_A3;
-                                const isAffected = ["ARG", "ESP", "GBR", "NLD", "ZAF"].includes(code);
+                                const isAffected = ["ARG", "ESP", "GBR", "NLD", "ZAF", "USA"].includes(code);
                                 if (isAffected) return { fillColor: '#6b001a', fillOpacity: 0.6, color: '#ff0055', weight: 2 };
                                 return { fillOpacity: 0, weight: 0.2, color: 'rgba(255,255,255,0.05)', fillColor: '#000' };
                             },

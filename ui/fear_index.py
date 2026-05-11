@@ -139,102 +139,96 @@ def render_fear_index() -> None:
     log_sentiment_snapshot(avg_fear, web_sentiment)
     community = get_community_data()
     user_id = _get_stable_user_id()
-
     lockout_sec = _get_user_lockout_remaining(user_id)
     is_locked = (lockout_sec > 0)
 
-    anim = "pulse-fear 2s ease-in-out infinite" if live_fear >= 3.0 else "none"
-    db_status = "REMOTE" if os.getenv("QDRANT_URL") else "LOCAL"
-    db_color = "#22c55e" if os.getenv("QDRANT_URL") else "#ef4444"
+    # Session-level lock: Allow voting once per session even if not globally locked
+    # unless they JUST voted in this specific turn.
+    if st.session_state.get("just_voted"):
+        is_locked = True
 
-    html_header = f"""
-<div style="background:rgba(15, 23, 42, 0.6); border: 1px solid {color}44; border-radius: 10px; padding: 0.8rem 1.2rem;
-margin-bottom: 0.8rem; position: relative; overflow: hidden; min-height: 120px; display: flex; flex-direction: column; justify-content: space-between; backdrop-filter: blur(10px);">
-<div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg,{color},{color}44,{color}); animation: {anim};"></div>
-<div style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
-    <div style="display:flex; align-items:center; gap: 1.5rem; flex-wrap:wrap;">
-        <div style="flex-shrink:0;">
-        <p style="color:#94a3b8; font-size:0.65rem; font-weight:800; letter-spacing:0.1em; margin:0; font-family:monospace; opacity:0.8;">📡 FEAR INDEX</p>
-        <h2 style="margin:0; font-size:1.8rem !important; font-weight:950; color:white !important; letter-spacing:-0.03em; line-height: 1;">{label.upper()}</h2>
-        </div>
-        <div style="background:{color}15; border:1px solid {color}; border-radius:6px; padding:0.3rem 0.8rem; text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15;">
-        <p style="color:{color}; font-size:1.5rem; font-weight:900; margin:0; line-height:1; font-family:monospace;">{live_fear:.2f}<small style="font-size:0.5em; opacity:0.7;">/5</small></p>
-        <p style="color:#94a3b8; font-size:0.5rem; font-weight:800; margin:0; text-transform:uppercase;">SCORE</p>
-        </div>
-    </div>
-    <div style="text-align:right;">
-        <span style="color:{db_color}; font-size:0.55rem; font-weight:900; border:1px solid {db_color}44; padding:2px 6px; border-radius:4px;">{db_status} DB</span>
-    </div>
-</div>
-<div style="display:flex; gap:0.9rem; flex-wrap:wrap; border-top:1px solid rgba(255,255,255,0.05); padding-top:0.4rem;">
-<span style="color:#94a3b8; font-size:0.6rem;">🌐 Web: <b style="color:white;">{web_sentiment:.1f}</b></span>
-<span style="color:#94a3b8; font-size:0.6rem;">👥 User: <b style="color:white;">{avg_fear:.1f}</b></span>
-<span style="color:#94a3b8; font-size:0.6rem;">📈 Votes: <b style="color:white;">{vote_count}</b></span>
-</div>
-</div>
-""".replace("\n", "").strip()
-    st.markdown(html_header, unsafe_allow_html=True)
-    
-    fig_trend = _build_sentiment_trend(community["history"])
-    st.plotly_chart(fig_trend, use_container_width=True, config={"displayModeBar": False})
-
-    col_gauge, col_dist = st.columns([1, 1.6])
-    with col_gauge:
-        fig_gauge = _build_fear_gauge(live_fear, color)
-        st.plotly_chart(fig_gauge, use_container_width=True, config={"displayModeBar": False})
-
-    with col_dist:
-        st.markdown("""
-            <style>
-            div.stButton > button {
-                width: 100% !important; height: 100px !important;
-                background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.95)) !important;
-                border: 1px solid rgba(255, 255, 255, 0.15) !important;
-                border-top: 3px solid var(--btn-color) !important;
-                border-radius: 14px !important; color: #f8fafc !important;
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-                display: flex !important; flex-direction: column !important;
-                align-items: center !important; justify-content: center !important;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.8), 0 0 15px var(--btn-color)44 !important;
-            }
-            div.stButton > button p {
-                margin: 0 !important; line-height: 1.1 !important; font-weight: 800 !important;
-                font-size: 0.6rem !important; text-transform: uppercase !important;
-            }
-            div.stButton > button:disabled { opacity: 0.3 !important; cursor: not-allowed !important; filter: grayscale(1) !important; }
-            </style>
-            <div style="margin-bottom: 0.6rem; border-bottom: 1px solid rgba(56,189,248,0.3); padding-bottom: 0.4rem;">
-                <p style='color:#38bdf8; font-size:0.8rem; font-weight:900; margin:0; letter-spacing:0.15em; text-transform:uppercase;'>📡 TACTICAL SENTIMENT INPUT</p>
+    # ── 1. BIO-HAZARD THREAT LEVEL BAR (REPLACES GAUGE) ──
+    threat_pct = (live_fear - 1) / 4 * 100
+    threat_html = f"""
+    <div style="background:rgba(15, 23, 42, 0.6); border: 1px solid {color}44; border-radius: 12px; padding: 1.2rem; margin-bottom: 1rem; backdrop-filter: blur(10px); position:relative; overflow:hidden;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <div>
+                <p style="color:#94a3b8; font-size:0.65rem; font-weight:800; letter-spacing:0.1em; margin:0; font-family:monospace;">☣️ CURRENT THREAT LEVEL</p>
+                <h2 style="margin:0; font-size:1.8rem; font-weight:950; color:white; letter-spacing:-0.02em;">{label.upper()}</h2>
             </div>
-            """, unsafe_allow_html=True)
+            <div style="text-align:right;">
+                <p style="color:{color}; font-size:2rem; font-weight:900; margin:0; line-height:1; font-family:monospace;">{live_fear:.2f}</p>
+                <p style="color:#94a3b8; font-size:0.5rem; font-weight:800; margin:0; text-transform:uppercase;">SENTIMENT SCORE</p>
+            </div>
+        </div>
+        <div style="height:12px; background:rgba(255,255,255,0.05); border-radius:100px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);">
+            <div style="width:{threat_pct}%; height:100%; background:linear-gradient(90deg, #22c55e, #f59e0b, #ef4444); transition: width 1s ease-in-out; position:relative;">
+                <div style="position:absolute; right:0; top:0; height:100%; width:4px; background:white; box-shadow:0 0 15px white;"></div>
+            </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:8px;">
+             <span style="color:#94a3b8; font-size:0.55rem; font-weight:700;">STABLE</span>
+             <span style="color:#ef4444; font-size:0.55rem; font-weight:900; animation:pulse-fear 1.5s infinite;">CRITICAL</span>
+        </div>
+    </div>
+    """
+    st.markdown(threat_html, unsafe_allow_html=True)
+    
+    # ── 2. TREND GRAPH ──
+    # ── 3. TACTICAL INPUT (MOBILE FRIENDLY) ──
+    st.markdown("""
+        <style>
+        div.stButton > button {
+            width: 100% !important; height: 100px !important;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.95)) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            border-top: 4px solid var(--btn-color) !important;
+            border-radius: 16px !important; color: #f8fafc !important;
+            transition: all 0.2s ease !important;
+            display: flex !important; flex-direction: column !important;
+            align-items: center !important; justify-content: center !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4) !important;
+        }
+        div.stButton > button:hover { transform: scale(1.02) !important; border-color: white !important; }
+        div.stButton > button p { margin: 0 !important; font-weight: 900 !important; font-size: 0.75rem !important; }
+        div.stButton > button span { font-size: 1.8rem !important; margin-bottom: 6px !important; }
+        div.stButton > button:disabled { opacity: 0.4 !important; filter: grayscale(1) !important; pointer-events: none !important; }
+        </style>
+        <div style="margin: 1.5rem 0 0.8rem; border-left: 4px solid #38bdf8; padding-left: 12px;">
+            <p style='color:#38bdf8; font-size:0.9rem; font-weight:900; margin:0; letter-spacing:0.05em;'>📡 TAP TO SYNC YOUR SENTIMENT</p>
+            <p style='color:#64748b; font-size:0.65rem; margin:2px 0 0;'>Your input recalibrates the global threat matrix in real-time.</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-        cols = st.columns(5)
-        icons = {1: "🟢", 2: "🟡", 3: "🟠", 4: "🔴", 5: "💀"}
-        for i, level_id in enumerate(range(1, 6)):
-            info = FEAR_LEVELS[level_id]
-            with cols[i]:
-                st.markdown(f'<div style="--btn-color: {info["color"]};">', unsafe_allow_html=True)
-                btn_label = f"{icons[level_id]}\n{info['label'].upper()}"
-                if st.button(btn_label, key=f"v23_btn_{level_id}", disabled=is_locked, use_container_width=True):
-                    _save_fear_vote(level_id, user_id)
-                    st.rerun()
-                st.markdown('</div>', unsafe_allow_html=True)
+    cols = st.columns(5)
+    icons = {1: "🟢", 2: "🟡", 3: "🟠", 4: "🔴", 5: "💀"}
+    for i, level_id in enumerate(range(1, 6)):
+        info = FEAR_LEVELS[level_id]
+        with cols[i]:
+            st.markdown(f'<div style="--btn-color: {info["color"]};">', unsafe_allow_html=True)
+            btn_text = f"{icons[level_id]}\n{info['label'].upper()}"
+            if st.button(btn_text, key=f"findex_v4_{level_id}", disabled=is_locked, use_container_width=True):
+                _save_fear_vote(level_id, user_id)
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
 
-        if is_locked:
-            hours = lockout_sec // 3600
-            mins = (lockout_sec % 3600) // 60
+    if is_locked:
+        hours = lockout_sec // 3600
+        mins = (lockout_sec % 3600) // 60
+        # If they just voted, show a simpler thank you
+        if st.session_state.get("just_voted"):
+             st.markdown(
+                """
+                <div style="background:rgba(34,197,94,0.1); border-left:4px solid #22c55e; padding:0.8rem; margin-top:1rem; border-radius:4px;">
+                    <p style="color:#22c55e; font-size:0.75rem; font-weight:900; margin:0;">✓ SENTIMENT SYNCHRONIZED</p>
+                    <p style="color:#94a3b8; font-size:0.6rem; margin:2px 0 0;">Outbreak status baseline has been updated with your local intelligence.</p>
+                </div>
+                """, unsafe_allow_html=True)
+        else:
             st.markdown(
                 f"""
                 <div style="background:rgba(239,68,68,0.1); border-left:4px solid #ef4444; padding:0.8rem; margin-top:1rem; border-radius:4px;">
                     <p style="color:#ef4444; font-size:0.75rem; font-weight:900; margin:0;">🔒 INPUT SECURED (RE-ENTRY LOCK ACTIVE)</p>
                     <p style="color:#94a3b8; font-size:0.6rem; margin:2px 0 0;">Time remaining: <b>{hours}h {mins}m</b>. Re-calibration locked to prevent data flooding.</p>
-                </div>
-                """, unsafe_allow_html=True)
-        elif st.session_state.get("just_voted"):
-            st.markdown(
-                """
-                <div style="background:rgba(34,197,94,0.1); border-left:4px solid #22c55e; padding:0.8rem; margin-top:1rem; border-radius:4px;">
-                    <p style="color:#22c55e; font-size:0.75rem; font-weight:900; margin:0;">✓ THANK YOU FOR YOUR INPUT</p>
-                    <p style="color:#94a3b8; font-size:0.6rem; margin:2px 0 0;">Your local intelligence has been successfully synchronized.</p>
                 </div>
                 """, unsafe_allow_html=True)
