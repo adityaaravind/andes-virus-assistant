@@ -460,8 +460,8 @@ background: linear-gradient(90deg,{color},{color}44,{color}); animation: {anim};
             st.markdown(
                 f"""
                 <div style="background:linear-gradient(90deg, rgba(34,197,94,0.1), transparent); border-left:4px solid #22c55e; border-radius:4px; padding:0.8rem; margin-top:1rem; box-shadow: 0 0 20px rgba(34,197,94,0.1);">
-                    <p style="color:#22c55e; font-size:0.75rem; font-weight:900; margin:0; letter-spacing:0.05em; text-shadow: 0 0 10px rgba(34,197,94,0.4);">✓ COMMUNITY INTELLIGENCE SYNCED: {info['label'].upper()} STATUS CONFIRMED</p>
-                    <p style="color:#94a3b8; font-size:0.6rem; margin:2px 0 0;">Tactical models recalibrated with your regional sentiment input.</p>
+                    <p style="color:#22c55e; font-size:0.75rem; font-weight:900; margin:0; letter-spacing:0.05em; text-shadow: 0 0 10px rgba(34,197,94,0.4);">✓ THANK YOU FOR YOUR INPUT</p>
+                    <p style="color:#94a3b8; font-size:0.6rem; margin:2px 0 0;">Your local intelligence has been successfully synchronized with our global models.</p>
                 </div>
                 """, 
                 unsafe_allow_html=True
