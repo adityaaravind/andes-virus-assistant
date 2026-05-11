@@ -554,13 +554,12 @@ def main() -> None:
         from ui.journalist_tools import render_journalist_tools
 
         # ── PANDEMIC RISK & FEAR INDEX — equal size cards ────────────────────────
-        st.markdown("<div id='risk_fear' class='tactical-row'>", unsafe_allow_html=True)
+        st.markdown("<div id='risk_fear'></div>", unsafe_allow_html=True)
         col_risk, col_fear = st.columns([1, 1])
         with col_risk:
             render_pandemic_risk_panel()
         with col_fear:
             render_fear_index()
-        st.markdown("</div>", unsafe_allow_html=True)
         st.divider()
 
         # ── Live news ────────────────────────────────────────────────────────────
