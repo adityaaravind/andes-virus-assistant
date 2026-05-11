@@ -198,7 +198,18 @@ def render_map_panel() -> None:
                                 tooltipHtml += `<div><div style="color:#94a3b8; font-size:9px;">CHANCE OF SPREAD</div><div style="color:#fff; font-size:14px; font-weight:900;">${hantaRisk}%</div></div>`;
                                 tooltipHtml += `<div><div style="color:#94a3b8; font-size:9px;">COVID DAY ${__DAY__}</div><div style="color:#fff; font-size:14px; font-weight:900;">${covidRisk.toFixed(1)}%</div></div>`;
                                 tooltipHtml += `</div>`;
-                                if (covidRisk === 0 && onsetDay > 0) tooltipHtml += `<p style="color:#ef4444; font-size:11px; font-weight:900; margin-top:10px;">[!] STARTING DAY: ${onsetDay}</p>`;
+                                
+                                tooltipHtml += `<p style="color:#94a3b8; font-size:10px; font-weight:900; margin:0; text-transform:uppercase;">CALC: (Travel Links * 0.6) + (Distance * 0.4)</p>`;
+                                
+                                if (covidRisk === 0) {
+                                    if (onsetDay > 0) {
+                                        tooltipHtml += `<p style="color:#ef4444; font-size:11px; font-weight:950; margin-top:10px; text-transform:uppercase;">[!] STARTING DAY: ${onsetDay}</p>`;
+                                    } else {
+                                        tooltipHtml += `<p style="color:#94a3b8; font-size:10px; font-weight:900; margin-top:10px; text-transform:uppercase;">STATUS: ESTIMATED DATA</p>`;
+                                        tooltipHtml += `<p style="color:#64748b; font-size:9px; font-style:italic; margin:0;">(Based on nearby areas)</p>`;
+                                    }
+                                }
+                                
                                 tooltipHtml += `</div></div>`;
                                 layer.bindTooltip(tooltipHtml, { sticky: true });
                             }
@@ -213,29 +224,14 @@ def render_map_panel() -> None:
                         iconSize: [24, 24], iconAnchor: [12, 12]
                     });
                     const marker = L.marker([h.lat, h.lng], { icon: icon }).addTo(map);
-                    
                     let popupHtml = `<div style="padding:15px; min-width:260px; font-family:sans-serif;">`;
-                    popupHtml += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">`;
-                    popupHtml += `<b style="color:${h.color}; font-size:14px;">📡 ${h.name}</b>`;
-                    popupHtml += `<span style="color:#94a3b8; font-size:9px;">${h.timestamp}</span>`;
-                    popupHtml += `</div>`;
-                    
+                    popupHtml += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><b style="color:${h.color}; font-size:14px;">📡 ${h.name}</b><span style="color:#94a3b8; font-size:9px;">${h.timestamp}</span></div>`;
                     popupHtml += `<div style="color:#ffffff; font-size:11px; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; font-weight:600;">${h.relation}</div>`;
-                    
-                    popupHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:12px;">`;
-                    popupHtml += `<div><div class="intel-label">TOTAL CASES</div><div style="color:#fff; font-size:18px; font-weight:900;">${h.cases}</div></div>`;
-                    popupHtml += `<div><div class="intel-label">TOTAL DEATHS</div><div style="color:#ef4444; font-size:18px; font-weight:900;">${h.deaths}</div></div>`;
-                    popupHtml += `</div>`;
-                    
-                    popupHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;">`;
-                    popupHtml += `<div><div class="intel-label">HOSPITAL / CLINIC</div><div style="color:#4ade80; font-size:10px; font-weight:900;">${h.admitted}</div></div>`;
-                    popupHtml += `<div><div class="intel-label">LATEST NOTES</div><div style="color:#cbd5e1; font-size:9px; font-style:italic; line-height:1.2;">${h.notes}</div></div>`;
-                    popupHtml += `</div></div>`;
-                    
+                    popupHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:12px;"><div><div class="intel-label">TOTAL CASES</div><div style="color:#fff; font-size:18px; font-weight:900;">${h.cases}</div></div><div><div class="intel-label">TOTAL DEATHS</div><div style="color:#ef4444; font-size:18px; font-weight:900;">${h.deaths}</div></div></div>`;
+                    popupHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;"><div><div class="intel-label">HOSPITAL / CLINIC</div><div style="color:#4ade80; font-size:10px; font-weight:900;">${h.admitted}</div></div><div><div class="intel-label">LATEST NOTES</div><div style="color:#cbd5e1; font-size:9px; font-style:italic; line-height:1.2;">${h.notes}</div></div></div></div>`;
                     marker.bindPopup(popupHtml, { closeButton: false, offset: [0, -10] });
                     marker.on('mouseover', function() { this.openPopup(); });
                     marker.on('mouseout', function() { this.closePopup(); });
-
                     if (!isShip) L.polyline([[h.lat, h.lng], shipPos], { color: h.color, weight: 1.5, opacity: 0.8, dashArray: '4, 6' }).addTo(map);
                 });
             </script>
