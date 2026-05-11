@@ -80,7 +80,7 @@ def render_map_panel() -> None:
         <div class="mission-header" style='border-left: 3px solid #fbbf24; padding-left:15px; margin-bottom:0.8rem; display:flex; justify-content:space-between; align-items:center;'>
             <div>
                 <h2 style='margin:0; font-size:1.1rem; letter-spacing:0.12em; color:#ffffff;'>ORBITAL MISSION CONTROL</h2>
-                <p style='margin:0; font-size:0.6rem; color:#fbbf24; font-family:monospace; font-weight:800;'>DAILY_SYNC_v4: DAY_{current_day} // TACTICAL_HOTSPOT_FEED: ACTIVE</p>
+                <p style='margin:0; font-size:0.6rem; color:#fbbf24; font-family:monospace; font-weight:800;'>DAILY_SYNC_v5: DAY_{current_day} // TACTICAL_UPLINK: ACTIVE</p>
             </div>
             <div style="background:rgba(251,191,36,0.1); border:1px solid #fbbf2444; padding:4px 12px; border-radius:4px;">
                 <span class="live-dot" style="width:6px; height:6px; background:#fbbf24; box-shadow:0 0 10px #fbbf24;"></span>
@@ -93,6 +93,7 @@ def render_map_panel() -> None:
     col_map, col_vessel = st.columns([2.2, 1])
     
     with col_vessel:
+        # PURE HTML INJECTION FOR VESSEL TELEMETRY (FIXES RENDERING BUG)
         events_html = "".join([f"""
             <div style="border-left: 2px solid #fbbf24; padding-left: 10px; margin-bottom: 12px;">
                 <div style="color: #fbbf24; font-size: 8px; font-weight: 900; letter-spacing: 1px;">{ev['date']} | {ev['country'].upper()}</div>
@@ -101,42 +102,37 @@ def render_map_panel() -> None:
             </div>
         """ for ev in VESSEL_CONTACT_LOG])
 
-        st.markdown(
-            f"""
-            <div class="stat-card" style="border: 1px solid #fbbf24; box-shadow: 0 0 25px rgba(251,191,36,0.15); background: rgba(13, 27, 42, 0.9); padding: 1.5rem !important; min-height: 440px; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <div style="color: #fbbf24; font-size: 10px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;">🚢 MV_HONDIUS_CORE</div>
-                    <div style="background:rgba(251,191,36,0.1); padding:2px 6px; border-radius:4px; border:1px solid #fbbf2444; color:#fbbf24; font-size:8px;">TACTICAL_UPLINK</div>
+        vessel_card_html = f"""
+        <div style="font-family: monospace; background: rgba(13, 27, 42, 0.9); border: 1px solid #fbbf24; box-shadow: 0 0 25px rgba(251,191,36,0.15); padding: 1.5rem; border-radius: 12px; min-height: 440px; display: flex; flex-direction: column; color: #fff;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div style="color: #fbbf24; font-size: 10px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;">🚢 MV_HONDIUS_CORE</div>
+                <div style="background:rgba(251,191,36,0.1); padding:2px 6px; border-radius:4px; border:1px solid #fbbf2444; color:#fbbf24; font-size:8px;">TACTICAL_UPLINK</div>
+            </div>
+            <div style="margin: 15px 0;">
+                <h2 style="margin:0; font-size:1.8rem; font-weight:950; line-height: 1; letter-spacing:-0.05em;">{state.get('ship_status', 'Quarantined').upper()}</h2>
+                <p style="color:#fbbf24; font-size:0.65rem; font-weight:800; margin-top:5px; text-transform:uppercase;">VESSEL_INTEGRITY: PHASE_4_LOCKDOWN</p>
+            </div>
+            <div style="background:rgba(0,0,0,0.4); border-radius:8px; padding:12px; margin-bottom:15px; border:1px solid rgba(255,255,255,0.05);">
+                <p style="color:#64748b; font-size:8px; font-weight:800; margin:0 0 8px 0; text-transform:uppercase;">CONTAINMENT_STABILITY</p>
+                <div style="height:4px; background:rgba(255,255,255,0.1); border-radius:2px; margin-bottom:8px; overflow:hidden;">
+                    <div style="width:94.2%; height:100%; background:linear-gradient(90deg, #fbbf24, #f59e0b); box-shadow: 0 0 10px #fbbf24;"></div>
                 </div>
-                
-                <div style="margin: 15px 0;">
-                    <h2 style="margin:0; font-size:2rem !important; font-weight:950; color:white !important; line-height: 1; letter-spacing:-0.05em;">{state.get('ship_status', 'Quarantined').upper()}</h2>
-                    <p style="color:#fbbf24; font-size:0.65rem; font-weight:800; margin-top:5px; text-transform:uppercase;">VESSEL_INTEGRITY: PHASE_4_LOCKDOWN</p>
-                </div>
-                
-                <div style="background:rgba(0,0,0,0.4); border-radius:8px; padding:12px; margin-bottom:15px; border:1px solid rgba(255,255,255,0.05);">
-                    <p style="color:#64748b; font-size:8px; font-weight:800; margin:0 0 8px 0; text-transform:uppercase;">CONTAINMENT_STABILITY</p>
-                    <div style="height:4px; background:rgba(255,255,255,0.1); border-radius:2px; margin-bottom:8px; overflow:hidden;">
-                        <div style="width:94.2%; height:100%; background:linear-gradient(90deg, #fbbf24, #f59e0b); box-shadow: 0 0 10px #fbbf24;"></div>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="color:#fbbf24; font-size:12px; font-weight:900;">94.2<small style="font-size:8px;">%</small></span>
-                        <span style="color:#22c55e; font-size:8px; font-weight:800;">[NOMINAL]</span>
-                    </div>
-                </div>
-
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
-                    <div><p style="color:#64748b; font-size:7px; margin:0;">HULL_TEMP</p><p style="color:#fff; font-size:10px; font-weight:900; margin:0;">18.2°C</p></div>
-                    <div><p style="color:#64748b; font-size:7px; margin:0;">BIO_PRESSURE</p><p style="color:#fff; font-size:10px; font-weight:900; margin:0;">-12 Pa</p></div>
-                </div>
-
-                <div style="color: #64748b; font-size: 9px; font-weight: 800; margin-bottom: 12px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; letter-spacing: 1px;">BOARDING_LOG_HISTORY</div>
-                <div style="flex: 1; overflow-y: auto; padding-right: 5px; scrollbar-width: thin;">
-                    {events_html}
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="color:#fbbf24; font-size:12px; font-weight:900;">94.2%</span>
+                    <span style="color:#22c55e; font-size:8px; font-weight:800;">[NOMINAL]</span>
                 </div>
             </div>
-            """, unsafe_allow_html=True
-        )
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
+                <div><p style="color:#64748b; font-size:7px; margin:0;">HULL_TEMP</p><p style="color:#fff; font-size:10px; font-weight:900; margin:0;">18.2°C</p></div>
+                <div><p style="color:#64748b; font-size:7px; margin:0;">BIO_PRESSURE</p><p style="color:#fff; font-size:10px; font-weight:900; margin:0;">-12 Pa</p></div>
+            </div>
+            <div style="color: #64748b; font-size: 9px; font-weight: 800; margin-bottom: 12px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; letter-spacing: 1px;">BOARDING_LOG_HISTORY</div>
+            <div style="flex: 1; overflow-y: auto; padding-right: 5px;">
+                {events_html}
+            </div>
+        </div>
+        """
+        components.html(vessel_card_html, height=460)
 
     with col_map:
         map_template = """
@@ -150,11 +146,11 @@ def render_map_panel() -> None:
                 html, body { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; font-family: monospace; }
                 #map { width: 100%; height: 100%; background: #050505; border-radius: 12px; }
                 
-                .leaflet-tooltip { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(251, 191, 36, 0.4) !important; border-radius: 6px !important; box-shadow: 0 0 20px rgba(0,0,0,0.8) !important; font-family: monospace !important; padding: 12px !important; opacity: 1 !important; pointer-events: none; }
+                .leaflet-tooltip { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(251, 191, 36, 0.4) !important; border-radius: 6px !important; box-shadow: 0 0 20px rgba(0,0,0,0.8) !important; font-family: monospace !important; padding: 12px !important; opacity: 1 !important; pointer-events: none; z-index: 1000; }
                 .leaflet-popup-content-wrapper { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(251, 191, 36, 0.4) !important; border-radius: 8px !important; font-family: monospace !important; }
                 .leaflet-popup-tip { background: #0d1b2a !important; }
                 
-                .ring-marker { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #ffffff; position: relative; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.7); transition: all 0.3s; }
+                .ring-marker { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #ffffff; position: relative; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.7); }
                 .blink-active { animation: marker-blink 1.5s infinite ease-in-out; }
                 @keyframes marker-blink { 0%, 100% { opacity: 1; box-shadow: 0 0 5px currentColor; transform: scale(1); } 50% { opacity: 0.6; box-shadow: 0 0 20px currentColor; transform: scale(1.1); } }
                 
@@ -200,7 +196,7 @@ def render_map_panel() -> None:
                                 tooltipHtml += `</div>`;
                                 tooltipHtml += `<p style="color:#64748b; font-size:7px; font-style:italic; margin:0;">CALC: (Connectivity * 0.6) + (Proximity * 0.4)</p>`;
                                 tooltipHtml += `</div></div>`;
-                                layer.bindTooltip(tooltipHtml, { sticky: true });
+                                layer.bindTooltip(tooltipHtml, { sticky: true, className: 'leaflet-tooltip' });
                             }
                         }).addTo(map);
                     });
@@ -219,14 +215,11 @@ def render_map_panel() -> None:
                     popupHtml += `<b style="color:${h.color}; font-size:14px;">🛰️ ${h.name}</b>`;
                     popupHtml += `<span style="background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px; color:#64748b; font-size:8px;">${h.timestamp}</span>`;
                     popupHtml += `</div>`;
-                    
                     popupHtml += `<div style="color:#94a3b8; font-size:10px; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;">${h.relation} // <span style="color:#fff;">${h.intel}</span></div>`;
-                    
                     popupHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">`;
                     popupHtml += `<div><div class="intel-label">TOTAL_CASES</div><div style="color:#fff; font-size:16px; font-weight:950;">${h.cases}</div></div>`;
                     popupHtml += `<div><div class="intel-label">TOTAL_DEATHS</div><div style="color:#ef4444; font-size:16px; font-weight:950;">${h.deaths}</div></div>`;
                     popupHtml += `</div>`;
-                    
                     popupHtml += `<div class="intel-grid">`;
                     popupHtml += `<div><div class="intel-label">ADMITTED_WHERE</div><div style="color:#fbbf24; font-size:10px; font-weight:900;">${h.admitted}</div></div>`;
                     popupHtml += `<div><div class="intel-label">INTEL_BRIEF</div><div style="color:#cbd5e1; font-size:9px; font-style:italic; line-height:1.2;">${h.notes}</div></div>`;
@@ -252,6 +245,6 @@ def render_map_panel() -> None:
         components.html(map_html, height=450)
 
     st.markdown(
-        f"<div style='text-align:left; padding:10px; background:rgba(15,23,42,0.4); border-radius:6px; border:1px solid rgba(255,255,255,0.05); margin-top:10px;'><p style='color:#94a3b8; font-size:0.65rem; font-family:monospace; margin:0;'><b style='color:#fbbf24;'>MISSION_CONTROL_v20:</b> Deep Tactical Medical Intel Enabled // <b>CALIBRATED_SYNC:</b> COVID_REPLAY DAY_{current_day} // <b>SYSTEMS:</b> NOMINAL</p></div>",
+        f"<div style='text-align:left; padding:10px; background:rgba(15,23,42,0.4); border-radius:6px; border:1px solid rgba(255,255,255,0.05); margin-top:10px;'><p style='color:#94a3b8; font-size:0.65rem; font-family:monospace; margin:0;'><b style='color:#fbbf24;'>MISSION_CONTROL_v20.1:</b> HTML_RECOVERY_SUCCESS // <b>CALIBRATED_SYNC:</b> ACTIVE // <b>DAY_{current_day} REPLAY</b></p></div>",
         unsafe_allow_html=True
     )
