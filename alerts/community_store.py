@@ -84,3 +84,15 @@ def get_community_data() -> dict[str, Any]:
         "history": history,
         "feed": feed
     }
+
+def get_trending_topics(limit: int = 5) -> list[tuple[str, int]]:
+    """Aggregate search types from the feed to find trending research topics."""
+    feed = get_persisted_value(INSIGHTS_FEED_KEY, [])
+    counts: dict[str, int] = {}
+    for item in feed:
+        if item["type"] == "search":
+            term = item["content"].replace("queried: ", "").strip().upper()
+            if len(term) > 3:
+                counts[term] = counts.get(term, 0) + 1
+    
+    return sorted(counts.items(), key=lambda x: x[1], reverse=True)[:limit]
