@@ -54,7 +54,7 @@ def render_map_panel() -> None:
     from ui.news_ticker import fetch_headlines
     
     try:
-        headlines = fetch_headlines(max_per_feed=10)
+        headlines = fetch_headlines(max_per_feed=12)
     except Exception:
         headlines = []
 
@@ -63,7 +63,6 @@ def render_map_panel() -> None:
     for country in NATIONALITIES_DATA:
         code = country["code"]
         name = country["country"].lower()
-        # Simple match: if country name in title or summary
         related = [h for h in headlines if name in (h.get("title", "") + " " + h.get("summary", "")).lower()]
         country_intel[code] = related[:5]
 
@@ -71,11 +70,12 @@ def render_map_panel() -> None:
         f"""
         <div class="mission-header" style='border-left: 3px solid #00f5ff; padding-left:15px; margin-bottom:0.8rem; display:flex; justify-content:space-between; align-items:center;'>
             <div>
-                <h2 style='margin:0; font-size:1.1rem; letter-spacing:0.12em; color:#ffffff;'>VESSEL_TELEMETRY // MV_HONDIUS</h2>
-                <p style='margin:0; font-size:0.6rem; color:#00f5ff; font-family:monospace; font-weight:800;'>TACTICAL_DECOUPLED_UPLINK // SYNC: {datetime.now().strftime('%H:%M:%S')} UTC</p>
+                <h2 style='margin:0; font-size:1.1rem; letter-spacing:0.12em; color:#ffffff;'>ORBITAL MISSION CONTROL</h2>
+                <p style='margin:0; font-size:0.6rem; color:#00f5ff; font-family:monospace; font-weight:800;'>VESSEL_LOCK: MV_HONDIUS // LOCAL_INTEL_SYNC: {datetime.now().strftime('%H:%M:%S')} UTC</p>
             </div>
             <div style="background:rgba(0,245,255,0.1); border:1px solid #00f5ff44; padding:4px 12px; border-radius:4px;">
-                <span style="color:#00f5ff; font-size:0.6rem; font-weight:900; font-family:monospace;">STABLE_LOCK</span>
+                <span class="live-dot" style="width:6px; height:6px; background:#22c55e; box-shadow:0 0 10px #22c55e;"></span>
+                <span style="color:#22c55e; font-size:0.6rem; font-weight:900; font-family:monospace;">STABLE</span>
             </div>
         </div>
         """, unsafe_allow_html=True
@@ -84,11 +84,10 @@ def render_map_panel() -> None:
     col_map, col_vessel = st.columns([2.2, 1])
     
     with col_vessel:
-        # VESSEL CORE TELEMETRY (CLEANED)
         st.markdown(
             f"""
-            <div class="tactical-card" style="border-left: 4px solid #00f5ff; background: rgba(13, 27, 42, 0.6); padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid rgba(0,245,255,0.2);">
-                <div style="color: #64748b; font-size: 10px; font-weight: 900; margin-bottom: 12px; letter-spacing: 2px;">🚢 VESSEL_SYSTEMS_STATUS</div>
+            <div class="tactical-card" style="border-left: 4px solid #00f5ff; background: rgba(13, 27, 42, 0.6); padding: 15px; border-radius: 10px; margin-bottom: 12px; border: 1px solid rgba(0,245,255,0.2);">
+                <div style="color: #64748b; font-size: 10px; font-weight: 900; margin-bottom: 8px; letter-spacing: 2px;">🚢 VESSEL_SYSTEMS</div>
                 <div style="display: flex; flex-direction: column; gap: 8px;">
                     <div style="display:flex; justify-content:space-between;"><span style="color:#94a3b8; font-size:10px;">MISSION_STATE</span><span style="color:#00f5ff; font-size:10px; font-weight:900;">{state.get('ship_status', 'Quarantined').upper()}</span></div>
                     <div style="display:flex; justify-content:space-between;"><span style="color:#94a3b8; font-size:10px;">PROPULSION</span><span style="color:#22c55e; font-size:10px; font-weight:900;">IDLE (ANCHOR)</span></div>
@@ -98,7 +97,7 @@ def render_map_panel() -> None:
             </div>
             
             <div class="tactical-card" style="border-right: 4px solid #22c55e; background: rgba(13, 27, 42, 0.6); padding: 15px; border-radius: 10px; border: 1px solid rgba(34,197,94,0.2);">
-                <div style="color: #22c55e; font-size: 10px; font-weight: 900; margin-bottom: 12px; letter-spacing: 2px;">🛰️ SHIP_BOARD_SIGNALS</div>
+                <div style="color: #22c55e; font-size: 10px; font-weight: 900; margin-bottom: 8px; letter-spacing: 2px;">🛰️ SHIP_BOARD_SIGNALS</div>
                 <div style="font-size: 11px; color: #cbd5e1; line-height: 1.6; font-family:monospace;">
                     • [08:12] Satellite Link: STABLE<br>
                     • [09:45] Sewage Treatment: SHUTDOWN<br>
@@ -119,7 +118,7 @@ def render_map_panel() -> None:
             <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
             <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
             <style>
-                html, body { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; font-family: 'JetBrains Mono', monospace; }
+                html, body { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; font-family: monospace; }
                 #map { width: 100%; height: 100%; background: #050505; border-radius: 12px; }
                 
                 .leaflet-popup-content-wrapper { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(0, 180, 216, 0.4) !important; border-radius: 8px !important; box-shadow: 0 0 25px rgba(0,0,0,0.8) !important; font-family: monospace !important; padding: 0 !important; }
@@ -134,9 +133,10 @@ def render_map_panel() -> None:
                 .news-item:hover { color: #00f5ff; }
                 .news-item:last-child { border: none; }
                 
-                .glow-country { filter: drop-shadow(0 0 8px rgba(255, 0, 85, 0.4)); }
-                .ring-marker { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #ffffff; position: relative; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.7); animation: radar-pulse 2s infinite; }
-                @keyframes radar-pulse { 0% { box-shadow: 0 0 0 0px rgba(255,255,255,0.4); } 100% { box-shadow: 0 0 0 15px rgba(255,255,255,0); } }
+                .ring-marker { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #ffffff; position: relative; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.7); }
+                .vessel-ring { border-color: #22c55e !important; box-shadow: 0 0 25px #22c55e, inset 0 0 15px #22c55e; animation: pulse-ring 2s infinite; }
+                .badge { position: absolute; top: -8px; right: -8px; background: #ffffff; color: #000; border-radius: 50%; width: 14px; height: 14px; font-size: 9px; font-weight: 900; display: flex; align-items: center; justify-content: center; border: 1px solid #000; }
+                @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.7); } 70% { box-shadow: 0 0 0 10px rgba(34,197,94,0); } 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); } }
             </style>
         </head>
         <body>
@@ -148,15 +148,17 @@ def render_map_panel() -> None:
                 const hotspots = __HOTSPOTS__;
                 const localScores = __LOCAL_SCORES__;
                 const countryIntel = __COUNTRY_INTEL__;
+                const shipPos = [14.93, -23.51];
                 const affectedCodes = ["ARG", "ESP", "GBR", "NLD", "ZAF"];
 
+                // 1. GEOJSON LAYER (Glow + News Scroller)
                 fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
                     .then(res => res.json())
                     .then(geojson => {
                         L.geoJSON(geojson, {
                             style: function(feature) {
                                 const code = feature.id || feature.properties.ISO_A3;
-                                if (affectedCodes.includes(code)) return { fillColor: '#8b0000', fillOpacity: 0.6, color: '#ff0055', weight: 2, className: 'glow-country' };
+                                if (affectedCodes.includes(code)) return { fillColor: '#4a1212', fillOpacity: 0.5, color: '#ff0055', weight: 2 };
                                 return { fillOpacity: 0.1, weight: 0.5, color: '#222', fillColor: '#111' };
                             },
                             onEachFeature: function(feature, layer) {
@@ -165,36 +167,34 @@ def render_map_panel() -> None:
                                 const news = countryIntel[code] || [];
                                 
                                 let popupHtml = `<div class="country-intel-box">`;
-                                popupHtml += `<b style="color:#00f5ff; font-size:11px; text-transform:uppercase;">🛰️ REGION_INTEL: ${name}</b><br/>`;
-                                popupHtml += `<div style="margin:8px 0; padding:4px 8px; background:rgba(0,245,255,0.1); border-radius:4px;"><span style="color:#94a3b8; font-size:9px;">FEAR_INDEX:</span> <b style="color:#fbbf24; font-size:10px;">${localScores[code] || 2.5}/5.0</b></div>`;
-                                
+                                popupHtml += `<b style="color:#00f5ff; font-size:11px;">🛰️ REGION: ${name} [${code}]</b><br/>`;
+                                popupHtml += `<div style="margin:8px 0; padding:4px 8px; background:rgba(0,245,255,0.1); border-radius:4px;"><span style="color:#94a3b8; font-size:9px;">FEAR_INDEX:</span> <b style="color:#fbbf24;">${localScores[code] || 2.5}/5.0</b></div>`;
                                 if (news.length > 0) {
-                                    popupHtml += `<div style="color:#64748b; font-size:9px; font-weight:900; margin:10px 0 5px; border-top:1px solid #333; padding-top:8px;">NEWS_SIGNALS:</div>`;
-                                    news.forEach(n => {
-                                        popupHtml += `<div class="news-item" onclick="window.open('${n.url}', '_blank')">• ${n.title}</div>`;
-                                    });
-                                } else {
-                                    popupHtml += `<p style="color:#475569; font-size:9px;">No localized signals detected.</p>`;
+                                    popupHtml += `<div style="color:#64748b; font-size:9px; font-weight:900; margin-top:10px; border-top:1px solid #333; padding-top:8px;">LOCAL_NEWS_SIGNALS:</div>`;
+                                    news.forEach(n => { popupHtml += `<div class="news-item" onclick="window.open('${n.url}', '_blank')">• ${n.title}</div>`; });
                                 }
                                 popupHtml += `</div>`;
                                 
                                 layer.bindPopup(popupHtml, { closeButton: false, offset: [0, -10] });
-                                layer.on('mouseover', function() { this.setStyle({ fillOpacity: 0.8, color: '#00f5ff' }); });
-                                layer.on('mouseout', function() { 
-                                    this.setStyle({ 
-                                        fillOpacity: affectedCodes.includes(code) ? 0.6 : 0.1, 
-                                        color: affectedCodes.includes(code) ? '#ff0055' : '#222' 
-                                    }); 
-                                });
+                                layer.on('mouseover', function() { this.setStyle({ fillOpacity: 0.7, color: '#00f5ff' }); });
+                                layer.on('mouseout', function() { this.setStyle({ fillOpacity: affectedCodes.includes(code) ? 0.5 : 0.1, color: affectedCodes.includes(code) ? '#ff0055' : '#222' }); });
                             }
                         }).addTo(map);
                     });
 
+                // 2. RELATIONAL HOTSPOTS (Indicators + Lines)
                 hotspots.forEach(h => {
-                    const marker = L.circleMarker([h.lat, h.lng], {
-                        radius: 8, fillColor: h.color, color: "#fff", weight: 2, fillOpacity: 1
-                    }).addTo(map);
-                    marker.bindPopup(`<div style="padding:10px; min-width:150px;"><b style="color:${h.color};">${h.name}</b><br/><div style="color:#94a3b8; font-size:9px; margin-top:5px;">${h.relation}</div></div>`, { closeButton: false });
+                    const isShip = h.name.includes('HONDIUS');
+                    const icon = L.divIcon({
+                        className: '',
+                        html: `<div class="ring-marker ${isShip ? 'vessel-ring' : ''}" style="border-color:${h.color}; box-shadow: 0 0 15px ${h.color};"><div class="badge">${h.cases}</div></div>`,
+                        iconSize: [22, 22], iconAnchor: [11, 11]
+                    });
+                    const marker = L.marker([h.lat, h.lng], { icon: icon }).addTo(map);
+                    marker.bindPopup(`<div style="padding:10px; min-width:180px; font-family:monospace;"><b style="color:${h.color};">${h.name}</b><br/><div style="color:#94a3b8; font-size:10px; margin:4px 0;">${h.relation}</div><div style="font-size:10px; color:#cbd5e1;">"${h.intel}"</div></div>`, { closeButton: false, offset: [0, -10] });
+                    marker.on('mouseover', function() { this.openPopup(); });
+                    marker.on('mouseout', function() { this.closePopup(); });
+                    if (!isShip) L.polyline([[h.lat, h.lng], shipPos], { color: h.color, weight: 1, dashArray: '4, 6', opacity: 0.3 }).addTo(map);
                 });
             </script>
         </body>
@@ -207,6 +207,6 @@ def render_map_panel() -> None:
         components.html(map_html, height=450)
 
     st.markdown(
-        "<div style='text-align:right; opacity:0.6;'><p style='color:#475569; font-size:0.5rem; font-family:monospace;'>ORBITAL_RECO_SYS v9.0 // SHIP_INTELLIGENCE: SYNCED // REGIONAL_INTEL: ACTIVE</p></div>",
+        "<div style='text-align:right; opacity:0.6;'><p style='color:#475569; font-size:0.5rem; font-family:monospace;'>ORBITAL_RECO_SYS v9.5 // SHIP_INTELLIGENCE: SYNCED // REGIONAL_INTEL: ACTIVE</p></div>",
         unsafe_allow_html=True
     )
