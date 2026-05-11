@@ -8,7 +8,7 @@ from typing import Any
 
 from PIL import Image, ImageDraw, ImageFont
 
-from ui.stats_panel import OUTBREAK_DATA, CASE_TIMELINE
+from ui.stats_panel import get_outbreak_stats, CASE_TIMELINE
 from ui.map_panel import NATIONALITIES_DATA
 
 # ── Font paths — bundled in assets/fonts/ for cloud deployment ───────────────
@@ -64,7 +64,7 @@ def generate_card() -> bytes:
     img  = Image.new("RGB", (W, H), BG)
     draw = ImageDraw.Draw(img)
 
-    d = OUTBREAK_DATA
+    d = get_outbreak_stats()
     cases    = d["confirmed_cases"]
     deaths   = d["deaths"]
     cfr      = d["case_fatality_rate"]
@@ -192,7 +192,7 @@ def generate_story_card() -> bytes:
     img  = Image.new("RGB", (SW, SH), BG)
     draw = ImageDraw.Draw(img)
 
-    d = OUTBREAK_DATA
+    d = get_outbreak_stats()
     today = datetime.utcnow().strftime("%B %d, %Y")
 
     draw.rectangle([0, 0, SW, 10], fill=RED)
