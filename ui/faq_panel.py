@@ -96,47 +96,32 @@ def render_faq_panel(chain: Any) -> None:
     st.markdown(
         '<div style="display:flex;align-items:baseline;gap:0.8rem;margin-bottom:0.6rem;">'
         '<h3 style="margin:0;color:#f8fafc;">Frequently Asked Questions</h3>'
-        '<span style="color:#64748b;font-size:0.75rem;">Click any card · Auto-ranked by popularity</span>'
+        '<span style="color:#64748b;font-size:0.75rem;">Interactive Knowledge Hub · Real-time Sync</span>'
         '</div>',
         unsafe_allow_html=True,
     )
 
-    # Use responsive grid instead of st.columns for better mobile behavior
-    faq_html = ""
+    # Group by category for cleaner organization
+    from collections import defaultdict
+    by_cat = defaultdict(list)
+    for q in questions:
+        by_cat[q["cat"]].append(q)
 
-    for i, item in enumerate(questions):
-        key         = item["key"]
-        cat         = item["cat"]
-        c_border, c_bg = CAT_COLORS.get(cat, ("#94a3b8", "rgba(148,163,184,0.10)"))
-        click_count = clicks.get(key, 0)
-        answer = STATIC_ANSWERS.get(key, "Answer not available for this question.")
+    cols = st.columns(2)
+    for idx, (cat, cat_questions) in enumerate(by_cat.items()):
+        col = cols[idx % 2]
+        with col:
+            c_border, c_bg = CAT_COLORS.get(cat, ("#94a3b8", "rgba(148,163,184,0.10)"))
+            st.markdown(f"<div style='border-left: 3px solid {c_border}; padding-left: 10px; margin-bottom: 10px;'><b style='color:{c_border}; font-size: 0.8rem; text-transform: uppercase;'>{cat}</b></div>", unsafe_allow_html=True)
+            for item in cat_questions:
+                key = item["key"]
+                click_count = clicks.get(key, 0)
+                answer = STATIC_ANSWERS.get(key, "Answer not available.")
+                
+                with st.expander(f"{item['q']} ({click_count} views)", expanded=False):
+                    st.markdown(f"<div style='color: #cbd5e1; font-size: 0.85rem; line-height: 1.6;'>{answer}</div>", unsafe_allow_html=True)
+                    if st.button(f"Mark as helpful", key=f"btn_{key}"):
+                        _save_click(key)
+                        st.rerun()
 
-        # Card and expansion logic inside a single markdown block for grid control
-        faq_html += (
-            f'<div style="background:{c_bg};border:1px solid {c_border}44;border-top:2px solid {c_border};'
-            f'border-radius:10px;padding:0.75rem 0.85rem;display:flex;flex-direction:column;gap:0.4rem;">'
-            f'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.4rem;">'
-            f'<span style="background:{c_border}22;color:{c_border};font-size:0.62rem;font-weight:700;'
-            f'padding:1px 7px;border-radius:10px;text-transform:uppercase;white-space:nowrap;">{cat}</span>'
-            f'<span style="color:#475569;font-size:0.65rem;white-space:nowrap;">'
-            f'{"🔥 " if click_count > 5 else ""}{click_count} views</span>'
-            f'</div>'
-            f'<p style="color:#f1f5f9;font-size:0.82rem;font-weight:600;margin:0;line-height:1.35;">'
-            f'{item["q"]}</p>'
-            f'<details style="margin-top:0.3rem;cursor:pointer;">'
-            f'<summary style="color:{c_border};font-size:0.75rem;font-weight:600;outline:none;">Show answer</summary>'
-            f'<div style="background:rgba(13,27,42,0.85);border:1px solid {c_border}33;'
-            f'border-radius:8px;padding:0.85rem;margin:0.5rem 0;color:#e2e8f0;font-size:0.82rem;line-height:1.6;">'
-            f'{answer.replace(chr(10), "<br>")}</div>'
-            f'</details>'
-            f'</div>'
-        )
-
-    st.markdown(
-        f'<style>'
-        f'.faq-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }}'
-        f'@media (max-width: 768px) {{ .faq-grid {{ grid-template-columns: 1fr; }} }}'
-        f'</style>'
-        f'<div class="faq-grid">{faq_html}</div>',
-        unsafe_allow_html=True,
-    )
+    st.divider()

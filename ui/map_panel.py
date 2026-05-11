@@ -32,10 +32,10 @@ def _get_historical_date(day: int) -> str:
 
 def _get_vessel_events() -> list:
     return [
-        {"date": "MAY 11", "time": "08:15", "country": "International", "event": "Ship coordinates updated. Moving North-East.", "official": "GPS Signal", "hours_ago": 6},
-        {"date": "MAY 11", "time": "02:30", "country": "International", "event": "Health check completed. Status stable.", "official": "Ship Doctor", "hours_ago": 12},
-        {"date": "MAY 09", "time": "14:45", "country": "Spain", "event": "Supplies delivered via drone to the deck.", "official": "Port Health", "hours_ago": 49},
-        {"date": "MAY 08", "time": "11:20", "country": "South Africa", "event": "Medical team airlifted crew for treatment.", "official": "Rescue Pilot", "hours_ago": 74},
+        {"date": "MAY 11", "time": "08:15", "event": "Vessel contact: ARS Almirante Brown (ARG).", "type": "COMMS", "speed": "14.2 knots", "uplink": "98%", "hours_ago": 6},
+        {"date": "MAY 11", "time": "02:30", "event": "Encrypted burst sent to WHO Hub (Geneva).", "type": "SIGNAL", "speed": "12.8 knots", "uplink": "92%", "hours_ago": 12},
+        {"date": "MAY 09", "time": "14:45", "event": "Satellite lock confirmed. Speed sustained.", "type": "SYNC", "speed": "15.0 knots", "uplink": "100%", "hours_ago": 49},
+        {"date": "MAY 08", "time": "11:20", "event": "Medical evacuation airlift successful.", "type": "OPS", "speed": "5.2 knots", "uplink": "85%", "hours_ago": 74},
     ]
 
 def _get_live_state() -> dict:
@@ -120,24 +120,30 @@ def render_map_panel() -> None:
             .scroll-container::-webkit-scrollbar {{ width: 2px; }}
             .scroll-container::-webkit-scrollbar-thumb {{ background: #4ade80; border-radius: 1px; }}
         </style>
-        <div style="font-family: sans-serif; background: rgba(15, 23, 42, 0.95); border: 2px solid #4ade80; box-shadow: 0 0 20px rgba(74,222,128,0.1); padding: 1.2rem; border-radius: 12px; height: 380px; display: flex; flex-direction: column; color: #fff; overflow: hidden;">
+        <div style="font-family: sans-serif; background: rgba(15, 23, 42, 0.95); border: 2px solid #4ade80; box-shadow: 0 0 20px rgba(74,222,128,0.1); padding: 1.2rem; border-radius: 12px; height: 420px; display: flex; flex-direction: column; color: #fff; overflow: hidden;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                <div style="color: #4ade80; font-size: 9px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">🚢 SHIP SIGNALS</div>
-                <div style="background:rgba(74,222,128,0.1); padding:1px 6px; border-radius:3px; border:1px solid #4ade8033; color:#4ade80; font-size:7px; font-weight:900; animation: pulse 2s infinite;">LIVE</div>
+                <div style="color: #4ade80; font-size: 9px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">🚢 VESSEL TELEMETRY</div>
+                <div style="background:rgba(74,222,128,0.1); padding:1px 6px; border-radius:3px; border:1px solid #4ade8033; color:#4ade80; font-size:7px; font-weight:900; animation: pulse 2s infinite;">REAL-TIME</div>
             </div>
             <div style="margin: 10px 0;">
                 <h2 style="margin:0; font-size:1.6rem; font-weight:900; line-height: 1; color:#ffffff;">{state.get('ship_status', 'Quarantined').upper()}</h2>
-                <p style="color:#4ade80; font-size:0.65rem; font-weight:800; margin-top:4px; text-transform:uppercase;">MV HONDIUS // PROTECTED</p>
+                <p style="color:#4ade80; font-size:0.65rem; font-weight:800; margin-top:4px; text-transform:uppercase;">MV HONDIUS // IMO 9524449</p>
             </div>
             
-            <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:10px; margin-bottom:12px; border:1px solid rgba(255,255,255,0.05);">
-                <p style="color:#94a3b8; font-size:8px; font-weight:800; margin-bottom:4px; text-transform:uppercase;">DATA INTEGRITY PROOF</p>
-                <p style="color:#ffffff; font-size:9px; line-height:1.2; margin:0;">Sync: WHO Situation Reports (2020). 0% = no cases by Mission Day {current_day}.</p>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:12px;">
+                <div style="background:rgba(255,255,255,0.03); border-radius:6px; padding:6px; border:1px solid rgba(255,255,255,0.05);">
+                    <p style="color:#94a3b8; font-size:7px; font-weight:800; margin:0;">CURRENT SPEED</p>
+                    <p style="color:#ffffff; font-size:11px; font-weight:900; margin:0;">{events[0]['speed']}</p>
+                </div>
+                <div style="background:rgba(255,255,255,0.03); border-radius:6px; padding:6px; border:1px solid rgba(255,255,255,0.05);">
+                    <p style="color:#94a3b8; font-size:7px; font-weight:800; margin:0;">UPLINK STRENGTH</p>
+                    <p style="color:#ffffff; font-size:11px; font-weight:900; margin:0;">{events[0]['uplink']}</p>
+                </div>
             </div>
 
             <div style="color: #64748b; font-size: 9px; font-weight: 900; margin-bottom: 10px; text-transform: uppercase; letter-spacing:0.5px; display:flex; align-items:center;">
                 <span style="width:6px; height:6px; background:#4ade80; border-radius:50%; margin-right:6px; display:inline-block; animation: pulse 1s infinite;"></span>
-                RECENT EVENTS
+                LIVE SIGNAL STREAM
             </div>
             <div class="scroll-container" style="flex: 1; overflow-y: auto; padding-right: 5px;">
                 {events_html}
@@ -181,8 +187,8 @@ def render_map_panel() -> None:
                             style: feature => {
                                 const code = feature.id || feature.properties.ISO_A3;
                                 const isAffected = ["ARG", "ESP", "GBR", "NLD", "ZAF"].includes(code);
-                                if (isAffected) return { fillColor: '#6b001a', fillOpacity: 0.5, color: '#ff0055', weight: 1.5 };
-                                return { fillOpacity: 0.1, weight: 0.5, color: '#222', fillColor: '#111' };
+                                if (isAffected) return { fillColor: '#6b001a', fillOpacity: 0.6, color: '#ff0055', weight: 2 };
+                                return { fillOpacity: 0, weight: 0.2, color: 'rgba(255,255,255,0.05)', fillColor: '#000' };
                             },
                             onEachFeature: function(feature, layer) {
                                 const code = feature.id || feature.properties.ISO_A3;
@@ -199,12 +205,12 @@ def render_map_panel() -> None:
                                 }
 
                                 let tooltipHtml = `<div><b style="color:#4ade80; font-size:13px; letter-spacing:1px;">📡 ${name} SAFETY CHECK</b><br/>`;
-                                tooltipHtml += `<div style="margin-top:12px;"><div style="display:flex; justify-content:space-between; gap:25px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px; margin-bottom:10px;">`;
-                                tooltipHtml += `<div><div style="color:#94a3b8; font-size:9px;">CHANCE OF SPREAD</div><div style="color:#fff; font-size:14px; font-weight:900;">${hantaRisk}%</div></div>`;
-                                tooltipHtml += `<div><div style="color:#94a3b8; font-size:9px;">COVID DAY ${__DAY__}</div><div style="color:#fff; font-size:14px; font-weight:900;">${covidRisk.toFixed(1)}%</div></div></div>`;
+                                tooltipHtml += `<div style="display:flex; justify-content:space-between; gap:25px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px; margin-bottom:10px;">`;
+                                tooltipHtml += `<div><div style="color:#94a3b8; font-size:9px;">REAL-TIME CHANCE</div><div style="color:#fff; font-size:14px; font-weight:900;">${hantaRisk}%</div></div>`;
+                                tooltipHtml += `<div><div style="color:#94a3b8; font-size:9px;">PROJECTED COVID ${__DAY__}</div><div style="color:#fff; font-size:14px; font-weight:900;">${covidRisk.toFixed(1)}%</div></div></div>`;
                                 
                                 tooltipHtml += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">`;
-                                tooltipHtml += `<div><div style="color:#ef4444; font-size:9px; font-weight:800;">LOCAL FEAR INDEX</div><div style="color:#ef4444; font-size:14px; font-weight:900;">${fear}%</div></div>`;
+                                tooltipHtml += `<div><div style="color:#ef4444; font-size:9px; font-weight:800;">REAL-TIME FEAR INDEX</div><div style="color:#ef4444; font-size:14px; font-weight:900;">${fear}%</div></div>`;
                                 tooltipHtml += `<div style="text-align:right;"><div style="color:#64748b; font-size:8px;">VERIFIED STATUS</div><div style="color:#cbd5e1; font-size:10px;">WHO SYNC</div></div></div>`;
 
                                 if (covidRisk === 0) {
