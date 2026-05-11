@@ -267,143 +267,120 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
 
         icons = {1: "🟢", 2: "🟡", 3: "🟠", 4: "🔴", 5: "💀"}
         
+        # --- NEW ROBUST TACTICAL SELECTOR ---
         st.markdown(
             """
             <style>
-            /* 1. ANIMATIONS */
-            @keyframes tile-glow {
-                0% { box-shadow: 0 0 5px rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
-                50% { box-shadow: 0 0 20px rgba(56,189,248,0.15); border-color: rgba(56,189,248,0.3); }
-                100% { box-shadow: 0 0 5px rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+            .selector-container {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin-top: 10px;
+                width: 100%;
             }
-            @keyframes text-blink {
-                0%, 100% { opacity: 1; }
-                50% { opacity: 0.5; }
+            .tactical-btn {
+                background: rgba(15, 23, 42, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-left: 4px solid var(--t-color);
+                border-radius: 8px;
+                padding: 12px 20px;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                transition: all 0.2s ease;
+                cursor: pointer;
+                position: relative;
+                overflow: hidden;
             }
-            @keyframes pulse-active {
-                0% { box-shadow: 0 0 10px var(--t-color)44; border-color: var(--t-color); }
-                50% { box-shadow: 0 0 30px var(--t-color)88; border-color: #fff; }
-                100% { box-shadow: 0 0 10px var(--t-color)44; border-color: var(--t-color); }
+            .tactical-btn:hover {
+                background: rgba(255, 255, 255, 0.05);
+                border-color: var(--t-color);
+                transform: translateX(4px);
             }
+            .tactical-btn.active {
+                background: radial-gradient(circle at left, var(--t-color)22 0%, rgba(15, 23, 42, 0.9) 100%);
+                border-color: var(--t-color);
+                box-shadow: 0 0 20px var(--t-color)33;
+                transform: translateX(8px);
+            }
+            .tactical-btn.disabled {
+                opacity: 0.4;
+                cursor: default;
+                filter: grayscale(0.5);
+            }
+            .tactical-btn.disabled:hover { transform: none; }
 
-            /* 2. LAYOUT RESET */
-            div[data-testid="stHorizontalBlock"] {
-                display: flex !important;
-                flex-wrap: wrap !important;
-                justify-content: space-between !important;
-                gap: 10px !important;
+            .btn-icon { font-size: 1.5rem; }
+            .btn-text {
+                display: flex;
+                flex-direction: column;
             }
-
-            div[data-testid="column"] {
-                flex: 1 1 18% !important;
-                min-width: 0 !important;
-                position: relative !important;
-                min-height: 90px !important;
+            .btn-label {
+                color: #fff;
+                font-weight: 900;
+                font-size: 0.8rem;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
             }
-
-            /* 3. TACTICAL TILES (THE BASE) */
-            .premium-tile {
-                background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9)) !important;
-                backdrop-filter: blur(12px) !important;
-                border: 1px solid rgba(255, 255, 255, 0.1) !important;
-                border-radius: 12px !important;
-                display: flex !important;
-                flex-direction: column !important;
-                align-items: center !important;
-                justify-content: center !important;
-                transition: all 0.3s ease !important;
-                width: 100% !important;
-                height: 90px !important;
-                position: relative !important;
-                z-index: 1 !important;
-                animation: tile-glow 3s ease-in-out infinite;
-                margin-bottom: 5px !important;
+            .btn-desc {
+                color: #94a3b8;
+                font-size: 0.6rem;
+                font-weight: 500;
             }
-
-            .premium-tile.active {
-                background: radial-gradient(circle at center, var(--t-color)66 0%, rgba(15, 23, 42, 0.98) 100%) !important;
-                border: 2px solid var(--t-color) !important;
-                animation: pulse-active 2s ease-in-out infinite !important;
-                transform: translateY(-2px) !important;
-            }
-
-            .premium-tile.disabled { opacity: 0.3 !important; filter: grayscale(0.8) !important; animation: none !important; }
             
-            .tile-icon { font-size: 1.8rem !important; margin-bottom: 2px !important; }
-            .tile-label { 
-                font-family: 'Inter', sans-serif !important; 
-                font-weight: 900 !important; 
-                font-size: 0.6rem !important; 
-                text-transform: uppercase !important; 
-                color: #ffffff !important; 
-                letter-spacing: 0.05em !important;
+            /* Pulsing prompt */
+            .pulse-prompt {
+                color: #fbbf24;
+                font-size: 0.6rem;
+                font-weight: 900;
+                letter-spacing: 0.05em;
+                margin-bottom: 10px;
+                display: block;
+                animation: blinker 2s linear infinite;
             }
-
-            /* 4. OVERLAY BUTTON (THE INTERACTION) */
-            div[data-testid="stButton"] { 
-                position: absolute !important;
-                top: 0 !important;
-                left: 0 !important;
-                width: 100% !important;
-                height: 90px !important;
-                z-index: 5 !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-            div[data-testid="stButton"] button {
-                background: transparent !important;
-                border: none !important;
-                width: 100% !important;
-                height: 100% !important;
-                color: transparent !important;
-                box-shadow: none !important;
-            }
-            div[data-testid="stButton"] button:hover { background: rgba(255,255,255,0.05) !important; }
-
-            /* 5. MOBILE FIX */
-            @media (max-width: 600px) {
-                div[data-testid="column"] { min-height: 60px !important; height: 60px !important; }
-                .premium-tile { 
-                    flex-direction: row !important; 
-                    height: 60px !important; 
-                    padding: 0 20px !important; 
-                    justify-content: flex-start !important;
-                    gap: 15px !important;
-                }
-                div[data-testid="stButton"] { height: 60px !important; }
-                .tile-icon { font-size: 1.8rem !important; margin: 0 !important; }
-                .tile-label { font-size: 0.8rem !important; letter-spacing: 0.1em !important; }
-            }
+            
+            @keyframes blinker { 50% { opacity: 0.3; } }
             </style>
-            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:1rem; border-bottom:1px solid rgba(56,189,248,0.2); padding-bottom:0.5rem;">
-                <p style='color:#38bdf8; font-size:0.7rem; font-weight:800; margin:0; letter-spacing:0.1em; text-transform:uppercase;'>📡 SENTIMENT INDEX</p>
-                <p style='color:#fbbf24; font-size:0.55rem; font-weight:900; margin:0; letter-spacing:0.05em; animation: text-blink 1.5s linear infinite;'>● ACTION REQUIRED: ANALYZE & SUBMIT</p>
+            <div style="margin-bottom: 1rem; border-bottom: 1px solid rgba(56,189,248,0.2); padding-bottom: 0.5rem;">
+                <p style='color:#38bdf8; font-size:0.7rem; font-weight:800; margin:0; letter-spacing:0.1em; text-transform:uppercase;'>📡 SENTIMENT SELECTOR</p>
             </div>
             """,
             unsafe_allow_html=True
         )
 
-        cols = st.columns(5)
-        for i, level_id in enumerate(range(1, 6)):
+        if not user_voted_today:
+            st.markdown('<span class="pulse-prompt">● ACTION REQUIRED: SELECT CURRENT OUTBREAK SENTIMENT</span>', unsafe_allow_html=True)
+            
+        for level_id in range(1, 6):
             info = FEAR_LEVELS[level_id]
             is_active = (level_id == level_int)
-            with cols[i]:
-                # THE TILE IS THE BASE
-                st.markdown(f'<div class="premium-tile {"active" if is_active else ""} {"disabled" if user_voted_today and not is_active else ""}" style="--t-color: {info["color"]};"><span class="tile-icon">{icons[level_id]}</span><span class="tile-label">{info["label"].upper()}</span></div>', unsafe_allow_html=True)
-                # THE BUTTON IS THE OVERLAY
-                if st.button(" ", key=f"v18_btn_{level_id}", disabled=user_voted_today):
+            
+            # Use native Streamlit button with custom CSS class wrapping
+            btn_col1, btn_col2 = st.columns([0.1, 0.9])
+            
+            # Render the tactical visual
+            st.markdown(
+                f"""
+                <div class="tactical-btn {'active' if is_active else ''} {'disabled' if user_voted_today and not is_active else ''}" 
+                     style="--t-color: {info['color']};">
+                    <span class="btn-icon">{icons[level_id]}</span>
+                    <div class="btn-text">
+                        <span class="btn-label">{info['label']}</span>
+                        <span class="btn-desc">{info['desc']}</span>
+                    </div>
+                </div>
+                """, 
+                unsafe_allow_html=True
+            )
+            
+            # Invisible button for logic - placed immediately after for accessibility
+            if not user_voted_today:
+                if st.button(f"SELECT {info['label'].upper()}", key=f"v20_sel_{level_id}", use_container_width=True):
                     _save_fear_vote(level_id, user_id)
                     st.rerun()
 
         if user_voted_today:
-            st.markdown(f"<div style='background:rgba(34,197,94,0.05); border:1px solid #22c55e33; border-radius:10px; padding:0.8rem; margin-top:1rem; text-align:center;'><p style='color:#22c55e; font-size:0.75rem; font-weight:950; margin:0;'>✓ SENTIMENT ANCHORED</p></div>", unsafe_allow_html=True)
-        else:
-            st.markdown(
-                "<p style='color:#38bdf8; font-size:0.55rem; text-align:center; margin-top:1rem; font-weight:950; letter-spacing:0.03em; text-shadow: 0 0 10px rgba(56,189,248,0.4);'>"
-                "⚡ TAP TILE TO VOTE — CRITICAL FOR RISK MODELING"
-                "</p>", 
-                unsafe_allow_html=True
-            )
+            st.success("✓ YOUR SENTIMENT DATA HAS BEEN ANCHORED FOR RISK MODELING")
 
     callout_html = """
 <style>.fear-callout-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.6rem; margin-top: 0.3rem; }</style>
