@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-VERSION = "1.5.3"
+VERSION = "1.5.0"
 
 # Pull secrets from Streamlit Cloud when .env is absent (production deploy)
 def _load_streamlit_secrets() -> None:
@@ -273,7 +273,7 @@ def _start_scheduler() -> None:
 _start_scheduler()
 
 st.set_page_config(
-    page_title="Andes Virus Assistant v1.4.0",
+    page_title="Andes Virus Assistant v1.5.0",
     page_icon="🧬",
 
     layout="wide",
@@ -406,7 +406,7 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
     with st.sidebar:
         st.markdown(
             "<h2 style='color:#00b4d8;font-size:1.1rem;margin-bottom:0.5rem;'>"
-            "🧬 Command Center</h2>",
+            "🧬 GLOBAL HEALTH MONITOR</h2>",
             unsafe_allow_html=True,
         )
         
@@ -573,20 +573,14 @@ def main() -> None:
         chain = _init_rag_chain()
 
         from ui.pandemic_risk import render_pandemic_risk_panel
-        from ui.fear_index import render_fear_index
         from ui.news_ticker import render_news_ticker
         from ui.stats_panel import render_timeline_chart
         from ui.map_panel import render_map_panel
         from ui.journalist_tools import render_journalist_tools
-        from ui.war_room import render_war_room_panel
 
-        # ── PANDEMIC RISK & FEAR INDEX — equal size cards ────────────────────────
-        st.markdown("<div id='risk_fear'></div>", unsafe_allow_html=True)
-        col_risk, col_fear = st.columns([1, 1])
-        with col_risk:
-            render_pandemic_risk_panel()
-        with col_fear:
-            render_fear_index()
+        # ── CHANCE OF SPREAD MONITOR (DETECTION BASELINE) ────────────────────────
+        st.markdown("<div id='spread_monitor'></div>", unsafe_allow_html=True)
+        render_pandemic_risk_panel()
         st.divider()
 
         # ── Global News Ticker ────────────────────────────────────────────────────
@@ -605,38 +599,6 @@ def main() -> None:
         # ── Journalist tools ─────────────────────────────────────────────────────
         st.markdown("<div id='journalist'></div>", unsafe_allow_html=True)
         render_journalist_tools()
-        st.divider()
-
-        # ── ROADMAP (COMING SOON) ───────────────────────────────────────────────
-        st.markdown("<div id='roadmap'></div>", unsafe_allow_html=True)
-        st.markdown("### 🚀 Next Intelligence Phases (coming soon)")
-        col_road1, col_road2 = st.columns(2)
-        with col_road1:
-            st.markdown(
-                """
-                <div class='stat-card' style='border-color: rgba(34, 197, 94, 0.3); min-height: 140px;'>
-                    <p class='stat-label glowing-title' style='color:#22c55e; font-size: 0.9rem !important;'>Automated Red-Teaming</p>
-                    <p style='color:#94a3b8; font-size:0.75rem; margin-top:0.5rem;'>
-                        AI agents stress-test official reports against leaked data to identify informational gaps.
-                    </p>
-                    <div style='margin-top:auto;'><span class='v11-feature-tag' style='margin-left:0; opacity:0.6;'>PHASE 3</span></div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-        with col_road2:
-            st.markdown(
-                """
-                <div class='stat-card' style='border-color: rgba(0, 180, 216, 0.3); min-height: 140px;'>
-                    <p class='stat-label glowing-title' style='color:#00b4d8; font-size: 0.9rem !important;'>Interactive Simulations</p>
-                    <p style='color:#94a3b8; font-size:0.75rem; margin-top:0.5rem;'>
-                        "What If?" Scenario Lab. Adjust viral variables to simulate outbreak progression and response.
-                    </p>
-                    <div style='margin-top:auto;'><span class='v11-feature-tag' style='margin-left:0; opacity:0.6;'>PHASE 2</span></div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
         st.divider()
 
         def update_sources(cards: list[dict[str, Any]]) -> None:

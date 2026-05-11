@@ -102,7 +102,7 @@ def _build_gauge(score: float, color: str) -> go.Figure:
                 "value": score,
             },
         },
-        title={"text": "PANDEMIC RISK SCORE", "font": {"size": 13, "color": "#94a3b8", "family": "monospace"}},
+        title={"text": "CHANCE OF SPREAD", "font": {"size": 13, "color": "#94a3b8", "family": "monospace"}},
     ))
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
@@ -189,7 +189,7 @@ margin-bottom: 1rem; position:relative; overflow:hidden; display: flex; flex-dir
 background: linear-gradient(90deg,{color},{color}44,{color}); animation: {anim};"></div>
 <div style="display:flex; align-items:center; justify-content: space-between; gap: 0.8rem;">
 <div style="overflow:hidden;">
-<p style="color:{color}; font-size:0.65rem; font-weight:800; letter-spacing:0.1em; margin:0; font-family:monospace; opacity:0.8; text-transform:uppercase;">GLOBAL PANDEMIC RISK</p>
+<p style="color:{color}; font-size:0.65rem; font-weight:800; letter-spacing:0.1em; margin:0; font-family:monospace; opacity:0.8; text-transform:uppercase;">OUTBREAK STATUS BASELINE</p>
 <h2 style="margin:0; font-size:1.8rem !important; font-weight:950; color:white !important; letter-spacing:-0.03em; line-height: 1;">{label}</h2>
 </div>
 <div style="background:{color}15; border:1px solid {color}66; border-radius:6px; padding:0.4rem 0.8rem; 
@@ -217,7 +217,7 @@ text-align:center; min-width:85px; box-shadow: 0 0 15px {color}10;">
 
         st.markdown(
             f"<p style='color:#64748b;font-size:0.72rem;text-align:center;margin-top:-0.5rem;'>"
-            f"Score updates every 5 min · Methodology: P2P risk 40%, geographic spread 25%, "
+            f"Score updates every 5 min · Methodology: P2P spread 40%, geographic reach 25%, "
             f"growth rate 20%, CFR severity 15%</p>",
             unsafe_allow_html=True,
         )
@@ -225,7 +225,7 @@ text-align:center; min-width:85px; box-shadow: 0 0 15px {color}10;">
     with col_bars:
         st.markdown(
             "<p style='color:#94a3b8;font-size:0.8rem;margin-bottom:0.2rem;'>"
-            "📊 <b>Risk Factor Comparison — Andes Virus vs COVID-19</b></p>",
+            "📊 <b>Spread Factor Baseline — Andes Virus vs COVID-19</b></p>",
             unsafe_allow_html=True,
         )
         fig_bars = _build_comparison_bars(risk)

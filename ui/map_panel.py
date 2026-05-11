@@ -200,7 +200,7 @@ def render_map_panel() -> None:
 
                                 let tooltipHtml = `<div><b style="color:#4ade80; font-size:13px; letter-spacing:1px;">📡 ${name} SAFETY CHECK</b><br/>`;
                                 tooltipHtml += `<div style="margin-top:12px;"><div style="display:flex; justify-content:space-between; gap:25px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px; margin-bottom:10px;">`;
-                                tooltipHtml += `<div><div style="color:#94a3b8; font-size:9px;">SPREAD RISK</div><div style="color:#fff; font-size:14px; font-weight:900;">${hantaRisk}%</div></div>`;
+                                tooltipHtml += `<div><div style="color:#94a3b8; font-size:9px;">CHANCE OF SPREAD</div><div style="color:#fff; font-size:14px; font-weight:900;">${hantaRisk}%</div></div>`;
                                 tooltipHtml += `<div><div style="color:#94a3b8; font-size:9px;">COVID DAY ${__DAY__}</div><div style="color:#fff; font-size:14px; font-weight:900;">${covidRisk.toFixed(1)}%</div></div></div>`;
                                 
                                 tooltipHtml += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">`;
