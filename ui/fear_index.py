@@ -279,12 +279,12 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
             /* TARGET STANDARD STREAMLIT BUTTONS */
             div.stButton > button {
                 width: 100% !important;
-                height: 90px !important;
-                background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9)) !important;
-                backdrop-filter: blur(8px) !important;
-                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                height: 95px !important;
+                background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.95)) !important;
+                backdrop-filter: blur(12px) !important;
+                border: 1px solid rgba(255, 255, 255, 0.15) !important;
                 border-top: 3px solid var(--btn-color) !important;
-                border-radius: 12px !important;
+                border-radius: 14px !important;
                 color: #f8fafc !important;
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
                 padding: 12px 5px !important;
@@ -292,32 +292,14 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
                 flex-direction: column !important;
                 align-items: center !important;
                 justify-content: center !important;
-                gap: 2px !important;
+                gap: 4px !important;
                 position: relative !important;
                 overflow: hidden !important;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.4) !important;
+                /* PERSISTENT NEON GLOW */
+                box-shadow: 0 4px 20px rgba(0,0,0,0.6), 0 0 12px var(--btn-color)33 !important;
             }
             
-            /* LABEL FIX: Ensure text fits and doesn't wrap awkwardly */
-            div.stButton > button p {
-                margin: 0 !important;
-                line-height: 1.1 !important;
-                white-space: pre-line !important;
-                text-align: center !important;
-                font-family: 'Inter', sans-serif !important;
-                font-weight: 900 !important;
-                font-size: 0.65rem !important;
-                letter-spacing: 0.05em !important;
-                text-transform: uppercase !important;
-            }
-
-            /* EMOJI SIZE FIX */
-            div.stButton > button div[data-testid="stMarkdownContainer"] {
-                font-size: 1.5rem !important;
-                line-height: 1 !important;
-            }
-            
-            /* BACKLIGHT GLOW EFFECT */
+            /* INTENSIFIED BACKLIGHT */
             div.stButton > button::before {
                 content: '';
                 position: absolute;
@@ -325,22 +307,22 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
                 left: -50%;
                 width: 200%;
                 height: 200%;
-                background: radial-gradient(circle, var(--btn-color)15 0%, transparent 70%);
-                opacity: 0.5;
+                background: radial-gradient(circle, var(--btn-color)25 0%, transparent 65%);
+                opacity: 0.4;
                 transition: opacity 0.3s ease;
                 z-index: 0;
             }
 
             div.stButton > button:hover {
-                background-color: rgba(30, 41, 59, 0.95) !important;
+                background-color: rgba(30, 41, 59, 1) !important;
                 border-color: var(--btn-color) !important;
-                transform: translateY(-5px) !important;
-                box-shadow: 0 10px 30px var(--btn-color)33 !important;
+                transform: translateY(-6px) !important;
+                box-shadow: 0 15px 35px var(--btn-color)44, 0 0 20px var(--btn-color)33 !important;
                 color: #fff !important;
             }
             
             div.stButton > button:hover::before {
-                opacity: 0.8;
+                opacity: 0.9;
             }
 
             div.stButton > button:active {
@@ -360,9 +342,9 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
 
             /* BREATHING ANIMATION FOR ACTIVE */
             @keyframes neon-breath {
-                0% { box-shadow: 0 0 10px var(--btn-color)22; }
-                50% { box-shadow: 0 0 25px var(--btn-color)55; }
-                100% { box-shadow: 0 0 10px var(--btn-color)22; }
+                0% { box-shadow: 0 0 15px var(--btn-color)33, 0 0 5px var(--btn-color)22; border-color: var(--btn-color); }
+                50% { box-shadow: 0 0 40px var(--btn-color)77, 0 0 20px var(--btn-color)44; border-color: #fff; }
+                100% { box-shadow: 0 0 15px var(--btn-color)33, 0 0 5px var(--btn-color)22; border-color: var(--btn-color); }
             }
             
             .active-breath > div.stButton > button {
@@ -409,8 +391,8 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
         if user_voted_today:
             st.markdown(
                 f"""
-                <div style="background:linear-gradient(90deg, rgba(34,197,94,0.1), transparent); border-left:4px solid #22c55e; border-radius:4px; padding:0.8rem; margin-top:1rem;">
-                    <p style="color:#22c55e; font-size:0.75rem; font-weight:900; margin:0; letter-spacing:0.05em;">✓ SENTIMENT ANCHORED: {info['label'].upper()} PHASE ACTIVE</p>
+                <div style="background:linear-gradient(90deg, rgba(34,197,94,0.1), transparent); border-left:4px solid #22c55e; border-radius:4px; padding:0.8rem; margin-top:1rem; box-shadow: 0 0 20px rgba(34,197,94,0.1);">
+                    <p style="color:#22c55e; font-size:0.75rem; font-weight:900; margin:0; letter-spacing:0.05em; text-shadow: 0 0 10px rgba(34,197,94,0.4);">✓ SENTIMENT ANCHORED: {info['label'].upper()} PHASE ACTIVE</p>
                     <p style="color:#94a3b8; font-size:0.6rem; margin:2px 0 0;">Outbreak risk models updated with your local intelligence.</p>
                 </div>
                 """, 
@@ -418,8 +400,8 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
             )
         else:
             st.markdown(
-                "<p style='color:#475569; font-size:0.55rem; text-align:center; margin-top:1rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em;'>"
-                "Select current public anxiety level for real-time risk modeling"
+                "<p style='color:#00b4d8; font-size:0.65rem; text-align:center; margin-top:1.2rem; font-weight:900; text-transform:uppercase; letter-spacing:0.1em; text-shadow: 0 0 12px rgba(0,180,216,0.8);'>"
+                "● Select current public anxiety level for real-time risk modeling"
                 "</p>", 
                 unsafe_allow_html=True
             )
