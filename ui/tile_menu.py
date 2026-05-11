@@ -7,6 +7,7 @@ import streamlit as st
 NAV_ITEMS = [
     {"label": "Outbreak Stats", "icon": "📊", "anchor": "stats"},
     {"label": "Live News",      "icon": "📰", "anchor": "news"},
+    {"label": "Risk & Fear",    "icon": "💀", "anchor": "fear"},
     {"label": "Global Map",     "icon": "🌍", "anchor": "map"},
 ]
 

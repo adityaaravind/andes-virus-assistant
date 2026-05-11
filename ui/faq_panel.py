@@ -89,39 +89,135 @@ def _pre_fetch_answers(chain: Any, questions: list[dict]) -> None:
                 cache[item["key"]] = ""
 
 
+def _migrate_legacy_clicks() -> None:
+    """Merge legacy faq_clicks.json into the new persistent KV store if needed."""
+    legacy_path = Path("data/faq_clicks.json")
+    if legacy_path.exists():
+        try:
+            legacy_data = json.loads(legacy_path.read_text())
+            current = _load_clicks()
+            updated = False
+            for k, v in legacy_data.items():
+                if k not in current or current[k] < v:
+                    current[k] = v
+                    updated = True
+            if updated:
+                bg_kv_set(_FAQ_CLICKS_KEY, current)
+        except Exception:
+            pass
+
 def render_faq_panel(chain: Any) -> None:
+    _migrate_legacy_clicks()
     questions = _sorted_questions()
     clicks    = _load_clicks()
 
     st.markdown(
-        '<div style="display:flex;align-items:baseline;gap:0.8rem;margin-bottom:0.6rem;">'
-        '<h3 style="margin:0;color:#f8fafc;">Frequently Asked Questions</h3>'
-        '<span style="color:#64748b;font-size:0.75rem;">Interactive Knowledge Hub · Real-time Sync</span>'
+        '<div style="display:flex;align-items:baseline;gap:0.8rem;margin-bottom:1.2rem;">'
+        '<h3 style="margin:0;color:#f8fafc;font-size:1.4rem;font-weight:900;">FREQUENTLY ASKED QUESTIONS</h3>'
+        '<span style="color:#64748b;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Intel Hub // Automated Rank</span>'
         '</div>',
         unsafe_allow_html=True,
     )
 
-    # Group by category for cleaner organization
-    from collections import defaultdict
-    by_cat = defaultdict(list)
-    for q in questions:
-        by_cat[q["cat"]].append(q)
+    # FAQ Grid Styles
+    st.markdown("""
+        <style>
+            .faq-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+                gap: 1.2rem;
+                margin-bottom: 2rem;
+            }
+            .faq-card {
+                background: rgba(15, 23, 42, 0.6);
+                border: 1px solid rgba(255,255,255,0.05);
+                border-radius: 12px;
+                padding: 1.2rem;
+                backdrop-filter: blur(10px);
+                position: relative;
+                overflow: hidden;
+                transition: all 0.3s ease;
+            }
+            .faq-card:hover {
+                border-color: rgba(255,255,255,0.1);
+                background: rgba(15, 23, 42, 0.8);
+                transform: translateY(-2px);
+            }
+            .faq-category {
+                font-size: 0.6rem;
+                font-weight: 900;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin-bottom: 0.5rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .faq-question {
+                color: #f1f5f9;
+                font-size: 0.95rem;
+                font-weight: 700;
+                line-height: 1.4;
+                margin-bottom: 0.5rem;
+            }
+            .faq-answer-box {
+                margin-top: 0.8rem;
+                padding: 0.8rem;
+                background: rgba(0,0,0,0.2);
+                border-radius: 8px;
+                border: 1px solid rgba(255,255,255,0.05);
+                color: #cbd5e1;
+                font-size: 0.85rem;
+                line-height: 1.6;
+            }
+            details summary {
+                list-style: none;
+                cursor: pointer;
+                outline: none;
+                color: #94a3b8;
+                font-size: 0.75rem;
+                font-weight: 700;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            details summary::-webkit-details-marker { display: none; }
+            details[open] summary { color: white; margin-bottom: 0.5rem; }
+        </style>
+    """, unsafe_allow_html=True)
 
-    cols = st.columns(2)
-    for idx, (cat, cat_questions) in enumerate(by_cat.items()):
-        col = cols[idx % 2]
-        with col:
-            c_border, c_bg = CAT_COLORS.get(cat, ("#94a3b8", "rgba(148,163,184,0.10)"))
-            st.markdown(f"<div style='border-left: 3px solid {c_border}; padding-left: 10px; margin-bottom: 10px;'><b style='color:{c_border}; font-size: 0.8rem; text-transform: uppercase;'>{cat}</b></div>", unsafe_allow_html=True)
-            for item in cat_questions:
-                key = item["key"]
-                click_count = clicks.get(key, 0)
-                answer = STATIC_ANSWERS.get(key, "Answer not available.")
-                
-                with st.expander(f"{item['q']} ({click_count} views)", expanded=False):
-                    st.markdown(f"<div style='color: #cbd5e1; font-size: 0.85rem; line-height: 1.6;'>{answer}</div>", unsafe_allow_html=True)
-                    if st.button(f"Mark as helpful", key=f"btn_{key}"):
-                        _save_click(key)
-                        st.rerun()
-
-    st.divider()
+    faq_html = '<div class="faq-grid">'
+    for item in questions:
+        key = item["key"]
+        cat = item["cat"]
+        click_count = clicks.get(key, 0)
+        c_border, c_bg = CAT_COLORS.get(cat, ("#94a3b8", "rgba(148,163,184,0.10)"))
+        answer = STATIC_ANSWERS.get(key, "Strategic response pending...")
+        
+        # Determine popularity badge
+        popularity_badge = ""
+        if click_count > 5:
+            popularity_badge = f'<span style="background:rgba(239,68,68,0.1); color:#f87171; padding:1px 6px; border-radius:4px; font-size:0.55rem; font-weight:900;">🔥 TRENDING</span>'
+        
+        faq_html += f"""
+            <div class="faq-card">
+                <div style="position:absolute; top:0; left:0; width:100%; height:3px; background:{c_border}; opacity:0.6;"></div>
+                <div class="faq-category">
+                    <span style="color:{c_border};">{cat.upper()}</span>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        {popularity_badge}
+                        <span style="color:#475569;">{click_count} VIEWS</span>
+                    </div>
+                </div>
+                <div class="faq-question">{item['q']}</div>
+                <details>
+                    <summary>▶ READ RESPONSE</summary>
+                    <div class="faq-answer-box">
+                        {answer}
+                    </div>
+                </details>
+            </div>
+        """
+    
+    faq_html += '</div>'
+    st.markdown(faq_html, unsafe_allow_html=True)

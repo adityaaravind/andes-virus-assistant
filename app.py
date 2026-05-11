@@ -588,7 +588,13 @@ def main() -> None:
         render_faq_panel(chain)
         st.divider()
 
-        # ── Stats + map ──────────────────────────────────────────────────────────
+        # ── 3. RISK & FEAR INDEX (SENTIMENT MONITOR) ─────────────────────────────
+        st.markdown("<div id='fear'></div>", unsafe_allow_html=True)
+        from ui.fear_index import render_fear_index
+        render_fear_index()
+        st.divider()
+
+        # ── 4. Global Health Monitor (Map) ───────────────────────────────────────
         st.markdown("<div id='map'></div>", unsafe_allow_html=True)
         from ui.map_panel import render_map_panel
         from ui.stats_panel import render_timeline_chart
