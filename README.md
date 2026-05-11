@@ -1,9 +1,9 @@
-# 🧬 Andes Virus Research Assistant `v1.3.1 Stable`
+# 🧬 Andes Virus Research Assistant `v1.4.0 Stable`
 
 **Real-time AI Outbreak Intelligence for the MV Hondius Hantavirus Incident.**
 
 [![Deployment](https://img.shields.io/badge/Deploy-Streamlit%20Cloud-FF4B4B?logo=streamlit)](https://andes-virus-assistant.streamlit.app/)
-[![Stable Version](https://img.shields.io/badge/Release-v1.3.1-00b4d8?logo=github)](https://github.com/adityaaravind/andes-virus-assistant/releases/tag/v1.3.1)
+[![Stable Version](https://img.shields.io/badge/Release-v1.4.0-00b4d8?logo=github)](https://github.com/adityaaravind/andes-virus-assistant/releases/tag/v1.4.0)
 
 ---
 
@@ -17,14 +17,14 @@ Andes Virus Assistant is a high-performance RAG (Retrieval-Augmented Generation)
 <tr>
 <td width="50%" style="border: none; padding: 10px;">
 <div style="background: rgba(0, 180, 216, 0.08); border: 1px solid #00b4d844; border-radius: 12px; padding: 1.5rem; height: 160px;">
-<p style="color: #00b4d8; font-weight: 800; font-size: 0.9rem; margin-top: 0; text-transform: uppercase;">🤖 RESEARCH RAG ENGINE</p>
-<p style="color: #94a3b8; font-size: 0.85rem; line-height: 1.5;">Ask complex questions. Get answers cited directly from WHO SITREPs, CDC guidance, and PubMed abstracts.</p>
+<p style="color: #00b4d8; font-weight: 800; font-size: 0.9rem; margin-top: 0; text-transform: uppercase;">🗺️ RELATIONAL MISSION CONTROL</p>
+<p style="color: #94a3b8; font-size: 0.85rem; line-height: 1.5;">High-fidelity global map tracking MV Hondius telemetry, affected regions, and real-time news hotspots.</p>
 </div>
 </td>
 <td width="50%" style="border: none; padding: 10px;">
 <div style="background: rgba(255, 215, 0, 0.08); border: 1px solid #ffd70044; border-radius: 12px; padding: 1.5rem; height: 160px;">
-<p style="color: #ffd700; font-weight: 800; font-size: 0.9rem; margin-top: 0; text-transform: uppercase;">🧭 COMMAND CENTER (v1.3)</p>
-<p style="color: #94a3b8; font-size: 0.85rem; line-height: 1.5;">Luxury-gold sidebar interface with touch-optimized, animated tiles for rapid navigation through intelligence blocks.</p>
+<p style="color: #ffd700; font-weight: 800; font-size: 0.9rem; margin-top: 0; text-transform: uppercase;">🤖 RESEARCH RAG ENGINE</p>
+<p style="color: #94a3b8; font-size: 0.85rem; line-height: 1.5;">Ask complex questions. Get answers cited directly from WHO SITREPs, CDC guidance, and PubMed abstracts.</p>
 </div>
 </td>
 </tr>
@@ -32,7 +32,7 @@ Andes Virus Assistant is a high-performance RAG (Retrieval-Augmented Generation)
 <td width="50%" style="border: none; padding: 10px;">
 <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid #ef444444; border-radius: 12px; padding: 1.5rem; height: 160px;">
 <p style="color: #ef4444; font-weight: 800; font-size: 0.9rem; margin-top: 0; text-transform: uppercase;">📈 RISK & FEAR INDEX</p>
-<p style="color: #94a3b8; font-size: 0.85rem; line-height: 1.5;">Real-time epidemiologic weighting blended with AI-driven media sentiment analysis and community voting.</p>
+<p style="color: #94a3b8; font-size: 0.85rem; line-height: 1.5;">Real-time epidemiologic weighting blended with AI-driven media sentiment analysis.</p>
 </div>
 </td>
 <td width="50%" style="border: none; padding: 10px;">
@@ -43,6 +43,17 @@ Andes Virus Assistant is a high-performance RAG (Retrieval-Augmented Generation)
 </td>
 </tr>
 </table>
+
+---
+
+## 📜 v1.4.0: The "Strategic Reconnaissance" Update
+
+Focusing on geographic intelligence and situational awareness.
+
+- **[NEW] Interactive Relational Map:** High-fidelity global tracking of the MV Hondius vessel and affected international hubs.
+- **[NEW] Tactical Overlays:** Real-time vessel telemetry and OSINT news signal feed integrated into the map component.
+- **[NEW] Mobile Recon Mode:** One-tap floating button to toggle intelligence overlays on small screens.
+- **[FIX] Journalist Tool Stability:** Resolved KeyError in SitRep generation by standardizing nationality data schemas.
 
 ---
 

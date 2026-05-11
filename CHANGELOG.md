@@ -2,6 +2,19 @@
 
 All notable changes to the **Andes Virus Research Assistant** will be documented in this file.
 
+## [1.4.0] - 2026-05-11
+### Added
+- **Interactive Relational Map:** Added a high-fidelity global map tracking vessel telemetry and outbreak hotspots.
+- **Mobile-Responsive Map Toggle:** Implemented a floating "📡 SHIP DATA" button to toggle overlays on small screens.
+- **Live OSINT Signal Feed:** Integrated a real-time news scroller directly into the map interface.
+
+### Changed
+- **Journalist Tools Data:** Added `passengers` and `crew` metrics to nationality data to support detailed reporting.
+- **Version Branding:** Updated application header to display `v1.4.0`.
+
+### Removed
+- **Community Intel Panel:** Removed the experimental "Tactical Intel" / Sentiment Velocity section to streamline the dashboard focus.
+
 ## [1.3.1] - 2026-05-09
 ### Added
 - **Ultra-Compact Sentiment Tiles:** Redesigned sentiment selector with high-intensity neon glow and radial hover effects.
