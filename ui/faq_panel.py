@@ -127,66 +127,96 @@ def render_faq_panel(chain: Any) -> None:
             .faq-grid {
                 display: grid;
                 grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-                gap: 1.2rem;
+                gap: 1.5rem;
                 margin-bottom: 2rem;
             }
             .faq-card {
-                background: rgba(15, 23, 42, 0.6);
-                border: 1px solid rgba(255,255,255,0.05);
-                border-radius: 12px;
-                padding: 1.2rem;
-                backdrop-filter: blur(10px);
+                background: rgba(15, 23, 42, 0.7);
+                border: 1px solid rgba(255,255,255,0.08);
+                border-radius: 16px;
+                padding: 1.5rem;
+                backdrop-filter: blur(12px);
                 position: relative;
                 overflow: hidden;
-                transition: all 0.3s ease;
+                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                display: flex;
+                flex-direction: column;
+                box-shadow: 0 4px 30px rgba(0,0,0,0.3);
             }
             .faq-card:hover {
-                border-color: rgba(255,255,255,0.1);
-                background: rgba(15, 23, 42, 0.8);
-                transform: translateY(-2px);
+                border-color: var(--accent-color);
+                background: rgba(15, 23, 42, 0.9);
+                transform: translateY(-4px);
+                box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 20px var(--accent-glow);
             }
             .faq-category {
-                font-size: 0.6rem;
-                font-weight: 900;
+                font-size: 0.65rem;
+                font-weight: 950;
                 text-transform: uppercase;
-                letter-spacing: 0.1em;
-                margin-bottom: 0.5rem;
+                letter-spacing: 0.15em;
+                margin-bottom: 0.8rem;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                color: var(--accent-color);
             }
             .faq-question {
-                color: #f1f5f9;
-                font-size: 0.95rem;
-                font-weight: 700;
-                line-height: 1.4;
-                margin-bottom: 0.5rem;
+                color: #f8fafc;
+                font-size: 1.05rem;
+                font-weight: 800;
+                line-height: 1.3;
+                margin-bottom: 1rem;
+                flex-grow: 1;
             }
             .faq-answer-box {
-                margin-top: 0.8rem;
-                padding: 0.8rem;
-                background: rgba(0,0,0,0.2);
-                border-radius: 8px;
-                border: 1px solid rgba(255,255,255,0.05);
-                color: #cbd5e1;
-                font-size: 0.85rem;
+                margin-top: 1rem;
+                padding: 1rem;
+                background: rgba(0,0,0,0.3);
+                border-radius: 10px;
+                border: 1px solid rgba(255,255,255,0.03);
+                color: #94a3b8;
+                font-size: 0.9rem;
                 line-height: 1.6;
+                animation: slideDown 0.3s ease-out;
+            }
+            @keyframes slideDown {
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity: 1; transform: translateY(0); }
             }
             details summary {
                 list-style: none;
                 cursor: pointer;
                 outline: none;
-                color: #94a3b8;
-                font-size: 0.75rem;
-                font-weight: 700;
+                color: var(--accent-color);
+                font-size: 0.7rem;
+                font-weight: 900;
                 display: flex;
                 align-items: center;
-                gap: 6px;
+                gap: 8px;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                opacity: 0.8;
+                transition: opacity 0.2s;
             }
+            details summary:hover { opacity: 1; }
             details summary::-webkit-details-marker { display: none; }
-            details[open] summary { color: white; margin-bottom: 0.5rem; }
+            details[open] summary { color: #f8fafc; margin-bottom: 0.5rem; }
+            details[open] summary::before { content: '▼'; font-size: 8px; }
+            details:not([open]) summary::before { content: '▶'; font-size: 8px; }
+            
+            .faq-icon {
+                font-size: 1.2rem;
+                margin-right: 8px;
+                opacity: 0.9;
+            }
         </style>
     """, unsafe_allow_html=True)
+
+    CAT_ICONS = {
+        "Biology":      "🧬", "Outbreak":     "🚨", "Transmission": "☣️",
+        "Mortality":    "☠️", "Treatment":    "💊", "Geography":    "🗺️",
+        "Symptoms":     "🌡️", "Risk":         "📈", "Response":     "🛡️",
+    }
 
     faq_html = '<div class="faq-grid">'
     for item in questions:
@@ -194,26 +224,30 @@ def render_faq_panel(chain: Any) -> None:
         cat = item["cat"]
         click_count = clicks.get(key, 0)
         c_border, c_bg = CAT_COLORS.get(cat, ("#94a3b8", "rgba(148,163,184,0.10)"))
+        icon = CAT_ICONS.get(cat, "❓")
         answer = STATIC_ANSWERS.get(key, "Strategic response pending...")
+        
+        # Unique glow for each card
+        accent_glow = c_border + "33" # 20% opacity
         
         # Determine popularity badge
         popularity_badge = ""
-        if click_count > 5:
-            popularity_badge = f'<span style="background:rgba(239,68,68,0.1); color:#f87171; padding:1px 6px; border-radius:4px; font-size:0.55rem; font-weight:900;">🔥 TRENDING</span>'
+        if click_count > 140: # Subagent saw 140+ views in previous audit
+            popularity_badge = f'<span style="background:rgba(239,68,68,0.2); color:#f87171; padding:2px 8px; border-radius:6px; font-size:0.55rem; font-weight:950; border:1px solid #f8717144;">HIGH PRIORITY</span>'
         
         faq_html += f"""
-            <div class="faq-card">
-                <div style="position:absolute; top:0; left:0; width:100%; height:3px; background:{c_border}; opacity:0.6;"></div>
+            <div class="faq-card" style="--accent-color: {c_border}; --accent-glow: {accent_glow};">
+                <div style="position:absolute; top:0; left:0; width:100%; height:4px; background:linear-gradient(90deg, {c_border}, transparent);"></div>
                 <div class="faq-category">
-                    <span style="color:{c_border};">{cat.upper()}</span>
+                    <span><span class="faq-icon">{icon}</span>{cat.upper()}</span>
                     <div style="display:flex; gap:8px; align-items:center;">
                         {popularity_badge}
-                        <span style="color:#475569;">{click_count} VIEWS</span>
+                        <span style="color:#475569; font-size:0.55rem;">{click_count} ANALYTICS</span>
                     </div>
                 </div>
                 <div class="faq-question">{item['q']}</div>
                 <details>
-                    <summary>▶ READ RESPONSE</summary>
+                    <summary>ACCESS INTEL</summary>
                     <div class="faq-answer-box">
                         {answer}
                     </div>
