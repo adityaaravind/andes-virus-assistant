@@ -279,7 +279,7 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
             /* TARGET STANDARD STREAMLIT BUTTONS */
             div.stButton > button {
                 width: 100% !important;
-                height: 95px !important;
+                height: 100px !important;
                 background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.95)) !important;
                 backdrop-filter: blur(12px) !important;
                 border: 1px solid rgba(255, 255, 255, 0.15) !important;
@@ -287,7 +287,7 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
                 border-radius: 14px !important;
                 color: #f8fafc !important;
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-                padding: 12px 5px !important;
+                padding: 10px 5px !important;
                 display: flex !important;
                 flex-direction: column !important;
                 align-items: center !important;
@@ -295,8 +295,48 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
                 gap: 4px !important;
                 position: relative !important;
                 overflow: hidden !important;
-                /* PERSISTENT NEON GLOW */
-                box-shadow: 0 4px 20px rgba(0,0,0,0.6), 0 0 12px var(--btn-color)33 !important;
+                /* INTENSE PERSISTENT NEON GLOW */
+                box-shadow: 0 4px 20px rgba(0,0,0,0.8), 0 0 15px var(--btn-color)44 !important;
+            }
+            
+            /* LABEL FIX: Strict font sizing to prevent wrapping */
+            div.stButton > button p {
+                margin: 0 !important;
+                line-height: 1 !important;
+                white-space: nowrap !important;
+                text-align: center !important;
+                font-family: 'Inter', sans-serif !important;
+                font-weight: 950 !important;
+                font-size: 0.62rem !important;
+                letter-spacing: -0.01em !important;
+                text-transform: uppercase !important;
+            }
+
+            /* EMOJI SIZE */
+            div.stButton > button div[data-testid="stMarkdownContainer"] {
+                font-size: 1.6rem !important;
+                line-height: 1 !important;
+            }
+
+            /* MOBILE ADAPTIVE LAYOUT (Horizontal Stack) */
+            @media (max-width: 600px) {
+                div.stButton > button { 
+                    height: 55px !important; 
+                    flex-direction: row !important; 
+                    gap: 20px !important;
+                    justify-content: flex-start !important;
+                    padding: 0 25px !important;
+                    border-top: none !important;
+                    border-left: 4px solid var(--btn-color) !important;
+                }
+                div.stButton > button div[data-testid="stMarkdownContainer"] {
+                    font-size: 1.4rem !important;
+                }
+                div.stButton > button p {
+                    font-size: 0.85rem !important;
+                    text-align: left !important;
+                    letter-spacing: 0.05em !important;
+                }
             }
             
             /* INTENSIFIED BACKLIGHT */
@@ -307,8 +347,8 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
                 left: -50%;
                 width: 200%;
                 height: 200%;
-                background: radial-gradient(circle, var(--btn-color)25 0%, transparent 65%);
-                opacity: 0.4;
+                background: radial-gradient(circle, var(--btn-color)30 0%, transparent 65%);
+                opacity: 0.5;
                 transition: opacity 0.3s ease;
                 z-index: 0;
             }
@@ -317,12 +357,12 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
                 background-color: rgba(30, 41, 59, 1) !important;
                 border-color: var(--btn-color) !important;
                 transform: translateY(-6px) !important;
-                box-shadow: 0 15px 35px var(--btn-color)44, 0 0 20px var(--btn-color)33 !important;
+                box-shadow: 0 15px 35px var(--btn-color)55, 0 0 25px var(--btn-color)44 !important;
                 color: #fff !important;
             }
             
             div.stButton > button:hover::before {
-                opacity: 0.9;
+                opacity: 1.0;
             }
 
             div.stButton > button:active {
