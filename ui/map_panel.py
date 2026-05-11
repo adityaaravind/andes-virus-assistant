@@ -27,15 +27,13 @@ def _get_vessel_events() -> list:
         {"date": "MAY 09", "time": "14:45", "country": "Spain", "event": "Supplies delivered via drone to the deck.", "official": "Port Health", "hours_ago": 49},
         {"date": "MAY 08", "time": "11:20", "country": "South Africa", "event": "Medical team airlifted crew for treatment.", "official": "Rescue Pilot", "hours_ago": 74},
         {"date": "MAY 05", "time": "18:00", "country": "International", "event": "Engaged deep-sea isolation protocols.", "official": "Vessel Captain", "hours_ago": 140},
-        {"date": "APR 30", "time": "22:15", "country": "Argentina", "event": "Final port clearance received. Departure.", "official": "Coast Guard", "hours_ago": 260},
-        {"date": "APR 28", "time": "09:00", "country": "Argentina", "event": "Vessel left the port under quarantine.", "official": "Port Authority", "hours_ago": 312},
     ]
 
 def _get_live_state() -> dict:
     if LIVE_FILE.exists():
         try: return json.loads(LIVE_FILE.read_text())
         except Exception: pass
-    return {"confirmed_cases": 5, "ship_status": "Quarantined", "last_updated": "2026-05-10"}
+    return {"confirmed_cases": 18, "ship_status": "Quarantined", "last_updated": datetime.now().strftime("%Y-%m-%d")}
 
 def _get_dynamic_hotspots(state: dict) -> list:
     hotspots = [
@@ -48,7 +46,7 @@ def _get_dynamic_hotspots(state: dict) -> list:
     nat_map = {d["code"]: d for d in NATIONALITIES_DATA}
     for h in hotspots:
         if h["code"] == "SHIP":
-            h["cases"] = state.get("confirmed_cases", 5); h["deaths"] = state.get("deaths", 1)
+            h["cases"] = state.get("confirmed_cases", 18); h["deaths"] = state.get("deaths", 5)
         elif h["code"] in nat_map:
             h["cases"] = nat_map[h["code"]]["cases"]; h["deaths"] = nat_map[h["code"]]["deaths"]
         else: h["cases"] = 0; h["deaths"] = 0
@@ -59,22 +57,23 @@ def _get_dynamic_intensity(day: int) -> dict:
     covid = {
         "CHN": 99.8, "ITA": min(phase * 82, 100), "ESP": min(phase * 64, 100),
         "GBR": min(phase * 42, 100), "USA": min(phase * 34, 100),
-        "ARG": 0.5 if day > 58 else 0.0, "ZAF": 0.1 if day > 67 else 0.0, 
-        "EGY": 0.5 if day > 46 else 0.0, "PHL": 8.5
+        "ARG": min(day * 0.1, 5) if day > 41 else 0.0, 
+        "ZAF": min(day * 0.1, 5) if day > 44 else 0.0, 
+        "EGY": min(day * 0.2, 10) if day > 23 else 0.0, "PHL": 8.5
     }
     hanta = {
         "ARG": 95.0, "ZAF": min(55.0 + (day * 0.55), 100), "ESP": min(45.0 + (day * 0.65), 100),
         "GBR": min(30.0 + (day * 0.45), 100), "NLD": min(25.0 + (day * 0.35), 100),
         "USA": 8.2, "ATA": 0.0
     }
-    onset = {"EGY": 46, "DZA": 57, "NGA": 60, "ZAF": 67, "BRA": 58, "ITA": 31, "USA": 20}
+    onset = {"ARG": 42, "ZAF": 45, "ESP": 10, "GBR": 10, "USA": 1, "ITA": 9, "CHN": 1}
     return {"hanta": hanta, "covid": covid, "onset": onset}
 
 def render_map_panel() -> None:
     state = _get_live_state()
     from ui.pandemic_risk import _compute_risk
     
-    risk_data = _compute_risk(state.get("confirmed_cases", 5), 5)
+    risk_data = _compute_risk(state.get("confirmed_cases", 18), 5)
     current_day = risk_data["days"]
     intensity = _get_dynamic_intensity(current_day)
     hotspots = _get_dynamic_hotspots(state)
@@ -88,14 +87,12 @@ def render_map_panel() -> None:
                 <p style='margin:0; font-size:0.6rem; color:#4ade80; font-family:monospace; font-weight:800;'>STABLE MAPS & SHIP STATUS // DATA SYNC: ACTIVE</p>
             </div>
         </div>
-
         """, unsafe_allow_html=True
     )
 
     col_map, col_vessel = st.columns([2.2, 1])
     
     with col_vessel:
-        # COMPACT VESSEL CARD
         events_html = ""
         for ev in events:
             color = "#4ade80" if ev['hours_ago'] <= 48 else "#fde047"
@@ -122,7 +119,6 @@ def render_map_panel() -> None:
                 <h2 style="margin:0; font-size:1.6rem; font-weight:900; line-height: 1; color:#ffffff;">{state.get('ship_status', 'Quarantined').upper()}</h2>
                 <p style="color:#4ade80; font-size:0.65rem; font-weight:800; margin-top:4px; text-transform:uppercase;">MV HONDIUS // PROTECTED</p>
             </div>
-            
             <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:10px; margin-bottom:12px; border:1px solid rgba(255,255,255,0.05);">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
                     <span style="color:#94a3b8; font-size:8px; font-weight:800; text-transform:uppercase;">SAFETY</span>
@@ -132,16 +128,13 @@ def render_map_panel() -> None:
                     <div style="width:94%; height:100%; background:#4ade80;"></div>
                 </div>
             </div>
-
             <div style="color: #64748b; font-size: 9px; font-weight: 900; margin-bottom: 10px; text-transform: uppercase; letter-spacing:0.5px; display:flex; align-items:center;">
                 <span style="width:6px; height:6px; background:#4ade80; border-radius:50%; margin-right:6px; display:inline-block; animation: pulse 1s infinite;"></span>
                 RECENT EVENTS
             </div>
-            
             <div class="scroll-container" style="flex: 1; overflow-y: auto; padding-right: 5px;">
                 {events_html}
             </div>
-            
             <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center;">
                 <span style="color:#64748b; font-size:7px;">SYNC: {datetime.now().strftime("%H:%M:%S")}</span>
                 <span style="color:#4ade80; font-size:8px; font-weight:900;">ACTIVE</span>
@@ -199,8 +192,13 @@ def render_map_panel() -> None:
                                 tooltipHtml += `<div><div style="color:#94a3b8; font-size:9px;">COVID DAY ${__DAY__}</div><div style="color:#fff; font-size:14px; font-weight:900;">${covidRisk.toFixed(1)}%</div></div></div>`;
                                 tooltipHtml += `<p style="color:#94a3b8; font-size:10px; font-weight:900; margin:0; text-transform:uppercase;">CALC: (Travel Links * 0.6) + (Distance * 0.4)</p>`;
                                 if (covidRisk === 0) {
-                                    if (onsetDay > 0) tooltipHtml += `<p style="color:#ef4444; font-size:11px; font-weight:950; margin-top:10px; text-transform:uppercase;">[!] STARTING DAY: ${onsetDay}</p>`;
-                                    else { tooltipHtml += `<p style="color:#94a3b8; font-size:10px; font-weight:900; margin-top:10px; text-transform:uppercase;">STATUS: ESTIMATED DATA</p><p style="color:#64748b; font-size:9px; font-style:italic; margin:0;">(Based on nearby areas)</p>`; }
+                                    if (onsetDay > 0) {
+                                        tooltipHtml += `<p style="color:#ef4444; font-size:11px; font-weight:950; margin-top:10px; text-transform:uppercase;">[!] STARTING DAY: ${onsetDay}</p>`;
+                                        tooltipHtml += `<p style="color:#64748b; font-size:9px; font-style:italic; margin:0;">REASON: Historically, COVID-19 did not reach this region until Day ${onsetDay}.</p>`;
+                                    } else { 
+                                        tooltipHtml += `<p style="color:#94a3b8; font-size:10px; font-weight:900; margin-top:10px; text-transform:uppercase;">STATUS: ESTIMATED DATA</p>`; 
+                                        tooltipHtml += `<p style="color:#64748b; font-size:9px; font-style:italic; margin:0;">(Based on nearby areas)</p>`; 
+                                    }
                                 }
                                 tooltipHtml += `</div></div>`;
                                 layer.bindTooltip(tooltipHtml, { sticky: true });
