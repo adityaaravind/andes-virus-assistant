@@ -1,16 +1,16 @@
-"""High-fidelity Relational Map — Detailed vessel telemetry and localized intelligence."""
+"""High-fidelity Global Health Monitor — Vessel tracking and localized safety intelligence."""
 from __future__ import annotations
 
 import json
 import streamlit as st
 import streamlit.components.v1 as components
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 import random
 
 LIVE_FILE = Path("data/outbreak_live.json")
 
-# Core outbreak data reference
+# Simple language data exports
 NATIONALITIES_DATA = [
     {"country": "Spain",         "code": "ESP", "passengers": 12, "crew": 0, "cases": 3, "deaths": 1},
     {"country": "United Kingdom","code": "GBR", "passengers": 8,  "crew": 0, "cases": 2, "deaths": 0},
@@ -19,13 +19,17 @@ NATIONALITIES_DATA = [
     {"country": "South Africa",  "code": "ZAF", "passengers": 0,  "crew": 10,"cases": 2, "deaths": 0},
 ]
 
-# Simulated Vessel Contact History
-VESSEL_CONTACT_LOG = [
-    {"date": "APR 01", "country": "Argentina", "event": "Port Authorities boarding for customs.", "official": "Prefectura Naval"},
-    {"date": "APR 26", "country": "South Africa", "event": "Airlift medical team for crew evac.", "official": "Health Inspector Dr. Botha"},
-    {"date": "MAY 05", "country": "Spain", "event": "Quarantine protocol review via drone.", "official": "Port Health Tenerife"},
-    {"date": "LIVE",   "country": "International", "event": "Satellite containment monitoring.", "official": "WHO Task Force"},
-]
+# Recent Ship Events (Simulated Real-Time Log)
+def _get_vessel_events() -> list:
+    now = datetime.now()
+    # Mock events with different ages to test color logic
+    return [
+        {"date": "MAY 11", "time": "08:15", "country": "International", "event": "Ship coordinates updated. Moving North-East.", "official": "GPS Signal", "hours_ago": 6},
+        {"date": "MAY 11", "time": "02:30", "country": "International", "event": "Health check completed. Status stable.", "official": "Ship Doctor", "hours_ago": 12},
+        {"date": "MAY 09", "time": "14:45", "country": "Spain", "event": "Supplies delivered via drone to the deck.", "official": "Port Health", "hours_ago": 49},
+        {"date": "MAY 08", "time": "11:20", "country": "South Africa", "event": "Medical team airlifted crew for treatment.", "official": "Rescue Pilot", "hours_ago": 74},
+        {"date": "APR 28", "time": "09:00", "country": "Argentina", "event": "Vessel left the port under quarantine.", "official": "Port Authority", "hours_ago": 312},
+    ]
 
 def _get_live_state() -> dict:
     if LIVE_FILE.exists():
@@ -34,13 +38,13 @@ def _get_live_state() -> dict:
     return {"confirmed_cases": 5, "ship_status": "Quarantined", "last_updated": "2026-05-10"}
 
 def _get_dynamic_hotspots(state: dict) -> list:
-    """Hotspots with deep medical intelligence and admission data."""
+    """Simplified hotspot descriptions for everyday users."""
     hotspots = [
-        {"lat": -34.60, "lng": -58.38, "code": "ARG", "name": "ARGENTINA_CLUSTER", "color": "#ff0055", "relation": "Departure Point", "intel": "PRIMARY_SOURCE", "admitted": "Hospital Muñiz (LVL 4)", "notes": "Zoonotic spill detected at container terminal.", "timestamp": "08:12 UTC"},
-        {"lat": -26.20, "lng": 28.04,  "code": "ZAF", "name": "SOUTH_AFRICA_SIGNAL", "color": "#00ffcc", "relation": "Evacuation Event", "intel": "SECONDARY_VECTOR", "admitted": "Netcare Milpark (LVL 3)", "notes": "Critically ill crew members airlifted via helipad.", "timestamp": "14:45 UTC"},
-        {"lat": 40.41, "lng": -3.70,  "code": "ESP", "name": "SPAIN_MONITOR", "color": "#ffaa00", "relation": "Repatriation", "intel": "CONTAINED_SIGNAL", "admitted": "Tenerife Isolation (LVL 4)", "notes": "Mandatory quarantine for returning holidaymakers.", "timestamp": "09:30 UTC"},
-        {"lat": 51.50, "lng": -0.12,  "code": "GBR", "name": "UK_MONITOR", "color": "#cc00ff", "relation": "Repatriation", "intel": "CONTAINED_SIGNAL", "admitted": "Royal Free London (HLU)", "notes": "Patient sequencing confirms direct Hondius link.", "timestamp": "11:20 UTC"},
-        {"lat": 14.93, "lng": -23.51, "code": "SHIP", "name": "MV_HONDIUS_CORE", "color": "#fbbf24", "relation": "Primary Vector", "intel": "CORE_HOTSPOT", "admitted": "Onboard Quarantine", "notes": "Level 4 lockdown enforced. No dock clearance.", "timestamp": "LIVE"}
+        {"lat": -34.60, "lng": -58.38, "code": "ARG", "name": "ARGENTINA SOURCE", "color": "#ff0055", "relation": "Where it started", "intel": "PORT AREA", "admitted": "City Hospital", "notes": "Virus first found here.", "timestamp": "APR 28"},
+        {"lat": -26.20, "lng": 28.04,  "code": "ZAF", "name": "S. AFRICA STOP", "color": "#00ffcc", "relation": "Emergency Stop", "intel": "HEALTH HUB", "admitted": "Netcare Clinic", "notes": "Crew members taken for help.", "timestamp": "MAY 08"},
+        {"lat": 40.41, "lng": -3.70,  "code": "ESP", "name": "SPAIN MONITOR", "color": "#ffaa00", "relation": "Return Point", "intel": "QUARANTINE", "admitted": "Tenerife Ward", "notes": "People staying in isolation.", "timestamp": "MAY 09"},
+        {"lat": 51.50, "lng": -0.12,  "code": "GBR", "name": "UK MONITOR", "color": "#cc00ff", "relation": "Return Point", "intel": "ISOLATION", "admitted": "Royal London", "notes": "Close monitoring active.", "timestamp": "MAY 11"},
+        {"lat": 14.93, "lng": -23.51, "code": "SHIP", "name": "THE SHIP (MV HONDIUS)", "color": "#4ade80", "relation": "Current Location", "intel": "RESTRICTED", "admitted": "Ship Med-Bay", "notes": "Closed to everyone.", "timestamp": "LIVE"}
     ]
     nat_map = {d["code"]: d for d in NATIONALITIES_DATA}
     for h in hotspots:
@@ -52,24 +56,19 @@ def _get_dynamic_hotspots(state: dict) -> list:
     return hotspots
 
 def _get_dynamic_intensity(day: int) -> dict:
-    """Mathematical global spread model with verified historical anchors."""
     phase = min(day / 65.0, 1.0)
     covid = {
         "CHN": 99.8, "ITA": min(phase * 82, 100), "ESP": min(phase * 64, 100),
         "GBR": min(phase * 42, 100), "USA": min(phase * 34, 100),
         "ARG": 0.5 if day > 58 else 0.0, "ZAF": 0.1 if day > 67 else 0.0, 
-        "EGY": 0.5 if day > 46 else 0.0, "NGA": 0.1 if day > 60 else 0.0,
-        "ATA": 0.0, "PHL": 8.5, "BRA": 4.2 if day > 58 else 0.0
+        "EGY": 0.5 if day > 46 else 0.0, "ATA": 0.0, "PHL": 8.5
     }
     hanta = {
         "ARG": 95.0, "ZAF": min(55.0 + (day * 0.55), 100), "ESP": min(45.0 + (day * 0.65), 100),
         "GBR": min(30.0 + (day * 0.45), 100), "NLD": min(25.0 + (day * 0.35), 100),
-        "CHL": 18.2, "BRA": 12.4, "USA": 8.2, "ATA": 0.0
+        "USA": 8.2, "ATA": 0.0
     }
-    # Historically verified onset days
-    onset = {
-        "EGY": 46, "DZA": 57, "NGA": 60, "ZAF": 67, "BRA": 58, "CHL": 64, "MEX": 61, "SEN": 62, "MAR": 62, "TUN": 63, "ITA": 31, "USA": 20, "ESP": 31, "GBR": 31, "CAN": 25, "AUS": 25, "PHL": 30
-    }
+    onset = {"EGY": 46, "DZA": 57, "NGA": 60, "ZAF": 67, "BRA": 58, "ITA": 31, "USA": 20}
     return {"hanta": hanta, "covid": covid, "onset": onset}
 
 def render_map_panel() -> None:
@@ -80,17 +79,18 @@ def render_map_panel() -> None:
     current_day = risk_data["days"]
     intensity = _get_dynamic_intensity(current_day)
     hotspots = _get_dynamic_hotspots(state)
+    events = _get_vessel_events()
 
     st.markdown(
         f"""
-        <div class="mission-header" style='border-left: 3px solid #fbbf24; padding-left:15px; margin-bottom:0.8rem; display:flex; justify-content:space-between; align-items:center;'>
+        <div class="mission-header" style='border-left: 3px solid #4ade80; padding-left:15px; margin-bottom:0.8rem; display:flex; justify-content:space-between; align-items:center;'>
             <div>
-                <h2 style='margin:0; font-size:1.1rem; letter-spacing:0.12em; color:#ffffff;'>ORBITAL MISSION CONTROL</h2>
-                <p style='margin:0; font-size:0.6rem; color:#fbbf24; font-family:monospace; font-weight:800;'>DAILY_SYNC_v6: DAY_{current_day} // VERIFIABLE_HISTORY_UPLINK: ACTIVE</p>
+                <h2 style='margin:0; font-size:1.1rem; letter-spacing:0.12em; color:#ffffff;'>VESSEL TRACKING & SAFETY</h2>
+                <p style='margin:0; font-size:0.6rem; color:#4ade80; font-family:monospace; font-weight:800;'>VIRUS TIMELINE: DAY_{current_day} // LIVE STATUS: ACTIVE</p>
             </div>
-            <div style="background:rgba(251,191,36,0.1); border:1px solid #fbbf2444; padding:4px 12px; border-radius:4px;">
-                <span class="live-dot" style="width:6px; height:6px; background:#fbbf24; box-shadow:0 0 10px #fbbf24;"></span>
-                <span style="color:#fbbf24; font-size:0.6rem; font-weight:900; font-family:monospace;">STABLE</span>
+            <div style="background:rgba(74,222,128,0.1); border:1px solid #4ade8044; padding:4px 12px; border-radius:4px;">
+                <span class="live-dot" style="width:6px; height:6px; background:#4ade80; box-shadow:0 0 10px #4ade80;"></span>
+                <span style="color:#4ade80; font-size:0.6rem; font-weight:900; font-family:monospace;">STABLE</span>
             </div>
         </div>
         """, unsafe_allow_html=True
@@ -99,45 +99,44 @@ def render_map_panel() -> None:
     col_map, col_vessel = st.columns([2.2, 1])
     
     with col_vessel:
-        events_html = "".join([f"""
-            <div style="border-left: 2px solid #fbbf24; padding-left: 10px; margin-bottom: 12px;">
-                <div style="color: #fbbf24; font-size: 8px; font-weight: 900; letter-spacing: 1px;">{ev['date']} | {ev['country'].upper()}</div>
-                <div style="color: #cbd5e1; font-size: 10px; line-height: 1.3;">{ev['event']}</div>
-                <div style="color: #64748b; font-size: 8px; font-style: italic;">Official: {ev['official']}</div>
-            </div>
-        """ for ev in VESSEL_CONTACT_LOG])
+        # SIMPLIFIED & BRIGHT VESSEL CARD
+        events_html = ""
+        for ev in events:
+            color = "#4ade80" if ev['hours_ago'] <= 48 else "#fde047"
+            events_html += f"""
+                <div style="border-left: 3px solid {color}; padding-left: 12px; margin-bottom: 15px;">
+                    <div style="color: {color}; font-size: 9px; font-weight: 900; letter-spacing: 1px;">{ev['date']} @ {ev['time']}</div>
+                    <div style="color: #ffffff; font-size: 11px; line-height: 1.3; font-weight: 500; margin-top:3px;">{ev['event']}</div>
+                    <div style="color: #94a3b8; font-size: 8px; margin-top:2px;">Reported by: {ev['official']}</div>
+                </div>
+            """
 
         vessel_card_html = f"""
-        <div style="font-family: monospace; background: rgba(13, 27, 42, 0.9); border: 1px solid #fbbf24; box-shadow: 0 0 25px rgba(251,191,36,0.15); padding: 1.5rem; border-radius: 12px; min-height: 440px; display: flex; flex-direction: column; color: #fff;">
+        <div style="font-family: sans-serif; background: rgba(15, 23, 42, 0.95); border: 2px solid #4ade80; box-shadow: 0 0 30px rgba(74,222,128,0.15); padding: 1.5rem; border-radius: 16px; min-height: 460px; display: flex; flex-direction: column; color: #fff;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                <div style="color: #fbbf24; font-size: 10px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;">🚢 MV_HONDIUS_CORE</div>
-                <div style="background:rgba(251,191,36,0.1); padding:2px 6px; border-radius:4px; border:1px solid #fbbf2444; color:#fbbf24; font-size:8px;">TACTICAL_UPLINK</div>
+                <div style="color: #4ade80; font-size: 10px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;">🚢 SHIP STATUS</div>
+                <div style="background:rgba(74,222,128,0.1); padding:2px 8px; border-radius:4px; border:1px solid #4ade8044; color:#4ade80; font-size:8px; font-weight:900;">LIVE FEED</div>
             </div>
-            <div style="margin: 15px 0;">
-                <h2 style="margin:0; font-size:1.8rem; font-weight:950; line-height: 1; letter-spacing:-0.05em;">{state.get('ship_status', 'Quarantined').upper()}</h2>
-                <p style="color:#fbbf24; font-size:0.65rem; font-weight:800; margin-top:5px; text-transform:uppercase;">VESSEL_INTEGRITY: PHASE_4_LOCKDOWN</p>
+            <div style="margin: 20px 0;">
+                <h2 style="margin:0; font-size:2.2rem; font-weight:900; line-height: 1; letter-spacing:-0.03em; color:#ffffff;">{state.get('ship_status', 'Quarantined').upper()}</h2>
+                <p style="color:#4ade80; font-size:0.75rem; font-weight:800; margin-top:8px; text-transform:uppercase;">MV HONDIUS // CLOSED FOR SAFETY</p>
             </div>
-            <div style="background:rgba(0,0,0,0.4); border-radius:8px; padding:12px; margin-bottom:15px; border:1px solid rgba(255,255,255,0.05);">
-                <p style="color:#64748b; font-size:8px; font-weight:800; margin:0 0 8px 0; text-transform:uppercase;">CONTAINMENT_STABILITY</p>
-                <div style="height:4px; background:rgba(255,255,255,0.1); border-radius:2px; margin-bottom:8px; overflow:hidden;">
-                    <div style="width:94.2%; height:100%; background:linear-gradient(90deg, #fbbf24, #f59e0b); box-shadow: 0 0 10px #fbbf24;"></div>
+            <div style="background:rgba(255,255,255,0.03); border-radius:12px; padding:15px; margin-bottom:20px; border:1px solid rgba(255,255,255,0.05);">
+                <p style="color:#94a3b8; font-size:9px; font-weight:800; margin:0 0 10px 0; text-transform:uppercase; letter-spacing:1px;">OVERALL SAFETY RATING</p>
+                <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:3px; margin-bottom:10px; overflow:hidden;">
+                    <div style="width:94%; height:100%; background:linear-gradient(90deg, #4ade80, #22c55e); box-shadow: 0 0 15px #4ade80;"></div>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="color:#fbbf24; font-size:12px; font-weight:900;">94.2%</span>
-                    <span style="color:#22c55e; font-size:8px; font-weight:800;">[NOMINAL]</span>
+                    <span style="color:#ffffff; font-size:14px; font-weight:900;">94% <small style="font-size:10px; color:#4ade80;">STABLE</small></span>
                 </div>
             </div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
-                <div><p style="color:#64748b; font-size:7px; margin:0;">HULL_TEMP</p><p style="color:#fff; font-size:10px; font-weight:900; margin:0;">18.2°C</p></div>
-                <div><p style="color:#64748b; font-size:7px; margin:0;">BIO_PRESSURE</p><p style="color:#fff; font-size:10px; font-weight:900; margin:0;">-12 Pa</p></div>
-            </div>
-            <div style="color: #64748b; font-size: 9px; font-weight: 800; margin-bottom: 12px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; letter-spacing: 1px;">BOARDING_LOG_HISTORY</div>
-            <div style="flex: 1; overflow-y: auto; padding-right: 5px;">
+            <div style="color: #94a3b8; font-size: 10px; font-weight: 900; margin-bottom: 15px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; text-transform: uppercase; letter-spacing:1px;">RECENT SHIP EVENTS</div>
+            <div style="flex: 1; overflow-y: auto; padding-right: 10px; scrollbar-width: thin;">
                 {events_html}
             </div>
         </div>
         """
-        components.html(vessel_card_html, height=460)
+        components.html(vessel_card_html, height=480)
 
     with col_map:
         map_template = """
@@ -148,18 +147,16 @@ def render_map_panel() -> None:
             <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
             <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
             <style>
-                html, body { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; font-family: monospace; }
+                html, body { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; font-family: sans-serif; }
                 #map { width: 100%; height: 100%; background: #050505; border-radius: 12px; }
-                .leaflet-tooltip { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(251, 191, 36, 0.4) !important; border-radius: 6px !important; box-shadow: 0 0 20px rgba(0,0,0,0.8) !important; font-family: monospace !important; padding: 14px !important; opacity: 1 !important; pointer-events: none; z-index: 1000; }
-                .leaflet-popup-content-wrapper { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(251, 191, 36, 0.4) !important; border-radius: 8px !important; font-family: monospace !important; }
-                .leaflet-popup-tip { background: #0d1b2a !important; }
-                .ring-marker { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #ffffff; position: relative; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.7); }
+                .leaflet-tooltip { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(74, 222, 128, 0.4) !important; border-radius: 8px !important; box-shadow: 0 0 30px rgba(0,0,0,0.8) !important; padding: 15px !important; opacity: 1 !important; z-index: 1000; }
+                .leaflet-popup-content-wrapper { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(74, 222, 128, 0.4) !important; border-radius: 12px !important; }
+                .ring-marker { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ffffff; position: relative; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); }
                 .blink-active { animation: marker-blink 1.5s infinite ease-in-out; }
-                @keyframes marker-blink { 0%, 100% { opacity: 1; box-shadow: 0 0 5px currentColor; transform: scale(1); } 50% { opacity: 0.6; box-shadow: 0 0 20px currentColor; transform: scale(1.1); } }
-                .vessel-ring { border-color: #fbbf24 !important; color: #fbbf24; }
-                .badge { position: absolute; top: -8px; right: -8px; background: #ffffff; color: #000; border-radius: 50%; width: 14px; height: 14px; font-size: 9px; font-weight: 900; display: flex; align-items: center; justify-content: center; border: 1px solid #000; }
-                .intel-label { color: #64748b; font-size: 8px; font-weight: 800; text-transform: uppercase; }
-                .intel-val { color: #fff; font-size: 11px; font-weight: 950; }
+                @keyframes marker-blink { 0%, 100% { opacity: 1; box-shadow: 0 0 8px currentColor; transform: scale(1); } 50% { opacity: 0.6; box-shadow: 0 0 25px currentColor; transform: scale(1.1); } }
+                .badge { position: absolute; top: -10px; right: -10px; background: #ffffff; color: #000; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center; border: 2px solid #000; }
+                .intel-label { color: #94a3b8; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+                .intel-val { color: #fff; font-size: 13px; font-weight: 900; }
             </style>
         </head>
         <body>
@@ -170,7 +167,6 @@ def render_map_panel() -> None:
 
                 const hotspots = __HOTSPOTS__;
                 const intensity = __INTENSITY__;
-                const affectedCodes = ["ARG", "ESP", "GBR", "NLD", "ZAF"];
                 const shipPos = [14.93, -23.51];
 
                 fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
@@ -179,36 +175,34 @@ def render_map_panel() -> None:
                         L.geoJSON(geojson, {
                             style: function(feature) {
                                 const code = feature.id || feature.properties.ISO_A3;
-                                if (affectedCodes.includes(code)) return { fillColor: '#6b001a', fillOpacity: 0.5, color: '#ff0055', weight: 2 };
+                                if (["ARG", "ESP", "GBR", "NLD", "ZAF"].includes(code)) return { fillColor: '#6b001a', fillOpacity: 0.5, color: '#ff0055', weight: 2 };
                                 return { fillOpacity: 0.1, weight: 0.5, color: '#222', fillColor: '#111' };
                             },
                             onEachFeature: function(feature, layer) {
                                 const code = feature.id || feature.properties.ISO_A3;
-                                const name = feature.properties.name || "REGION";
+                                const name = feature.properties.name || "AREA";
                                 const hantaRisk = (intensity.hanta[code] || (Math.random() * 2 + 0.1)).toFixed(1);
                                 const covidRisk = parseFloat(intensity.covid[code] || 0.0);
                                 const onsetDay = intensity.onset[code] || 0;
 
-                                let tooltipHtml = `<div><b style="color:#fbbf24; font-size:12px; letter-spacing:1px;">📡 ${name} BRIEFING</b><br/>`;
+                                let tooltipHtml = `<div><b style="color:#4ade80; font-size:13px; letter-spacing:1px;">📡 ${name} SAFETY CHECK</b><br/>`;
                                 tooltipHtml += `<div style="margin-top:12px;">`;
                                 tooltipHtml += `<div style="display:flex; justify-content:space-between; gap:25px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px; margin-bottom:10px;">`;
-                                tooltipHtml += `<div><div class="intel-label">EST. HANTA RISK</div><div style="color:#fff; font-size:13px; font-weight:950;">${hantaRisk}%</div></div>`;
-                                tooltipHtml += `<div><div class="intel-label">COVID DAY ${__DAY__}</div><div style="color:#fff; font-size:13px; font-weight:950;">${covidRisk.toFixed(1)}%</div></div>`;
+                                tooltipHtml += `<div><div class="intel-label">CHANCE OF SPREAD</div><div class="intel-val">${hantaRisk}%</div></div>`;
+                                tooltipHtml += `<div><div class="intel-label">COVID DAY ${__DAY__}</div><div class="intel-val">${covidRisk.toFixed(1)}%</div></div>`;
                                 tooltipHtml += `</div>`;
-                                
-                                tooltipHtml += `<p style="color:#64748b; font-size:9px; font-weight:800; margin:0; text-transform:uppercase;">CALC: (Connectivity * 0.6) + (Proximity * 0.4)</p>`;
+                                tooltipHtml += `<p style="color:#94a3b8; font-size:10px; font-weight:800; margin:0;">HOW WE CALCULATE: (Travel Links + Proximity)</p>`;
                                 
                                 if (covidRisk === 0) {
                                     if (onsetDay > 0) {
-                                        tooltipHtml += `<p style="color:#ef4444; font-size:10px; font-weight:950; margin-top:8px; text-transform:uppercase;">[!] PROJECTED_ONSET: DAY ${onsetDay}</p>`;
+                                        tooltipHtml += `<p style="color:#ef4444; font-size:11px; font-weight:900; margin-top:10px;">[!] STARTING DAY: ${onsetDay}</p>`;
                                     } else {
-                                        tooltipHtml += `<p style="color:#94a3b8; font-size:9px; font-weight:800; margin-top:8px; text-transform:uppercase;">STATUS: NON-VERIFIABLE DATA</p>`;
-                                        tooltipHtml += `<p style="color:#64748b; font-size:8px; font-style:italic; margin:0;">(Projected by Proximity Estimation)</p>`;
+                                        tooltipHtml += `<p style="color:#94a3b8; font-size:10px; font-weight:800; margin-top:10px;">STATUS: ESTIMATED DATA</p>`;
+                                        tooltipHtml += `<p style="color:#64748b; font-size:9px; font-style:italic;">(Based on nearby areas)</p>`;
                                     }
                                 }
-                                
                                 tooltipHtml += `</div></div>`;
-                                layer.bindTooltip(tooltipHtml, { sticky: true, className: 'leaflet-tooltip' });
+                                layer.bindTooltip(tooltipHtml, { sticky: true });
                             }
                         }).addTo(map);
                     });
@@ -217,20 +211,19 @@ def render_map_panel() -> None:
                     const isShip = h.code === 'SHIP';
                     const icon = L.divIcon({
                         className: '',
-                        html: `<div class="ring-marker blink-active ${isShip ? 'vessel-ring' : ''}" style="border-color:${h.color}; color:${h.color}; box-shadow: 0 0 15px ${h.color};"><div class="badge">${h.cases}</div></div>`,
-                        iconSize: [22, 22], iconAnchor: [11, 11]
+                        html: `<div class="ring-marker blink-active ${isShip ? 'vessel-ring' : ''}" style="border-color:${h.color}; color:${h.color};"><div class="badge">${h.cases}</div></div>`,
+                        iconSize: [24, 24], iconAnchor: [12, 12]
                     });
                     const marker = L.marker([h.lat, h.lng], { icon: icon }).addTo(map);
-                    let popupHtml = `<div style="padding:15px; min-width:240px; font-family:monospace;">`;
-                    popupHtml += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><b style="color:${h.color}; font-size:14px;">🛰️ ${h.name}</b><span style="color:#64748b; font-size:8px;">${h.timestamp}</span></div>`;
-                    popupHtml += `<div style="color:#94a3b8; font-size:10px; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;">${h.relation} // <span style="color:#fff;">${h.intel}</span></div>`;
-                    popupHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;"><div><div class="intel-label">TOTAL_CASES</div><div style="color:#fff; font-size:16px; font-weight:950;">${h.cases}</div></div><div><div class="intel-label">TOTAL_DEATHS</div><div style="color:#ef4444; font-size:16px; font-weight:950;">${h.deaths}</div></div></div>`;
-                    popupHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px;"><div><div class="intel-label">ADMITTED_WHERE</div><div style="color:#fbbf24; font-size:10px; font-weight:900;">${h.admitted}</div></div><div><div class="intel-label">INTEL_BRIEF</div><div style="color:#cbd5e1; font-size:9px; font-style:italic; line-height:1.2;">${h.notes}</div></div></div></div>`;
+                    let popupHtml = `<div style="padding:15px; min-width:260px; font-family:sans-serif;">`;
+                    popupHtml += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"><b style="color:${h.color}; font-size:14px;">${h.name}</b><span style="color:#94a3b8; font-size:9px;">${h.timestamp}</span></div>`;
+                    popupHtml += `<div style="color:#ffffff; font-size:11px; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; font-weight:600;">${h.relation}</div>`;
+                    popupHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;"><div><div class="intel-label">TOTAL CASES</div><div style="color:#fff; font-size:18px; font-weight:900;">${h.cases}</div></div><div><div class="intel-label">TOTAL DEATHS</div><div style="color:#ef4444; font-size:18px; font-weight:900;">${h.deaths}</div></div></div>`;
+                    popupHtml += `<div style="margin-top:15px; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;"><div><div class="intel-label">HOSPITAL / CLINIC</div><div style="color:#4ade80; font-size:11px; font-weight:900;">${h.admitted}</div></div><p style="color:#cbd5e1; font-size:10px; margin-top:8px; line-height:1.4;"><i>"${h.notes}"</i></p></div></div>`;
                     marker.bindPopup(popupHtml, { closeButton: false, offset: [0, -10] });
                     marker.on('mouseover', function() { this.openPopup(); });
                     marker.on('mouseout', function() { this.closePopup(); });
                     if (!isShip) {
-                        L.polyline([[h.lat, h.lng], shipPos], { color: h.color, weight: 6, opacity: 0.15, dashArray: '4, 6' }).addTo(map);
                         L.polyline([[h.lat, h.lng], shipPos], { color: h.color, weight: 1.5, opacity: 0.8, dashArray: '4, 6' }).addTo(map);
                     }
                 });
@@ -244,6 +237,6 @@ def render_map_panel() -> None:
         components.html(map_html, height=450)
 
     st.markdown(
-        f"<div style='text-align:left; padding:10px; background:rgba(15,23,42,0.4); border-radius:6px; border:1px solid rgba(255,255,255,0.05); margin-top:10px;'><p style='color:#94a3b8; font-size:0.65rem; font-family:monospace; margin:0;'><b style='color:#fbbf24;'>METHODOLOGY_DISCLOSURE:</b> Proximity Estimation active for Non-Verifiable sectors // <b>ACCURACY_SYNC:</b> High-Fidelity // <b>DAY_{current_day}</b></p></div>",
+        f"<div style='text-align:left; padding:10px; background:rgba(15,23,42,0.4); border-radius:6px; border:1px solid rgba(255,255,255,0.05); margin-top:10px;'><p style='color:#94a3b8; font-size:0.7rem; margin:0;'><b style='color:#4ade80;'>HOW WE CALCULATE:</b> We use travel links and distance from the ship to estimate local risk. Historical data is from early 2020 COVID-19 records.</p></div>",
         unsafe_allow_html=True
     )
