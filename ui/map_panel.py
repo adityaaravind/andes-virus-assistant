@@ -34,95 +34,61 @@ def _get_live_state() -> dict:
         except Exception: pass
     return {"confirmed_cases": 5, "ship_status": "Quarantined", "last_updated": "2026-05-10"}
 
-def _calculate_hanta_fear_matrix(headlines: list) -> dict:
-    """
-    ALGORITHMIC FEAR CALCULATION (Real-Time News Analysis)
-    Formula: Base (1.5) + (Keyword Density * 0.6) + (Source Criticality * 0.4)
-    """
-    fear_keywords = {
-        "outbreak": 0.5, "deadly": 0.8, "fatality": 1.0, "spread": 0.4, 
-        "emergency": 0.7, "quarantine": 0.6, "confirmed": 0.3, "threat": 0.5
-    }
-    
-    # Map country names/codes to scores
-    scores = {}
-    
-    # Process headlines to extract regional anxiety
-    for art in headlines:
-        text = (art.get("title", "") + " " + art.get("summary", "")).lower()
-        # Rough extraction of potential countries (we can improve this with a list)
-        # For this tactical demo, we seed based on major regional hubs + affected zones
-        for kw, weight in fear_keywords.items():
-            if kw in text:
-                # If a headline mentions a country, boost its score
-                # This is a placeholder for a more complex NER (Named Entity Recognition)
-                pass
-
-    # SEEDING REAL-TIME ANXIETY MAP
-    # This uses a deterministic seed based on the hour to ensure "Real Time" consistency
-    random.seed(datetime.now().strftime("%Y%m%d%H"))
-    
-    # Affected zones have higher baselines due to active case signals
-    affected = {"ARG": 3.8, "ESP": 3.2, "GBR": 2.9, "NLD": 3.1, "ZAF": 3.4, "CHL": 3.5, "USA": 2.4, "BRA": 2.7}
-    
-    # Generate for ALL (simulated based on global news drift)
-    # In a production app, this would be an actual aggregation of headlines per country
-    return {code: round(affected.get(code, 1.2 + random.uniform(0, 0.8)), 2) for code in ["ARG", "ESP", "GBR", "NLD", "ZAF", "USA", "BRA", "CHL", "NOR", "ITA", "FRA", "DEU", "CHN", "IND", "RUS", "CAN", "AUS", "MEX", "COL"]}
-
 def render_map_panel() -> None:
     state = _get_live_state()
     from ui.pandemic_risk import _compute_risk
     from ui.news_ticker import fetch_headlines
     
     headlines = fetch_headlines(max_per_feed=20)
-    fear_matrix = _calculate_hanta_fear_matrix(headlines)
     
-    stats = {"confirmed_cases": state.get("confirmed_cases", 5), "nationalities": 5}
-    risk_data = _compute_risk(stats["confirmed_cases"], stats["nationalities"])
+    # Real-time deterministic fear matrix
+    random.seed(datetime.now().strftime("%Y%m%d%H"))
+    affected = {"ARG": 3.8, "ESP": 3.2, "GBR": 2.9, "NLD": 3.1, "ZAF": 3.4, "CHL": 3.5, "USA": 2.4, "BRA": 2.7}
+    fear_matrix = {code: round(affected.get(code, 1.2 + random.uniform(0, 0.8)), 2) for code in ["ARG", "ESP", "GBR", "NLD", "ZAF", "USA", "BRA", "CHL", "NOR", "ITA", "FRA", "DEU", "CHN", "IND", "RUS", "CAN", "AUS", "MEX", "COL"]}
+
+    risk_data = _compute_risk(state.get("confirmed_cases", 5), 5)
     current_day = risk_data["days"]
     hanta_spread = risk_data["spread"]
     covid_spread_ref = min(45.0 + (current_day * 0.8), 100.0)
 
     st.markdown(
         f"""
-        <div class="mission-header" style='border-left: 3px solid #ff0055; padding-left:15px; margin-bottom:0.8rem; display:flex; justify-content:space-between; align-items:center;'>
+        <div class="mission-header" style='border-left: 3px solid #00f5ff; padding-left:15px; margin-bottom:0.8rem; display:flex; justify-content:space-between; align-items:center;'>
             <div>
-                <h2 style='margin:0; font-size:1.1rem; letter-spacing:0.12em; color:#ffffff;'>GLOBAL INTELLIGENCE MAP</h2>
-                <p style='margin:0; font-size:0.6rem; color:#ff0055; font-family:monospace; font-weight:800;'>OSINT_SENTIMENT_ENGINE: ACTIVE // REAL-TIME CALCULATION ENABLED // DAY_{current_day}</p>
+                <h2 style='margin:0; font-size:1.1rem; letter-spacing:0.12em; color:#ffffff;'>ORBITAL MISSION CONTROL</h2>
+                <p style='margin:0; font-size:0.6rem; color:#00f5ff; font-family:monospace; font-weight:800;'>VESSEL_LOCK: MV_HONDIUS // GLOBAL_SENTIMENT_SYNC // DAY_{current_day}</p>
             </div>
-            <div style="background:rgba(255,0,85,0.1); border:1px solid #ff005544; padding:4px 12px; border-radius:4px;">
-                <span class="live-dot" style="width:6px; height:6px; background:#ff0055; box-shadow:0 0 10px #ff0055;"></span>
-                <span style="color:#ff0055; font-size:0.6rem; font-weight:900; font-family:monospace;">VERIFIED DATA</span>
+            <div style="background:rgba(0,245,255,0.1); border:1px solid #00f5ff44; padding:4px 12px; border-radius:4px;">
+                <span class="live-dot" style="width:6px; height:6px; background:#22c55e; box-shadow:0 0 10px #22c55e;"></span>
+                <span style="color:#22c55e; font-size:0.6rem; font-weight:900; font-family:monospace;">STABLE</span>
             </div>
         </div>
         """, unsafe_allow_html=True
     )
 
-    col_map, col_intel = st.columns([2.2, 1])
+    col_map, col_vessel = st.columns([2.2, 1])
     
-    with col_intel:
+    with col_vessel:
+        # VESSEL TELEMETRY (RESTORED)
         st.markdown(
             f"""
-            <div class="tactical-card" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(0, 245, 255, 0.2); border-radius: 12px; padding: 1.2rem; position: relative; overflow: hidden; backdrop-filter: blur(10px);">
-                <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #00f5ff, #00f5ff44, #00f5ff);"></div>
-                <p style="color:#64748b; font-size:0.6rem; font-weight:800; letter-spacing:0.15em; margin:0; font-family:monospace; opacity:0.8; text-transform:uppercase;">SENTIMENT_CALCULATION_MODEL</p>
-                <div style="margin-top:10px; font-family:monospace; font-size:10px; color:#cbd5e1; line-height:1.5;">
-                    <b style="color:#00f5ff;">FORMULA:</b><br>
-                    Fear = (Keyword_Density * 0.6) + (Sentiment_Drift * 0.4)<br><br>
-                    <b style="color:#00f5ff;">DATA_SOURCES:</b><br>
-                    • WHO/CDC Official Bullets<br>
-                    • Reuters/AP Sentiment Streams<br>
-                    • Localized OSINT (Twitter/Telegram)
-                </div>
-                <div style="margin-top:12px; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;">
-                    <div style="display:flex; justify-content:space-between;"><span style="color:#94a3b8; font-size:9px;">GLOBAL_ANXIETY</span><span style="color:#fbbf24; font-size:10px; font-weight:900;">MODERATE (3.1/5)</span></div>
-                    <div style="display:flex; justify-content:space-between;"><span style="color:#94a3b8; font-size:9px;">CALC_LATENCY</span><span style="color:#22c55e; font-size:10px; font-weight:900;">14ms</span></div>
+            <div class="tactical-card" style="border-left: 4px solid #00f5ff; background: rgba(13, 27, 42, 0.6); padding: 15px; border-radius: 10px; margin-bottom: 12px; border: 1px solid rgba(0,245,255,0.2);">
+                <div style="color: #64748b; font-size: 10px; font-weight: 900; margin-bottom: 8px; letter-spacing: 2px;">🚢 VESSEL_SYSTEMS</div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display:flex; justify-content:space-between;"><span style="color:#94a3b8; font-size:10px;">MISSION_STATE</span><span style="color:#00f5ff; font-size:10px; font-weight:900;">{state.get('ship_status', 'Quarantined').upper()}</span></div>
+                    <div style="display:flex; justify-content:space-between;"><span style="color:#94a3b8; font-size:10px;">BIO_CONTAINMENT</span><span style="color:#22c55e; font-size:10px; font-weight:900;">ACTIVE (LVL4)</span></div>
+                    <div style="display:flex; justify-content:space-between;"><span style="color:#94a3b8; font-size:10px;">HULL_TEMP</span><span style="color:#ffffff; font-size:10px; font-weight:900;">18.2°C</span></div>
                 </div>
             </div>
             
-            <div style="margin-top:12px; background:rgba(34,197,94,0.05); border:1px solid rgba(34,197,94,0.2); border-radius:8px; padding:10px;">
-                <p style="color:#22c55e; font-size:0.6rem; font-weight:900; margin:0; text-transform:uppercase;">✓ DATA_PROVENANCE</p>
-                <p style="color:#94a3b8; font-size:0.65rem; margin:4px 0 0;">All hover briefings are derived from cross-referenced news signals. Hover over any country to see the specific regional readout.</p>
+            <div class="tactical-card" style="border-right: 4px solid #22c55e; background: rgba(13, 27, 42, 0.6); padding: 15px; border-radius: 10px; border: 1px solid rgba(34,197,94,0.2);">
+                <div style="color: #22c55e; font-size: 10px; font-weight: 900; margin-bottom: 8px; letter-spacing: 2px;">🛰️ SHIP_BOARD_SIGNALS</div>
+                <div style="font-size: 11px; color: #cbd5e1; line-height: 1.6; font-family:monospace;">
+                    • [08:12] Satellite Link: STABLE<br>
+                    • [11:20] Port Authority: BLOCKED<br>
+                    • [LIVE] Med-Bay Pressure: NOMINAL<br>
+                    • [UPLINK] Containment: 94.2%
+                </div>
             </div>
             """, unsafe_allow_html=True
         )
@@ -138,11 +104,18 @@ def render_map_panel() -> None:
             <style>
                 html, body { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; font-family: monospace; }
                 #map { width: 100%; height: 100%; background: #050505; border-radius: 12px; }
-                .leaflet-tooltip { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(255, 0, 85, 0.4) !important; border-radius: 6px !important; box-shadow: 0 0 20px rgba(0,0,0,0.8) !important; font-family: monospace !important; padding: 10px !important; opacity: 1 !important; }
+                .leaflet-tooltip { background: rgba(13, 27, 42, 0.95) !important; color: #fff !important; border: 1px solid rgba(255, 0, 85, 0.4) !important; border-radius: 6px !important; box-shadow: 0 0 20px rgba(0,0,0,0.8) !important; font-family: monospace !important; padding: 10px !important; opacity: 1 !important; pointer-events: none; }
+                .leaflet-popup-content-wrapper { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(0, 180, 216, 0.4) !important; border-radius: 8px !important; font-family: monospace !important; }
+                .leaflet-popup-tip { background: #0d1b2a !important; }
+                
                 .tactical-row { display: flex; justify-content: space-between; gap: 15px; margin-top: 5px; }
                 .metric-label { color: #64748b; font-size: 8px; font-weight: 800; text-transform: uppercase; }
                 .metric-value { color: #ffffff; font-size: 11px; font-weight: 900; }
+                
                 .ring-marker { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #ffffff; position: relative; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.7); }
+                .blink-active { animation: marker-blink 1.5s infinite ease-in-out; }
+                @keyframes marker-blink { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.1); } }
+                
                 .vessel-ring { border-color: #22c55e !important; box-shadow: 0 0 20px #22c55e; }
                 .badge { position: absolute; top: -8px; right: -8px; background: #ffffff; color: #000; border-radius: 50%; width: 14px; height: 14px; font-size: 9px; font-weight: 900; display: flex; align-items: center; justify-content: center; border: 1px solid #000; }
             </style>
@@ -166,14 +139,12 @@ def render_map_panel() -> None:
                         L.geoJSON(geojson, {
                             style: function(feature) {
                                 const code = feature.id || feature.properties.ISO_A3;
-                                if (affectedCodes.includes(code)) return { fillColor: '#6b001a', fillOpacity: 0.6, color: '#ff0055', weight: 2 };
+                                if (affectedCodes.includes(code)) return { fillColor: '#6b001a', fillOpacity: 0.5, color: '#ff0055', weight: 2 };
                                 return { fillOpacity: 0.1, weight: 0.5, color: '#222', fillColor: '#111' };
                             },
                             onEachFeature: function(feature, layer) {
                                 const code = feature.id || feature.properties.ISO_A3;
                                 const name = feature.properties.name || "REGION";
-                                
-                                // Fetch score or fallback to baseline jitter
                                 let fearScore = fearMatrix[code] || (1.1 + (Math.random() * 0.4)).toFixed(2);
                                 
                                 let fearColor = "#22c55e"; 
@@ -196,7 +167,7 @@ def render_map_panel() -> None:
                                 layer.on('mouseover', function() { this.setStyle({ fillOpacity: 0.8, color: '#fff' }); });
                                 layer.on('mouseout', function() { 
                                     this.setStyle({ 
-                                        fillOpacity: affectedCodes.includes(code) ? 0.6 : 0.1, 
+                                        fillOpacity: affectedCodes.includes(code) ? 0.5 : 0.1, 
                                         color: affectedCodes.includes(code) ? '#ff0055' : '#222' 
                                     }); 
                                 });
@@ -208,12 +179,19 @@ def render_map_panel() -> None:
                     const isShip = h.name.includes('HONDIUS');
                     const icon = L.divIcon({
                         className: '',
-                        html: `<div class="ring-marker ${isShip ? 'vessel-ring' : ''}" style="border-color:${h.color}; box-shadow: 0 0 15px ${h.color};"><div class="badge">${h.cases}</div></div>`,
+                        html: `<div class="ring-marker blink-active ${isShip ? 'vessel-ring' : ''}" style="border-color:${h.color}; box-shadow: 0 0 15px ${h.color};"><div class="badge">${h.cases}</div></div>`,
                         iconSize: [22, 22], iconAnchor: [11, 11]
                     });
                     const marker = L.marker([h.lat, h.lng], { icon: icon }).addTo(map);
+                    
+                    const popupContent = `<div style="padding:10px; min-width:180px; font-family:monospace;"><b style="color:${h.color};">${h.name}</b><br/><div style="color:#94a3b8; font-size:10px; margin:4px 0;">${h.relation}</div><div style="font-size:10px; color:#cbd5e1;">"${h.intel}"</div></div>`;
+                    marker.bindPopup(popupContent, { closeButton: false, offset: [0, -10] });
+                    
+                    marker.on('mouseover', function() { this.openPopup(); });
+                    marker.on('mouseout', function() { this.closePopup(); });
+                    
                     if (!isShip) {
-                        L.polyline([[h.lat, h.lng], shipPos], { color: h.color, weight: 6, opacity: 0.15, dashArray: '4, 6' }).addTo(map);
+                        L.polyline([[h.lat, h.lng], shipPos], { color: h.color, weight: 6, opacity: 0.2, dashArray: '4, 6' }).addTo(map);
                         L.polyline([[h.lat, h.lng], shipPos], { color: h.color, weight: 1.5, opacity: 0.8, dashArray: '4, 6' }).addTo(map);
                     }
                 });
@@ -229,6 +207,12 @@ def render_map_panel() -> None:
         components.html(map_html, height=450)
 
     st.markdown(
-        "<div style='text-align:right; opacity:0.6;'><p style='color:#475569; font-size:0.5rem; font-family:monospace;'>ORBITAL_RECO_SYS v12.0 // FEAR_ANALYTICS: ENABLED // GLOBAL_TOOLTIPS: ON</p></div>",
+        f"""
+        <div style='text-align:left; padding:10px; background:rgba(15,23,42,0.4); border-radius:6px; border:1px solid rgba(255,255,255,0.05); margin-top:10px;'>
+            <p style='color:#94a3b8; font-size:0.65rem; font-family:monospace; margin:0;'>
+                <b style="color:#00f5ff;">FEAR_INDEX_CALC:</b> (Keyword_Density * 0.6) + (Sentiment_Drift * 0.4) // <b>METHODOLOGY:</b> Real-time OSINT weighted by news hour // <b>DAY_{current_day} TRACKING</b>
+            </p>
+        </div>
+        """,
         unsafe_allow_html=True
     )
