@@ -272,52 +272,96 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
 
         icons = {1: "🟢", 2: "🟡", 3: "🟠", 4: "🔴", 5: "💀"}
         
-        # --- ROBUST SMALL GRID SELECTOR (v1.4.4) ---
+        # --- ROBUST SMALL GRID SELECTOR (v1.4.5) ---
         st.markdown(
             """
             <style>
-            /* TARGET STANDARD STREAMLIT BUTTONS IN THE SELECTOR AREA */
+            /* TARGET STANDARD STREAMLIT BUTTONS */
             div.stButton > button {
                 width: 100% !important;
-                height: 70px !important;
-                background-color: rgba(15, 23, 42, 0.8) !important;
+                height: 85px !important;
+                background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.8)) !important;
+                backdrop-filter: blur(8px) !important;
                 border: 1px solid rgba(255, 255, 255, 0.1) !important;
                 border-top: 3px solid var(--btn-color) !important;
-                border-radius: 8px !important;
+                border-radius: 12px !important;
                 color: #f8fafc !important;
                 font-family: 'Inter', monospace !important;
-                transition: all 0.2s ease !important;
-                padding: 5px !important;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                padding: 10px !important;
                 display: flex !important;
                 flex-direction: column !important;
                 align-items: center !important;
                 justify-content: center !important;
-                gap: 2px !important;
-            }
-            div.stButton > button:hover {
-                background-color: rgba(255, 255, 255, 0.05) !important;
-                border-color: var(--btn-color) !important;
-                transform: translateY(-2px) !important;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
-            }
-            div.stButton > button:active {
-                transform: translateY(0) !important;
-                background-color: var(--btn-color)44 !important;
+                gap: 4px !important;
+                position: relative !important;
+                overflow: hidden !important;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.4), inset 0 0 20px var(--btn-color)11 !important;
             }
             
-            /* LABEL STYLING INSIDE BUTTONS */
-            .btn-lbl { font-size: 0.6rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; }
-            .btn-ico { font-size: 1.4rem; }
+            /* BACKLIGHT GLOW EFFECT */
+            div.stButton > button::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: radial-gradient(circle, var(--btn-color)15 0%, transparent 70%);
+                opacity: 0.5;
+                transition: opacity 0.3s ease;
+                z-index: 0;
+            }
+
+            div.stButton > button:hover {
+                background-color: rgba(30, 41, 59, 0.95) !important;
+                border-color: var(--btn-color) !important;
+                transform: translateY(-5px) !important;
+                box-shadow: 0 10px 30px var(--btn-color)33 !important;
+                color: #fff !important;
+            }
+            
+            div.stButton > button:hover::before {
+                opacity: 0.8;
+            }
+
+            div.stButton > button:active {
+                transform: translateY(-2px) scale(0.98) !important;
+                box-shadow: 0 5px 15px var(--btn-color)44 !important;
+            }
+            
+            /* DISABLED / VOTED STATE */
+            div.stButton > button:disabled {
+                opacity: 0.6 !important;
+                cursor: not-allowed !important;
+                filter: grayscale(0.4) !important;
+                border-top-color: rgba(255,255,255,0.1) !important;
+                transform: none !important;
+                box-shadow: none !important;
+            }
+
+            /* BREATHING ANIMATION FOR ACTIVE */
+            @keyframes neon-breath {
+                0% { box-shadow: 0 0 10px var(--btn-color)22; }
+                50% { box-shadow: 0 0 25px var(--btn-color)55; }
+                100% { box-shadow: 0 0 10px var(--btn-color)22; }
+            }
+            
+            .active-breath > div.stButton > button {
+                animation: neon-breath 2s ease-in-out infinite !important;
+                border-color: var(--btn-color) !important;
+                background: linear-gradient(135deg, var(--btn-color)11, rgba(15, 23, 42, 0.9)) !important;
+            }
 
             @media (max-width: 600px) {
-                div.stButton > button { height: 60px !important; }
-                .btn-ico { font-size: 1.2rem; }
-                .btn-lbl { font-size: 0.5rem; }
+                div.stButton > button { height: 75px !important; gap: 2px !important; }
             }
             </style>
-            <div style="margin-bottom: 0.8rem; border-bottom: 1px solid rgba(56,189,248,0.2); padding-bottom: 0.4rem; display:flex; justify-content:space-between; align-items:center;">
-                <p style='color:#38bdf8; font-size:0.7rem; font-weight:800; margin:0; letter-spacing:0.1em; text-transform:uppercase;'>📡 OUTBREAK SENTIMENT SELECTOR</p>
-                <p style='color:#fbbf24; font-size:0.45rem; font-weight:950; margin:0;'>[ VOTE TO ANCHOR RISK DATA ]</p>
+            <div style="margin-bottom: 1.2rem; border-bottom: 1px solid rgba(56,189,248,0.3); padding-bottom: 0.6rem; display:flex; justify-content:space-between; align-items:center;">
+                <p style='color:#38bdf8; font-size:0.8rem; font-weight:900; margin:0; letter-spacing:0.15em; text-transform:uppercase; text-shadow: 0 0 10px rgba(56,189,248,0.5);'>📡 TACTICAL SENTIMENT INPUT</p>
+                <div style="background:rgba(251,191,36,0.1); border:1px solid #fbbf2444; border-radius:4px; padding:2px 8px;">
+                    <p style='color:#fbbf24; font-size:0.5rem; font-weight:950; margin:0; letter-spacing:0.05em;'>LIVE UPLINK</p>
+                </div>
             </div>
             """,
             unsafe_allow_html=True
@@ -330,15 +374,15 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
             is_active = (level_id == level_int)
             
             with cols[i]:
-                # We use a trick: standard button text can be complex if we use markdown or just simple labels.
-                # Since Streamlit buttons don't support HTML in labels easily, we keep them simple.
-                # But we can inject the CSS variable for the top border color.
-                st.markdown(f'<div style="--btn-color: {info["color"]};">', unsafe_allow_html=True)
+                # Wrap in a div to pass CSS variable and apply breathing if active
+                container_class = "active-breath" if user_voted_today and is_active else ""
+                st.markdown(f'<div class="{container_class}" style="--btn-color: {info["color"]};">', unsafe_allow_html=True)
                 
-                # Use a combined label for the button
+                # Use a combined label with emoji and text
+                # Note: Streamlit buttons preserve newlines if rendered correctly
                 btn_label = f"{icons[level_id]}\n{info['label'].upper()}"
                 
-                if st.button(btn_label, key=f"v22_btn_{level_id}", disabled=user_voted_today, use_container_width=True):
+                if st.button(btn_label, key=f"v23_btn_{level_id}", disabled=user_voted_today, use_container_width=True):
                     _save_fear_vote(level_id, user_id)
                     st.rerun()
                 
@@ -347,16 +391,17 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
         if user_voted_today:
             st.markdown(
                 f"""
-                <div style="background:rgba(34,197,94,0.05); border:1px solid #22c55e44; border-radius:8px; padding:0.6rem; margin-top:0.8rem; text-align:center;">
-                    <p style="color:#22c55e; font-size:0.7rem; font-weight:900; margin:0;">✓ SENTIMENT RECORDED AT LEVEL {level_int}</p>
+                <div style="background:linear-gradient(90deg, rgba(34,197,94,0.1), transparent); border-left:4px solid #22c55e; border-radius:4px; padding:0.8rem; margin-top:1rem;">
+                    <p style="color:#22c55e; font-size:0.75rem; font-weight:900; margin:0; letter-spacing:0.05em;">✓ SENTIMENT ANCHORED: {info['label'].upper()} PHASE ACTIVE</p>
+                    <p style="color:#94a3b8; font-size:0.6rem; margin:2px 0 0;">Outbreak risk models updated with your local intelligence.</p>
                 </div>
                 """, 
                 unsafe_allow_html=True
             )
         else:
             st.markdown(
-                "<p style='color:#64748b; font-size:0.5rem; text-align:center; margin-top:0.8rem; font-weight:700; text-transform:uppercase;'>"
-                "Select the emoji that best represents the current public mood"
+                "<p style='color:#475569; font-size:0.55rem; text-align:center; margin-top:1rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em;'>"
+                "Select current public anxiety level for real-time risk modeling"
                 "</p>", 
                 unsafe_allow_html=True
             )
