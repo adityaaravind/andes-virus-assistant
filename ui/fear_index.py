@@ -37,6 +37,7 @@ def _save_fear_vote(level: int, user_id: str) -> None:
     # FAST REGISTRATION: Update session state immediately
     st.session_state.fear_slider_input = level
     st.session_state.user_voted_today = True
+    st.session_state.just_voted = True
 
     try:
         data = _load_fear_data()
@@ -455,12 +456,12 @@ background: linear-gradient(90deg,{color},{color}44,{color}); animation: {anim};
                 
                 st.markdown('</div>', unsafe_allow_html=True)
 
-        if user_voted_today:
+        if st.session_state.get("just_voted"):
             st.markdown(
                 f"""
                 <div style="background:linear-gradient(90deg, rgba(34,197,94,0.1), transparent); border-left:4px solid #22c55e; border-radius:4px; padding:0.8rem; margin-top:1rem; box-shadow: 0 0 20px rgba(34,197,94,0.1);">
-                    <p style="color:#22c55e; font-size:0.75rem; font-weight:900; margin:0; letter-spacing:0.05em; text-shadow: 0 0 10px rgba(34,197,94,0.4);">✓ SENTIMENT ANCHORED: {info['label'].upper()} PHASE ACTIVE</p>
-                    <p style="color:#94a3b8; font-size:0.6rem; margin:2px 0 0;">Outbreak risk models updated with your local intelligence.</p>
+                    <p style="color:#22c55e; font-size:0.75rem; font-weight:900; margin:0; letter-spacing:0.05em; text-shadow: 0 0 10px rgba(34,197,94,0.4);">✓ COMMUNITY INTELLIGENCE SYNCED: {info['label'].upper()} STATUS CONFIRMED</p>
+                    <p style="color:#94a3b8; font-size:0.6rem; margin:2px 0 0;">Tactical models recalibrated with your regional sentiment input.</p>
                 </div>
                 """, 
                 unsafe_allow_html=True
