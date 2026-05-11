@@ -320,7 +320,15 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
             .tile-label { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 0.55rem; text-transform: uppercase; color: #f8fafc; letter-spacing: 0.05em; }
 
             /* 3. INVISIBLE STREAMLIT BUTTON OVERLAY */
-            div[data-testid="stButton"] { height: 85px !important; margin: 0 !important; }
+            div[data-testid="stButton"] { 
+                height: 85px !important; 
+                margin: 0 !important;
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                z-index: 10 !important;
+            }
             div[data-testid="stButton"] button {
                 background: transparent !important;
                 border: none !important;
@@ -328,10 +336,20 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
                 height: 85px !important;
                 width: 100% !important;
                 color: transparent !important;
-                z-index: 10 !important;
                 border-radius: 10px !important;
+                padding: 0 !important;
             }
-            div[data-testid="stButton"] button:hover { background: rgba(255,255,255,0.03) !important; }
+            
+            /* REACTIVE FEEDBACK */
+            div[data-testid="stButton"] button:hover + .premium-tile {
+                background: rgba(255,255,255,0.08) !important;
+                border-color: rgba(255,255,255,0.3) !important;
+                transform: translateY(-2px);
+            }
+            div[data-testid="stButton"] button:active + .premium-tile {
+                transform: scale(0.95);
+                background: rgba(255,255,255,0.1) !important;
+            }
 
             /* 4. MOBILE OPTIMIZATION (THE FIX) */
             @media (max-width: 600px) {
@@ -364,10 +382,11 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
             info = FEAR_LEVELS[level_id]
             is_active = (level_id == level_int)
             with cols[i]:
-                st.markdown(f'<div class="premium-tile {"active" if is_active else ""} {"disabled" if user_voted_today and not is_active else ""}" style="--t-color: {info["color"]};"><span class="tile-icon">{icons[level_id]}</span><span class="tile-label">{info["label"].upper()}</span></div>', unsafe_allow_html=True)
+                # THE FIX: Put button BEFORE tile in DOM so we can use '+' selector for hover effects
                 if st.button(" ", key=f"v16_btn_{level_id}", disabled=user_voted_today):
                     _save_fear_vote(level_id, user_id)
                     st.rerun()
+                st.markdown(f'<div class="premium-tile {"active" if is_active else ""} {"disabled" if user_voted_today and not is_active else ""}" style="--t-color: {info["color"]};"><span class="tile-icon">{icons[level_id]}</span><span class="tile-label">{info["label"].upper()}</span></div>', unsafe_allow_html=True)
 
         if user_voted_today:
             st.markdown(f"<div style='background:rgba(34,197,94,0.05); border:1px solid #22c55e33; border-radius:10px; padding:0.8rem; margin-top:1rem; text-align:center;'><p style='color:#22c55e; font-size:0.75rem; font-weight:950; margin:0;'>✓ SENTIMENT ANCHORED</p></div>", unsafe_allow_html=True)
