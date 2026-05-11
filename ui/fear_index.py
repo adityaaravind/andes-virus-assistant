@@ -270,58 +270,86 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
         st.markdown(
             """
             <style>
-            /* 1. LAYOUT RESET */
+            /* 1. ANIMATIONS */
+            @keyframes tile-glow {
+                0% { box-shadow: 0 0 5px rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+                50% { box-shadow: 0 0 20px rgba(56,189,248,0.15); border-color: rgba(56,189,248,0.3); }
+                100% { box-shadow: 0 0 5px rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+            }
+            @keyframes text-blink {
+                0%, 100% { opacity: 1; transform: scale(1); }
+                50% { opacity: 0.7; transform: scale(0.98); }
+            }
+            @keyframes pulse-active {
+                0% { box-shadow: 0 0 10px var(--t-color)44; }
+                50% { box-shadow: 0 0 30px var(--t-color)88; }
+                100% { box-shadow: 0 0 10px var(--t-color)44; }
+            }
+
+            /* 2. LAYOUT RESET */
             div[data-testid="stHorizontalBlock"] {
                 display: flex !important;
                 flex-wrap: wrap !important;
                 justify-content: space-between !important;
-                gap: 8px !important;
+                gap: 10px !important;
             }
 
             div[data-testid="column"] {
                 flex: 1 1 18% !important;
                 min-width: 0 !important;
                 position: relative;
+                height: 90px !important;
             }
 
-            /* 2. PREMIUM TACTICAL BUTTONS */
+            /* 3. TACTICAL BUTTONS */
             .premium-tile {
-                background: rgba(15, 23, 42, 0.4);
-                backdrop-filter: blur(8px);
+                background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.8));
+                backdrop-filter: blur(12px);
                 border: 1px solid rgba(255, 255, 255, 0.1);
-                border-radius: 10px;
-                padding: 10px 5px;
+                border-radius: 12px;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-                cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 width: 100%;
-                min-height: 85px;
+                height: 100%;
                 position: absolute;
                 top: 0;
                 left: 0;
                 pointer-events: none;
                 z-index: 1;
+                animation: tile-glow 3s ease-in-out infinite;
             }
 
             .premium-tile.active {
-                background: radial-gradient(circle at center, var(--t-color)33 0%, rgba(15, 23, 42, 0.95) 100%) !important;
+                background: radial-gradient(circle at center, var(--t-color)44 0%, rgba(15, 23, 42, 0.98) 100%) !important;
                 border: 2px solid var(--t-color) !important;
-                box-shadow: 0 0 20px var(--t-color)44;
-                transform: translateY(-2px);
+                animation: pulse-active 2s ease-in-out infinite !important;
+                transform: translateY(-4px);
                 z-index: 2;
             }
 
-            .premium-tile.disabled { opacity: 0.3; filter: grayscale(0.5); }
+            .premium-tile.disabled { opacity: 0.2; filter: grayscale(0.8); animation: none; }
             
-            .tile-icon { font-size: 1.6rem; margin-bottom: 4px; }
-            .tile-label { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 0.55rem; text-transform: uppercase; color: #f8fafc; letter-spacing: 0.05em; }
+            .tile-icon { 
+                font-size: 1.8rem; 
+                margin-bottom: 4px;
+                filter: drop-shadow(0 0 8px rgba(255,255,255,0.3));
+            }
+            .tile-label { 
+                font-family: 'Inter', sans-serif; 
+                font-weight: 900; 
+                font-size: 0.6rem; 
+                text-transform: uppercase; 
+                color: #ffffff; 
+                letter-spacing: 0.1em;
+                text-shadow: 0 0 10px rgba(255,255,255,0.2);
+            }
 
-            /* 3. INVISIBLE STREAMLIT BUTTON OVERLAY */
+            /* 4. INVISIBLE BUTTON OVERLAY */
             div[data-testid="stButton"] { 
-                height: 85px !important; 
+                height: 90px !important; 
                 margin: 0 !important;
                 position: absolute !important;
                 top: 0 !important;
@@ -332,46 +360,46 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
             div[data-testid="stButton"] button {
                 background: transparent !important;
                 border: none !important;
-                box-shadow: none !important;
-                height: 85px !important;
+                height: 90px !important;
                 width: 100% !important;
                 color: transparent !important;
-                border-radius: 10px !important;
-                padding: 0 !important;
+                border-radius: 12px !important;
             }
             
             /* REACTIVE FEEDBACK */
             div[data-testid="stButton"] button:hover + .premium-tile {
-                background: rgba(255,255,255,0.08) !important;
-                border-color: rgba(255,255,255,0.3) !important;
-                transform: translateY(-2px);
+                background: rgba(255,255,255,0.12) !important;
+                border-color: #38bdf8 !important;
+                transform: translateY(-6px);
+                box-shadow: 0 10px 30px rgba(56,189,248,0.2);
             }
             div[data-testid="stButton"] button:active + .premium-tile {
-                transform: scale(0.95);
-                background: rgba(255,255,255,0.1) !important;
+                transform: scale(0.92) translateY(0);
+                background: rgba(56,189,248,0.2) !important;
             }
 
-            /* 4. MOBILE OPTIMIZATION (THE FIX) */
+            /* 5. MOBILE OVERRIDE */
             @media (max-width: 600px) {
-                div[data-testid="stHorizontalBlock"] { flex-direction: column !important; gap: 10px !important; }
-                div[data-testid="column"] { flex: 1 1 100% !important; height: 65px !important; }
+                div[data-testid="stHorizontalBlock"] { flex-direction: column !important; gap: 12px !important; }
+                div[data-testid="column"] { flex: 1 1 100% !important; height: 70px !important; width: 100% !important; }
                 .premium-tile { 
                     flex-direction: row !important; 
-                    height: 65px !important; 
-                    min-height: 65px !important;
+                    height: 70px !important; 
                     justify-content: flex-start !important;
-                    padding: 0 20px !important;
-                    gap: 15px;
+                    padding: 0 25px !important;
+                    gap: 20px;
+                    animation: tile-glow 2s ease-in-out infinite;
                 }
-                div[data-testid="stButton"] { height: 65px !important; }
-                div[data-testid="stButton"] button { height: 65px !important; }
-                .tile-icon { font-size: 1.8rem; margin: 0; }
-                .tile-label { font-size: 0.8rem; letter-spacing: 0.15em; font-weight: 900; }
+                div[data-testid="stButton"] { height: 70px !important; }
+                div[data-testid="stButton"] button { height: 70px !important; }
+                .tile-icon { font-size: 2rem; margin: 0; }
+                .tile-label { font-size: 0.9rem; letter-spacing: 0.2em; }
+                .premium-tile.active { transform: scale(1.02) !important; }
             }
             </style>
-            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:0.5rem;">
-                <p style='color:#94a3b8; font-size:0.7rem; font-weight:800; margin:0; letter-spacing:0.1em; text-transform:uppercase;'>📡 SENTIMENT INDEX</p>
-                <p style='color:#38bdf8; font-size:0.55rem; font-weight:900; margin:0; letter-spacing:0.05em; animation: blinker 2s linear infinite;'>[ ACTION REQUIRED: SUBMIT CURRENT STATUS ]</p>
+            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:1.5rem; border-bottom:2px solid rgba(56,189,248,0.2); padding-bottom:0.8rem;">
+                <p style='color:#38bdf8; font-size:0.75rem; font-weight:900; margin:0; letter-spacing:0.15em; text-transform:uppercase; text-shadow:0 0 10px rgba(56,189,248,0.5);'>📡 SENTIMENT INPUT</p>
+                <p style='color:#fbbf24; font-size:0.6rem; font-weight:950; margin:0; letter-spacing:0.08em; animation: text-blink 1.5s ease-in-out infinite; text-shadow:0 0 12px rgba(251,191,36,0.6);'>● ACTION REQUIRED: ANALYZE & SUBMIT</p>
             </div>
             """,
             unsafe_allow_html=True
