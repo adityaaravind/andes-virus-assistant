@@ -87,7 +87,7 @@ def render_map_panel() -> None:
     events = _get_vessel_events()
 
     st.markdown(
-        f\"\"\"
+        f"""
         <div class="mission-header" style='border-left: 3px solid #4ade80; padding-left:15px; margin-bottom:0.8rem; display:flex; justify-content:space-between; align-items:center;'>
             <div>
                 <h2 style='margin:0; font-size:1.1rem; letter-spacing:0.12em; color:#ffffff;'>GLOBAL HEALTH MONITOR</h2>
@@ -97,7 +97,7 @@ def render_map_panel() -> None:
                 <span style="color:#4ade80; font-size:9px; font-weight:900;">VERIFIED HISTORICAL SYNC</span>
             </div>
         </div>
-        \"\"\", unsafe_allow_html=True
+        """, unsafe_allow_html=True
     )
 
     col_map, col_vessel = st.columns([2.2, 1])
@@ -106,14 +106,14 @@ def render_map_panel() -> None:
         events_html = ""
         for ev in events:
             color = "#4ade80" if ev['hours_ago'] <= 48 else "#fde047"
-            events_html += f\"\"\"
-                <div style="border-left: 3px solid {{color}}; padding-left: 12px; margin-bottom: 12px; animation: slideIn 0.4s ease-out;">
-                    <div style="color: {{color}}; font-size: 8.5px; font-weight: 900; letter-spacing: 0.5px;">{{ev['date']}} @ {{ev['time']}}</div>
-                    <div style="color: #ffffff; font-size: 10.5px; line-height: 1.2; font-weight: 600; margin-top:2px;">{{ev['event']}}</div>
+            events_html += f"""
+                <div style="border-left: 3px solid {color}; padding-left: 12px; margin-bottom: 12px; animation: slideIn 0.4s ease-out;">
+                    <div style="color: {color}; font-size: 8.5px; font-weight: 900; letter-spacing: 0.5px;">{ev['date']} @ {ev['time']}</div>
+                    <div style="color: #ffffff; font-size: 10.5px; line-height: 1.2; font-weight: 600; margin-top:2px;">{ev['event']}</div>
                 </div>
-            \"\"\"
+            """
 
-        vessel_card_html = f\"\"\"
+        vessel_card_html = f"""
         <style>
             @keyframes slideIn {{ from {{ opacity: 0; transform: translateX(-10px); }} to {{ opacity: 1; transform: translateX(0); }} }}
             @keyframes pulse {{ 0% {{ opacity: 1; }} 50% {{ opacity: 0.4; }} 100% {{ opacity: 1; }} }}
@@ -126,18 +126,18 @@ def render_map_panel() -> None:
                 <div style="background:rgba(74,222,128,0.1); padding:1px 6px; border-radius:3px; border:1px solid #4ade8033; color:#4ade80; font-size:7px; font-weight:900; animation: pulse 2s infinite;">REAL-TIME</div>
             </div>
             <div style="margin: 10px 0;">
-                <h2 style="margin:0; font-size:1.6rem; font-weight:900; line-height: 1; color:#ffffff;">{{state.get('ship_status', 'Quarantined').upper()}}</h2>
+                <h2 style="margin:0; font-size:1.6rem; font-weight:900; line-height: 1; color:#ffffff;">{state.get('ship_status', 'Quarantined').upper()}</h2>
                 <p style="color:#4ade80; font-size:0.65rem; font-weight:800; margin-top:4px; text-transform:uppercase;">MV HONDIUS // IMO 9524449</p>
             </div>
             
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:12px;">
                 <div style="background:rgba(255,255,255,0.03); border-radius:6px; padding:6px; border:1px solid rgba(255,255,255,0.05);">
                     <p style="color:#94a3b8; font-size:7px; font-weight:800; margin:0;">CURRENT SPEED</p>
-                    <p style="color:#ffffff; font-size:11px; font-weight:900; margin:0;">{{events[0]['speed']}}</p>
+                    <p style="color:#ffffff; font-size:11px; font-weight:900; margin:0;">{events[0]['speed']}</p>
                 </div>
                 <div style="background:rgba(255,255,255,0.03); border-radius:6px; padding:6px; border:1px solid rgba(255,255,255,0.05);">
                     <p style="color:#94a3b8; font-size:7px; font-weight:800; margin:0;">UPLINK STRENGTH</p>
-                    <p style="color:#ffffff; font-size:11px; font-weight:900; margin:0;">{{events[0]['uplink']}}</p>
+                    <p style="color:#ffffff; font-size:11px; font-weight:900; margin:0;">{events[0]['uplink']}</p>
                 </div>
             </div>
 
@@ -146,14 +146,14 @@ def render_map_panel() -> None:
                 LIVE SIGNAL STREAM
             </div>
             <div class="scroll-container" style="flex: 1; overflow-y: auto; padding-right: 5px;">
-                {{events_html}}
+                {events_html}
             </div>
         </div>
-        \"\"\"
+        """
         components.html(vessel_card_html, height=450)
 
     with col_map:
-        map_template = \"\"\"
+        map_template = """
         <!DOCTYPE html>
         <html>
         <head>
@@ -176,7 +176,7 @@ def render_map_panel() -> None:
             <div id="map"></div>
             <script>
                 const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([12, -25], 2.8);
-                L.tileLayer('https://{{s}}.basemaps.cartocdn.com/dark_all/{{z}}/{{x}}/{{y}}{{r}}.png', { maxZoom: 19 }).addTo(map);
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
                 const hotspots = __HOTSPOTS__;
                 const intensity = __INTENSITY__;
                 const shipPos = [14.93, -23.51];
@@ -237,7 +237,7 @@ def render_map_panel() -> None:
             </script>
         </body>
         </html>
-        \"\"\"
+        """
         map_html = map_template.replace("__HOTSPOTS__", json.dumps(hotspots))
         map_html = map_html.replace("__INTENSITY__", json.dumps(intensity))
         map_html = map_html.replace("__DAY__", str(current_day))
