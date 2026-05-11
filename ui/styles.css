@@ -401,32 +401,16 @@ div[data-testid="stButton"] button[key*="vote_dist_"] div[data-testid="stMarkdow
 /* ── Mobile Experience Overrides ── */
 @media (max-width: 768px) {
   /* Roadmap & Columns: force stack and wrapping by default */
-  div[data-testid="stAppViewContainer"] div[data-testid="stHorizontalBlock"] {
+  div[data-testid="stAppViewContainer"] div[data-testid="stHorizontalBlock"]:not(.no-stack) {
       flex-direction: column !important;
       gap: 1rem !important;
       display: flex !important;
   }
   
-  /* EXEMPTION: Only stack if it's NOT a custom grid component */
-  div[data-testid="stAppViewContainer"] div[data-testid="stHorizontalBlock"]:has(.stat-card),
-  div[data-testid="stAppViewContainer"] div[data-testid="stHorizontalBlock"]:has(button[key*="v23_btn_"]) {
-      flex-direction: row !important;
-      flex-wrap: wrap !important;
-      display: flex !important;
-  }
-
-  /* Global child width: default to 100% on mobile */
-  div[data-testid="stAppViewContainer"] div[data-testid="stHorizontalBlock"] > div {
+  /* Global child width: default to 100% on mobile unless in a no-stack container */
+  div[data-testid="stAppViewContainer"] div[data-testid="stHorizontalBlock"]:not(.no-stack) > div {
       width: 100% !important;
       max-width: 100% !important;
-  }
-
-  /* EXEMPTION: Child width for grid components */
-  div[data-testid="stAppViewContainer"] div[data-testid="stHorizontalBlock"]:has(.stat-card) > div,
-  div[data-testid="stAppViewContainer"] div[data-testid="stHorizontalBlock"]:has(button[key*="v23_btn_"]) > div {
-      width: auto !important;
-      max-width: none !important;
-      flex: 1 1 auto !important;
   }
 
   .main .block-container { 

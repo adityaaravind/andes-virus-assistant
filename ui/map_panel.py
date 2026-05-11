@@ -112,13 +112,18 @@ def render_map_panel() -> None:
             art['color'] = tier_cfg['border']
             
             news_items_html += f"""
-            <div style="background: rgba(15, 23, 42, 0.4); border: 1px solid {art.get('color', '#a78bfa')}44; padding: 12px; border-radius: 12px; border-left: 4px solid {art.get('color', '#a78bfa')}; margin-bottom: 12px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.3);" onclick="window.open('{art['url']}', '_blank')">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                    <span style="color: {art.get('color', '#a78bfa')}; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px;">📡 {art['source']} SIGNAL</span>
-                    <span style="color: #64748b; font-size: 7px; font-weight: 700; font-family:monospace;">{art.get('date', 'LIVE')}</span>
-                </div>
-                <div style="font-size: 11px; color: #f1f5f9; line-height: 1.5; font-weight: 500; display: block; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px;">
-                    {art.get('summary', art['title'])[:160]}...
+            <div style="background: rgba(15, 23, 42, 0.4); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 12px 15px; cursor: pointer; transition: all 0.2s ease;" onclick="window.open('{art['url']}', '_blank')">
+                <div style="display:flex; align-items:flex-start; gap:10px;">
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background: {art.get('color', '#a78bfa')}; box-shadow: 0 0 10px {art.get('color', '#a78bfa')}; margin-top: 4px; flex-shrink: 0;"></div>
+                    <div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                            <span style="color: {art.get('color', '#a78bfa')}; font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px;">{art['source']} INTEL</span>
+                            <span style="color: #475569; font-size: 7px; font-family:monospace;">{art.get('date', 'LIVE')}</span>
+                        </div>
+                        <div style="font-size: 11px; color: #cbd5e1; line-height: 1.5; font-weight: 500;">
+                            • {art.get('summary', art['title'])[:180]}...
+                        </div>
+                    </div>
                 </div>
             </div>
             """
