@@ -122,7 +122,7 @@ def render_faq_panel(chain: Any) -> None:
     )
 
     # FAQ Grid Styles
-    st.markdown("""<style>
+    st.html("""<style>
 .faq-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -208,7 +208,7 @@ details:not([open]) summary::before { content: '▶'; font-size: 8px; }
     margin-right: 8px;
     opacity: 0.9;
 }
-</style>""", unsafe_allow_html=True)
+</style>""")
 
     CAT_ICONS = {
         "Biology":      "🧬", "Outbreak":     "🚨", "Transmission": "☣️",
@@ -252,4 +252,4 @@ details:not([open]) summary::before { content: '▶'; font-size: 8px; }
 </div>"""
     
     faq_html += '</div>'
-    st.markdown(faq_html, unsafe_allow_html=True)
+    st.html(faq_html)
