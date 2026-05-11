@@ -449,7 +449,7 @@ background: linear-gradient(90deg,{color},{color}44,{color}); animation: {anim};
                 # Use a combined label with emoji and text
                 btn_label = f"{icons[level_id]}\n{info['label'].upper()}"
                 
-                if st.button(btn_label, key=f"v23_btn_{level_id}", disabled=user_voted_today, use_container_width=True):
+                if st.button(btn_label, key=f"v23_btn_{level_id}", use_container_width=True):
                     _save_fear_vote(level_id, user_id)
                     st.rerun()
                 

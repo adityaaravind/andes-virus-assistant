@@ -114,18 +114,45 @@ def get_outbreak_stats() -> dict[str, Any]:
 
 def render_stats_panel() -> None:
     stats = get_outbreak_stats()
+    
+    # ── 1. HEADER ──
     st.markdown(
-        f'<div style="display:flex; align-items:center; gap:8px; margin-bottom:1rem; background:rgba(74,222,128,0.05); padding:4px 12px; border-radius:100px; width:fit-content; border:1px solid rgba(74,222,128,0.1);">'
+        f'<div style="display:flex; align-items:center; gap:8px; margin-bottom:1.2rem; background:rgba(74,222,128,0.05); padding:4px 12px; border-radius:100px; width:fit-content; border:1px solid rgba(74,222,128,0.1);">'
         f'<span class="live-dot" style="width:8px; height:8px; background:#4ade80; box-shadow: 0 0 8px #4ade80;"></span>'
         f'<span style="color:#4ade80; font-size:0.65rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em;">Real-time Health Data Sync Active</span>'
         f'</div>',
         unsafe_allow_html=True
     )
-    
-    col1, col2, col3, col4 = st.columns(4)
-    with col1: st.metric("Confirmed", stats["confirmed_cases"])
-    with col2: st.metric("Suspected", stats["suspected_cases"])
-    with col3: st.metric("Fatalities", stats["deaths"])
-    with col4: st.metric("Nationalities", stats["nationalities"])
-    
-    st.divider()
+
+    # ── 2. GLOWING STAT CARDS (Re-implemented) ──
+    def get_glow(val: int, type: str) -> str:
+        if type == "cases": return "glow-amber" if val < 20 else "glow-red"
+        if type == "deaths": return "glow-red" if val > 0 else "glow-green"
+        return "glow-green"
+
+    cards = [
+        (str(stats["confirmed_cases"]), "Confirmed Cases", get_glow(stats["confirmed_cases"], "cases")),
+        (str(stats["suspected_cases"]), "Suspected Cases", "glow-amber"),
+        (str(stats["deaths"]), "Total Fatalities", get_glow(stats["deaths"], "deaths")),
+        (str(stats["nationalities"]), "Nationalities", "glow-green"),
+    ]
+
+    cards_html = ""
+    for val, label, glow in cards:
+        cards_html += f"""
+        <div class="stat-card" style="flex:1; min-width:150px; background:rgba(15, 23, 42, 0.6); border:1px solid rgba(255,255,255,0.05); padding:1rem; border-radius:12px; backdrop-filter:blur(10px); position:relative; overflow:hidden;">
+            <div style="position:absolute; top:0; left:0; width:100%; height:2px; background:var(--{glow}-color, #4ade80); opacity:0.6;"></div>
+            <span class="stat-value {glow}" style="display:block; font-size:2rem; font-weight:900; color:white; line-height:1;">{val}</span>
+            <span class="stat-label" style="display:block; font-size:0.6rem; font-weight:800; color:#94a3b8; margin-top:8px; text-transform:uppercase; letter-spacing:0.05em;">{label}</span>
+        </div>
+        """
+
+    st.markdown(
+        f'<div style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem;">{cards_html}</div>',
+        unsafe_allow_html=True
+    )
+
+    # SHIP TELEMETRY BAR
+    from ui.ship_telemetry import get_ship_bar_html
+    ship_status = stats.get("ship_status", "In Transit")
+    st.markdown(get_ship_bar_html(ship_status), unsafe_allow_html=True)
