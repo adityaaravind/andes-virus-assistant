@@ -225,6 +225,7 @@ def render_map_panel() -> None:
         </html>
         """
         map_html = map_template.replace("__HOTSPOTS__", json.dumps(hotspots))
-        map_html = map_template.replace("__INTENSITY__", json.dumps(intensity))
+        map_html = map_html.replace("__INTENSITY__", json.dumps(intensity))
         map_html = map_html.replace("__DAY__", str(current_day))
         components.html(map_html, height=450)
+
