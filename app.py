@@ -198,8 +198,13 @@ def _run_ingestion_job() -> None:
         sys.path.insert(0, str(Path(__file__).parent))
         from scripts.ingest_all import run_ingestion
         run_ingestion()
-        
+
+        # PERSIST SUCCESS TIMESTAMP
+        from alerts.persistent_kv import kv_set
+        kv_set("last_ingestion_time", datetime.utcnow().isoformat())
+
         # Check alert thresholds after every ingestion
+
         from alerts.alert_manager import check_and_fire
         from ui.stats_panel import get_outbreak_stats
         from ui.map_panel import NATIONALITIES_DATA
@@ -230,7 +235,8 @@ def _start_scheduler() -> None:
             return
         try:
             from apscheduler.schedulers.background import BackgroundScheduler
-            interval_hours = int(os.getenv("NEWS_REFRESH_INTERVAL_HOURS", "2"))
+            # Force 1 hour interval as requested by user
+            interval_hours = int(os.getenv("NEWS_REFRESH_INTERVAL_HOURS", "1"))
             scheduler = BackgroundScheduler(daemon=True)
             scheduler.add_job(
                 _run_ingestion_job,
@@ -415,22 +421,40 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
         render_alert_settings()
 
         st.divider()
-        st.markdown("#### Vector Store")
+        st.markdown("#### System Health")
         try:
+            from alerts.persistent_kv import kv_get
+            last_ingest = kv_get("last_ingestion_time")
+            if last_ingest:
+                dt = datetime.fromisoformat(last_ingest)
+                st.caption(f"🕒 Last Data Refresh: {dt.strftime('%b %d, %H:%M')} UTC")
+            else:
+                st.caption("🕒 Last Data Refresh: Pending...")
+            
             stats = get_stats()
             st.metric("Chunks indexed", stats.get("total_chunks", 0))
+            
+            backend = stats.get("backend", "local").upper()
             status = stats.get("status", "unknown")
             color = "#22c55e" if status == "ready" else "#ef4444"
+            
             st.markdown(
-                f"<span style='color:{color};font-size:0.8rem;'>● {status.upper()}</span>",
+                f"<div style='display:flex; justify-content:space-between; align-items:center;'>"
+                f"<span style='color:#64748b; font-size:0.75rem; font-weight:700;'>STORAGE</span>"
+                f"<span style='background:rgba(0,180,216,0.1); color:#00b4d8; padding:2px 8px; border-radius:4px; font-size:0.6rem; font-weight:900;'>{backend}</span>"
+                f"</div>",
+                unsafe_allow_html=True
+            )
+            st.markdown(
+                f"<div style='margin-top:4px;'><span style='color:{color}; font-size:0.7rem;'>● STATUS: {status.upper()}</span></div>",
                 unsafe_allow_html=True,
             )
         except Exception:
             st.markdown("<span style='color:#ef4444;'>● DB unreachable</span>", unsafe_allow_html=True)
 
         st.markdown(
-            f"<p style='color:#64748b;font-size:0.72rem;margin-top:0.4rem;'>"
-            f"🔄 Full ingest every 1h · News every 5 min</p>",
+            f"<p style='color:#64748b;font-size:0.72rem;margin-top:0.6rem;'>"
+            f"🔄 Automated Ingest: Hourly</p>",
             unsafe_allow_html=True,
         )
 
@@ -552,6 +576,7 @@ def main() -> None:
         from ui.stats_panel import render_timeline_chart
         from ui.map_panel import render_map_panel
         from ui.journalist_tools import render_journalist_tools
+        from ui.war_room import render_war_room_panel
 
         # ── PANDEMIC RISK & FEAR INDEX — equal size cards ────────────────────────
         st.markdown("<div id='risk_fear'></div>", unsafe_allow_html=True)
@@ -562,9 +587,13 @@ def main() -> None:
             render_fear_index()
         st.divider()
 
-        # ── Live news ────────────────────────────────────────────────────────────
-        st.markdown("<div id='news'></div>", unsafe_allow_html=True)
-        render_news_ticker()
+        # ── War Room & News ──────────────────────────────────────────────────────
+        st.markdown("<div id='war_room_news'></div>", unsafe_allow_html=True)
+        col_war, col_news = st.columns([2, 1])
+        with col_war:
+            render_war_room_panel()
+        with col_news:
+            render_news_ticker()
         st.divider()
 
         # ── Stats + map ──────────────────────────────────────────────────────────
