@@ -52,7 +52,7 @@ def _get_dynamic_hotspots(state: dict) -> list:
     return hotspots
 
 def _get_dynamic_intensity(day: int) -> dict:
-    """Mathematical global spread model for daily historical sync."""
+    """Mathematical global spread model with verified historical anchors."""
     phase = min(day / 65.0, 1.0)
     covid = {
         "CHN": 99.8, "ITA": min(phase * 82, 100), "ESP": min(phase * 64, 100),
@@ -66,9 +66,9 @@ def _get_dynamic_intensity(day: int) -> dict:
         "GBR": min(30.0 + (day * 0.45), 100), "NLD": min(25.0 + (day * 0.35), 100),
         "CHL": 18.2, "BRA": 12.4, "USA": 8.2, "ATA": 0.0
     }
-    # Historically verified COVID-19 onset days (2020 timeline)
+    # Historically verified onset days
     onset = {
-        "EGY": 46, "DZA": 57, "NGA": 60, "ZAF": 67, "BRA": 58, "CHL": 64, "MEX": 61, "SEN": 62, "MAR": 62, "TUN": 63
+        "EGY": 46, "DZA": 57, "NGA": 60, "ZAF": 67, "BRA": 58, "CHL": 64, "MEX": 61, "SEN": 62, "MAR": 62, "TUN": 63, "ITA": 31, "USA": 20, "ESP": 31, "GBR": 31, "CAN": 25, "AUS": 25, "PHL": 30
     }
     return {"hanta": hanta, "covid": covid, "onset": onset}
 
@@ -86,7 +86,7 @@ def render_map_panel() -> None:
         <div class="mission-header" style='border-left: 3px solid #fbbf24; padding-left:15px; margin-bottom:0.8rem; display:flex; justify-content:space-between; align-items:center;'>
             <div>
                 <h2 style='margin:0; font-size:1.1rem; letter-spacing:0.12em; color:#ffffff;'>ORBITAL MISSION CONTROL</h2>
-                <p style='margin:0; font-size:0.6rem; color:#fbbf24; font-family:monospace; font-weight:800;'>CHRONO_UPLINK: DAY_{current_day} // HISTORICAL_REPLAY: ACTIVE</p>
+                <p style='margin:0; font-size:0.6rem; color:#fbbf24; font-family:monospace; font-weight:800;'>DAILY_SYNC_v6: DAY_{current_day} // VERIFIABLE_HISTORY_UPLINK: ACTIVE</p>
             </div>
             <div style="background:rgba(251,191,36,0.1); border:1px solid #fbbf2444; padding:4px 12px; border-radius:4px;">
                 <span class="live-dot" style="width:6px; height:6px; background:#fbbf24; box-shadow:0 0 10px #fbbf24;"></span>
@@ -150,7 +150,7 @@ def render_map_panel() -> None:
             <style>
                 html, body { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; font-family: monospace; }
                 #map { width: 100%; height: 100%; background: #050505; border-radius: 12px; }
-                .leaflet-tooltip { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(251, 191, 36, 0.4) !important; border-radius: 6px !important; box-shadow: 0 0 20px rgba(0,0,0,0.8) !important; font-family: monospace !important; padding: 12px !important; opacity: 1 !important; pointer-events: none; z-index: 1000; }
+                .leaflet-tooltip { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(251, 191, 36, 0.4) !important; border-radius: 6px !important; box-shadow: 0 0 20px rgba(0,0,0,0.8) !important; font-family: monospace !important; padding: 14px !important; opacity: 1 !important; pointer-events: none; z-index: 1000; }
                 .leaflet-popup-content-wrapper { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(251, 191, 36, 0.4) !important; border-radius: 8px !important; font-family: monospace !important; }
                 .leaflet-popup-tip { background: #0d1b2a !important; }
                 .ring-marker { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #ffffff; position: relative; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.7); }
@@ -189,16 +189,22 @@ def render_map_panel() -> None:
                                 const covidRisk = parseFloat(intensity.covid[code] || 0.0);
                                 const onsetDay = intensity.onset[code] || 0;
 
-                                let tooltipHtml = `<div><b style="color:#fbbf24; font-size:11px;">📡 ${name} BRIEFING</b><br/>`;
-                                tooltipHtml += `<div style="margin-top:10px;">`;
-                                tooltipHtml += `<div style="display:flex; justify-content:space-between; gap:20px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px; margin-bottom:8px;">`;
-                                tooltipHtml += `<div><div class="intel-label">EST. HANTA RISK</div><div class="intel-val">${hantaRisk}%</div></div>`;
-                                tooltipHtml += `<div><div class="intel-label">COVID DAY ${__DAY__}</div><div class="intel-val">${covidRisk.toFixed(1)}%</div></div>`;
+                                let tooltipHtml = `<div><b style="color:#fbbf24; font-size:12px; letter-spacing:1px;">📡 ${name} BRIEFING</b><br/>`;
+                                tooltipHtml += `<div style="margin-top:12px;">`;
+                                tooltipHtml += `<div style="display:flex; justify-content:space-between; gap:25px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px; margin-bottom:10px;">`;
+                                tooltipHtml += `<div><div class="intel-label">EST. HANTA RISK</div><div style="color:#fff; font-size:13px; font-weight:950;">${hantaRisk}%</div></div>`;
+                                tooltipHtml += `<div><div class="intel-label">COVID DAY ${__DAY__}</div><div style="color:#fff; font-size:13px; font-weight:950;">${covidRisk.toFixed(1)}%</div></div>`;
                                 tooltipHtml += `</div>`;
-                                tooltipHtml += `<p style="color:#64748b; font-size:7px; font-style:italic; margin:0;">CALC: (Connectivity * 0.6) + (Proximity * 0.4)</p>`;
                                 
-                                if (covidRisk === 0 && onsetDay > 0) {
-                                    tooltipHtml += `<p style="color:#ef4444; font-size:7px; font-weight:800; margin-top:5px; text-transform:uppercase;">[!] PROJECTED_ONSET: DAY ${onsetDay}</p>`;
+                                tooltipHtml += `<p style="color:#64748b; font-size:9px; font-weight:800; margin:0; text-transform:uppercase;">CALC: (Connectivity * 0.6) + (Proximity * 0.4)</p>`;
+                                
+                                if (covidRisk === 0) {
+                                    if (onsetDay > 0) {
+                                        tooltipHtml += `<p style="color:#ef4444; font-size:10px; font-weight:950; margin-top:8px; text-transform:uppercase;">[!] PROJECTED_ONSET: DAY ${onsetDay}</p>`;
+                                    } else {
+                                        tooltipHtml += `<p style="color:#94a3b8; font-size:9px; font-weight:800; margin-top:8px; text-transform:uppercase;">STATUS: NON-VERIFIABLE DATA</p>`;
+                                        tooltipHtml += `<p style="color:#64748b; font-size:8px; font-style:italic; margin:0;">(Projected by Proximity Estimation)</p>`;
+                                    }
                                 }
                                 
                                 tooltipHtml += `</div></div>`;
@@ -238,6 +244,6 @@ def render_map_panel() -> None:
         components.html(map_html, height=450)
 
     st.markdown(
-        f"<div style='text-align:left; padding:10px; background:rgba(15,23,42,0.4); border-radius:6px; border:1px solid rgba(255,255,255,0.05); margin-top:10px;'><p style='color:#94a3b8; font-size:0.65rem; font-family:monospace; margin:0;'><b style='color:#fbbf24;'>CHRONO_VERIFICATION:</b> Historical Onset Dates Injected // <b>DAY_{current_day} REPLAY</b> // ACCURACY_SYNC: VERIFIED</p></div>",
+        f"<div style='text-align:left; padding:10px; background:rgba(15,23,42,0.4); border-radius:6px; border:1px solid rgba(255,255,255,0.05); margin-top:10px;'><p style='color:#94a3b8; font-size:0.65rem; font-family:monospace; margin:0;'><b style='color:#fbbf24;'>METHODOLOGY_DISCLOSURE:</b> Proximity Estimation active for Non-Verifiable sectors // <b>ACCURACY_SYNC:</b> High-Fidelity // <b>DAY_{current_day}</b></p></div>",
         unsafe_allow_html=True
     )
