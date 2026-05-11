@@ -565,13 +565,19 @@ def main() -> None:
         from ui.stats_panel import render_stats_panel
         render_stats_panel()
 
-        # ── 2. CHANCE OF SPREAD MONITOR (DETECTION BASELINE) ────────────────────────
+        # ── 2. RISK & FEAR INDEX (SENTIMENT MONITOR) ─────────────────────────────
+        st.markdown("<div id='fear'></div>", unsafe_allow_html=True)
+        from ui.fear_index import render_fear_index
+        render_fear_index()
+        st.divider()
+
+        # ── 3. CHANCE OF SPREAD MONITOR (DETECTION BASELINE) ────────────────────────
         st.markdown("<div id='spread_monitor'></div>", unsafe_allow_html=True)
         from ui.pandemic_risk import render_pandemic_risk_panel
         render_pandemic_risk_panel()
         st.divider()
 
-        # ── 3. Global News Ticker ────────────────────────────────────────────────────
+        # ── 4. Global News Ticker ────────────────────────────────────────────────────
         st.markdown("<div id='news'></div>", unsafe_allow_html=True)
         from ui.news_ticker import render_news_ticker
         render_news_ticker()
@@ -583,23 +589,17 @@ def main() -> None:
 
         chain = _init_rag_chain()
 
-
-        from ui.faq_panel import render_faq_panel
-        render_faq_panel(chain)
-        st.divider()
-
-        # ── 3. RISK & FEAR INDEX (SENTIMENT MONITOR) ─────────────────────────────
-        st.markdown("<div id='fear'></div>", unsafe_allow_html=True)
-        from ui.fear_index import render_fear_index
-        render_fear_index()
-        st.divider()
-
-        # ── 4. Global Health Monitor (Map) ───────────────────────────────────────
+        # ── 5. Global Health Monitor (Map) ───────────────────────────────────────
         st.markdown("<div id='map'></div>", unsafe_allow_html=True)
         from ui.map_panel import render_map_panel
         from ui.stats_panel import render_timeline_chart
         render_map_panel()
         render_timeline_chart()
+        st.divider()
+
+        # ── 6. FREQUENTLY ASKED QUESTIONS (TACTICAL KNOWLEDGE) ───────────────────
+        from ui.faq_panel import render_faq_panel
+        render_faq_panel(chain)
         st.divider()
 
         def update_sources(cards: list[dict[str, Any]]) -> None:
