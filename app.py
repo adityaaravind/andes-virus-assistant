@@ -587,14 +587,11 @@ def main() -> None:
             render_fear_index()
         st.divider()
 
-        # ── War Room & News ──────────────────────────────────────────────────────
-        st.markdown("<div id='war_room_news'></div>", unsafe_allow_html=True)
-        col_war, col_news = st.columns([2, 1])
-        with col_war:
-            render_war_room_panel()
-        with col_news:
-            render_news_ticker()
+        # ── Global News Ticker ────────────────────────────────────────────────────
+        st.markdown("<div id='news'></div>", unsafe_allow_html=True)
+        render_news_ticker()
         st.divider()
+
 
         # ── Stats + map ──────────────────────────────────────────────────────────
         st.markdown("<div id='map'></div>", unsafe_allow_html=True)
