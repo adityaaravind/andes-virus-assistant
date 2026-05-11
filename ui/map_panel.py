@@ -107,16 +107,22 @@ def render_map_panel() -> None:
         news_items_html = ""
         for art in headlines:
             news_items_html += f"""
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 8px; border-radius: 6px; border-left: 2px solid #00f5ff; margin-bottom: 8px; cursor: pointer;" onclick="window.open('{art['url']}', '_blank')">
-                <span style="color: #00f5ff; font-size: 8px; font-weight: 900; text-transform: uppercase;">{art['source']}</span>
-                <span style="font-size: 10px; color: #f1f5f9; line-height: 1.2; font-weight: 600; display: block;">{art['title'][:70]}...</span>
+            <div style="background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(167, 139, 250, 0.2); padding: 10px; border-radius: 8px; border-left: 3px solid #a78bfa; margin-bottom: 10px; cursor: pointer; transition: all 0.2s ease;" onclick="window.open('{art['url']}', '_blank')">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <span style="color: #a78bfa; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">{art['source']}</span>
+                    <span style="color: #64748b; font-size: 7px; font-weight: 700;">{art.get('date', 'LIVE')}</span>
+                </div>
+                <div style="font-size: 11px; color: #f1f5f9; line-height: 1.4; font-weight: 500; display: block;">
+                    {art.get('summary', art['title'])[:140]}...
+                </div>
+                <div style="margin-top:5px; color:#a78bfa; font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:0.05em;">Click to view full intelligence report →</div>
             </div>
             """
             
         st.markdown(
             f"""
-            <div class="tactical-card mobile-dynamic-height" style="border-right: 4px solid #00f5ff; background: rgba(13, 27, 42, 0.6); padding: 15px; border-radius: 10px; border: 1px solid rgba(0,245,255,0.2); height: 350px; display: flex; flex-direction: column;">
-                <div style="color: #64748b; font-size: 10px; font-weight: 900; margin-bottom: 8px; letter-spacing: 2px;">📡 GLOBAL OSINT SIGNALS</div>
+            <div class="tactical-card mobile-dynamic-height" style="border-right: 4px solid #a78bfa; background: rgba(13, 27, 42, 0.6); padding: 15px; border-radius: 10px; border: 1px solid rgba(167,139,250,0.2); height: 350px; display: flex; flex-direction: column;">
+                <div style="color: #a78bfa; font-size: 10px; font-weight: 900; margin-bottom: 8px; letter-spacing: 2px;">📡 GLOBAL OSINT SIGNALS</div>
                 <div style="flex: 1; overflow-y: auto; padding-right: 5px;">
                     {news_items_html}
                 </div>
@@ -222,10 +228,11 @@ def render_map_panel() -> None:
         st.markdown(
             """
             <div id="map-container" style="position: relative;">
-                <div id="map-overlay" class="map-interact-overlay" onclick="this.style.display='none'; document.getElementById('map-iframe').style.pointerEvents='auto';">
+                <div id="map-overlay" class="map-interact-overlay" 
+                     onclick="document.getElementById('map-overlay').style.setProperty('display', 'none', 'important'); document.getElementById('map-iframe-wrapper').style.setProperty('pointer-events', 'auto', 'important');">
                     <span>📍 Tap to explore map</span>
                 </div>
-                <div id="map-iframe" style="pointer-events: none;">
+                <div id="map-iframe-wrapper" style="pointer-events: none;">
             """, unsafe_allow_html=True
         )
         
@@ -237,12 +244,14 @@ def render_map_panel() -> None:
             """
             <script>
                 // Hide overlay by default on desktop
-                if (window.innerWidth > 768) {
-                    const overlay = document.getElementById('map-overlay');
-                    if (overlay) overlay.style.display = 'none';
-                    const iframe = document.getElementById('map-iframe');
-                    if (iframe) iframe.style.pointerEvents = 'auto';
-                }
+                setTimeout(() => {
+                    if (window.innerWidth > 768) {
+                        const overlay = document.getElementById('map-overlay');
+                        if (overlay) overlay.style.display = 'none';
+                        const wrapper = document.getElementById('map-iframe-wrapper');
+                        if (wrapper) wrapper.style.pointerEvents = 'auto';
+                    }
+                }, 100);
             </script>
             """, unsafe_allow_html=True
         )

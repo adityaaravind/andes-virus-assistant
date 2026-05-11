@@ -401,15 +401,28 @@ div[data-testid="stButton"] button[key*="vote_dist_"] div[data-testid="stMarkdow
 /* ── Mobile Experience Overrides ── */
 @media (max-width: 768px) {
   /* Roadmap & Columns: force stack and wrapping by default, EXEMPT specific grids */
-  div[data-testid="stHorizontalBlock"]:not(:has(button[key*="v23_btn_"])) {
+  [data-testid="stAppViewContainer"] div[data-testid="stHorizontalBlock"] {
       flex-direction: column !important;
       gap: 1rem !important;
       display: flex !important;
   }
   
-  div[data-testid="stHorizontalBlock"] > div {
+  /* OVERRIDE for Fear Index and Stat Cards to maintain row layout */
+  [data-testid="stAppViewContainer"] div[data-testid="stHorizontalBlock"]:has(button[key*="v23_btn_"]),
+  [data-testid="stAppViewContainer"] div[data-testid="stHorizontalBlock"]:has(.stat-card) {
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
+  }
+
+  [data-testid="stAppViewContainer"] div[data-testid="stHorizontalBlock"] > div {
       width: 100% !important;
       max-width: 100% !important;
+  }
+
+  [data-testid="stAppViewContainer"] div[data-testid="stHorizontalBlock"]:has(button[key*="v23_btn_"]) > div,
+  [data-testid="stAppViewContainer"] div[data-testid="stHorizontalBlock"]:has(.stat-card) > div {
+      width: auto !important;
+      max-width: none !important;
   }
 
   .main .block-container { 

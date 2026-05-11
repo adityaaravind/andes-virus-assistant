@@ -306,12 +306,11 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
                 white-space: nowrap !important;
                 text-align: center !important;
                 font-family: 'Inter', sans-serif !important;
-                font-weight: 950 !important;
-                font-size: 0.65rem !important;
+                font-weight: 800 !important;
+                font-size: 0.6rem !important;
                 letter-spacing: 0.05em !important;
                 text-transform: uppercase !important;
-                /* INTENSE GLOWING TEXT */
-                text-shadow: 0 0 5px var(--btn-color), 0 0 10px var(--btn-color), 0 0 15px var(--btn-color) !important;
+                text-shadow: 0 0 5px var(--btn-color);
             }
 
             /* EMOJI SIZE - Matches stat-value feel */
@@ -321,38 +320,38 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
                 margin-bottom: 5px !important;
             }
 
-            /* MOBILE ADAPTIVE LAYOUT (2-column grid for better thumb reach) */
+            /* MOBILE ADAPTIVE LAYOUT (Compact 3-column grid) */
             @media (max-width: 600px) {
-                /* FORCE GRID ON THE PARENT COLUMN CONTAINER WITH HIGHER SPECIFICITY */
                 [data-testid="stAppViewContainer"] div[data-testid="stHorizontalBlock"]:has(button[key*="v23_btn_"]) {
                     display: grid !important;
-                    grid-template-columns: 1fr 1fr !important;
+                    grid-template-columns: 1fr 1fr 1fr !important;
                     gap: 0.5rem !important;
                     flex-direction: row !important;
                 }
-                /* Ensure columns don't force 100% width inside the grid */
                 [data-testid="stAppViewContainer"] div[data-testid="stHorizontalBlock"]:has(button[key*="v23_btn_"]) > div {
                     width: 100% !important;
                     max-width: 100% !important;
                 }
+                
                 div.stButton > button { 
-                    height: 70px !important; 
-                    flex-direction: row !important; 
-                    gap: 15px !important;
-                    justify-content: center !important;
-                    padding: 10px 20px !important;
-                    border-top: none !important;
-                    border-left: 5px solid var(--btn-color) !important;
-                    /* ADD INSET GLOW FOR INPUT BUTTON FEEL */
-                    box-shadow: inset 0 0 15px var(--btn-color)33, 0 6px 20px rgba(0,0,0,0.7) !important;
+                    height: 60px !important; 
+                    flex-direction: column !important; 
+                    gap: 4px !important;
+                    padding: 8px !important;
+                    border-radius: 10px !important;
+                    border: 1px solid var(--btn-color) !important;
+                    background: rgba(15, 23, 42, 0.9) !important;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
                 }
                 div.stButton > button div[data-testid="stMarkdownContainer"] {
-                    font-size: 1.5rem !important;
+                    font-size: 1.3rem !important;
+                    margin-bottom: 0 !important;
                 }
                 div.stButton > button p {
-                    font-size: 0.7rem !important;
-                    text-align: left !important;
+                    font-size: 0.52rem !important;
+                    text-align: center !important;
                     letter-spacing: 0.05em !important;
+                    font-weight: 900 !important;
                 }
             }
             
@@ -459,12 +458,12 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
             )
         else:
             st.markdown(
-                "<div style='text-align:center; margin-top:1.5rem;'>"
-                "<p class='cta-pulse' style='color:#00b4d8; font-size:0.8rem; font-weight:950; text-transform:uppercase; letter-spacing:0.12em;'>"
-                "⚠️ INPUT REQUIRED: SHARE YOUR LOCAL ANXIETY LEVEL"
+                "<div style='text-align:center; margin-top:1.2rem;'>"
+                "<p class='cta-pulse' style='color:#00b4d8; font-size:0.85rem; font-weight:950; text-transform:uppercase; letter-spacing:0.15em;'>"
+                "🚨 YOUR INPUT NEEDED: HOW SAFE DO YOU FEEL?"
                 "</p>"
-                "<p style='color:#94a3b8; font-size:0.65rem; margin-top:4px; max-width:80%; margin-left:auto; margin-right:auto;'>"
-                "Your participation calibrates the global risk model. High-frequency user clicks generate maximum prediction intelligence and score accuracy."
+                "<p style='color:#94a3b8; font-size:0.68rem; margin-top:5px; max-width:90%; margin-left:auto; margin-right:auto;'>"
+                "Select a level below to calibrate the global risk model. Each report directly updates the live outbreak intelligence score."
                 "</p>"
                 "</div>", 
                 unsafe_allow_html=True
