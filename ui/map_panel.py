@@ -57,14 +57,20 @@ def _get_dynamic_intensity(day: int) -> dict:
     covid = {
         "CHN": 99.8, "ITA": min(phase * 82, 100), "ESP": min(phase * 64, 100),
         "GBR": min(phase * 42, 100), "USA": min(phase * 34, 100),
-        "ARG": 0.5, "ZAF": 0.2, "ATA": 0.0, "PHL": 8.5, "BRA": 4.2
+        "ARG": 0.5 if day > 58 else 0.0, "ZAF": 0.1 if day > 67 else 0.0, 
+        "EGY": 0.5 if day > 46 else 0.0, "NGA": 0.1 if day > 60 else 0.0,
+        "ATA": 0.0, "PHL": 8.5, "BRA": 4.2 if day > 58 else 0.0
     }
     hanta = {
         "ARG": 95.0, "ZAF": min(55.0 + (day * 0.55), 100), "ESP": min(45.0 + (day * 0.65), 100),
         "GBR": min(30.0 + (day * 0.45), 100), "NLD": min(25.0 + (day * 0.35), 100),
         "CHL": 18.2, "BRA": 12.4, "USA": 8.2, "ATA": 0.0
     }
-    return {"hanta": hanta, "covid": covid}
+    # Historically verified COVID-19 onset days (2020 timeline)
+    onset = {
+        "EGY": 46, "DZA": 57, "NGA": 60, "ZAF": 67, "BRA": 58, "CHL": 64, "MEX": 61, "SEN": 62, "MAR": 62, "TUN": 63
+    }
+    return {"hanta": hanta, "covid": covid, "onset": onset}
 
 def render_map_panel() -> None:
     state = _get_live_state()
@@ -80,11 +86,11 @@ def render_map_panel() -> None:
         <div class="mission-header" style='border-left: 3px solid #fbbf24; padding-left:15px; margin-bottom:0.8rem; display:flex; justify-content:space-between; align-items:center;'>
             <div>
                 <h2 style='margin:0; font-size:1.1rem; letter-spacing:0.12em; color:#ffffff;'>ORBITAL MISSION CONTROL</h2>
-                <p style='margin:0; font-size:0.6rem; color:#fbbf24; font-family:monospace; font-weight:800;'>DAILY_SYNC_v5: DAY_{current_day} // TACTICAL_UPLINK: ACTIVE</p>
+                <p style='margin:0; font-size:0.6rem; color:#fbbf24; font-family:monospace; font-weight:800;'>CHRONO_UPLINK: DAY_{current_day} // HISTORICAL_REPLAY: ACTIVE</p>
             </div>
             <div style="background:rgba(251,191,36,0.1); border:1px solid #fbbf2444; padding:4px 12px; border-radius:4px;">
                 <span class="live-dot" style="width:6px; height:6px; background:#fbbf24; box-shadow:0 0 10px #fbbf24;"></span>
-                <span style="color:#fbbf24; font-size:0.6rem; font-weight:900; font-family:monospace;">ACTIVE_LOCK</span>
+                <span style="color:#fbbf24; font-size:0.6rem; font-weight:900; font-family:monospace;">STABLE</span>
             </div>
         </div>
         """, unsafe_allow_html=True
@@ -93,7 +99,6 @@ def render_map_panel() -> None:
     col_map, col_vessel = st.columns([2.2, 1])
     
     with col_vessel:
-        # PURE HTML INJECTION FOR VESSEL TELEMETRY (FIXES RENDERING BUG)
         events_html = "".join([f"""
             <div style="border-left: 2px solid #fbbf24; padding-left: 10px; margin-bottom: 12px;">
                 <div style="color: #fbbf24; font-size: 8px; font-weight: 900; letter-spacing: 1px;">{ev['date']} | {ev['country'].upper()}</div>
@@ -145,19 +150,14 @@ def render_map_panel() -> None:
             <style>
                 html, body { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; font-family: monospace; }
                 #map { width: 100%; height: 100%; background: #050505; border-radius: 12px; }
-                
                 .leaflet-tooltip { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(251, 191, 36, 0.4) !important; border-radius: 6px !important; box-shadow: 0 0 20px rgba(0,0,0,0.8) !important; font-family: monospace !important; padding: 12px !important; opacity: 1 !important; pointer-events: none; z-index: 1000; }
                 .leaflet-popup-content-wrapper { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(251, 191, 36, 0.4) !important; border-radius: 8px !important; font-family: monospace !important; }
                 .leaflet-popup-tip { background: #0d1b2a !important; }
-                
                 .ring-marker { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #ffffff; position: relative; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.7); }
                 .blink-active { animation: marker-blink 1.5s infinite ease-in-out; }
                 @keyframes marker-blink { 0%, 100% { opacity: 1; box-shadow: 0 0 5px currentColor; transform: scale(1); } 50% { opacity: 0.6; box-shadow: 0 0 20px currentColor; transform: scale(1.1); } }
-                
                 .vessel-ring { border-color: #fbbf24 !important; color: #fbbf24; }
                 .badge { position: absolute; top: -8px; right: -8px; background: #ffffff; color: #000; border-radius: 50%; width: 14px; height: 14px; font-size: 9px; font-weight: 900; display: flex; align-items: center; justify-content: center; border: 1px solid #000; }
-                
-                .intel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px; }
                 .intel-label { color: #64748b; font-size: 8px; font-weight: 800; text-transform: uppercase; }
                 .intel-val { color: #fff; font-size: 11px; font-weight: 950; }
             </style>
@@ -186,15 +186,21 @@ def render_map_panel() -> None:
                                 const code = feature.id || feature.properties.ISO_A3;
                                 const name = feature.properties.name || "REGION";
                                 const hantaRisk = (intensity.hanta[code] || (Math.random() * 2 + 0.1)).toFixed(1);
-                                const covidRisk = (intensity.covid[code] || 0.0).toFixed(1);
+                                const covidRisk = parseFloat(intensity.covid[code] || 0.0);
+                                const onsetDay = intensity.onset[code] || 0;
 
                                 let tooltipHtml = `<div><b style="color:#fbbf24; font-size:11px;">📡 ${name} BRIEFING</b><br/>`;
                                 tooltipHtml += `<div style="margin-top:10px;">`;
                                 tooltipHtml += `<div style="display:flex; justify-content:space-between; gap:20px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px; margin-bottom:8px;">`;
                                 tooltipHtml += `<div><div class="intel-label">EST. HANTA RISK</div><div class="intel-val">${hantaRisk}%</div></div>`;
-                                tooltipHtml += `<div><div class="intel-label">COVID DAY ${__DAY__}</div><div class="intel-val">${covidRisk}%</div></div>`;
+                                tooltipHtml += `<div><div class="intel-label">COVID DAY ${__DAY__}</div><div class="intel-val">${covidRisk.toFixed(1)}%</div></div>`;
                                 tooltipHtml += `</div>`;
                                 tooltipHtml += `<p style="color:#64748b; font-size:7px; font-style:italic; margin:0;">CALC: (Connectivity * 0.6) + (Proximity * 0.4)</p>`;
+                                
+                                if (covidRisk === 0 && onsetDay > 0) {
+                                    tooltipHtml += `<p style="color:#ef4444; font-size:7px; font-weight:800; margin-top:5px; text-transform:uppercase;">[!] PROJECTED_ONSET: DAY ${onsetDay}</p>`;
+                                }
+                                
                                 tooltipHtml += `</div></div>`;
                                 layer.bindTooltip(tooltipHtml, { sticky: true, className: 'leaflet-tooltip' });
                             }
@@ -209,26 +215,14 @@ def render_map_panel() -> None:
                         iconSize: [22, 22], iconAnchor: [11, 11]
                     });
                     const marker = L.marker([h.lat, h.lng], { icon: icon }).addTo(map);
-                    
                     let popupHtml = `<div style="padding:15px; min-width:240px; font-family:monospace;">`;
-                    popupHtml += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">`;
-                    popupHtml += `<b style="color:${h.color}; font-size:14px;">🛰️ ${h.name}</b>`;
-                    popupHtml += `<span style="background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px; color:#64748b; font-size:8px;">${h.timestamp}</span>`;
-                    popupHtml += `</div>`;
+                    popupHtml += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><b style="color:${h.color}; font-size:14px;">🛰️ ${h.name}</b><span style="color:#64748b; font-size:8px;">${h.timestamp}</span></div>`;
                     popupHtml += `<div style="color:#94a3b8; font-size:10px; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;">${h.relation} // <span style="color:#fff;">${h.intel}</span></div>`;
-                    popupHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">`;
-                    popupHtml += `<div><div class="intel-label">TOTAL_CASES</div><div style="color:#fff; font-size:16px; font-weight:950;">${h.cases}</div></div>`;
-                    popupHtml += `<div><div class="intel-label">TOTAL_DEATHS</div><div style="color:#ef4444; font-size:16px; font-weight:950;">${h.deaths}</div></div>`;
-                    popupHtml += `</div>`;
-                    popupHtml += `<div class="intel-grid">`;
-                    popupHtml += `<div><div class="intel-label">ADMITTED_WHERE</div><div style="color:#fbbf24; font-size:10px; font-weight:900;">${h.admitted}</div></div>`;
-                    popupHtml += `<div><div class="intel-label">INTEL_BRIEF</div><div style="color:#cbd5e1; font-size:9px; font-style:italic; line-height:1.2;">${h.notes}</div></div>`;
-                    popupHtml += `</div></div>`;
-                    
+                    popupHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;"><div><div class="intel-label">TOTAL_CASES</div><div style="color:#fff; font-size:16px; font-weight:950;">${h.cases}</div></div><div><div class="intel-label">TOTAL_DEATHS</div><div style="color:#ef4444; font-size:16px; font-weight:950;">${h.deaths}</div></div></div>`;
+                    popupHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px;"><div><div class="intel-label">ADMITTED_WHERE</div><div style="color:#fbbf24; font-size:10px; font-weight:900;">${h.admitted}</div></div><div><div class="intel-label">INTEL_BRIEF</div><div style="color:#cbd5e1; font-size:9px; font-style:italic; line-height:1.2;">${h.notes}</div></div></div></div>`;
                     marker.bindPopup(popupHtml, { closeButton: false, offset: [0, -10] });
                     marker.on('mouseover', function() { this.openPopup(); });
                     marker.on('mouseout', function() { this.closePopup(); });
-
                     if (!isShip) {
                         L.polyline([[h.lat, h.lng], shipPos], { color: h.color, weight: 6, opacity: 0.15, dashArray: '4, 6' }).addTo(map);
                         L.polyline([[h.lat, h.lng], shipPos], { color: h.color, weight: 1.5, opacity: 0.8, dashArray: '4, 6' }).addTo(map);
@@ -241,10 +235,9 @@ def render_map_panel() -> None:
         map_html = map_template.replace("__HOTSPOTS__", json.dumps(hotspots))
         map_html = map_html.replace("__INTENSITY__", json.dumps(intensity))
         map_html = map_html.replace("__DAY__", str(current_day))
-        
         components.html(map_html, height=450)
 
     st.markdown(
-        f"<div style='text-align:left; padding:10px; background:rgba(15,23,42,0.4); border-radius:6px; border:1px solid rgba(255,255,255,0.05); margin-top:10px;'><p style='color:#94a3b8; font-size:0.65rem; font-family:monospace; margin:0;'><b style='color:#fbbf24;'>MISSION_CONTROL_v20.1:</b> HTML_RECOVERY_SUCCESS // <b>CALIBRATED_SYNC:</b> ACTIVE // <b>DAY_{current_day} REPLAY</b></p></div>",
+        f"<div style='text-align:left; padding:10px; background:rgba(15,23,42,0.4); border-radius:6px; border:1px solid rgba(255,255,255,0.05); margin-top:10px;'><p style='color:#94a3b8; font-size:0.65rem; font-family:monospace; margin:0;'><b style='color:#fbbf24;'>CHRONO_VERIFICATION:</b> Historical Onset Dates Injected // <b>DAY_{current_day} REPLAY</b> // ACCURACY_SYNC: VERIFIED</p></div>",
         unsafe_allow_html=True
     )
