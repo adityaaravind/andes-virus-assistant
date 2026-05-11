@@ -363,13 +363,22 @@ def _render_header() -> None:
     with header_col:
         st.markdown(
             """
-            <div style='display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin-bottom: 0.5rem;'>
-                <h1 class='glowing-title mega-glow' style='margin:0; display: inline-block;'>🧬 Andes Virus Research Assistant <span class='v11-feature-tag' style='vertical-align: middle; margin-left: 10px;'>v2.0.0</span></h1>
-                <div class='outbreak-badge'>OUTBREAK ACTIVE</div>
+            <div style='display: flex; flex-direction: column; gap: 4px; margin-bottom: 0.5rem;'>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class='outbreak-badge' style="background: #dc2626 !important; color: white !important; font-size: 0.75rem !important; padding: 2px 10px !important; border-radius: 4px !important; font-weight: 900 !important; letter-spacing: 0.2em !important; animation: pulse-red 2s infinite;">● OUTBREAK ACTIVE</div>
+                </div>
+                <h1 class='glowing-title mega-glow' style='margin:0; font-size: 2.4rem !important; letter-spacing: -0.02em !important; line-height: 1.1;'>MV Hondius Hantavirus Outbreak</h1>
+                <p style='font-size:0.9rem !important; margin:0; opacity: 0.8; color: #94a3b8; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;'>
+                    Tactical Intelligence Dashboard · Joint Task Force Operations
+                </p>
             </div>
-            <p style='font-size:0.85rem !important; margin:0; margin-bottom: 0.8rem; opacity: 0.7; color: #48cae4; letter-spacing: 0.05em; font-family: sans-serif; text-shadow: 0 0 10px rgba(0, 180, 216, 0.4);'>
-                MV Hondius Hantavirus Outbreak · Intelligence Dashboard
-            </p>
+            <style>
+            @keyframes pulse-red {
+                0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+                70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+            }
+            </style>
             """,
             unsafe_allow_html=True
         )
@@ -610,10 +619,18 @@ def main() -> None:
         render_suggestion_box()
 
         st.markdown(
-            "<div class='app-footer'>"
-            "Data sourced from WHO, CDC, PubMed, Reuters, BBC, Al Jazeera, Wikipedia. "
-            "Not medical advice. For emergencies contact your local health authority."
-            "</div>",
+            f"""
+            <div class='app-footer' style="text-align: left !important; display: flex; flex-direction: column; gap: 5px;">
+                <div style="opacity: 0.6; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-weight: 900; color: #00b4d8; font-size: 0.7rem; letter-spacing: 0.1em;">🧬 SYSTEM: ANDES VIRUS RESEARCH ASSISTANT</span>
+                    <span style="background: rgba(0, 180, 216, 0.1); border: 1px solid rgba(0, 180, 216, 0.3); padding: 1px 6px; border-radius: 4px; font-size: 0.6rem; color: #00b4d8; font-weight: 800;">v{VERSION}</span>
+                </div>
+                <div style="opacity: 0.4; font-size: 0.65rem;">
+                    Data sourced from WHO, CDC, PubMed, Reuters, BBC, Al Jazeera, Wikipedia. 
+                    Not medical advice. For emergencies contact your local health authority.
+                </div>
+            </div>
+            """,
             unsafe_allow_html=True,
         )
 
