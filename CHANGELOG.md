@@ -1,4 +1,17 @@
 
+## [1.6.0] - 2026-05-11 (STABLE PRODUCTION BASELINE)
+### Added
+- **Finalized Stable UI/UX:** Established the definitive baseline for all core modules. **This is the version to revert to for future stable builds.**
+- **Individualized FAQ Cards:** Premium knowledge hub with category-specific icons, glowing accents, and fluid drop-down animations.
+- **Fear Index Restoration:** Re-integrated the tactical sentiment monitor with historical vote persistence.
+- **Vessel Telemetry 2.0:** High-fidelity ship status cards with real-time speed, uplink, and signal stream.
+- **Case Progression Analytics:** Log-scale timeline chart comparing current outbreak to historical COVID-19 data.
+
+### Changed
+- **Optimized Dashboard Layout:** Reordered hierarchy to Stats -> Fear -> Spread -> News -> Map -> FAQ.
+- **Data Migration:** Successfully merged legacy FAQ and sentiment data into the new persistent KV store.
+- **Rendering Engine:** Switched to `st.html()` for FAQ cards to ensure perfect visual fidelity across all browsers.
+
 ## [1.5.0] - 2026-05-11
 ### Added
 - **Stable Maps & Ship Status Baseline:** Locked in the high-fidelity map architecture and compact vessel telemetry.
