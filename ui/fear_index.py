@@ -32,28 +32,33 @@ def _load_fear_data() -> dict[str, Any]:
 
 
 def _save_fear_vote(level: int, user_id: str) -> None:
-    """Save a new fear vote to persistent store (background)."""
-    # FAST REGISTRATION: Update session state immediately before background IO
+    """Save a new fear vote to persistent store (Synchronous for reliability)."""
+    # FAST REGISTRATION: Update session state immediately
     st.session_state.fear_slider_input = level
     st.session_state.user_voted_today = True
-    
+
     try:
         data = _load_fear_data()
+        # Remove existing vote for this user (if any)
         data["votes"] = [v for v in data["votes"] if v.get("user_id") != user_id]
         data["votes"].append({
             "level": level,
             "user_id": user_id,
             "timestamp": datetime.utcnow().isoformat(),
         })
-        data["votes"] = data["votes"][-1000:]
+        # Keep only last 2000 votes to prevent file bloat
+        data["votes"] = data["votes"][-2000:]
         data["last_updated"] = datetime.utcnow().isoformat()
-        # Fire and forget
-        bg_kv_set(_FEAR_KEY, data)
-    except Exception:
-        pass
+
+        # Synchronous save for guaranteed persistence before rerun
+        from alerts.persistent_kv import kv_set
+        kv_set(_FEAR_KEY, data)
+    except Exception as e:
+        st.error(f"Persistence error: {str(e)}")
 
 
 @st.cache_data(ttl=900, show_spinner=False)
+
 def _calculate_web_sentiment() -> float:
     """Analyze recent news to derive a 'media fear' score (1-5)."""
     try:
@@ -267,139 +272,94 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
 
         icons = {1: "🟢", 2: "🟡", 3: "🟠", 4: "🔴", 5: "💀"}
         
-        # --- UNIFIED TACTICAL SELECTOR (v1.4.3) ---
+        # --- ROBUST SMALL GRID SELECTOR (v1.4.4) ---
         st.markdown(
             """
             <style>
-            .sentiment-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 12px;
-                margin-top: 10px;
-                width: 100%;
+            /* TARGET STANDARD STREAMLIT BUTTONS IN THE SELECTOR AREA */
+            div.stButton > button {
+                width: 100% !important;
+                height: 70px !important;
+                background-color: rgba(15, 23, 42, 0.8) !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                border-top: 3px solid var(--btn-color) !important;
+                border-radius: 8px !important;
+                color: #f8fafc !important;
+                font-family: 'Inter', monospace !important;
+                transition: all 0.2s ease !important;
+                padding: 5px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 2px !important;
             }
-            .tactical-choice {
-                background: rgba(15, 23, 42, 0.7);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                border-top: 3px solid var(--t-color);
-                border-radius: 10px;
-                padding: 15px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-                position: relative;
-                overflow: hidden;
-                cursor: pointer;
-                min-height: 110px;
+            div.stButton > button:hover {
+                background-color: rgba(255, 255, 255, 0.05) !important;
+                border-color: var(--btn-color) !important;
+                transform: translateY(-2px) !important;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
             }
-            .tactical-choice:hover {
-                background: rgba(255, 255, 255, 0.05);
-                border-color: var(--t-color);
-                transform: translateY(-4px);
-                box-shadow: 0 5px 20px rgba(0,0,0,0.4);
-            }
-            .tactical-choice.active {
-                background: radial-gradient(circle at top, var(--t-color)33 0%, rgba(15, 23, 42, 0.95) 100%);
-                border: 2.5px solid var(--t-color);
-                box-shadow: 0 0 30px var(--t-color)44;
-                transform: translateY(-4px) scale(1.02);
-            }
-            .tactical-choice.disabled { opacity: 0.3; cursor: default; filter: grayscale(1); }
-
-            .choice-icon { font-size: 1.8rem; margin-bottom: 8px; }
-            .choice-label {
-                color: #fff;
-                font-weight: 950;
-                font-size: 0.85rem;
-                letter-spacing: 0.1em;
-                text-transform: uppercase;
-                margin-bottom: 2px;
-            }
-            .choice-desc {
-                color: #94a3b8;
-                font-size: 0.6rem;
-                font-weight: 600;
-                line-height: 1.2;
+            div.stButton > button:active {
+                transform: translateY(0) !important;
+                background-color: var(--btn-color)44 !important;
             }
             
-            /* Invisible overlay button logic */
-            div[data-testid="stButton"] { 
-                position: absolute !important;
-                top: 0 !important;
-                left: 0 !important;
-                width: 100% !important;
-                height: 100% !important;
-                z-index: 5 !important;
-                margin: 0 !important;
-            }
-            div[data-testid="stButton"] button {
-                background: transparent !important;
-                border: none !important;
-                width: 100% !important;
-                height: 100% !important;
-                color: transparent !important;
-            }
+            /* LABEL STYLING INSIDE BUTTONS */
+            .btn-lbl { font-size: 0.6rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; }
+            .btn-ico { font-size: 1.4rem; }
 
             @media (max-width: 600px) {
-                .sentiment-grid { grid-template-columns: 1fr; }
-                .tactical-choice { 
-                    flex-direction: row; 
-                    text-align: left; 
-                    min-height: 75px; 
-                    padding: 0 20px;
-                    gap: 15px;
-                    border-top: none;
-                    border-left: 4px solid var(--t-color);
-                }
-                .choice-icon { margin-bottom: 0; font-size: 2rem; }
+                div.stButton > button { height: 60px !important; }
+                .btn-ico { font-size: 1.2rem; }
+                .btn-lbl { font-size: 0.5rem; }
             }
             </style>
-            <div style="margin-bottom: 1rem; border-bottom: 1px solid rgba(56,189,248,0.2); padding-bottom: 0.5rem; display:flex; justify-content:space-between; align-items:center;">
-                <p style='color:#38bdf8; font-size:0.75rem; font-weight:800; margin:0; letter-spacing:0.1em; text-transform:uppercase;'>📡 TACTICAL SENTIMENT INPUT</p>
-                <p style='color:#fbbf24; font-size:0.5rem; font-weight:950; margin:0; animation: blinker 2s infinite;'>[ STATUS: REQUIRED ]</p>
+            <div style="margin-bottom: 0.8rem; border-bottom: 1px solid rgba(56,189,248,0.2); padding-bottom: 0.4rem; display:flex; justify-content:space-between; align-items:center;">
+                <p style='color:#38bdf8; font-size:0.7rem; font-weight:800; margin:0; letter-spacing:0.1em; text-transform:uppercase;'>📡 OUTBREAK SENTIMENT SELECTOR</p>
+                <p style='color:#fbbf24; font-size:0.45rem; font-weight:950; margin:0;'>[ VOTE TO ANCHOR RISK DATA ]</p>
             </div>
-            <div class="sentiment-grid">
             """,
             unsafe_allow_html=True
         )
 
-        for level_id in range(1, 6):
+        # The Small Grid: 5 columns
+        cols = st.columns(5)
+        for i, level_id in enumerate(range(1, 6)):
             info = FEAR_LEVELS[level_id]
             is_active = (level_id == level_int)
             
-            # Use columns to contain the absolute positioned buttons correctly within the grid context
-            # We don't actually need separate columns here because the grid CSS handles it,
-            # but we need a container that st.button can occupy.
-            
+            with cols[i]:
+                # We use a trick: standard button text can be complex if we use markdown or just simple labels.
+                # Since Streamlit buttons don't support HTML in labels easily, we keep them simple.
+                # But we can inject the CSS variable for the top border color.
+                st.markdown(f'<div style="--btn-color: {info["color"]};">', unsafe_allow_html=True)
+                
+                # Use a combined label for the button
+                btn_label = f"{icons[level_id]}\n{info['label'].upper()}"
+                
+                if st.button(btn_label, key=f"v22_btn_{level_id}", disabled=user_voted_today, use_container_width=True):
+                    _save_fear_vote(level_id, user_id)
+                    st.rerun()
+                
+                st.markdown('</div>', unsafe_allow_html=True)
+
+        if user_voted_today:
             st.markdown(
                 f"""
-                <div style="position:relative; height: 100%;">
-                    <div class="tactical-choice {'active' if is_active else ''} {'disabled' if user_voted_today and not is_active else ''}" 
-                         style="--t-color: {info['color']};">
-                        <span class="choice-icon">{icons[level_id]}</span>
-                        <div style="display:flex; flex-direction:column;">
-                            <span class="choice-label">{info['label']}</span>
-                            <span class="choice-desc">{info['desc']}</span>
-                        </div>
-                    </div>
+                <div style="background:rgba(34,197,94,0.05); border:1px solid #22c55e44; border-radius:8px; padding:0.6rem; margin-top:0.8rem; text-align:center;">
+                    <p style="color:#22c55e; font-size:0.7rem; font-weight:900; margin:0;">✓ SENTIMENT RECORDED AT LEVEL {level_int}</p>
+                </div>
                 """, 
                 unsafe_allow_html=True
             )
-            
-            # The actual interactive element
-            if not user_voted_today:
-                if st.button(" ", key=f"v21_sel_{level_id}"):
-                    _save_fear_vote(level_id, user_id)
-                    st.rerun()
-            
-            st.markdown("</div>", unsafe_allow_html=True)
-
-        st.markdown("</div>", unsafe_allow_html=True) # Close grid
-
-        if user_voted_today:
-            st.success("✓ SENTIMENT DATA ANCHORED")
+        else:
+            st.markdown(
+                "<p style='color:#64748b; font-size:0.5rem; text-align:center; margin-top:0.8rem; font-weight:700; text-transform:uppercase;'>"
+                "Select the emoji that best represents the current public mood"
+                "</p>", 
+                unsafe_allow_html=True
+            )
 
     callout_html = """
 <style>.fear-callout-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.6rem; margin-top: 0.3rem; }</style>
