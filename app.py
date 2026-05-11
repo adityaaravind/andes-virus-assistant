@@ -567,11 +567,6 @@ def main() -> None:
         render_journalist_tools()
         st.divider()
 
-        # ── COMMUNITY INTELLIGENCE (PHASE 2) ────────────────────────────────────
-        from ui.community_feed import render_community_feed
-        render_community_feed()
-        st.divider()
-
         # ── ROADMAP (COMING SOON) ───────────────────────────────────────────────
         st.markdown("<div id='roadmap'></div>", unsafe_allow_html=True)
         st.markdown("### 🚀 Next Intelligence Phases (coming soon)")
