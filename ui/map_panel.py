@@ -1,4 +1,4 @@
-"""High-fidelity Relational Map — Detailed vessel telemetry and real-time voyage tracking."""
+"""High-fidelity Relational Map — Detailed vessel telemetry and real-time global news signals."""
 from __future__ import annotations
 
 import json
@@ -11,11 +11,11 @@ LIVE_FILE = Path("data/outbreak_live.json")
 
 # Data Exports for compatibility
 NATIONALITIES_DATA = [
-    {"country": "Spain",         "code": "ESP", "cases": 3, "deaths": 1},
-    {"country": "United Kingdom","code": "GBR", "cases": 2, "deaths": 0},
-    {"country": "Netherlands",   "code": "NLD", "cases": 2, "deaths": 1},
-    {"country": "Argentina",     "code": "ARG", "cases": 4, "deaths": 1},
-    {"country": "South Africa",  "code": "ZAF", "cases": 2, "deaths": 0},
+    {"country": "Spain",         "code": "ESP", "passengers": 12, "crew": 0, "cases": 3, "deaths": 1},
+    {"country": "United Kingdom","code": "GBR", "passengers": 8,  "crew": 0, "cases": 2, "deaths": 0},
+    {"country": "Netherlands",   "code": "NLD", "passengers": 5,  "crew": 2, "cases": 2, "deaths": 1},
+    {"country": "Argentina",     "code": "ARG", "passengers": 45, "crew": 5, "cases": 4, "deaths": 1},
+    {"country": "South Africa",  "code": "ZAF", "passengers": 0,  "crew": 10,"cases": 2, "deaths": 0},
 ]
 
 # Relational Hotspot Data
@@ -37,6 +37,13 @@ def render_map_panel() -> None:
     state = _get_live_state()
     from ui.fear_index import _calculate_fear_average
     fear, _, _, _, _, _ = _calculate_fear_average()
+    
+    # Fetch live headlines for the side scroller
+    from ui.news_ticker import fetch_headlines
+    try:
+        headlines = fetch_headlines(max_per_feed=5)
+    except Exception:
+        headlines = []
 
     st.markdown(
         f"""
@@ -64,102 +71,137 @@ def render_map_panel() -> None:
             html, body { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; font-family: monospace; }
             #map { width: 100%; height: 100vh; background: #050505; }
             
-            /* ADVANCED TELEMETRY CARD */
-            #telemetry-overlay {
-                position: absolute; bottom: 25px; left: 20px; z-index: 1000;
-                background: rgba(13, 27, 42, 0.95); border: 1px solid #fbbf24; border-radius: 12px;
-                padding: 18px; width: 320px; color: white; border-left: 6px solid #fbbf24;
-                box-shadow: 0 0 40px rgba(0,0,0,0.8); backdrop-filter: blur(12px);
+            /* UI OVERLAYS */
+            .overlay-card {
+                position: absolute; z-index: 1000;
+                background: rgba(13, 27, 42, 0.95); border: 1px solid rgba(148, 163, 184, 0.2);
+                border-radius: 12px; padding: 15px; color: white; backdrop-filter: blur(12px);
+                box-shadow: 0 0 40px rgba(0,0,0,0.8);
             }
-            .t-header { color: #64748b; font-size: 10px; font-weight: 900; margin-bottom: 12px; letter-spacing: 2px; }
-            .t-vessel-name { font-size: 18px; font-weight: 950; color: #ffffff; letter-spacing: 1px; display: flex; align-items: center; gap: 12px; }
-            .t-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; border-top: 1px solid #222; padding-top: 15px; }
-            .t-stat-label { color: #475569; font-size: 9px; font-weight: 800; text-transform: uppercase; }
-            .t-stat-val { color: #fbbf24; font-size: 12px; font-weight: 900; margin-top: 2px; }
-            .t-route { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; border-left: 2px solid #00f5ff; }
             
-            .blink-light { width: 10px; height: 10px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 15px #22c55e; animation: blinker 1s linear infinite; }
+            /* LEFT: TELEMETRY */
+            #telemetry-overlay {
+                bottom: 25px; left: 20px; width: 300px; border-left: 6px solid #fbbf24;
+            }
+            
+            /* RIGHT: SIGNAL FEED */
+            #signal-overlay {
+                bottom: 25px; right: 20px; width: 280px; height: 350px; 
+                border-right: 6px solid #00f5ff; overflow: hidden;
+                display: flex; flex-direction: column;
+            }
+
+            #mobile-toggle {
+                display: none;
+                position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
+                z-index: 2000; background: #fbbf24; color: #000;
+                padding: 8px 18px; border-radius: 20px; font-weight: 900; font-size: 11px;
+                box-shadow: 0 0 20px rgba(251,191,36,0.4); cursor: pointer;
+                letter-spacing: 1px;
+            }
+
+            @media (max-width: 768px) {
+                #telemetry-overlay { display: none; bottom: 70px; left: 15px; right: 15px; width: auto; }
+                #signal-overlay { display: none; }
+                #mobile-toggle { display: block; }
+            }
+            
+            .t-header { color: #64748b; font-size: 10px; font-weight: 900; margin-bottom: 12px; letter-spacing: 2px; text-transform: uppercase; }
+            .t-vessel-name { font-size: 16px; font-weight: 950; color: #ffffff; display: flex; align-items: center; gap: 10px; }
+            .t-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; border-top: 1px solid #222; padding-top: 12px; }
+            .t-stat-label { color: #475569; font-size: 8px; font-weight: 800; text-transform: uppercase; }
+            .t-stat-val { color: #fbbf24; font-size: 11px; font-weight: 900; }
+            
+            /* SCROLLER */
+            .scroller-container {
+                flex: 1; overflow: hidden; position: relative; margin-top: 5px;
+            }
+            .scroller-content {
+                display: flex; flex-direction: column; gap: 12px;
+                animation: scroll-up 30s linear infinite;
+            }
+            .scroller-container:hover .scroller-content { animation-play-state: paused; }
+            
+            @keyframes scroll-up {
+                0% { transform: translateY(0); }
+                100% { transform: translateY(-50%); }
+            }
+            
+            .news-item {
+                background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+                padding: 10px; border-radius: 6px; border-left: 2px solid #00f5ff;
+                cursor: pointer; transition: background 0.2s;
+            }
+            .news-item:hover { background: rgba(0, 245, 255, 0.1); border-color: #00f5ff; }
+            .news-source { color: #00f5ff; font-size: 9px; font-weight: 900; text-transform: uppercase; margin-bottom: 4px; display: block; }
+            .news-title { font-size: 10px; color: #f1f5f9; line-height: 1.3; font-weight: 600; display: block; }
+
+            .blink-light { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 12px #22c55e; animation: blinker 1s linear infinite; }
             @keyframes blinker { 50% { opacity: 0.2; } }
 
-            .ring-marker { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #ffffff; position: relative; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); }
-            .vessel-ring { border-color: #22c55e !important; box-shadow: 0 0 25px #22c55e, inset 0 0 15px #22c55e; animation: pulse 1.5s infinite; }
-            .badge { position: absolute; top: -9px; right: -9px; background: #ffffff; color: #000; border-radius: 50%; width: 15px; height: 15px; font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center; border: 1px solid #000; }
-            @keyframes pulse { 0% { transform: scale(0.6); opacity: 1; } 100% { transform: scale(2.2); opacity: 0; } }
+            .ring-marker { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #ffffff; position: relative; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); }
+            .vessel-ring { border-color: #22c55e !important; box-shadow: 0 0 25px #22c55e, inset 0 0 15px #22c55e; }
+            .badge { position: absolute; top: -8px; right: -8px; background: #ffffff; color: #000; border-radius: 50%; width: 14px; height: 14px; font-size: 9px; font-weight: 900; display: flex; align-items: center; justify-content: center; border: 1px solid #000; }
 
-            /* POPUP STYLING - FIX WHITE BACKGROUND */
-            .leaflet-popup-content-wrapper {
-                background: rgba(13, 27, 42, 0.98) !important;
-                color: #fff !important;
-                border: 1px solid rgba(0, 180, 216, 0.4) !important;
-                border-radius: 8px !important;
-                box-shadow: 0 0 25px rgba(0,0,0,0.8) !important;
-                font-family: monospace !important;
-            }
+            .leaflet-popup-content-wrapper { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(0, 180, 216, 0.4) !important; border-radius: 8px !important; box-shadow: 0 0 25px rgba(0,0,0,0.8) !important; font-family: monospace !important; }
             .leaflet-popup-tip { background: #0d1b2a !important; }
-            .leaflet-popup-content { margin: 12px !important; line-height: 1.4 !important; }
-
-            /* TOOLTIP STYLING */
-            .custom-tooltip {
-                background: rgba(13, 27, 42, 0.9) !important;
-                color: #fff !important;
-                border: 1px solid #1b2e45 !important;
-                box-shadow: 0 0 15px rgba(0,0,0,0.5) !important;
-            }
         </style>
     </head>
     <body>
-        <div id="telemetry-overlay">
-            <div class="t-header">🛰️ LIVE VESSEL INTELLIGENCE</div>
+        <div id="telemetry-overlay" class="overlay-card">
+            <div class="t-header">🛰️ VESSEL TELEMETRY</div>
             <div class="t-vessel-name"><div class="blink-light"></div> MV HONDIUS</div>
-            <div style="color: #48cae4; font-size: 13px; margin-top: 5px;">IMO: 9443413 // CALLSIGN: PBWA</div>
-            
             <div class="t-grid">
-                <div><div class="t-stat-label">Coordinates</div><div class="t-stat-val">14.93°N // 23.51°W</div></div>
-                <div><div class="t-stat-label">Current Speed</div><div class="t-stat-val">0.0 KNOTS</div></div>
-                <div><div class="t-stat-label">Status</div><div class="t-stat-val" style="color:#ef4444;">__STATUS__</div></div>
-                <div><div class="t-stat-label">Lock Precision</div><div class="t-stat-val">99.8% (SAT-LINK)</div></div>
+                <div><div class="t-stat-label">COORD</div><div class="t-stat-val">14.93N/23.51W</div></div>
+                <div><div class="t-stat-label">STATUS</div><div class="t-stat-val" style="color:#ef4444;">__STATUS__</div></div>
             </div>
+            <div style="font-size:9px; color:#475569; border-top:1px solid #222; padding-top:8px;">PREV: USHUAIA, ARG (APR 01)</div>
+        </div>
 
-            <div class="t-route">
-                <div class="t-stat-label" style="color:#00f5ff; margin-bottom:5px;">Voyage History</div>
-                <div style="font-size:10px; color:#fff;"><b>PREV:</b> USHUAIA, ARG (APR 01)</div>
-                <div style="font-size:10px; color:#fff; margin-top:4px;"><b>NEXT:</b> PORTO GRANDE, CV (MEDICAL HOLD)</div>
-            </div>
-            
-            <div style="margin-top:15px; display:flex; justify-content:space-between; font-size:9px; color:#475569;">
-                <span>REFRESH: 60S</span>
-                <span>SYNC_ID: __SYNC_ID__</span>
+        <div id="signal-overlay" class="overlay-card">
+            <div class="t-header">📡 GLOBAL OSINT SIGNALS</div>
+            <div class="scroller-container">
+                <div class="scroller-content" id="scroller">
+                    __NEWS_ITEMS__
+                    __NEWS_ITEMS__
+                </div>
             </div>
         </div>
+
+        <div id="mobile-toggle">📡 SHIP DATA</div>
+
         <div id="map"></div>
         <script>
-            const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([12, -35], 3.2);
+            const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([12, -25], 2.8);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
+
+            const toggle = document.getElementById('mobile-toggle');
+            const telemetry = document.getElementById('telemetry-overlay');
+            toggle.onclick = () => {
+                const isHidden = window.getComputedStyle(telemetry).display === 'none';
+                telemetry.style.display = isHidden ? 'block' : 'none';
+                toggle.innerText = isHidden ? '✖ CLOSE' : '📡 SHIP DATA';
+                toggle.style.background = isHidden ? '#ef4444' : '#fbbf24';
+            };
 
             const hotspots = __HOTSPOTS__;
             const shipPos = [14.93, -23.51];
             const affectedCodes = ["ARG", "ZAF", "ESP", "GBR", "NLD", "PHL", "CHL", "NOR", "ITA"];
 
-            // Affected Country Shading with Hover Intelligence
             fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
                 .then(res => res.json())
                 .then(geojson => {
                     L.geoJSON(geojson, {
                         style: function(feature) {
                             const code = feature.id || feature.properties.ISO_A3;
-                            if (affectedCodes.includes(code)) {
-                                return { fillColor: '#4a1212', fillOpacity: 0.5, color: '#00b4d8', weight: 1 };
-                            }
+                            if (affectedCodes.includes(code)) return { fillColor: '#4a1212', fillOpacity: 0.5, color: '#00b4d8', weight: 1 };
                             return { fillOpacity: 0, weight: 0.5, color: '#222' };
                         },
                         onEachFeature: function(feature, layer) {
                             const code = feature.id || feature.properties.ISO_A3;
-                            const h = hotspots.find(x => x.name.includes(code) || (code === "ARG" && x.name.includes("ARGENTINA")) || (code === "ZAF" && x.name.includes("SOUTH_AFRICA")) || (code === "ESP" && x.name.includes("SPAIN")) || (code === "GBR" && x.name.includes("UK")));
-                            
+                            const h = hotspots.find(x => x.name.includes(code) || (code === "ARG" && x.name.includes("ARGENTINA")));
                             if (h) {
-                                layer.bindTooltip(`<div style="font-family:monospace; color:#fff; font-size:10px;"><b>ZONE: ${feature.properties.name}</b><br/>REASON: ${h.relation}</div>`, { sticky: true, className: 'custom-tooltip' });
-                                layer.on('mouseover', function() { this.setStyle({ fillOpacity: 0.7, weight: 2 }); });
-                                layer.on('mouseout', function() { this.setStyle({ fillOpacity: 0.5, weight: 1 }); });
+                                layer.bindTooltip(`<div style="font-family:monospace; color:#fff; font-size:10px;"><b>ZONE: ${feature.properties.name}</b><br/>REASON: ${h.relation}</div>`, { sticky: true });
                             }
                         }
                     }).addTo(map);
@@ -170,56 +212,38 @@ def render_map_panel() -> None:
                 const icon = L.divIcon({
                     className: '',
                     html: `<div class="ring-marker ${isShip ? 'vessel-ring' : ''}" style="border-color:${h.color}; box-shadow: 0 0 15px ${h.color};"><div class="badge">${h.cases}</div></div>`,
-                    iconSize: [22, 22], iconAnchor: [11, 11]
+                    iconSize: [20, 20], iconAnchor: [10, 10]
                 });
-                
                 const marker = L.marker([h.lat, h.lng], { icon: icon }).addTo(map);
-                
-                const popupContent = `
-                    <div style="min-width:200px; font-family:monospace;">
-                        <b style="color:${h.color}; font-size:12px; letter-spacing:1px;">${h.name}</b><br/>
-                        <div style="color:#94a3b8; font-size:10px; margin:5px 0;">${h.relation}</div>
-                        <div style="height:1px; background:#333; margin:8px 0;"></div>
-                        <div style="font-size:10px; color:#cbd5e1; line-height:1.3;">"${h.intel}"</div>
-                        <div style="margin-top:10px; display:flex; justify-content:space-between;">
-                            <span style="color:#64748b; font-size:9px;">CASES: <b style="color:#fff;">${h.cases}</b></span>
-                            <span style="color:#64748b; font-size:9px;">FEAR: <b style="color:#fbbf24;">__FEAR__/5</b></span>
-                        </div>
-                    </div>
-                `;
-
-                marker.bindPopup(popupContent, { closeButton: false, offset: [0, -10] });
-
-                // TRIGGER ON HOVER
-                marker.on('mouseover', function(e) { this.openPopup(); });
-                marker.on('mouseout', function(e) { this.closePopup(); });
-
-                if (!isShip) {
-                    L.polyline([[h.lat, h.lng], shipPos], { color: h.color, weight: 1, dashArray: '5, 10', opacity: 0.3 }).addTo(map);
-                }
+                marker.bindPopup(`<div style="min-width:180px; font-family:monospace;"><b style="color:${h.color};">${h.name}</b><br/><div style="color:#94a3b8; font-size:10px; margin:4px 0;">${h.relation}</div><div style="font-size:10px; color:#cbd5e1;">"${h.intel}"</div></div>`, { closeButton: false, offset: [0, -10] });
+                marker.on('mouseover', function() { this.openPopup(); });
+                marker.on('mouseout', function() { this.closePopup(); });
+                if (!isShip) L.polyline([[h.lat, h.lng], shipPos], { color: h.color, weight: 1, dashArray: '4, 6', opacity: 0.3 }).addTo(map);
             });
-
-            // Live Pulse Simulation
-            setInterval(() => {
-                const now = new Date();
-                document.querySelectorAll('.blink-light').forEach(el => {
-                    el.style.boxShadow = `0 0 ${10 + Math.random()*15}px #22c55e`;
-                });
-            }, 500);
         </script>
     </body>
     </html>
     """
 
+    # Format news items for the scroller
+    news_html = ""
+    for art in headlines:
+        news_html += f"""
+        <div class="news-item" onclick="window.open('{art['url']}', '_blank')">
+            <span class="news-source">{art['source']}</span>
+            <span class="news-title">{art['title'][:80]}...</span>
+        </div>
+        """
+
     # Manual Interpolation
     map_html = map_template.replace("__HOTSPOTS__", json.dumps(RELATIONAL_HOTSPOTS))
+    map_html = map_html.replace("__NEWS_ITEMS__", news_html)
     map_html = map_html.replace("__STATUS__", state.get('ship_status', 'Transit').upper())
     map_html = map_html.replace("__FEAR__", f"{fear:.2f}")
-    map_html = map_html.replace("__SYNC_ID__", datetime.now().strftime('%y%m%d-%H%M'))
 
     components.html(map_html, height=580)
     
     st.markdown(
-        "<div style='text-align:right; opacity:0.6;'><p style='color:#475569; font-size:0.5rem; font-family:monospace;'>ORBITAL_RECO_SYS v8.0 // SHIP_INTELLIGENCE: SYNCED // LIVE_TELEMETRY: ON</p></div>",
+        "<div style='text-align:right; opacity:0.6;'><p style='color:#475569; font-size:0.5rem; font-family:monospace;'>ORBITAL_RECO_SYS v8.5 // SHIP_INTELLIGENCE: SYNCED // OSINT_FEED: LIVE</p></div>",
         unsafe_allow_html=True
     )
