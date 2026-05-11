@@ -85,9 +85,10 @@ def render_map_panel() -> None:
         <div class="mission-header" style='border-left: 3px solid #4ade80; padding-left:15px; margin-bottom:0.8rem; display:flex; justify-content:space-between; align-items:center;'>
             <div>
                 <h2 style='margin:0; font-size:1.1rem; letter-spacing:0.12em; color:#ffffff;'>GLOBAL HEALTH MONITOR</h2>
-                <p style='margin:0; font-size:0.6rem; color:#4ade80; font-family:monospace; font-weight:800;'>VIRUS TIMELINE: DAY_{current_day} // STATUS: ACTIVE</p>
+                <p style='margin:0; font-size:0.6rem; color:#4ade80; font-family:monospace; font-weight:800;'>STABLE MAPS & SHIP STATUS // DATA SYNC: ACTIVE</p>
             </div>
         </div>
+
         """, unsafe_allow_html=True
     )
 

@@ -1,6 +1,19 @@
-# Changelog
 
-All notable changes to the **Andes Virus Research Assistant** will be documented in this file.
+## [1.5.0] - 2026-05-11
+### Added
+- **Stable Maps & Ship Status Baseline:** Locked in the high-fidelity map architecture and compact vessel telemetry.
+- **Mission Control v28.1:** Finalized the "Everyday User" upgrade with simplified terminology and bright readability.
+- **Compact Telemetry Grid:** Optimized real-time ship signals card for high-density space efficiency.
+- **Methodology Disclosures:** Transparent labeling for Verifiable vs. Non-Verifiable (Proximity-Based) data regions.
+
+### Changed
+- **Terminology Refactor:** Replaced technical jargon with accessible terms (e.g., 'Risk' -> 'Chance of Spread', 'Mission Control' -> 'Global Health Monitor').
+- **High-Visibility Tooltips:** Enlarged briefing text and calculation formulas for immediate data recognition.
+
+### Removed
+- **Expert Discussion Room:** Removed the experimental War Room feature to declutter the user experience.
+- **Sentiment Complexity:** Reverted complex fear-index analysis in favor of stable, deterministic risk models.
+
 
 ## [1.4.0] - 2026-05-11
 ### Added
