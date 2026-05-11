@@ -217,8 +217,8 @@ def render_map_panel() -> None:
         map_html = map_template.replace("__HOTSPOTS__", json.dumps(RELATIONAL_HOTSPOTS))
         map_html = map_html.replace("__LOCAL_SCORES__", json.dumps(local_scores))
         
-        # Responsive height: 580 on desktop, 400 on mobile
-        components.html(map_html, height=480)
+        # Optimized height for better mobile/desktop balance
+        components.html(map_html, height=380)
     
     st.markdown(
         "<div style='text-align:right; opacity:0.6;'><p style='color:#475569; font-size:0.5rem; font-family:monospace;'>ORBITAL_RECO_SYS v8.5 // SHIP_INTELLIGENCE: SYNCED // OSINT_FEED: LIVE</p></div>",
