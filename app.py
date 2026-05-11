@@ -18,6 +18,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+VERSION = "1.5.3"
+
 # Pull secrets from Streamlit Cloud when .env is absent (production deploy)
 def _load_streamlit_secrets() -> None:
     try:
