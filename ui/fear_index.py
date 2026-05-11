@@ -269,8 +269,6 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
         
         st.markdown(
             """
-        st.markdown(
-            """
             <style>
             /* 1. ANIMATIONS */
             @keyframes tile-glow {
