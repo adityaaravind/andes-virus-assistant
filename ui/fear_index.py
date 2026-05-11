@@ -335,26 +335,36 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
                     width: 100% !important;
                     max-width: 100% !important;
                 }
-                
                 div.stButton > button { 
-                    height: 55px !important; 
+                    height: 70px !important; 
                     flex-direction: row !important; 
-                    gap: 10px !important;
+                    gap: 15px !important;
                     justify-content: center !important;
-                    padding: 5px 10px !important;
+                    padding: 10px 20px !important;
                     border-top: none !important;
-                    border-left: 4px solid var(--btn-color) !important;
+                    border-left: 5px solid var(--btn-color) !important;
                     /* ADD INSET GLOW FOR INPUT BUTTON FEEL */
-                    box-shadow: inset 0 0 10px var(--btn-color)22, 0 4px 15px rgba(0,0,0,0.6) !important;
+                    box-shadow: inset 0 0 15px var(--btn-color)33, 0 6px 20px rgba(0,0,0,0.7) !important;
                 }
                 div.stButton > button div[data-testid="stMarkdownContainer"] {
-                    font-size: 1.2rem !important;
+                    font-size: 1.5rem !important;
                 }
                 div.stButton > button p {
-                    font-size: 0.6rem !important;
+                    font-size: 0.7rem !important;
                     text-align: left !important;
-                    letter-spacing: 0.02em !important;
+                    letter-spacing: 0.05em !important;
                 }
+            }
+            
+            @keyframes text-pulse-blue {
+                0% { text-shadow: 0 0 10px rgba(0,180,216,0.4); opacity: 0.8; }
+                50% { text-shadow: 0 0 25px rgba(0,180,216,0.9); opacity: 1; transform: scale(1.02); }
+                100% { text-shadow: 0 0 10px rgba(0,180,216,0.4); opacity: 0.8; }
+            }
+            
+            .cta-pulse {
+                animation: text-pulse-blue 2s infinite ease-in-out;
+                display: inline-block;
             }
             
             /* INTENSIFIED BACKLIGHT */
@@ -449,9 +459,14 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
             )
         else:
             st.markdown(
-                "<p style='color:#00b4d8; font-size:0.7rem; text-align:center; margin-top:1.2rem; font-weight:900; text-transform:uppercase; letter-spacing:0.1em; text-shadow: 0 0 12px rgba(0,180,216,0.8);'>"
-                "● Tap to Report Local Sentiment Score"
-                "</p>", 
+                "<div style='text-align:center; margin-top:1.5rem;'>"
+                "<p class='cta-pulse' style='color:#00b4d8; font-size:0.8rem; font-weight:950; text-transform:uppercase; letter-spacing:0.12em;'>"
+                "⚠️ INPUT REQUIRED: SHARE YOUR LOCAL ANXIETY LEVEL"
+                "</p>"
+                "<p style='color:#94a3b8; font-size:0.65rem; margin-top:4px; max-width:80%; margin-left:auto; margin-right:auto;'>"
+                "Your participation calibrates the global risk model. High-frequency user clicks generate maximum prediction intelligence and score accuracy."
+                "</p>"
+                "</div>", 
                 unsafe_allow_html=True
             )
 
