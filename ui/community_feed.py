@@ -8,9 +8,9 @@ from alerts.community_store import get_community_data, get_trending_topics
 
 def render_community_feed() -> None:
     """Render a live tactical intelligence stream with trending research topics."""
-    # Real-time refresh (every 30 seconds for community data)
+    # Real-time refresh (every 5 minutes for community data to ensure stability)
     from streamlit_autorefresh import st_autorefresh
-    st_autorefresh(interval=30000, key="community_refresh")
+    st_autorefresh(interval=300000, key="community_refresh")
 
     data = get_community_data()
     feed = data.get("feed", [])
