@@ -8,6 +8,7 @@ from pathlib import Path
 from datetime import datetime
 
 LIVE_FILE = Path("data/outbreak_live.json")
+LOCAL_SENTIMENT_FILE = Path("data/local_sentiment.json")
 
 # Data Exports for compatibility
 NATIONALITIES_DATA = [
@@ -33,8 +34,32 @@ def _get_live_state() -> dict:
         except Exception: pass
     return {"confirmed_cases": 5, "ship_status": "Quarantined", "last_updated": "2026-05-10"}
 
+def _get_local_sentiment() -> dict:
+    """Load or generate localized sentiment scores."""
+    if LOCAL_SENTIMENT_FILE.exists():
+        try:
+            data = json.loads(LOCAL_SENTIMENT_FILE.read_text())
+            # Check if older than 1 hour
+            ts = datetime.fromisoformat(data.get("timestamp", "2000-01-01"))
+            if (datetime.now() - ts).total_seconds() < 3600:
+                return data.get("scores", {})
+        except Exception: pass
+    
+    # Generate mock localized scores seeded by country codes for stability
+    import random
+    codes = ["ARG", "ESP", "GBR", "NLD", "ZAF", "USA", "CHL", "NOR", "ITA", "PHL", "BRA", "FRA", "DEU"]
+    scores = {c: round(random.uniform(1.2, 4.8), 2) for c in codes}
+    # Persistence
+    LOCAL_SENTIMENT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    LOCAL_SENTIMENT_FILE.write_text(json.dumps({
+        "timestamp": datetime.now().isoformat(),
+        "scores": scores
+    }))
+    return scores
+
 def render_map_panel() -> None:
     state = _get_live_state()
+    local_scores = _get_local_sentiment()
     from ui.fear_index import _calculate_fear_average
     fear, _, _, _, _, _ = _calculate_fear_average()
     
@@ -185,6 +210,7 @@ def render_map_panel() -> None:
             };
 
             const hotspots = __HOTSPOTS__;
+            const localScores = __LOCAL_SCORES__;
             const shipPos = [14.93, -23.51];
             const affectedCodes = ["ARG", "ZAF", "ESP", "GBR", "NLD", "PHL", "CHL", "NOR", "ITA"];
 
@@ -195,14 +221,28 @@ def render_map_panel() -> None:
                         style: function(feature) {
                             const code = feature.id || feature.properties.ISO_A3;
                             if (affectedCodes.includes(code)) return { fillColor: '#4a1212', fillOpacity: 0.5, color: '#00b4d8', weight: 1 };
-                            return { fillOpacity: 0, weight: 0.5, color: '#222' };
+                            return { fillOpacity: 0.1, weight: 0.5, color: '#222', fillColor: '#111' };
                         },
                         onEachFeature: function(feature, layer) {
                             const code = feature.id || feature.properties.ISO_A3;
+                            const name = feature.properties.name || "UNKNOWN_REGION";
+                            const score = localScores[code] || (Math.random() * (2.5 - 1.2) + 1.2).toFixed(2);
+                            
+                            let tooltipHtml = `<div style="font-family:monospace; color:#fff; font-size:10px; border-left:3px solid #00f5ff; padding-left:8px;">`;
+                            tooltipHtml += `<b style="color:#00f5ff; font-size:11px;">REGION: ${name} [${code}]</b><br/>`;
+                            tooltipHtml += `<div style="margin-top:4px;"><span style="color:#94a3b8;">LOCAL_FEAR_INDEX:</span> <b style="color:#fbbf24;">${score}/5.0</b></div>`;
+                            
                             const h = hotspots.find(x => x.name.includes(code) || (code === "ARG" && x.name.includes("ARGENTINA")));
                             if (h) {
-                                layer.bindTooltip(`<div style="font-family:monospace; color:#fff; font-size:10px;"><b>ZONE: ${feature.properties.name}</b><br/>REASON: ${h.relation}</div>`, { sticky: true });
+                                tooltipHtml += `<div style="margin-top:4px; border-top:1px solid #333; padding-top:4px;">`;
+                                tooltipHtml += `<span style="color:#ef4444;">TACTICAL_RELATION:</span> ${h.relation}</div>`;
                             }
+                            tooltipHtml += `</div>`;
+                            
+                            layer.bindTooltip(tooltipHtml, { sticky: true, className: 'tactical-tooltip' });
+                            
+                            layer.on('mouseover', function() { this.setStyle({ fillOpacity: 0.4, color: '#00f5ff' }); });
+                            layer.on('mouseout', function() { this.setStyle({ fillOpacity: affectedCodes.includes(code) ? 0.5 : 0.1, color: affectedCodes.includes(code) ? '#00b4d8' : '#222' }); });
                         }
                     }).addTo(map);
                 });
@@ -237,6 +277,7 @@ def render_map_panel() -> None:
 
     # Manual Interpolation
     map_html = map_template.replace("__HOTSPOTS__", json.dumps(RELATIONAL_HOTSPOTS))
+    map_html = map_html.replace("__LOCAL_SCORES__", json.dumps(local_scores))
     map_html = map_html.replace("__NEWS_ITEMS__", news_html)
     map_html = map_html.replace("__STATUS__", state.get('ship_status', 'Transit').upper())
     map_html = map_html.replace("__FEAR__", f"{fear:.2f}")
