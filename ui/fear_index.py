@@ -314,10 +314,11 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
                 text-shadow: 0 0 5px var(--btn-color), 0 0 10px var(--btn-color), 0 0 15px var(--btn-color) !important;
             }
 
-            /* EMOJI SIZE */
+            /* EMOJI SIZE - Matches stat-value feel */
             div.stButton > button div[data-testid="stMarkdownContainer"] {
-                font-size: 1.6rem !important;
+                font-size: 2rem !important;
                 line-height: 1 !important;
+                margin-bottom: 5px !important;
             }
 
             /* MOBILE ADAPTIVE LAYOUT (2-column grid for better thumb reach) */
@@ -360,28 +361,23 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
             div.stButton > button::before {
                 content: '';
                 position: absolute;
-                top: -50%;
-                left: -50%;
-                width: 200%;
-                height: 200%;
-                background: radial-gradient(circle, var(--btn-color)30 0%, transparent 65%);
-                opacity: 0.5;
-                transition: opacity 0.3s ease;
-                z-index: 0;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 3px;
+                background: var(--btn-color);
+                box-shadow: 0 0 15px var(--btn-color);
+                opacity: 0.8;
+                z-index: 10;
             }
 
             div.stButton > button:hover {
-                background-color: rgba(30, 41, 59, 1) !important;
+                background: rgba(15, 23, 42, 0.9) !important;
                 border-color: var(--btn-color) !important;
-                transform: translateY(-6px) !important;
-                box-shadow: 0 15px 35px var(--btn-color)55, 0 0 25px var(--btn-color)44 !important;
-                color: #fff !important;
+                transform: translateY(-4px) !important;
+                box-shadow: 0 15px 40px rgba(0,0,0,0.6), 0 0 20px var(--btn-color)33 !important;
             }
             
-            div.stButton > button:hover::before {
-                opacity: 1.0;
-            }
-
             div.stButton > button:active {
                 transform: translateY(-2px) scale(0.98) !important;
                 box-shadow: 0 5px 15px var(--btn-color)44 !important;
@@ -433,7 +429,6 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
                 st.markdown(f'<div class="{container_class}" style="--btn-color: {info["color"]};">', unsafe_allow_html=True)
                 
                 # Use a combined label with emoji and text
-                # Note: Streamlit buttons preserve newlines if rendered correctly
                 btn_label = f"{icons[level_id]}\n{info['label'].upper()}"
                 
                 if st.button(btn_label, key=f"v23_btn_{level_id}", disabled=user_voted_today, use_container_width=True):
