@@ -367,10 +367,10 @@ def _render_header() -> None:
             """
             <div style='display: flex; flex-direction: column; gap: 4px; margin-bottom: 0.5rem;'>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <div class='outbreak-badge' style="background: #dc2626 !important; color: white !important; font-size: 0.75rem !important; padding: 2px 10px !important; border-radius: 4px !important; font-weight: 900 !important; letter-spacing: 0.2em !important; animation: pulse-red 2s infinite;">● OUTBREAK ACTIVE</div>
+                    <div class='outbreak-badge'>● OUTBREAK ACTIVE</div>
                 </div>
-                <h1 class='glowing-title mega-glow' style='margin:0; font-size: 2.4rem !important; letter-spacing: -0.02em !important; line-height: 1.1;'>MV Hondius Hantavirus Outbreak</h1>
-                <p style='font-size:0.9rem !important; margin:0; opacity: 0.8; color: #94a3b8; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;'>
+                <h1 class='glowing-title mega-glow' style='margin:0;'>MV Hondius Hantavirus Outbreak</h1>
+                <p style='font-size:clamp(0.6rem, 2vw, 0.9rem) !important; margin:0; opacity: 0.8; color: #94a3b8; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;'>
                     Strain: Andes orthohantavirus (ANDV) · Lineage: Patagonian/Hondius · Intel Class: CRITICAL/RED
                 </p>
             </div>

@@ -302,14 +302,16 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
             /* LABEL FIX: Strict font sizing to prevent wrapping */
             div.stButton > button p {
                 margin: 0 !important;
-                line-height: 1 !important;
+                line-height: 1.1 !important;
                 white-space: nowrap !important;
                 text-align: center !important;
                 font-family: 'Inter', sans-serif !important;
                 font-weight: 950 !important;
-                font-size: 0.62rem !important;
-                letter-spacing: -0.01em !important;
+                font-size: 0.65rem !important;
+                letter-spacing: 0.05em !important;
                 text-transform: uppercase !important;
+                /* INTENSE GLOWING TEXT */
+                text-shadow: 0 0 5px var(--btn-color), 0 0 10px var(--btn-color), 0 0 15px var(--btn-color) !important;
             }
 
             /* EMOJI SIZE */
@@ -318,24 +320,39 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
                 line-height: 1 !important;
             }
 
-            /* MOBILE ADAPTIVE LAYOUT (Horizontal Stack) */
+            /* MOBILE ADAPTIVE LAYOUT (2-column grid for better thumb reach) */
             @media (max-width: 600px) {
+                /* FORCE GRID ON THE PARENT COLUMN CONTAINER WITH HIGHER SPECIFICITY */
+                [data-testid="stAppViewContainer"] div[data-testid="stHorizontalBlock"]:has(button[key*="v23_btn_"]) {
+                    display: grid !important;
+                    grid-template-columns: 1fr 1fr !important;
+                    gap: 0.5rem !important;
+                    flex-direction: row !important;
+                }
+                /* Ensure columns don't force 100% width inside the grid */
+                [data-testid="stAppViewContainer"] div[data-testid="stHorizontalBlock"]:has(button[key*="v23_btn_"]) > div {
+                    width: 100% !important;
+                    max-width: 100% !important;
+                }
+                
                 div.stButton > button { 
                     height: 55px !important; 
                     flex-direction: row !important; 
-                    gap: 20px !important;
-                    justify-content: flex-start !important;
-                    padding: 0 25px !important;
+                    gap: 10px !important;
+                    justify-content: center !important;
+                    padding: 5px 10px !important;
                     border-top: none !important;
                     border-left: 4px solid var(--btn-color) !important;
+                    /* ADD INSET GLOW FOR INPUT BUTTON FEEL */
+                    box-shadow: inset 0 0 10px var(--btn-color)22, 0 4px 15px rgba(0,0,0,0.6) !important;
                 }
                 div.stButton > button div[data-testid="stMarkdownContainer"] {
-                    font-size: 1.4rem !important;
+                    font-size: 1.2rem !important;
                 }
                 div.stButton > button p {
-                    font-size: 0.85rem !important;
+                    font-size: 0.6rem !important;
                     text-align: left !important;
-                    letter-spacing: 0.05em !important;
+                    letter-spacing: 0.02em !important;
                 }
             }
             
@@ -393,9 +410,6 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
                 background: linear-gradient(135deg, var(--btn-color)11, rgba(15, 23, 42, 0.9)) !important;
             }
 
-            @media (max-width: 600px) {
-                div.stButton > button { height: 75px !important; gap: 2px !important; }
-            }
             </style>
             <div style="margin-bottom: 1.2rem; border-bottom: 1px solid rgba(56,189,248,0.3); padding-bottom: 0.6rem; display:flex; justify-content:space-between; align-items:center;">
                 <p style='color:#38bdf8; font-size:0.8rem; font-weight:900; margin:0; letter-spacing:0.15em; text-transform:uppercase; text-shadow: 0 0 10px rgba(56,189,248,0.5);'>📡 TACTICAL SENTIMENT INPUT</p>
@@ -440,8 +454,8 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
             )
         else:
             st.markdown(
-                "<p style='color:#00b4d8; font-size:0.65rem; text-align:center; margin-top:1.2rem; font-weight:900; text-transform:uppercase; letter-spacing:0.1em; text-shadow: 0 0 12px rgba(0,180,216,0.8);'>"
-                "● Select current public anxiety level for real-time risk modeling"
+                "<p style='color:#00b4d8; font-size:0.7rem; text-align:center; margin-top:1.2rem; font-weight:900; text-transform:uppercase; letter-spacing:0.1em; text-shadow: 0 0 12px rgba(0,180,216,0.8);'>"
+                "● Tap to Report Local Sentiment Score"
                 "</p>", 
                 unsafe_allow_html=True
             )

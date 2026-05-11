@@ -115,7 +115,7 @@ def render_map_panel() -> None:
             
         st.markdown(
             f"""
-            <div class="tactical-card" style="border-right: 4px solid #00f5ff; background: rgba(13, 27, 42, 0.6); padding: 15px; border-radius: 10px; border: 1px solid rgba(0,245,255,0.2); height: 350px; display: flex; flex-direction: column;">
+            <div class="tactical-card mobile-dynamic-height" style="border-right: 4px solid #00f5ff; background: rgba(13, 27, 42, 0.6); padding: 15px; border-radius: 10px; border: 1px solid rgba(0,245,255,0.2); height: 350px; display: flex; flex-direction: column;">
                 <div style="color: #64748b; font-size: 10px; font-weight: 900; margin-bottom: 8px; letter-spacing: 2px;">📡 GLOBAL OSINT SIGNALS</div>
                 <div style="flex: 1; overflow-y: auto; padding-right: 5px;">
                     {news_items_html}
@@ -218,7 +218,34 @@ def render_map_panel() -> None:
         map_html = map_html.replace("__LOCAL_SCORES__", json.dumps(local_scores))
         
         # Optimized height for better mobile/desktop balance
+        # Map Interaction Overlay for Mobile
+        st.markdown(
+            """
+            <div id="map-container" style="position: relative;">
+                <div id="map-overlay" class="map-interact-overlay" onclick="this.style.display='none'; document.getElementById('map-iframe').style.pointerEvents='auto';">
+                    <span>📍 Tap to explore map</span>
+                </div>
+                <div id="map-iframe" style="pointer-events: none;">
+            """, unsafe_allow_html=True
+        )
+        
         components.html(map_html, height=380)
+        
+        st.markdown("</div></div>", unsafe_allow_html=True)
+        
+        st.markdown(
+            """
+            <script>
+                // Hide overlay by default on desktop
+                if (window.innerWidth > 768) {
+                    const overlay = document.getElementById('map-overlay');
+                    if (overlay) overlay.style.display = 'none';
+                    const iframe = document.getElementById('map-iframe');
+                    if (iframe) iframe.style.pointerEvents = 'auto';
+                }
+            </script>
+            """, unsafe_allow_html=True
+        )
     
     st.markdown(
         "<div style='text-align:right; opacity:0.6;'><p style='color:#475569; font-size:0.5rem; font-family:monospace;'>ORBITAL_RECO_SYS v8.5 // SHIP_INTELLIGENCE: SYNCED // OSINT_FEED: LIVE</p></div>",
