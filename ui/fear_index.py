@@ -270,78 +270,91 @@ text-align:center; min-width:90px; box-shadow: 0 0 15px {color}15; height: fit-c
         st.markdown(
             """
             <style>
-            /* 1. FORCE VERTICAL ON MOBILE */
+            /* 1. LAYOUT RESET */
             div[data-testid="stHorizontalBlock"] {
                 display: flex !important;
                 flex-wrap: wrap !important;
-                justify-content: center !important;
-                gap: 12px !important;
+                justify-content: space-between !important;
+                gap: 8px !important;
             }
 
             div[data-testid="column"] {
                 flex: 1 1 18% !important;
-                min-width: 65px !important;
+                min-width: 0 !important;
                 position: relative;
-                overflow: visible !important;
             }
 
+            /* 2. PREMIUM TACTICAL BUTTONS */
             .premium-tile {
                 background: rgba(15, 23, 42, 0.4);
                 backdrop-filter: blur(8px);
-                border: 1px solid rgba(255, 255, 255, 0.05);
-                border-radius: 12px;
-                width: 65px;
-                height: 65px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 10px;
+                padding: 10px 5px;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                cursor: pointer;
+                width: 100%;
+                min-height: 85px;
                 position: absolute;
                 top: 0;
-                left: 50%;
-                transform: translateX(-50%);
-                z-index: 1;
+                left: 0;
                 pointer-events: none;
+                z-index: 1;
             }
 
             .premium-tile.active {
-                background: radial-gradient(circle at center, var(--t-color)55 0%, rgba(15, 23, 42, 0.95) 100%) !important;
-                border: 2.5px solid var(--t-color) !important;
-                box-shadow: 0 0 30px var(--t-color)77;
-                transform: translateX(-50%) scale(1.1) translateY(-4px) !important;
+                background: radial-gradient(circle at center, var(--t-color)33 0%, rgba(15, 23, 42, 0.95) 100%) !important;
+                border: 2px solid var(--t-color) !important;
+                box-shadow: 0 0 20px var(--t-color)44;
+                transform: translateY(-2px);
                 z-index: 2;
-                opacity: 1 !important;
             }
 
-            .premium-tile.disabled { opacity: 0.1; filter: grayscale(1); }
-            .tile-icon { font-size: 1.4rem; line-height: 1; }
-            .tile-label { font-family: 'Inter', sans-serif; font-weight: 900; font-size: 0.45rem; text-transform: uppercase; color: #94a3b8; }
+            .premium-tile.disabled { opacity: 0.3; filter: grayscale(0.5); }
+            
+            .tile-icon { font-size: 1.6rem; margin-bottom: 4px; }
+            .tile-label { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 0.55rem; text-transform: uppercase; color: #f8fafc; letter-spacing: 0.05em; }
 
-            div[data-testid="stButton"] { height: 65px !important; display: flex; justify-content: center; }
+            /* 3. INVISIBLE STREAMLIT BUTTON OVERLAY */
+            div[data-testid="stButton"] { height: 85px !important; margin: 0 !important; }
             div[data-testid="stButton"] button {
                 background: transparent !important;
                 border: none !important;
                 box-shadow: none !important;
-                height: 65px !important;
-                width: 65px !important;
+                height: 85px !important;
+                width: 100% !important;
                 color: transparent !important;
                 z-index: 10 !important;
+                border-radius: 10px !important;
             }
+            div[data-testid="stButton"] button:hover { background: rgba(255,255,255,0.03) !important; }
 
-            /* MOBILE: VERTICAL STACK FOR CLARITY */
+            /* 4. MOBILE OPTIMIZATION (THE FIX) */
             @media (max-width: 600px) {
-                div[data-testid="stHorizontalBlock"] { flex-direction: column !important; align-items: center !important; }
-                div[data-testid="column"] { flex: 0 0 70px !important; width: 100% !important; height: 70px !important; }
-                .premium-tile { width: 100%; max-width: 280px; height: 55px; flex-direction: row; gap: 15px; border-radius: 10px; }
-                .premium-tile.active { transform: translateX(-50%) scale(1.02) !important; }
-                div[data-testid="stButton"] { height: 55px !important; width: 100%; max-width: 280px; }
-                div[data-testid="stButton"] button { height: 55px !important; width: 100% !important; }
-                .tile-icon { font-size: 1.5rem; }
-                .tile-label { font-size: 0.7rem; letter-spacing: 0.1em; }
+                div[data-testid="stHorizontalBlock"] { flex-direction: column !important; gap: 10px !important; }
+                div[data-testid="column"] { flex: 1 1 100% !important; height: 65px !important; }
+                .premium-tile { 
+                    flex-direction: row !important; 
+                    height: 65px !important; 
+                    min-height: 65px !important;
+                    justify-content: flex-start !important;
+                    padding: 0 20px !important;
+                    gap: 15px;
+                }
+                div[data-testid="stButton"] { height: 65px !important; }
+                div[data-testid="stButton"] button { height: 65px !important; }
+                .tile-icon { font-size: 1.8rem; margin: 0; }
+                .tile-label { font-size: 0.8rem; letter-spacing: 0.15em; font-weight: 900; }
             }
             </style>
-            <p style='color:#94a3b8; font-size:0.75rem; font-weight:800; margin-bottom:1rem; letter-spacing:0.1em; opacity:0.8; text-transform:uppercase;'>📡 SENTIMENT INDEX</p>
+            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:0.5rem;">
+                <p style='color:#94a3b8; font-size:0.7rem; font-weight:800; margin:0; letter-spacing:0.1em; text-transform:uppercase;'>📡 SENTIMENT INDEX</p>
+                <p style='color:#38bdf8; font-size:0.55rem; font-weight:900; margin:0; letter-spacing:0.05em; animation: blinker 2s linear infinite;'>[ ACTION REQUIRED: SUBMIT CURRENT STATUS ]</p>
+            </div>
             """,
             unsafe_allow_html=True
         )
