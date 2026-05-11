@@ -60,12 +60,4 @@ def render_community_feed() -> None:
         unsafe_allow_html=True
     )
     
-    # 4. SENTIMENT VELOCITY (Sparkline with no gap)
-    if history:
-        st.markdown("<p style='color:#64748b; font-size:0.5rem; font-weight:900; text-transform:uppercase; letter-spacing:0.08em; margin:0;'>Sentiment Velocity (7D)</p>", unsafe_allow_html=True)
-        from ui.fear_index import _build_sentiment_trend
-        fig_trend = _build_sentiment_trend(history)
-        # Force a very small height in Plotly container
-        st.plotly_chart(fig_trend, use_container_width=True, config={"displayModeBar": False}, key="community_velocity_chart")
-    
     st.markdown("<div style='margin-bottom:-1rem;'></div>", unsafe_allow_html=True) # Tighten spacing
