@@ -202,11 +202,33 @@ def render_fear_index() -> None:
         div.stButton > button p { margin: 0 !important; font-weight: 950 !important; font-size: 0.7rem !important; letter-spacing: 0.05em; text-transform: uppercase; }
         div.stButton > button span { font-size: 1.2rem !important; margin-bottom: 0px !important; }
         div.stButton > button:disabled { opacity: 0.2 !important; filter: grayscale(1) !important; pointer-events: none !important; }
+        /* ── Mobile Grid Overrides for Fear Buttons ── */
+        @media (max-width: 768px) {
+            div[data-testid="stVerticalBlock"] > div:has(.fear-marker) + div > div[data-testid="stHorizontalBlock"] {
+                flex-direction: row !important;
+                flex-wrap: wrap !important;
+                gap: 0.5rem !important;
+            }
+            div[data-testid="stVerticalBlock"] > div:has(.fear-marker) + div > div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+                width: calc(50% - 0.25rem) !important;
+                flex: 1 1 calc(50% - 0.25rem) !important;
+                min-width: 0 !important;
+            }
+            /* Make the 5th (last) button span full width to anchor the grid */
+            div[data-testid="stVerticalBlock"] > div:has(.fear-marker) + div > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child {
+                width: 100% !important;
+                flex: 1 1 100% !important;
+            }
+            /* Compact buttons inside grid */
+            div.stButton > button { height: 45px !important; padding: 2px !important; }
+            div.stButton > button p { font-size: 0.55rem !important; }
+        }
         </style>
         <div style="margin: 1.2rem 0 0.6rem; border-left: 3px solid #38bdf8; padding-left: 10px;">
             <p style='color:#38bdf8; font-size:0.85rem; font-weight:900; margin:0; letter-spacing:0.02em;'>🗣️ TELL US HOW YOU FEEL</p>
             <p style='color:#64748b; font-size:0.6rem; margin:1px 0 0;'>Your input helps recalibrate the community mood in real-time.</p>
         </div>
+        <div class="fear-marker" style="display:none;"></div>
         """, unsafe_allow_html=True)
 
     cols = st.columns(5)
