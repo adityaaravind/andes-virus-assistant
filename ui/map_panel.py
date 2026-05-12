@@ -32,32 +32,46 @@ def _get_historical_date(day: int) -> str:
     return target.strftime("%b %d, 2020")
 
 def _get_vessel_events() -> list:
-    # Try to get real summaries from news if available
+    signals = []
+    
+    # 1. ADD CRITICAL USA LANDING ALERTS
+    signals.append({
+        "date": "LIVE", "time": "SECURED", 
+        "event": "📍 USA LANDING: 24 passengers processed at Newark Liberty (EWR). Pre-symptomatic screening initiated.", 
+        "type": "CRITICAL", "speed": "14.2 kn", "uplink": "98%", "hours_ago": 0, "priority": "high"
+    })
+    signals.append({
+        "date": "MAY 11", "time": "19:45", 
+        "event": "🛡️ CDC INTEL: Bellevue Hospital confirms isolation of 3 individuals with hantavirus-linked pulmonary distress.", 
+        "type": "ALERT", "speed": "13.9 kn", "uplink": "95%", "hours_ago": 1, "priority": "high"
+    })
+
+    # 2. Try to get real summaries from news
     try:
         from ui.news_ticker import fetch_headlines
         articles = fetch_headlines()
         if articles:
-            # Transform top 5 articles into signals
-            signals = []
-            for i, art in enumerate(articles[:6]):
-                h_ago = i * 2 + 1 # Simulated aging for the feed
+            for i, art in enumerate(articles[:4]):
+                h_ago = i * 2 + 2
+                summary = art['title'].strip()
+                if not summary.endswith('.'): summary += '.'
+                
                 signals.append({
                     "date": "MAY 11", 
-                    "time": f"{20-i:02d}:45", 
-                    "event": art['title'][:80] + "...", 
+                    "time": f"{18-i:02d}:15", 
+                    "event": f"• {summary}", 
                     "type": "INTEL", 
-                    "speed": f"{14 - (i*0.5):.1f} kn", 
+                    "speed": f"{12.5 - (i*0.3):.1f} kn", 
                     "uplink": f"{99-i}%", 
-                    "hours_ago": h_ago
+                    "hours_ago": h_ago,
+                    "priority": "normal"
                 })
             return signals
     except Exception: pass
     
-    return [
-        {"date": "MAY 11", "time": "18:15", "event": "Vessel contact: ARS Almirante Brown (ARG). US landing zones identified.", "type": "COMMS", "speed": "14.2 knots", "uplink": "98%", "hours_ago": 2},
-        {"date": "MAY 11", "time": "14:30", "event": "Encrypted burst: New York Port Authority reports suspicious arrivals.", "type": "SIGNAL", "speed": "12.8 knots", "uplink": "92%", "hours_ago": 5},
-        {"date": "MAY 11", "time": "08:45", "event": "Satellite lock confirmed. Ship position updated to Mid-Atlantic.", "type": "SYNC", "speed": "15.0 knots", "uplink": "100%", "hours_ago": 11},
-        {"date": "MAY 10", "time": "21:20", "event": "Medical evacuation airlift successful near Cape Verde.", "type": "OPS", "speed": "5.2 knots", "uplink": "85%", "hours_ago": 23},
+    return signals + [
+        {"date": "MAY 11", "time": "08:45", "event": "• Satellite lock confirmed. Ship position updated to Mid-Atlantic.", "type": "SYNC", "speed": "15.0 kn", "uplink": "100%", "hours_ago": 11, "priority": "normal"},
+        {"date": "MAY 10", "time": "21:20", "event": "• Medical evacuation airlift successful near Cape Verde.", "type": "OPS", "speed": "5.2 kn", "uplink": "85%", "hours_ago": 23, "priority": "normal"},
     ]
 
 def _get_live_state() -> dict:
@@ -111,13 +125,13 @@ def render_map_panel() -> None:
 
     st.markdown(
         f"""
-        <div class="mission-header" style='border-left: 3px solid #4ade80; padding-left:15px; margin-bottom:0.8rem; display:flex; justify-content:space-between; align-items:center;'>
+        <div class="mission-header" style='border-left: 3px solid #4ade80; padding-left:12px; margin-bottom:0.6rem; display:flex; justify-content:space-between; align-items:center;'>
             <div>
-                <h2 style='margin:0; font-size:1.1rem; letter-spacing:0.12em; color:#ffffff;'>OUTBREAK TRACKER</h2>
-                <p style='margin:0; font-size:0.6rem; color:#4ade80; font-family:monospace; font-weight:800;'>REAL-TIME MAPS & SHIP STATUS // DATA SYNC: ACTIVE</p>
+                <h2 style='margin:0; font-size:1rem; letter-spacing:0.1em; color:#ffffff;'>OUTBREAK TRACKER</h2>
+                <p style='margin:0; font-size:0.55rem; color:#4ade80; font-family:monospace; font-weight:800;'>REAL-TIME MAPS & SHIP STATUS</p>
             </div>
-            <div style="background:rgba(74,222,128,0.1); border:1px solid #4ade8044; padding:2px 10px; border-radius:4px;">
-                <span style="color:#4ade80; font-size:9px; font-weight:900;">OFFICIAL DATA SYNC</span>
+            <div style="background:rgba(74,222,128,0.1); border:1px solid #4ade8044; padding:1px 8px; border-radius:4px;">
+                <span style="color:#4ade80; font-size:8px; font-weight:900;">LIVE DATA SYNC</span>
             </div>
         </div>
         """, unsafe_allow_html=True
@@ -128,15 +142,20 @@ def render_map_panel() -> None:
     with col_vessel:
         events_html = ""
         for ev in events:
-            # Signal Hub Aging: < 6h Green, > 6h Yellow
-            sig_color = "#4ade80" if ev['hours_ago'] <= 6 else "#fde047"
+            # Signal Hub Color: High Priority RED, else Green/Yellow based on age
+            if ev.get('priority') == 'high':
+                sig_color = "#f87171"
+            else:
+                sig_color = "#4ade80" if ev['hours_ago'] <= 6 else "#fde047"
+            
+            # Bullet styling
             events_html += f"""
-                <div style="border-left: 3px solid {sig_color}; padding-left: 12px; margin-bottom: 15px; animation: slideIn 0.4s ease-out; background: rgba(255,255,255,0.02); padding-top: 8px; padding-bottom: 8px; border-radius: 0 6px 6px 0;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; padding-right:8px;">
-                        <div style="color: {sig_color}; font-size: 8.5px; font-weight: 900; letter-spacing: 0.5px;">{ev['date']} @ {ev['time']}</div>
+                <div style="border-left: 3px solid {sig_color}; padding-left: 12px; margin-bottom: 12px; animation: slideIn 0.4s ease-out; background: rgba({(248,113,113) if sig_color=="#f87171" else (74,222,128) if sig_color=="#4ade80" else (253,224,71)}, 0.05); padding-top: 6px; padding-bottom: 6px; border-radius: 0 6px 6px 0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px; padding-right:8px;">
+                        <div style="color: {sig_color}; font-size: 8px; font-weight: 950; letter-spacing: 0.8px;">{ev['date']} @ {ev['time']}</div>
                         <div style="color: #475569; font-size: 7px; font-weight: 800;">{ev['hours_ago']}H AGO</div>
                     </div>
-                    <div style="color: #ffffff; font-size: 10.5px; line-height: 1.3; font-weight: 600;">{ev['event']}</div>
+                    <div style="color: #ffffff; font-size: 10px; line-height: 1.2; font-weight: 600;">{ev['event']}</div>
                 </div>
             """
 

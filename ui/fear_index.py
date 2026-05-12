@@ -24,14 +24,11 @@ FEAR_LEVELS = {
 }
 
 def _get_stable_user_id() -> str:
-    """Generate a reasonably stable user ID for Streamlit Cloud sessions."""
+    """Generate a unique session-based ID to ensure individual lockout periods."""
     if "stable_user_id" not in st.session_state:
-        # Try to get something more stable than just a daily hash if possible
-        # For now, we'll use a session-independent hash based on the current date + a secret if available
-        # In a real app, we'd use a cookie or local storage via a component.
-        day_str = datetime.utcnow().strftime("%Y-%m-%d")
-        # We'll use the user's timezone/browser info if available to differentiate
-        st.session_state.stable_user_id = f"u_{hashlib.md5(day_str.encode()).hexdigest()[:12]}"
+        # Generate a random unique ID for this specific session
+        import uuid
+        st.session_state.stable_user_id = f"u_{str(uuid.uuid4())[:12]}"
     return st.session_state.stable_user_id
 
 def _load_fear_data() -> dict[str, Any]:
@@ -179,24 +176,29 @@ def render_fear_index() -> None:
     st.markdown("""
         <style>
         div.stButton > button {
-            width: 100% !important; height: 100px !important;
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.95)) !important;
-            border: 1px solid rgba(255, 255, 255, 0.15) !important;
-            border-top: 4px solid var(--btn-color) !important;
-            border-radius: 16px !important; color: #f8fafc !important;
-            transition: all 0.2s ease !important;
-            display: flex !important; flex-direction: column !important;
-            align-items: center !important; justify-content: center !important;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4) !important;
+            width: 100% !important; height: 55px !important;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.98)) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-top: 3px solid var(--btn-color) !important;
+            border-radius: 10px !important; color: #f8fafc !important;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            display: flex !important; flex-direction: row !important;
+            align-items: center !important; justify-content: center !important; gap: 8px !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
         }
-        div.stButton > button:hover { transform: scale(1.02) !important; border-color: white !important; }
-        div.stButton > button p { margin: 0 !important; font-weight: 900 !important; font-size: 0.75rem !important; }
-        div.stButton > button span { font-size: 1.8rem !important; margin-bottom: 6px !important; }
-        div.stButton > button:disabled { opacity: 0.4 !important; filter: grayscale(1) !important; pointer-events: none !important; }
+        div.stButton > button:hover { 
+            transform: translateY(-2px) !important; 
+            border-color: var(--btn-color) !important;
+            box-shadow: 0 0 20px var(--btn-color)44 !important;
+            background: rgba(30, 41, 59, 1) !important;
+        }
+        div.stButton > button p { margin: 0 !important; font-weight: 950 !important; font-size: 0.7rem !important; letter-spacing: 0.05em; text-transform: uppercase; }
+        div.stButton > button span { font-size: 1.2rem !important; margin-bottom: 0px !important; }
+        div.stButton > button:disabled { opacity: 0.2 !important; filter: grayscale(1) !important; pointer-events: none !important; }
         </style>
-        <div style="margin: 1.5rem 0 0.8rem; border-left: 4px solid #38bdf8; padding-left: 12px;">
-            <p style='color:#38bdf8; font-size:0.9rem; font-weight:900; margin:0; letter-spacing:0.05em;'>🗣️ TELL US HOW YOU FEEL</p>
-            <p style='color:#64748b; font-size:0.65rem; margin:2px 0 0;'>Help us understand the community mood by sharing your worry level.</p>
+        <div style="margin: 1.2rem 0 0.6rem; border-left: 3px solid #38bdf8; padding-left: 10px;">
+            <p style='color:#38bdf8; font-size:0.85rem; font-weight:900; margin:0; letter-spacing:0.02em;'>🗣️ TELL US HOW YOU FEEL</p>
+            <p style='color:#64748b; font-size:0.6rem; margin:1px 0 0;'>Your input helps recalibrate the community mood in real-time.</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -206,7 +208,7 @@ def render_fear_index() -> None:
         info = FEAR_LEVELS[level_id]
         with cols[i]:
             st.markdown(f'<div style="--btn-color: {info["color"]};">', unsafe_allow_html=True)
-            btn_text = f"{icons[level_id]}\n{info['label'].upper()}"
+            btn_text = f"{icons[level_id]} {info['label'].upper()}"
             if st.button(btn_text, key=f"findex_v4_{level_id}", disabled=is_locked, use_container_width=True):
                 _save_fear_vote(level_id, user_id)
                 st.rerun()

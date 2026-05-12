@@ -182,15 +182,15 @@ def render_pandemic_risk_panel() -> None:
     score = risk["overall"]
 
     st.markdown(
-        f'<div style="background:rgba(15, 23, 42, 0.6); border:1px solid {color}44; border-radius:12px; padding:1.2rem; border-top: 4px solid {color}; backdrop-filter:blur(10px);">'
-        f'<div style="display:flex; justify-content:space-between; align-items:baseline;">'
-        f'<div><p style="color:#94a3b8; font-size:0.65rem; font-weight:800; letter-spacing:0.1em; margin:0; text-transform:uppercase;">Outbreak Status Check</p>'
-        f'<h2 style="margin:0; font-size:1.8rem; font-weight:950; color:white; letter-spacing:-0.02em;">{label.upper()}</h2></div>'
-        f'<div style="background:{color}22; padding:4px 12px; border-radius:8px; border:1px solid {color}44;">'
-        f'<span style="color:{color}; font-size:1.4rem; font-weight:900;">{score:.1f}</span>'
-        f'<span style="color:#94a3b8; font-size:0.6rem; font-weight:800; margin-left:4px;">SCORE</span>'
+        f'<div style="background:rgba(15, 23, 42, 0.6); border:1px solid {color}44; border-radius:12px; padding:0.8rem; border-top: 3px solid {color}; backdrop-filter:blur(10px);">'
+        f'<div style="display:flex; justify-content:space-between; align-items:center;">'
+        f'<div><p style="color:#94a3b8; font-size:0.6rem; font-weight:800; letter-spacing:0.1em; margin:0; text-transform:uppercase;">Outbreak Status Check</p>'
+        f'<h2 style="margin:0; font-size:1.6rem; font-weight:950; color:white; letter-spacing:-0.03em; line-height:1.1;">{label.upper()}</h2></div>'
+        f'<div style="background:{color}22; padding:2px 10px; border-radius:6px; border:1px solid {color}44; text-align:center;">'
+        f'<span style="color:{color}; font-size:1.2rem; font-weight:900;">{score:.1f}</span>'
+        f'<span style="color:#94a3b8; font-size:0.5rem; font-weight:800; margin-left:2px;">SCORE</span>'
         f'</div></div>'
-        f'<p style="color:#cbd5e1; font-size:0.85rem; margin:10px 0 0; font-weight:600;">{desc}</p>'
+        f'<p style="color:#cbd5e1; font-size:0.75rem; margin:6px 0 0; font-weight:600; line-height:1.2; opacity:0.9;">{desc}</p>'
         f'</div>',
         unsafe_allow_html=True
     )
@@ -220,18 +220,18 @@ def render_pandemic_risk_panel() -> None:
 
     # ── Key difference callout ────────────────────────────────────────────────
     callout_html = f"""
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1rem; margin-top:1.5rem;">
-        <div style="background:rgba(34,197,94,0.03); border:1px solid rgba(34,197,94,0.1); padding:1rem; border-radius:10px;">
-            <p style="color:#4ade80; font-size:0.65rem; font-weight:800; text-transform:uppercase; margin-bottom:8px;">✓ Lower Risk Than COVID</p>
-            <p style="color:#94a3b8; font-size:0.75rem; line-height:1.4; margin:0;">Andes virus is less contagious than COVID-19. It usually requires close contact and doesn't stay in the air like COVID does.</p>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:0.6rem; margin-top:0.8rem;">
+        <div style="background:rgba(34,197,94,0.03); border:1px solid rgba(34,197,94,0.1); padding:0.6rem; border-radius:8px;">
+            <p style="color:#4ade80; font-size:0.6rem; font-weight:900; text-transform:uppercase; margin-bottom:4px;">✓ Lower Risk Than COVID</p>
+            <p style="color:#94a3b8; font-size:0.7rem; line-height:1.2; margin:0;">Less contagious. Requires close contact; not airborne like COVID.</p>
         </div>
-        <div style="background:rgba(245,158,11,0.03); border:1px solid rgba(245,158,11,0.1); padding:1rem; border-radius:10px;">
-            <p style="color:#f59e0b; font-size:0.65rem; font-weight:800; text-transform:uppercase; margin-bottom:8px;">▲ High Severity</p>
-            <p style="color:#94a3b8; font-size:0.75rem; line-height:1.4; margin:0;">While harder to catch, it is much more dangerous if you do get it. Sickness severity is around 35%, which is very high.</p>
+        <div style="background:rgba(245,158,11,0.03); border:1px solid rgba(245,158,11,0.1); padding:0.6rem; border-radius:8px;">
+            <p style="color:#f59e0b; font-size:0.6rem; font-weight:900; text-transform:uppercase; margin-bottom:4px;">▲ High Severity</p>
+            <p style="color:#94a3b8; font-size:0.7rem; line-height:1.2; margin:0;">35% fatality rate. Much more dangerous if contracted.</p>
         </div>
-        <div style="background:rgba(239,68,68,0.03); border:1px solid rgba(239,68,68,0.1); padding:1rem; border-radius:10px;">
-            <p style="color:#f87171; font-size:0.65rem; font-weight:800; text-transform:uppercase; margin-bottom:8px;">🚨 WATCH: MUTATION RISK</p>
-            <p style="color:#94a3b8; font-size:0.75rem; line-height:1.4; margin:0;">If the virus changes to spread easier, the risk score will jump. We are monitoring this closely.</p>
+        <div style="background:rgba(239,68,68,0.03); border:1px solid rgba(239,68,68,0.1); padding:0.6rem; border-radius:8px;">
+            <p style="color:#f87171; font-size:0.6rem; font-weight:900; text-transform:uppercase; margin-bottom:4px;">🚨 WATCH: MUTATION</p>
+            <p style="color:#94a3b8; font-size:0.7rem; line-height:1.2; margin:0;">Monitoring changes in spread efficiency across borders.</p>
         </div>
     </div>
     """
