@@ -167,11 +167,18 @@ def render_fear_index() -> None:
              <span style="color:#94a3b8; font-size:0.55rem; font-weight:700;">STABLE</span>
              <span style="color:#ef4444; font-size:0.55rem; font-weight:900; animation:pulse-fear 1.5s infinite;">CRITICAL</span>
         </div>
-        <div style="margin-top:12px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center;">
-             <div style="display:flex; gap:12px;">
-                 <span style="color:#64748b; font-size:0.6rem; font-weight:800;">TOTAL VOTES: <b style="color:white;">{vote_count}</b></span>
-                 <span style="color:#64748b; font-size:0.6rem; font-weight:800;">USER AVG: <b style="color:#00f5ff;">{round((live_fear - web_sentiment * 0.4) / 0.6, 2) if vote_count > 0 else live_fear:.1f}</b></span>
-                 <span style="color:#64748b; font-size:0.6rem; font-weight:800;">WEB SENTIMENT: <b style="color:#a78bfa;">{web_sentiment:.1f}</b></span>
+        <div style="margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.05); display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px;">
+             <div style="background:rgba(255,255,255,0.02); padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.03); text-align:center;">
+                 <div style="color:#64748b; font-size:0.5rem; font-weight:800; letter-spacing:0.05em; margin-bottom:2px;">TOTAL VOTES</div>
+                 <div style="color:white; font-size:1rem; font-weight:900;">{vote_count}</div>
+             </div>
+             <div style="background:rgba(0,245,255,0.02); padding:8px; border-radius:6px; border:1px solid rgba(0,245,255,0.1); text-align:center;">
+                 <div style="color:#00f5ff; font-size:0.5rem; font-weight:800; letter-spacing:0.05em; margin-bottom:2px;">USER AVG</div>
+                 <div style="color:#00f5ff; font-size:1rem; font-weight:900;">{round((live_fear - web_sentiment * 0.4) / 0.6, 2) if vote_count > 0 else live_fear:.1f}</div>
+             </div>
+             <div style="background:rgba(167,139,250,0.02); padding:8px; border-radius:6px; border:1px solid rgba(167,139,250,0.1); text-align:center;">
+                 <div style="color:#a78bfa; font-size:0.5rem; font-weight:800; letter-spacing:0.05em; margin-bottom:2px;">WEB SENTIMENT</div>
+                 <div style="color:#a78bfa; font-size:1rem; font-weight:900;">{web_sentiment:.1f}</div>
              </div>
         </div>
     </div>

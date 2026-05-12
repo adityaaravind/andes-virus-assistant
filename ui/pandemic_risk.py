@@ -182,14 +182,15 @@ def render_pandemic_risk_panel() -> None:
     score = risk["overall"]
 
     st.markdown(
-        f'<div style="border-left: 4px solid {color}; padding-left: 10px; margin-bottom: 1rem;">'
-        f'<div style="display:flex; justify-content:space-between; align-items:baseline;">'
-        f'<div><p style="color:#94a3b8; font-size:0.6rem; font-weight:800; letter-spacing:0.1em; margin:0; text-transform:uppercase;">Outbreak Status Check</p>'
-        f'<h2 style="margin:0; font-size:1.4rem; font-weight:900; color:white; letter-spacing:-0.02em; line-height:1.1;">{label.upper()}</h2></div>'
-        f'<div><span style="color:{color}; font-size:1.6rem; font-weight:900;">{score:.1f}</span>'
-        f'<span style="color:#94a3b8; font-size:0.6rem; font-weight:800; margin-left:4px;">SCORE</span></div>'
-        f'</div>'
-        f'<p style="color:#cbd5e1; font-size:0.75rem; margin:4px 0 0; font-weight:500;">{desc}</p>'
+        f'<div style="background:rgba(15, 23, 42, 0.6); border:1px solid {color}44; border-radius:12px; padding:1.2rem; border-top: 3px solid {color}; backdrop-filter:blur(10px); box-shadow:0 0 20px {color}22;">'
+        f'<div style="display:flex; justify-content:space-between; align-items:center;">'
+        f'<div><p style="color:#94a3b8; font-size:0.65rem; font-weight:900; letter-spacing:0.15em; margin:0; text-transform:uppercase;">OUTBREAK STATUS CHECK</p>'
+        f'<h2 style="margin:0; font-size:1.8rem; font-weight:950; color:white; letter-spacing:-0.03em; line-height:1.1; text-shadow:0 0 15px {color}66;">{label.upper()}</h2></div>'
+        f'<div style="background:{color}15; padding:6px 14px; border-radius:8px; border:1px solid {color}44; text-align:center; box-shadow:0 0 10px {color}33;">'
+        f'<span style="color:{color}; font-size:1.4rem; font-weight:950;">{score:.1f}</span>'
+        f'<span style="color:#94a3b8; font-size:0.55rem; font-weight:800; margin-left:4px;">SCORE</span>'
+        f'</div></div>'
+        f'<p style="color:#cbd5e1; font-size:0.8rem; margin:10px 0 0; font-weight:600; line-height:1.3; opacity:0.9;">{desc}</p>'
         f'</div>',
         unsafe_allow_html=True
     )

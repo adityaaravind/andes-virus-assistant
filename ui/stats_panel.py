@@ -175,6 +175,10 @@ def render_stats_panel() -> None:
         cards_html += (
             f'<div class="stat-card" style="flex:1; min-width:140px; background:rgba(15, 23, 42, 0.6); border:1px solid rgba(255,255,255,0.05); padding:1rem; border-radius:12px; backdrop-filter:blur(10px); position:relative; overflow:hidden;">'
             f'<div style="position:absolute; top:0; left:0; width:100%; height:2px; background:{color}; opacity:0.6;"></div>'
+            f'<div style="position:absolute; top:12px; right:12px; display:flex; align-items:center; gap:4px;">'
+            f'<span style="color:#22c55e; font-size:6px; font-weight:900; letter-spacing:0.1em; opacity:0.8;">LIVE</span>'
+            f'<span class="live-dot" style="width:4px; height:4px; background:#22c55e; box-shadow:0 0 5px #22c55e; display:inline-block; border-radius:50%;"></span>'
+            f'</div>'
             f'<span class="stat-value {g_class}" style="display:block; font-size:2rem; font-weight:900; color:white; line-height:1;">{val}</span>'
             f'<span class="stat-label" style="display:block; font-size:0.6rem; font-weight:800; color:#94a3b8; margin-top:8px; text-transform:uppercase; letter-spacing:0.05em;">{label}</span>'
             f'<span class="stat-def {def_glow}">{def_text}</span>'
