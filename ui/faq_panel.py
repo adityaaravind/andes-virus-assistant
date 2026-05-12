@@ -9,18 +9,18 @@ from alerts.persist_helper import bg_kv_set, get_persisted_value
 _FAQ_CLICKS_KEY = "faq_popularity_clicks"
 
 BASE_QUESTIONS = [
-    {"q": "What is Andes virus and why is it dangerous?",         "cat": "Biology",    "key": "q_what"},
-    {"q": "How many cases are confirmed on MV Hondius?",          "cat": "Outbreak",   "key": "q_cases"},
-    {"q": "Can Andes virus spread human to human?",               "cat": "Transmission","key": "q_p2p"},
-    {"q": "What is the mortality rate of hantavirus?",            "cat": "Mortality",  "key": "q_cfr"},
+    {"q": "What is Andes virus and why is it dangerous?",         "cat": "Scientific Facts",    "key": "q_what"},
+    {"q": "How many cases are confirmed on MV Hondius?",          "cat": "Current Outbreak",   "key": "q_cases"},
+    {"q": "Can Andes virus spread human to human?",               "cat": "How it Spreads","key": "q_p2p"},
+    {"q": "What is the mortality rate of hantavirus?",            "cat": "Safety & Risks",  "key": "q_cfr"},
     {"q": "What treatments exist for Andes virus infection?",     "cat": "Treatment",  "key": "q_treat"},
-    {"q": "Which countries have been affected by the outbreak?",  "cat": "Geography",  "key": "q_countries"},
-    {"q": "What is the current status of MV Hondius?",            "cat": "Outbreak",   "key": "q_ship"},
-    {"q": "How is hantavirus transmitted to humans?",             "cat": "Transmission","key": "q_trans"},
+    {"q": "Which countries have been affected by the outbreak?",  "cat": "Locations",  "key": "q_countries"},
+    {"q": "What is the current status of MV Hondius?",            "cat": "Current Outbreak",   "key": "q_ship"},
+    {"q": "How is hantavirus transmitted to humans?",             "cat": "How it Spreads","key": "q_trans"},
     {"q": "What are the symptoms of Andes virus infection?",      "cat": "Symptoms",   "key": "q_symptoms"},
-    {"q": "Is there a risk of global pandemic from Andes virus?", "cat": "Risk",       "key": "q_pandemic"},
-    {"q": "What is the difference between HPS and HFRS?",         "cat": "Biology",    "key": "q_types"},
-    {"q": "What precautions are passengers and crew taking?",     "cat": "Response",   "key": "q_precautions"},
+    {"q": "Is there a risk of global pandemic from Andes virus?", "cat": "Safety & Risks",       "key": "q_pandemic"},
+    {"q": "What is the difference between HPS and HFRS?",         "cat": "Scientific Facts",    "key": "q_types"},
+    {"q": "What precautions are passengers and crew taking?",     "cat": "Official Response",     "key": "q_precautions"},
 ]
 
 # Static answers based on current outbreak data
@@ -51,15 +51,14 @@ STATIC_ANSWERS = {
 }
 
 CAT_COLORS = {
-    "Biology":      ("#3b82f6", "rgba(59,130,246,0.12)"),
-    "Outbreak":     ("#ef4444", "rgba(239,68,68,0.12)"),
-    "Transmission": ("#f59e0b", "rgba(245,158,11,0.12)"),
-    "Mortality":    ("#ef4444", "rgba(239,68,68,0.10)"),
-    "Treatment":    ("#22c55e", "rgba(34,197,94,0.10)"),
-    "Geography":    ("#00b4d8", "rgba(0,180,216,0.10)"),
-    "Symptoms":     ("#f59e0b", "rgba(245,158,11,0.10)"),
-    "Risk":         ("#a78bfa", "rgba(167,139,250,0.10)"),
-    "Response":     ("#22c55e", "rgba(34,197,94,0.10)"),
+    "Scientific Facts": ("#3b82f6", "rgba(59,130,246,0.12)"),
+    "Current Outbreak": ("#ef4444", "rgba(239,68,68,0.12)"),
+    "How it Spreads":   ("#f59e0b", "rgba(245,158,11,0.12)"),
+    "Safety & Risks":   ("#ef4444", "rgba(239,68,68,0.10)"),
+    "Treatment":        ("#22c55e", "rgba(34,197,94,0.10)"),
+    "Locations":        ("#00b4d8", "rgba(0,180,216,0.10)"),
+    "Symptoms":         ("#f59e0b", "rgba(245,158,11,0.10)"),
+    "Official Response": ("#22c55e", "rgba(34,197,94,0.10)"),
 }
 
 
@@ -115,8 +114,8 @@ def render_faq_panel(chain: Any) -> None:
 
     st.markdown(
         '<div style="display:flex;align-items:baseline;gap:0.8rem;margin-bottom:1.2rem;">'
-        '<h3 style="margin:0;color:#f8fafc;font-size:1.4rem;font-weight:900;">FREQUENTLY ASKED QUESTIONS</h3>'
-        '<span style="color:#64748b;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Intel Hub // Automated Rank</span>'
+        '<h3 style="margin:0;color:#f8fafc;font-size:1.4rem;font-weight:900;">COMMON QUESTIONS & ANSWERS</h3>'
+        '<span style="color:#64748b;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Information Center // Sorted by Popularity</span>'
         '</div>',
         unsafe_allow_html=True,
     )
@@ -211,9 +210,9 @@ details:not([open]) summary::before { content: '▶'; font-size: 8px; }
 </style>""")
 
     CAT_ICONS = {
-        "Biology":      "🧬", "Outbreak":     "🚨", "Transmission": "☣️",
-        "Mortality":    "☠️", "Treatment":    "💊", "Geography":    "🗺️",
-        "Symptoms":     "🌡️", "Risk":         "📈", "Response":     "🛡️",
+        "Scientific Facts": "🧬", "Current Outbreak": "🚨", "How it Spreads": "☣️",
+        "Safety & Risks": "☠️", "Treatment": "💊", "Locations": "🗺️",
+        "Symptoms": "🌡️", "Official Response": "🛡️",
     }
 
     faq_html = '<div class="faq-grid">'
@@ -230,8 +229,8 @@ details:not([open]) summary::before { content: '▶'; font-size: 8px; }
         
         # Determine popularity badge
         popularity_badge = ""
-        if click_count > 140: # Subagent saw 140+ views in previous audit
-            popularity_badge = f'<span style="background:rgba(239,68,68,0.2); color:#f87171; padding:2px 8px; border-radius:6px; font-size:0.55rem; font-weight:950; border:1px solid #f8717144;">HIGH PRIORITY</span>'
+        if click_count > 140:
+            popularity_badge = f'<span style="background:rgba(239,68,68,0.2); color:#f87171; padding:2px 8px; border-radius:6px; font-size:0.55rem; font-weight:950; border:1px solid #f8717144;">MOST VIEWED</span>'
         
         faq_html += f"""<div class="faq-card" style="--accent-color: {c_border}; --accent-glow: {accent_glow};">
 <div style="position:absolute; top:0; left:0; width:100%; height:4px; background:linear-gradient(90deg, {c_border}, transparent);"></div>
@@ -239,12 +238,12 @@ details:not([open]) summary::before { content: '▶'; font-size: 8px; }
 <span><span class="faq-icon">{icon}</span>{cat.upper()}</span>
 <div style="display:flex; gap:8px; align-items:center;">
 {popularity_badge}
-<span style="color:#475569; font-size:0.55rem;">{click_count} ANALYTICS</span>
+<span style="color:#475569; font-size:0.55rem;">{click_count} VIEWS</span>
 </div>
 </div>
 <div class="faq-question">{item['q']}</div>
 <details>
-<summary>ACCESS INTEL</summary>
+<summary>VIEW ANSWER</summary>
 <div class="faq-answer-box">
 {answer}
 </div>

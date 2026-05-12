@@ -5,10 +5,10 @@ import streamlit as st
 
 
 NAV_ITEMS = [
-    {"label": "Outbreak Stats", "icon": "📊", "anchor": "stats"},
-    {"label": "Risk & Fear",    "icon": "💀", "anchor": "fear"},
-    {"label": "Live News",      "icon": "📰", "anchor": "news"},
-    {"label": "Global Map",     "icon": "🌍", "anchor": "map"},
+    {"label": "Virus Statistics", "icon": "📊", "anchor": "stats"},
+    {"label": "Public Worry",    "icon": "💀", "anchor": "fear"},
+    {"label": "Latest News",      "icon": "📰", "anchor": "news"},
+    {"label": "Global Map",       "icon": "🌍", "anchor": "map"},
 ]
 
 
@@ -16,7 +16,7 @@ def render_tile_menu() -> None:
     """Render a grid of interactive tiles in the sidebar."""
     st.markdown(
         "<h3 style='color:#94a3b8;font-size:0.85rem;margin-bottom:0.8rem;text-transform:uppercase;letter-spacing:0.05em;'>"
-        "⚡ Quick Navigate</h3>",
+        "⚡ Jump To Section</h3>",
         unsafe_allow_html=True,
     )
 

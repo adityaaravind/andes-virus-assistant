@@ -113,11 +113,11 @@ def render_map_panel() -> None:
         f"""
         <div class="mission-header" style='border-left: 3px solid #4ade80; padding-left:15px; margin-bottom:0.8rem; display:flex; justify-content:space-between; align-items:center;'>
             <div>
-                <h2 style='margin:0; font-size:1.1rem; letter-spacing:0.12em; color:#ffffff;'>GLOBAL HEALTH MONITOR</h2>
-                <p style='margin:0; font-size:0.6rem; color:#4ade80; font-family:monospace; font-weight:800;'>STABLE MAPS & SHIP STATUS // DATA SYNC: ACTIVE</p>
+                <h2 style='margin:0; font-size:1.1rem; letter-spacing:0.12em; color:#ffffff;'>OUTBREAK TRACKER</h2>
+                <p style='margin:0; font-size:0.6rem; color:#4ade80; font-family:monospace; font-weight:800;'>REAL-TIME MAPS & SHIP STATUS // DATA SYNC: ACTIVE</p>
             </div>
             <div style="background:rgba(74,222,128,0.1); border:1px solid #4ade8044; padding:2px 10px; border-radius:4px;">
-                <span style="color:#4ade80; font-size:9px; font-weight:900;">VERIFIED HISTORICAL SYNC</span>
+                <span style="color:#4ade80; font-size:9px; font-weight:900;">OFFICIAL DATA SYNC</span>
             </div>
         </div>
         """, unsafe_allow_html=True
@@ -149,8 +149,8 @@ def render_map_panel() -> None:
         </style>
         <div style="font-family: sans-serif; background: rgba(15, 23, 42, 0.95); border: 2px solid #4ade80; box-shadow: 0 0 20px rgba(74,222,128,0.1); padding: 1.2rem; border-radius: 12px; height: 440px; display: flex; flex-direction: column; color: #fff; overflow: hidden;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                <div style="color: #4ade80; font-size: 9px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">📡 SIGNAL HUB</div>
-                <div style="background:rgba(74,222,128,0.1); padding:1px 6px; border-radius:3px; border:1px solid #4ade8033; color:#4ade80; font-size:7px; font-weight:900; animation: pulse 2s infinite;">SIGNAL HUB ACTIVE</div>
+                <div style="color: #4ade80; font-size: 9px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">📡 LIVE UPDATES FEED</div>
+                <div style="background:rgba(74,222,128,0.1); padding:1px 6px; border-radius:3px; border:1px solid #4ade8033; color:#4ade80; font-size:7px; font-weight:900; animation: pulse 2s infinite;">LIVE FEED ACTIVE</div>
             </div>
             <div style="margin: 10px 0;">
                 <h2 style="margin:0; font-size:1.6rem; font-weight:900; line-height: 1; color:#ffffff;">{state.get('ship_status', 'Quarantined').upper()}</h2>
@@ -170,7 +170,7 @@ def render_map_panel() -> None:
 
             <div style="color: #64748b; font-size: 9px; font-weight: 900; margin-bottom: 10px; text-transform: uppercase; letter-spacing:0.5px; display:flex; align-items:center;">
                 <span style="width:6px; height:6px; background:#4ade80; border-radius:50%; margin-right:6px; display:inline-block; animation: pulse 1s infinite;"></span>
-                TACTICAL MISSION FEED
+                LATEST NEWS BULLETINS
             </div>
             <div class="scroll-container" style="flex: 1; overflow-y: auto; padding-right: 5px; scroll-behavior: smooth;">
                 {events_html}
@@ -237,12 +237,12 @@ def render_map_panel() -> None:
 
                                 let tooltipHtml = '<div><b style="color:#4ade80; font-size:13px; letter-spacing:1px;">📡 ' + name + ' SAFETY CHECK</b><br/>';
                                 tooltipHtml += '<div style="display:flex; justify-content:space-between; gap:25px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px; margin-bottom:10px;">';
-                                tooltipHtml += '<div><div style="color:#94a3b8; font-size:9px;">REAL-TIME CHANCE</div><div style="color:#fff; font-size:14px; font-weight:900;">' + hantaRisk + '%</div></div>';
-                                tooltipHtml += '<div><div style="color:#94a3b8; font-size:9px;">PROJECTED COVID ' + __DAY__ + '</div><div style="color:#fff; font-size:14px; font-weight:900;">' + covidRisk.toFixed(1) + '%</div></div></div>';
+                                tooltipHtml += '<div><div style="color:#94a3b8; font-size:9px;">HEALTH RISK</div><div style="color:#fff; font-size:14px; font-weight:900;">' + hantaRisk + '%</div></div>';
+                                tooltipHtml += '<div><div style="color:#94a3b8; font-size:9px;">ESTIMATED COVID ' + __DAY__ + '</div><div style="color:#fff; font-size:14px; font-weight:900;">' + covidRisk.toFixed(1) + '%</div></div></div>';
                                 
                                 tooltipHtml += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">';
-                                tooltipHtml += '<div><div style="color:#ef4444; font-size:9px; font-weight:800;">REAL-TIME FEAR INDEX</div><div style="color:#ef4444; font-size:14px; font-weight:900;">' + fear + '%</div></div>';
-                                tooltipHtml += '<div style="text-align:right;"><div style="color:#64748b; font-size:8px;">VERIFIED STATUS</div><div style="color:#cbd5e1; font-size:10px;">WHO SYNC</div></div></div>';
+                                tooltipHtml += '<div><div style="color:#ef4444; font-size:9px; font-weight:800;">PUBLIC WORRY INDEX</div><div style="color:#ef4444; font-size:14px; font-weight:900;">' + fear + '%</div></div>';
+                                tooltipHtml += '<div style="text-align:right;"><div style="color:#64748b; font-size:8px;">VERIFIED BY</div><div style="color:#cbd5e1; font-size:10px;">OFFICIAL SOURCE</div></div></div>';
 
                                 if (covidRisk === 0) {
                                     const proofDate = onsetDay > 0 ? getProofDate(onsetDay) : "later date";
@@ -270,7 +270,7 @@ def render_map_panel() -> None:
                         '<span style="color:#94a3b8; font-size:9px;">' + h.timestamp + '</span></div>' +
                         '<div style="color:#ffffff; font-size:11px; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; font-weight:600;">' + h.relation + '</div>' +
                         '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:12px;">' +
-                        '<div><div class="intel-label">FEAR INDEX</div><div style="color:#ef4444; font-size:18px; font-weight:900;">' + h.fear + '%</div></div>' +
+                        '<div><div class="intel-label">PUBLIC WORRY</div><div style="color:#ef4444; font-size:18px; font-weight:900;">' + h.fear + '%</div></div>' +
                         '<div><div class="intel-label">TOTAL CASES</div><div style="color:#fff; font-size:18px; font-weight:900;">' + h.cases + '</div></div></div>' +
                         '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;">' +
                         '<div><div class="intel-label">HOSPITAL / CLINIC</div><div style="color:#4ade80; font-size:10px; font-weight:900;">' + h.admitted + '</div></div>' +

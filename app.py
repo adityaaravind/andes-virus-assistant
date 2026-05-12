@@ -612,12 +612,12 @@ def main() -> None:
             f"""
             <div class='app-footer' style="text-align: left !important; display: flex; flex-direction: column; gap: 5px;">
                 <div style="opacity: 0.6; display: flex; align-items: center; gap: 10px;">
-                    <span style="font-weight: 900; color: #00b4d8; font-size: 0.7rem; letter-spacing: 0.1em;">🧬 SYSTEM: ANDES VIRUS RESEARCH ASSISTANT</span>
+                    <span style="font-weight: 900; color: #00b4d8; font-size: 0.7rem; letter-spacing: 0.1em;">🧬 PROJECT: ANDES VIRUS ASSISTANT</span>
                     <span style="background: rgba(0, 180, 216, 0.1); border: 1px solid rgba(0, 180, 216, 0.3); padding: 1px 6px; border-radius: 4px; font-size: 0.6rem; color: #00b4d8; font-weight: 800;">v{VERSION}</span>
                 </div>
                 <div style="opacity: 0.4; font-size: 0.65rem;">
-                    Data sourced from WHO, CDC, PubMed, Reuters, BBC, Al Jazeera, Wikipedia. 
-                    Not medical advice. For emergencies contact your local health authority.
+                    Information sourced from WHO, CDC, PubMed, and major news outlets.
+                    Not medical advice. For emergencies, contact your local doctor or health center.
                 </div>
             </div>
             """,

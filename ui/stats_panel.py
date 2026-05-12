@@ -47,7 +47,7 @@ def build_timeline_chart(current_day: int) -> go.Figure:
         mode="lines",
         name="COVID-19 (Historical)",
         line=dict(color="rgba(148, 163, 184, 0.5)", width=1.5, dash="dot"),
-        hovertemplate="<b>COVID-19 COMPARISON</b><br>Mission Day: %{x|%b %d}<br>Historical Count: %{y:,}<extra></extra>",
+        hovertemplate="<b>COVID-19 COMPARISON</b><br>Day since start: %{x|%b %d}<br>Historical Count: %{y:,}<extra></extra>",
     ))
 
     # Hantavirus Case Progression (Solid Line)
@@ -69,7 +69,7 @@ def build_timeline_chart(current_day: int) -> go.Figure:
         margin=dict(l=10, r=10, t=10, b=10),
         height=240,
         xaxis=dict(gridcolor="rgba(255,255,255,0.05)", showline=False, tickformat="%b %d"),
-        yaxis=dict(gridcolor="rgba(255,255,255,0.05)", showline=False, type="log", title=dict(text="CUMULATIVE LOG SCALE", font=dict(size=8))),
+        yaxis=dict(gridcolor="rgba(255,255,255,0.05)", showline=False, type="log", title=dict(text="TOTAL CASES (LOG SCALE)", font=dict(size=8))),
         showlegend=True,
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, font=dict(size=9), bgcolor="rgba(0,0,0,0)"),
         hovermode="x unified",
@@ -82,8 +82,8 @@ def render_timeline_chart() -> None:
     risk_data = _compute_risk(stats.get("confirmed_cases", 18), 5)
     current_day = risk_data["days"]
 
-    st.markdown(f"#### Case Progression <small style='color:#4ade80; font-size:10px;'>DAY_{current_day} ACTIVE</small>", unsafe_allow_html=True)
-    st.caption("Comparison between Current Outbreak and Historical COVID-19 (2020) Progression.")
+    st.markdown(f"#### Outbreak Timeline <small style='color:#4ade80; font-size:10px;'>DAY_{current_day} ACTIVE</small>", unsafe_allow_html=True)
+    st.caption("Comparing the current outbreak with early COVID-19 (2020) growth.")
     
     fig = build_timeline_chart(current_day)
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
@@ -146,7 +146,7 @@ def render_stats_panel() -> None:
     st.markdown(
         f'<div style="display:flex; align-items:center; gap:8px; margin-bottom:1.2rem; background:rgba(74,222,128,0.05); padding:4px 12px; border-radius:100px; width:fit-content; border:1px solid rgba(74,222,128,0.1);">'
         f'<span class="live-dot" style="width:8px; height:8px; background:#4ade80; box-shadow: 0 0 8px #4ade80;"></span>'
-        f'<span style="color:#4ade80; font-size:0.65rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em;">Real-time Health Data Sync Active</span>'
+        f'<span style="color:#4ade80; font-size:0.65rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em;">Live Health Updates Active</span>'
         f'</div>',
         unsafe_allow_html=True
     )
@@ -163,10 +163,10 @@ def render_stats_panel() -> None:
         return "glow-green"
 
     cards = [
-        (str(stats["confirmed_cases"]), "Confirmed Cases", "Verified lab results from South African medical teams.", get_color(stats["confirmed_cases"], "cases"), get_glow_class(stats["confirmed_cases"], "cases")),
-        (str(stats["suspected_cases"]), "Suspected Cases", "Showing symptoms but pending formal viral sequencing.", "var(--glow-amber)", "glow-amber"),
-        (str(stats["deaths"]), "Total Fatalities", "Confirmed deaths directly attributed to pulmonary syndrome.", get_color(stats["deaths"], "deaths"), get_glow_class(stats["deaths"], "deaths")),
-        (str(stats["nationalities"]), "Nationalities", "Countries of origin for passengers currently being monitored.", "var(--glow-green)", "glow-green"),
+        (str(stats["confirmed_cases"]), "Confirmed Cases", "Confirmed by doctors through hospital lab results.", get_color(stats["confirmed_cases"], "cases"), get_glow_class(stats["confirmed_cases"], "cases")),
+        (str(stats["suspected_cases"]), "Suspected Cases", "Showing symptoms but waiting for final medical testing.", "var(--glow-amber)", "glow-amber"),
+        (str(stats["deaths"]), "Total Deaths", "Deaths directly linked to the current respiratory illness.", get_color(stats["deaths"], "deaths"), get_glow_class(stats["deaths"], "deaths")),
+        (str(stats["nationalities"]), "Countries Involved", "Home countries of people currently being monitored.", "var(--glow-green)", "glow-green"),
     ]
 
     cards_html = ""

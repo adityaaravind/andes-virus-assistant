@@ -153,12 +153,12 @@ def render_fear_index() -> None:
     <div style="background:rgba(15, 23, 42, 0.6); border: 1px solid {color}44; border-radius: 12px; padding: 1.2rem; margin-bottom: 1rem; backdrop-filter: blur(10px); position:relative; overflow:hidden;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
             <div>
-                <p style="color:#94a3b8; font-size:0.65rem; font-weight:800; letter-spacing:0.1em; margin:0; font-family:monospace;">☣️ CURRENT THREAT LEVEL</p>
+                <p style="color:#94a3b8; font-size:0.65rem; font-weight:800; letter-spacing:0.1em; margin:0; font-family:monospace;">🧬 PUBLIC WORRY METER</p>
                 <h2 style="margin:0; font-size:1.8rem; font-weight:950; color:white; letter-spacing:-0.02em;">{label.upper()}</h2>
             </div>
             <div style="text-align:right;">
                 <p style="color:{color}; font-size:2rem; font-weight:900; margin:0; line-height:1; font-family:monospace;">{live_fear:.2f}</p>
-                <p style="color:#94a3b8; font-size:0.5rem; font-weight:800; margin:0; text-transform:uppercase;">SENTIMENT SCORE</p>
+                <p style="color:#94a3b8; font-size:0.5rem; font-weight:800; margin:0; text-transform:uppercase;">WORRY SCORE</p>
             </div>
         </div>
         <div style="height:12px; background:rgba(255,255,255,0.05); border-radius:100px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);">
@@ -195,8 +195,8 @@ def render_fear_index() -> None:
         div.stButton > button:disabled { opacity: 0.4 !important; filter: grayscale(1) !important; pointer-events: none !important; }
         </style>
         <div style="margin: 1.5rem 0 0.8rem; border-left: 4px solid #38bdf8; padding-left: 12px;">
-            <p style='color:#38bdf8; font-size:0.9rem; font-weight:900; margin:0; letter-spacing:0.05em;'>📡 TAP TO SYNC YOUR SENTIMENT</p>
-            <p style='color:#64748b; font-size:0.65rem; margin:2px 0 0;'>Your input recalibrates the global threat matrix in real-time.</p>
+            <p style='color:#38bdf8; font-size:0.9rem; font-weight:900; margin:0; letter-spacing:0.05em;'>🗣️ TELL US HOW YOU FEEL</p>
+            <p style='color:#64748b; font-size:0.65rem; margin:2px 0 0;'>Help us understand the community mood by sharing your worry level.</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -220,15 +220,15 @@ def render_fear_index() -> None:
              st.markdown(
                 """
                 <div style="background:rgba(34,197,94,0.1); border-left:4px solid #22c55e; padding:0.8rem; margin-top:1rem; border-radius:4px;">
-                    <p style="color:#22c55e; font-size:0.75rem; font-weight:900; margin:0;">✓ SENTIMENT SYNCHRONIZED</p>
-                    <p style="color:#94a3b8; font-size:0.6rem; margin:2px 0 0;">Outbreak status baseline has been updated with your local intelligence.</p>
+                    <p style="color:#22c55e; font-size:0.75rem; font-weight:900; margin:0;">✓ STATUS UPDATED</p>
+                    <p style="color:#94a3b8; font-size:0.6rem; margin:2px 0 0;">Your feedback has been successfully recorded.</p>
                 </div>
                 """, unsafe_allow_html=True)
         else:
             st.markdown(
                 f"""
                 <div style="background:rgba(239,68,68,0.1); border-left:4px solid #ef4444; padding:0.8rem; margin-top:1rem; border-radius:4px;">
-                    <p style="color:#ef4444; font-size:0.75rem; font-weight:900; margin:0;">🔒 INPUT SECURED (RE-ENTRY LOCK ACTIVE)</p>
-                    <p style="color:#94a3b8; font-size:0.6rem; margin:2px 0 0;">Time remaining: <b>{hours}h {mins}m</b>. Re-calibration locked to prevent data flooding.</p>
+                    <p style="color:#ef4444; font-size:0.75rem; font-weight:900; margin:0;">🔒 VOTE RECORDED (LOCK ACTIVE)</p>
+                    <p style="color:#94a3b8; font-size:0.6rem; margin:2px 0 0;">Next vote available in: <b>{hours}h {mins}m</b>. This prevents multiple votes from one person.</p>
                 </div>
                 """, unsafe_allow_html=True)
