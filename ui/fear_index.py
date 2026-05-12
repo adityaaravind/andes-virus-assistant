@@ -167,6 +167,13 @@ def render_fear_index() -> None:
              <span style="color:#94a3b8; font-size:0.55rem; font-weight:700;">STABLE</span>
              <span style="color:#ef4444; font-size:0.55rem; font-weight:900; animation:pulse-fear 1.5s infinite;">CRITICAL</span>
         </div>
+        <div style="margin-top:12px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center;">
+             <div style="display:flex; gap:12px;">
+                 <span style="color:#64748b; font-size:0.6rem; font-weight:800;">TOTAL VOTES: <b style="color:white;">{vote_count}</b></span>
+                 <span style="color:#64748b; font-size:0.6rem; font-weight:800;">USER AVG: <b style="color:#00f5ff;">{round((live_fear - web_sentiment * 0.4) / 0.6, 2) if vote_count > 0 else live_fear:.1f}</b></span>
+                 <span style="color:#64748b; font-size:0.6rem; font-weight:800;">WEB SENTIMENT: <b style="color:#a78bfa;">{web_sentiment:.1f}</b></span>
+             </div>
+        </div>
     </div>
     """
     st.markdown(threat_html, unsafe_allow_html=True)
