@@ -185,8 +185,8 @@ def render_fear_index() -> None:
         div.stButton > button {
             width: 100% !important; height: 55px !important;
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.98)) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            border-top: 3px solid var(--btn-color) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            border-left: 3px solid var(--btn-color) !important;
             border-radius: 10px !important; color: #f8fafc !important;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
             display: flex !important; flex-direction: row !important;
