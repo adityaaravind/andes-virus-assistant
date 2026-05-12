@@ -256,8 +256,8 @@ def render_map_panel() -> None:
 
                                 let tooltipHtml = '<div><b style="color:#4ade80; font-size:13px; letter-spacing:1px;">📡 ' + name + ' SAFETY CHECK</b><br/>';
                                 tooltipHtml += '<div style="display:flex; justify-content:space-between; gap:25px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px; margin-bottom:10px;">';
-                                tooltipHtml += '<div><div style="color:#94a3b8; font-size:9px;">HEALTH RISK</div><div style="color:#fff; font-size:14px; font-weight:900;">' + hantaRisk + '%</div></div>';
-                                tooltipHtml += '<div><div style="color:#94a3b8; font-size:9px;">ESTIMATED COVID ' + __DAY__ + '</div><div style="color:#fff; font-size:14px; font-weight:900;">' + covidRisk.toFixed(1) + '%</div></div></div>';
+                                tooltipHtml += '<div><div style="color:#94a3b8; font-size:9px;">OUTBREAK RISK</div><div style="color:#fff; font-size:14px; font-weight:900;">' + hantaRisk + '%</div></div>';
+                                tooltipHtml += '<div><div style="color:#94a3b8; font-size:9px;">COVID ESTIMATE (DAY ' + __DAY__ + ')</div><div style="color:#fff; font-size:14px; font-weight:900;">' + covidRisk.toFixed(2) + '%</div></div></div>';
                                 
                                 tooltipHtml += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">';
                                 tooltipHtml += '<div><div style="color:#ef4444; font-size:9px; font-weight:800;">PUBLIC WORRY INDEX</div><div style="color:#ef4444; font-size:14px; font-weight:900;">' + fear + '%</div></div>';
@@ -265,7 +265,7 @@ def render_map_panel() -> None:
 
                                 if (covidRisk === 0) {
                                     const proofDate = onsetDay > 0 ? getProofDate(onsetDay) : "later date";
-                                    tooltipHtml += `<p style="color:#64748b; font-size:9px; font-style:italic; margin:4px 0 0;">PROOF: WHO confirmed first case on <b>\${proofDate}</b> (Mission Day \${onsetDay}).</p>`;
+                                    tooltipHtml += `<p style="color:#fde047; font-size:9px; font-style:italic; margin:4px 0 0;">PROOF: COVID-19 risk is 0.00% till Day ${onsetDay} (${proofDate}).</p>`;
                                 } else {
                                     tooltipHtml += `<p style="color:#94a3b8; font-size:9px; font-weight:900; margin:0; text-transform:uppercase;">CALC: (Travel Links * 0.6) + (Distance * 0.4)</p>`;
                                 }
