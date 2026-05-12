@@ -219,7 +219,21 @@ def render_pandemic_risk_panel() -> None:
         st.plotly_chart(fig_bars, width="stretch", config={"displayModeBar": False})
 
     # ── Key difference callout ────────────────────────────────────────────────
-</div>
-""".replace("\n", "").strip()
+    callout_html = f"""
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1rem; margin-top:1.5rem;">
+        <div style="background:rgba(34,197,94,0.03); border:1px solid rgba(34,197,94,0.1); padding:1rem; border-radius:10px;">
+            <p style="color:#4ade80; font-size:0.65rem; font-weight:800; text-transform:uppercase; margin-bottom:8px;">✓ Lower Risk Than COVID</p>
+            <p style="color:#94a3b8; font-size:0.75rem; line-height:1.4; margin:0;">Andes virus is less contagious than COVID-19. It usually requires close contact and doesn't stay in the air like COVID does.</p>
+        </div>
+        <div style="background:rgba(245,158,11,0.03); border:1px solid rgba(245,158,11,0.1); padding:1rem; border-radius:10px;">
+            <p style="color:#f59e0b; font-size:0.65rem; font-weight:800; text-transform:uppercase; margin-bottom:8px;">▲ High Severity</p>
+            <p style="color:#94a3b8; font-size:0.75rem; line-height:1.4; margin:0;">While harder to catch, it is much more dangerous if you do get it. Sickness severity is around 35%, which is very high.</p>
+        </div>
+        <div style="background:rgba(239,68,68,0.03); border:1px solid rgba(239,68,68,0.1); padding:1rem; border-radius:10px;">
+            <p style="color:#f87171; font-size:0.65rem; font-weight:800; text-transform:uppercase; margin-bottom:8px;">🚨 WATCH: MUTATION RISK</p>
+            <p style="color:#94a3b8; font-size:0.75rem; line-height:1.4; margin:0;">If the virus changes to spread easier, the risk score will jump. We are monitoring this closely.</p>
+        </div>
+    </div>
+    """
     st.markdown(callout_html, unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
