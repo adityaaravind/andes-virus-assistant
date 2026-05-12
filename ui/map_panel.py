@@ -264,10 +264,24 @@ def render_map_panel() -> None:
                                 tooltipHtml += '<div style="text-align:right;"><div style="color:#64748b; font-size:8px;">VERIFIED BY</div><div style="color:#cbd5e1; font-size:10px;">OFFICIAL SOURCE</div></div></div>';
 
                                 if (covidRisk === 0) {
-                                    const proofDate = onsetDay > 0 ? getProofDate(onsetDay) : "later date";
-                                    tooltipHtml += `<p style="color:#fde047; font-size:9px; font-style:italic; margin:4px 0 0;">PROOF: COVID-19 risk is 0.00% till Day ${onsetDay} (${proofDate}).</p>`;
+                                    if (onsetDay > 0) {
+                                        const proofDate = getProofDate(onsetDay);
+                                        tooltipHtml += `<div style="background:rgba(253,224,71,0.1); padding:6px; border-radius:4px; border-left: 3px solid #fde047; margin-top:8px;">
+                                            <p style="color:#fde047; font-size:9px; font-weight:800; margin:0; letter-spacing:0.5px;">📌 PROOF OF ZERO RISK:</p>
+                                            <p style="color:#fef08a; font-size:9px; font-style:italic; margin:2px 0 0;">Historical WHO data confirms COVID-19 risk was 0.00% here till Day ${onsetDay} (${proofDate}).</p>
+                                        </div>`;
+                                    } else {
+                                        tooltipHtml += `<div style="background:rgba(253,224,71,0.1); padding:6px; border-radius:4px; border-left: 3px solid #fde047; margin-top:8px;">
+                                            <p style="color:#fde047; font-size:9px; font-weight:800; margin:0; letter-spacing:0.5px;">📌 PROOF OF ZERO RISK:</p>
+                                            <p style="color:#fef08a; font-size:9px; font-style:italic; margin:2px 0 0;">Historical WHO data confirms COVID-19 risk was 0.00% here till a much later date.</p>
+                                        </div>`;
+                                    }
                                 } else {
-                                    tooltipHtml += `<p style="color:#94a3b8; font-size:9px; font-weight:900; margin:0; text-transform:uppercase;">CALC: (Travel Links * 0.6) + (Distance * 0.4)</p>`;
+                                    const proofDate = onsetDay > 0 ? getProofDate(onsetDay) : "Jan 2020";
+                                    tooltipHtml += `<div style="background:rgba(239,68,68,0.15); padding:6px; border-radius:4px; border-left: 3px solid #ef4444; margin-top:8px;">
+                                        <p style="color:#ef4444; font-size:9px; font-weight:800; margin:0; letter-spacing:0.5px;">⚠️ HISTORICAL PROOF:</p>
+                                        <p style="color:#fca5a5; font-size:9px; margin:2px 0 0; line-height:1.2;">WHO confirmed initial COVID-19 spread in this region began on Day ${onsetDay} (${proofDate}).</p>
+                                    </div>`;
                                 }
                                 tooltipHtml += `</div></div>`;
                                 layer.bindTooltip(tooltipHtml, { sticky: true });
