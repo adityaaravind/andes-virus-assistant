@@ -55,6 +55,7 @@ def _save_fear_vote(level: int, user_id: str) -> None:
 
     try:
         data = _load_fear_data()
+        old_count = len(data.get("votes", []))
         data["votes"] = [v for v in data["votes"] if v.get("user_id") != user_id]
         data["votes"].append({
             "level": level,
@@ -63,9 +64,32 @@ def _save_fear_vote(level: int, user_id: str) -> None:
         })
         data["votes"] = data["votes"][-2000:]
         data["last_updated"] = datetime.utcnow().isoformat()
+        new_count = len(data["votes"])
 
         from alerts.persistent_kv import kv_set
         kv_set(_FEAR_KEY, data)
+
+        # FIRE REAL-TIME SIGNAL FOR VOTE CHANGE
+        avg_fear, _, label, _, _, web_sentiment = _calculate_fear_average()
+
+        from alerts.notifier import send_ntfy
+        send_ntfy(
+            os.getenv("NTFY_DEFAULT_TOPIC", "HANTAVIRUS"),
+            f"🗳️ Fear Index Updated: {label.upper()}",
+            f"New vote recorded (Level {level}/5).\n"
+            f"Current fear score: {avg_fear:.2f}\n"
+            f"Total votes: {new_count}\n"
+            f"Status: {label}",
+            "info"
+        )
+
+        # Log the vote signal
+        from alerts.alert_manager import _log_alert
+        _log_alert(
+            f"Fear Index Vote: {label}",
+            f"Vote level {level}, new avg: {avg_fear:.2f}, total votes: {new_count}"
+        )
+
     except Exception as e:
         st.error(f"Persistence error: {str(e)}")
 

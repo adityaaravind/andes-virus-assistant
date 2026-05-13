@@ -16,20 +16,33 @@ def _hash_id(key: str) -> int:
 
 
 def _client():
-    from qdrant_client import QdrantClient
-    from qdrant_client.models import Distance, VectorParams
-    c = QdrantClient(url=os.getenv("QDRANT_URL"), api_key=os.getenv("QDRANT_API_KEY"))
-    names = [col.name for col in c.get_collections().collections]
-    if _COLLECTION not in names:
-        c.create_collection(
-            _COLLECTION,
-            vectors_config=VectorParams(size=_VECTOR_DIM, distance=Distance.COSINE),
-        )
-    return c
+    try:
+        from qdrant_client import QdrantClient
+        from qdrant_client.models import Distance, VectorParams
+        c = QdrantClient(url=os.getenv("QDRANT_URL"), api_key=os.getenv("QDRANT_API_KEY"))
+        names = [col.name for col in c.get_collections().collections]
+        if _COLLECTION not in names:
+            c.create_collection(
+                _COLLECTION,
+                vectors_config=VectorParams(size=_VECTOR_DIM, distance=Distance.COSINE),
+            )
+        return c
+    except ImportError:
+        raise RuntimeError("qdrant_client not available - using local JSON fallback")
 
+
+def _qdrant_available() -> bool:
+    """Check if Qdrant is configured and client is available."""
+    if not os.getenv("QDRANT_URL"):
+        return False
+    try:
+        import qdrant_client
+        return True
+    except ImportError:
+        return False
 
 def kv_get(key: str, default: Any = None) -> Any:
-    if os.getenv("QDRANT_URL"):
+    if _qdrant_available():
         try:
             result = _client().retrieve(_COLLECTION, ids=[_hash_id(key)], with_payload=True)
             if result:
@@ -50,7 +63,7 @@ def kv_get(key: str, default: Any = None) -> Any:
 
 
 def kv_set(key: str, value: Any) -> None:
-    if os.getenv("QDRANT_URL"):
+    if _qdrant_available():
         try:
             from qdrant_client.models import PointStruct
             _client().upsert(
@@ -62,7 +75,7 @@ def kv_set(key: str, value: Any) -> None:
                 )],
             )
             return
-        except Exception:
+        except (Exception, ImportError):
             pass
     path = Path(f"data/kv_{key}.json")
     path.parent.mkdir(parents=True, exist_ok=True)

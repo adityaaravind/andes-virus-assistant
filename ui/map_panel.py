@@ -553,6 +553,9 @@ def _get_map_data() -> dict:
     hotspots = _get_dynamic_hotspots(state)
     events = _get_vessel_events()
 
+    # Fire signal when map data refreshes (cache TTL = real-time updates)
+    _fire_map_refresh_signal(hotspots, state, current_day)
+
     return {
         "state": state,
         "intensity": intensity,
@@ -560,6 +563,33 @@ def _get_map_data() -> dict:
         "events": events,
         "current_day": current_day
     }
+
+
+def _fire_map_refresh_signal(hotspots: list, state: dict, current_day: int) -> None:
+    """Fire real-time signal when map data updates."""
+    try:
+        from alerts.signal_dispatcher import fire_map_signal, fire_card_signal
+
+        # Fire map signal for each country with cases
+        affected_countries = []
+        for hotspot in hotspots:
+            if hotspot.get("confirmed_cases", 0) > 0:
+                country = hotspot.get("location", "Unknown")
+                cases = hotspot.get("confirmed_cases", 0)
+                affected_countries.append(country)
+                # Fire individual country signal
+                fire_map_signal(country, cases, "update")
+
+        # Fire overall card update signal
+        if affected_countries:
+            fire_card_signal(
+                "Map Panel",
+                "Geographic Data Update",
+                f"Tracking {len(affected_countries)} affected regions. Day {current_day} of outbreak."
+            )
+
+    except Exception:
+        pass  # Silent fail
 
 def render_map_panel() -> None:
     # Add cache clear button in debug mode

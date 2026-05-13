@@ -127,6 +127,13 @@ def _run_fast_news_poll() -> None:
         kv_set("last_news_poll_chunks", len(chunks))
         kv_set("last_news_poll_docs", len(docs))
 
+        # FIRE REAL-TIME SIGNAL FOR NEWS POLL
+        from alerts.signal_dispatcher import fire_ingestion_signal, fire_news_signal
+        if docs:
+            fire_news_signal(len(docs), ["outbreak", "hantavirus", "andes"])
+        if chunks:
+            fire_ingestion_signal("Fast News Poll", len(docs), len(chunks))
+
 
         # Backup streamlit-analytics2 to Qdrant & Check size
         try:
@@ -202,6 +209,10 @@ def _run_ingestion_job() -> None:
         # PERSIST SUCCESS TIMESTAMP
         from alerts.persistent_kv import kv_set
         kv_set("last_ingestion_time", datetime.utcnow().isoformat())
+
+        # FIRE REAL-TIME SIGNAL FOR FULL INGESTION
+        from alerts.signal_dispatcher import fire_ingestion_signal
+        fire_ingestion_signal("Full Pipeline", 0, 0)  # Will be overridden by actual counts in run_ingestion
 
         # Check alert thresholds after every ingestion
 

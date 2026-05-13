@@ -65,6 +65,13 @@ def run_ingestion(fast: bool = False) -> None:
                 new_chunks = embed_chunks(new_chunks)
                 added = add_documents(new_chunks)
                 console.print(f"  [green]✓ {source_name} batch complete:[/green] {added} new chunks stored")
+
+                # FIRE REAL-TIME SIGNAL FOR EACH SOURCE
+                try:
+                    from alerts.signal_dispatcher import fire_ingestion_signal
+                    fire_ingestion_signal(source_name, len(docs), len(new_chunks))
+                except ImportError:
+                    pass  # Signal system not available
             except Exception as e:
                 console.print(f"  [red]✖ {source_name} batch failed:[/red] {e}")
         

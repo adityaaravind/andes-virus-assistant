@@ -139,48 +139,28 @@ def _load_live() -> dict[str, Any]:
     return {}
 
 def _log_stats_refresh_signal() -> None:
-    """Log signal when stats are refreshed."""
+    """Fire real-time signal when stats are refreshed."""
     try:
-        from alerts.community_store import add_insight
-        from datetime import datetime
-
         # Get current stats for signal
         live = _load_live()
         confirmed = live.get("confirmed_cases", 18)
         deaths = live.get("deaths", 5)
+        nationalities = live.get("nationalities", 28)
 
+        # Fire comprehensive stats signal
+        from alerts.signal_dispatcher import fire_stats_signal
+        stats = {
+            "confirmed_cases": confirmed,
+            "deaths": deaths,
+            "nationalities": nationalities,
+            "trend": "increasing" if confirmed > 15 else "stable"
+        }
+        fire_stats_signal(stats)
+
+        # Also maintain legacy system for display
+        from alerts.community_store import add_insight
         signal_msg = f"📊 STATS REFRESH: Live data updated - {confirmed} confirmed cases, {deaths} deaths. Cards synchronized with latest medical reports."
         add_insight("system", signal_msg, "STATS-MONITOR")
-
-        # Also add to manual signals for immediate display
-        import json
-        from pathlib import Path
-
-        manual_file = Path("data/manual_signals.json")
-        signals = []
-
-        if manual_file.exists():
-            signals = json.loads(manual_file.read_text())
-
-        new_signal = {
-            "date": "LIVE",
-            "time": "REFRESH",
-            "event": signal_msg,
-            "type": "SYSTEM",
-            "speed": "15.0 kn",
-            "uplink": "100%",
-            "hours_ago": 0,
-            "priority": "low",
-            "active": True,
-            "source": "stats_monitor",
-            "timestamp": datetime.utcnow().isoformat()
-        }
-
-        signals.insert(0, new_signal)
-        signals = signals[:10]  # Keep only latest 10
-
-        with open(manual_file, 'w') as f:
-            json.dump(signals, f, indent=2)
 
     except Exception:
         pass  # Silent fail

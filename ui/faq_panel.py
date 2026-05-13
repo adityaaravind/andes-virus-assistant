@@ -110,8 +110,28 @@ def _save_click(key: str) -> None:
     # Use synchronous update to ensure reliability
     from alerts.persistent_kv import kv_set, kv_get
     clicks = kv_get(_FAQ_CLICKS_KEY, {})
-    clicks[key] = clicks.get(key, 0) + 1
+    old_count = clicks.get(key, 0)
+    clicks[key] = old_count + 1
     kv_set(_FAQ_CLICKS_KEY, clicks)
+
+    # FIRE REAL-TIME SIGNAL FOR FAQ INTERACTION
+    try:
+        from alerts.signal_dispatcher import fire_card_signal
+
+        # Find the question title for the signal
+        question_title = key.replace("_", " ").title()
+        for q in BASE_QUESTIONS:
+            if q["key"] == key:
+                question_title = q["question"]
+                break
+
+        fire_card_signal(
+            "FAQ Panel",
+            f"Question Clicked: {question_title[:50]}...",
+            f"User interaction detected. Click count: {clicks[key]}. Popular questions help identify user concerns."
+        )
+    except Exception:
+        pass  # Silent fail
 
 
 def _sorted_questions() -> list[dict]:
