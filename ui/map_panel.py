@@ -437,6 +437,18 @@ def _get_dynamic_ship_status() -> str:
     else:
         return "Evening Protocols — Enhanced Biosafety"
 
+def _load_location_cases() -> dict:
+    """Load location-specific case data from extraction results."""
+    try:
+        from pathlib import Path
+        location_file = Path("data/location_cases.json")
+        if location_file.exists():
+            import json
+            return json.loads(location_file.read_text())
+    except Exception:
+        pass
+    return {}
+
 def _get_dynamic_hotspots(state: dict) -> list:
     # Get dynamic ship position
     ship_lat, ship_lng = _get_ship_position()
@@ -459,18 +471,60 @@ def _get_dynamic_hotspots(state: dict) -> list:
     nationality_data = _get_auto_nationality_data(state.get("confirmed_cases", 8), state.get("deaths", 3))
     nat_map = {d["code"]: d for d in nationality_data}
 
-    # City-specific case assignments for USA
+    # Load dynamic location-specific case data
+    location_cases = _load_location_cases()
+
+    # Add new hotspots from extracted location data
+    for location_name, data in location_cases.items():
+        coords = data.get("coordinates", {})
+        if coords:
+            # Check if this location already exists in hotspots
+            existing = next((h for h in hotspots if h["name"] == location_name.upper()), None)
+            if not existing:
+                # Add new hotspot
+                hotspots.append({
+                    "lat": coords["lat"],
+                    "lng": coords["lng"],
+                    "code": coords["code"],
+                    "name": location_name.upper(),
+                    "color": "#ff6b35",  # Orange for new locations
+                    "relation": "Extracted Case Location",
+                    "intel": "NEWS REPORT",
+                    "admitted": f"Local Hospital ({coords.get('state', 'Unknown')})",
+                    "notes": f"{data['cases']} cases reported. Source: {data['source']} (credibility: {data['credibility']:.1f})",
+                    "timestamp": "EXTRACTED"
+                })
+
+    # Fallback city-specific case assignments for USA (if no extracted data)
     usa_city_cases = {"NYC LANDING": 1, "ATLANTA ALERT": 2, "SEATTLE MONITOR": 3}
 
     for h in hotspots:
         h["fear"] = _get_local_fear_index(h["code"], 95 if h["code"]=="ARG" else 20)
+
         if h["code"] == "SHIP":
             h["cases"] = state.get("confirmed_cases", 8); h["deaths"] = state.get("deaths", 3)
-        elif h["code"] == "USA" and h["name"] in usa_city_cases:
-            h["cases"] = usa_city_cases[h["name"]]; h["deaths"] = 1 if h["name"] == "ATLANTA ALERT" else 0
-        elif h["code"] in nat_map:
-            h["cases"] = nat_map[h["code"]]["cases"]; h["deaths"] = nat_map[h["code"]]["deaths"]
-        else: h["cases"] = 0; h["deaths"] = 0
+        else:
+            # Check for extracted location data first
+            location_match = None
+            for location_name, data in location_cases.items():
+                if (location_name.upper() == h["name"] or
+                    location_name.upper() in h["name"] or
+                    h["name"] in location_name.upper()):
+                    location_match = data
+                    break
+
+            if location_match:
+                h["cases"] = location_match["cases"]
+                h["deaths"] = 0  # Deaths not tracked per location yet
+                # Add source info to notes for hover display
+                if "Source:" not in h["notes"]:
+                    h["notes"] += f" Source: {location_match['source']} (credibility: {location_match['credibility']:.1f})"
+            elif h["code"] == "USA" and h["name"] in usa_city_cases:
+                h["cases"] = usa_city_cases[h["name"]]; h["deaths"] = 1 if h["name"] == "ATLANTA ALERT" else 0
+            elif h["code"] in nat_map:
+                h["cases"] = nat_map[h["code"]]["cases"]; h["deaths"] = nat_map[h["code"]]["deaths"]
+            else:
+                h["cases"] = 0; h["deaths"] = 0
     return hotspots
 
 def _get_dynamic_intensity(day: int) -> dict:

@@ -68,6 +68,38 @@ COUNTRY_PATTERNS = [
     r"from\s+(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+(?:different\s+)?countr",
 ]
 
+# Location-specific case patterns: (number, location) or (location, number)
+LOCATION_PATTERNS = [
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+(?:new\s+)?cases?\s+(?:reported\s+)?(?:in|from|at)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+(?:patients?|infections?|people)\s+(?:in|from|at)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)",
+    r"([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(?:reports?|confirms?)\s+(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+cases?",
+    r"([A-Z][a-z]+)\s+(?:hospital|health\s+(?:department|officials?))\s+(?:reports?|confirms?)\s+(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+(?:confirmed|reported)\s+(?:in|at)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)",
+    r"(?:in|at)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)[,:]?\s+(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+cases?",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+cases?\s+in\s+([A-Z][a-z]+)",
+]
+
+# City/location coordinate database for map hotspots
+LOCATION_COORDS = {
+    "New York": {"lat": 40.71, "lng": -74.01, "code": "USA", "state": "NY"},
+    "NYC": {"lat": 40.71, "lng": -74.01, "code": "USA", "state": "NY"},
+    "Manhattan": {"lat": 40.71, "lng": -74.01, "code": "USA", "state": "NY"},
+    "Newark": {"lat": 40.74, "lng": -74.17, "code": "USA", "state": "NJ"},
+    "Atlanta": {"lat": 33.75, "lng": -84.39, "code": "USA", "state": "GA"},
+    "Seattle": {"lat": 47.61, "lng": -122.33, "code": "USA", "state": "WA"},
+    "Los Angeles": {"lat": 34.05, "lng": -118.24, "code": "USA", "state": "CA"},
+    "Chicago": {"lat": 41.88, "lng": -87.63, "code": "USA", "state": "IL"},
+    "Miami": {"lat": 25.76, "lng": -80.19, "code": "USA", "state": "FL"},
+    "Boston": {"lat": 42.36, "lng": -71.06, "code": "USA", "state": "MA"},
+    "Denver": {"lat": 39.74, "lng": -104.99, "code": "USA", "state": "CO"},
+    "Las Palmas": {"lat": 28.10, "lng": -15.42, "code": "ESP", "state": "Canary Islands"},
+    "Canary Islands": {"lat": 28.10, "lng": -15.42, "code": "ESP", "state": "Canary Islands"},
+    "London": {"lat": 51.51, "lng": -0.13, "code": "GBR", "state": "England"},
+    "Madrid": {"lat": 40.42, "lng": -3.70, "code": "ESP", "state": "Madrid"},
+    "Buenos Aires": {"lat": -34.61, "lng": -58.38, "code": "ARG", "state": "Buenos Aires"},
+    "Santiago": {"lat": -33.46, "lng": -70.65, "code": "CHL", "state": "Santiago"},
+}
+
 
 def _nums(text: str, patterns: list[str], lo: int, hi: int) -> list[int]:
     out = []
@@ -94,6 +126,106 @@ def _nums(text: str, patterns: list[str], lo: int, hi: int) -> list[int]:
             except (ValueError, TypeError, IndexError):
                 pass
     return out
+
+
+def _extract_locations(text: str, source: str, credibility: float) -> dict[str, dict]:
+    """Extract location-specific case data from text with source attribution."""
+    location_data = {}
+
+    for pattern in LOCATION_PATTERNS:
+        for m in re.finditer(pattern, text, re.IGNORECASE):
+            try:
+                groups = m.groups()
+
+                # Handle different pattern formats: (number, location) or (location, number)
+                if groups[0].isdigit() or groups[0].lower() in WORD_TO_NUM:
+                    # Pattern: number, location
+                    num_str, location = groups[0], groups[1]
+                else:
+                    # Pattern: location, number
+                    location, num_str = groups[0], groups[1]
+
+                # Convert word to number
+                if num_str.lower() in WORD_TO_NUM:
+                    cases = WORD_TO_NUM[num_str.lower()]
+                else:
+                    cases = int(num_str)
+
+                # Normalize location name and remove common suffixes
+                location = location.strip().title()
+                # Remove common trailing words that aren't part of city names
+                location = re.sub(r'\s+(From|Connected|To|Hospital|Health|Department|Officials?|Reports?).*$', '', location)
+                location = location.strip()
+
+                # Check if location is in our coordinate database
+                location_key = location
+                if location not in LOCATION_COORDS:
+                    # Try alternative names and partial matches
+                    for alt_name in LOCATION_COORDS:
+                        if (alt_name.lower() in location.lower() or
+                            location.lower() in alt_name.lower() or
+                            location.lower().split()[0] == alt_name.lower().split()[0]):
+                            location_key = alt_name
+                            break
+
+                if location_key in LOCATION_COORDS and 1 <= cases <= 1000:
+                    coords = LOCATION_COORDS[location_key]
+
+                    # Store with source attribution
+                    if location not in location_data or cases > location_data[location].get("cases", 0):
+                        location_data[location] = {
+                            "cases": cases,
+                            "source": source,
+                            "credibility": credibility,
+                            "coordinates": coords,
+                            "timestamp": datetime.utcnow().isoformat(),
+                            "raw_text": m.group(0)  # Original matched text for debugging
+                        }
+
+            except (ValueError, TypeError, IndexError):
+                pass
+
+    return location_data
+
+
+def _save_location_data(location_data: dict[str, dict]) -> None:
+    """Save location-specific case data to persistent storage."""
+    location_file = Path("data/location_cases.json")
+
+    # Load existing data
+    existing = {}
+    if location_file.exists():
+        try:
+            existing = json.loads(location_file.read_text())
+        except Exception:
+            pass
+
+    # Merge new data (only if higher case count or higher credibility)
+    updated = False
+    for location, new_data in location_data.items():
+        should_update = False
+
+        if location not in existing:
+            should_update = True
+        else:
+            existing_data = existing[location]
+            # Update if higher case count, or same count but higher credibility
+            if (new_data["cases"] > existing_data.get("cases", 0) or
+                (new_data["cases"] == existing_data.get("cases", 0) and
+                 new_data["credibility"] > existing_data.get("credibility", 0))):
+                should_update = True
+
+        if should_update:
+            existing[location] = new_data
+            updated = True
+            logging.info(f"Location update: {location} = {new_data['cases']} cases from {new_data['source']}")
+
+    # Save updated data
+    if updated:
+        try:
+            location_file.write_text(json.dumps(existing, indent=2))
+        except Exception as e:
+            logging.warning(f"Failed to save location data: {e}")
 
 
 def _generate_case_update_signal(old_count: int, new_count: int) -> None:
@@ -160,13 +292,27 @@ def extract_and_save(articles: list[dict[str, Any]]) -> dict[str, Any]:
         return {}
 
     all_cases, all_suspected, all_deaths, all_countries = [], [], [], []
+    all_location_data = {}
+
     for art in trusted:
         text = (art.get("title", "") + " " + art.get("summary", "")).lower()
         extracted_cases = _nums(text, CASE_PATTERNS, 1, 500)
         extracted_suspected = _nums(text, SUSPECTED_PATTERNS, 1, 500)
         extracted_deaths = _nums(text, DEATH_PATTERNS, 0, 200)
         extracted_countries = _nums(text, COUNTRY_PATTERNS, 1, 50)
-        
+
+        # Extract location-specific data
+        location_data = _extract_locations(
+            text,
+            art.get("source", "Unknown"),
+            art.get("credibility", 0.5)
+        )
+
+        # Merge location data (keeping highest case counts)
+        for location, data in location_data.items():
+            if location not in all_location_data or data["cases"] > all_location_data[location]["cases"]:
+                all_location_data[location] = data
+
         all_cases     += extracted_cases
         all_suspected += extracted_suspected
         all_deaths    += extracted_deaths
@@ -237,5 +383,9 @@ def extract_and_save(articles: list[dict[str, Any]]) -> dict[str, Any]:
         add_insight("alert", summary_msg, "SCRAPER")
 
         logging.info("Case count live update: %s", {k: merged[k] for k in ("confirmed_cases","deaths","nationalities") if k in merged})
+
+    # Save location-specific data regardless of whether main counts changed
+    if all_location_data:
+        _save_location_data(all_location_data)
 
     return extracted if changed else {}
