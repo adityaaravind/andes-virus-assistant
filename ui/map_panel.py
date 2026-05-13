@@ -121,16 +121,28 @@ def _get_dynamic_hotspots(state: dict) -> list:
         {"lat": -26.20, "lng": 28.04,  "code": "ZAF", "name": "S. AFRICA STOP", "color": "#00ffcc", "relation": "Emergency Evacuation", "intel": "HEALTH HUB", "admitted": "Netcare Milpark", "notes": "Critically ill crew members taken for help.", "timestamp": "MAY 08"},
         {"lat": 40.41, "lng": -3.70,  "code": "ESP", "name": "SPAIN MONITOR", "color": "#ffaa00", "relation": "Repatriation Monitoring", "intel": "QUARANTINE", "admitted": "Tenerife Isolation Ward", "notes": "Close monitoring for returning passengers.", "timestamp": "MAY 09"},
         {"lat": 51.50, "lng": -0.12,  "code": "GBR", "name": "UK MONITOR", "color": "#cc00ff", "relation": "Repatriation Monitoring", "intel": "ISOLATION", "admitted": "Royal London Hospital", "notes": "Patients kept in secure isolation wards.", "timestamp": "MAY 11"},
-        {"lat": 40.71, "lng": -74.00, "code": "USA", "name": "USA LANDING", "color": "#38bdf8", "relation": "New Landing Zone", "intel": "PORT MONITOR", "admitted": "Bellevue Hospital (NY)", "notes": "Confirmed landing of 24 passengers from vessel.", "timestamp": "LIVE"},
+
+        # USA city-specific hotspots
+        {"lat": 40.71, "lng": -74.00, "code": "USA", "name": "NYC LANDING", "color": "#38bdf8", "relation": "Passenger Landing Zone", "intel": "PORT MONITOR", "admitted": "Bellevue Hospital (NY)", "notes": "24 passengers from vessel landed here.", "timestamp": "LIVE"},
+        {"lat": 33.75, "lng": -84.39, "code": "USA", "name": "ATLANTA ALERT", "color": "#ef4444", "relation": "Suspected Exposure", "intel": "ISOLATION", "admitted": "Emory University Hospital", "notes": "Two individuals with suspected hantavirus exposure in specialized isolation.", "timestamp": "MAY 13"},
+        {"lat": 47.61, "lng": -122.33, "code": "USA", "name": "SEATTLE MONITOR", "color": "#fbbf24", "relation": "Contact Monitoring", "intel": "HEALTH WATCH", "admitted": "King County Health", "notes": "3 King County residents being monitored for hantavirus.", "timestamp": "MAY 12"},
+
+        # Ship location
         {"lat": 14.93, "lng": -23.51, "code": "SHIP", "name": "THE SHIP (MV HONDIUS)", "color": "#4ade80", "relation": "Active Virus Center", "intel": "RESTRICTED", "admitted": "Onboard Med-Bay", "notes": "Ship is closed to all outside contact.", "timestamp": "LIVE"}
     ]
     # Generate nationality data based on current case counts
     nationality_data = _get_auto_nationality_data(state.get("confirmed_cases", 8), state.get("deaths", 3))
     nat_map = {d["code"]: d for d in nationality_data}
+
+    # City-specific case assignments for USA
+    usa_city_cases = {"NYC LANDING": 1, "ATLANTA ALERT": 2, "SEATTLE MONITOR": 3}
+
     for h in hotspots:
         h["fear"] = _get_local_fear_index(h["code"], 95 if h["code"]=="ARG" else 20)
         if h["code"] == "SHIP":
             h["cases"] = state.get("confirmed_cases", 8); h["deaths"] = state.get("deaths", 3)
+        elif h["code"] == "USA" and h["name"] in usa_city_cases:
+            h["cases"] = usa_city_cases[h["name"]]; h["deaths"] = 1 if h["name"] == "ATLANTA ALERT" else 0
         elif h["code"] in nat_map:
             h["cases"] = nat_map[h["code"]]["cases"]; h["deaths"] = nat_map[h["code"]]["deaths"]
         else: h["cases"] = 0; h["deaths"] = 0
