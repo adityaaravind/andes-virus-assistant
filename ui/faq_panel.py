@@ -7,6 +7,7 @@ from pathlib import Path
 from alerts.persist_helper import bg_kv_set, get_persisted_value
 
 _FAQ_CLICKS_KEY = "faq_popularity_clicks"
+_FAQ_VIEWS_KEY = "faq_total_views"
 
 BASE_QUESTIONS = [
     {"q": "What is Andes virus and why is it dangerous?",         "cat": "Scientific Facts",    "key": "q_what"},
@@ -66,10 +67,34 @@ def _load_clicks() -> dict[str, int]:
     return get_persisted_value(_FAQ_CLICKS_KEY, {})
 
 
+def _get_total_views() -> int:
+    """Get total FAQ page views."""
+    return get_persisted_value(_FAQ_VIEWS_KEY, 0)
+
+
+def _increment_views() -> int:
+    """Increment FAQ views if not already counted this session."""
+    if st.session_state.get("faq_view_counted"):
+        return _get_total_views()
+
+    # Mark as counted for this session
+    st.session_state["faq_view_counted"] = True
+
+    # Increment synchronously to ensure it works
+    from alerts.persistent_kv import kv_set, kv_get
+    current_views = kv_get(_FAQ_VIEWS_KEY, 0)
+    new_views = current_views + 1
+    kv_set(_FAQ_VIEWS_KEY, new_views)
+
+    return new_views
+
+
 def _save_click(key: str) -> None:
-    clicks = _load_clicks()
+    # Use synchronous update to ensure reliability
+    from alerts.persistent_kv import kv_set, kv_get
+    clicks = kv_get(_FAQ_CLICKS_KEY, {})
     clicks[key] = clicks.get(key, 0) + 1
-    bg_kv_set(_FAQ_CLICKS_KEY, clicks)
+    kv_set(_FAQ_CLICKS_KEY, clicks)
 
 
 def _sorted_questions() -> list[dict]:
@@ -112,11 +137,27 @@ def render_faq_panel(chain: Any) -> None:
     questions = _sorted_questions()
     clicks    = _load_clicks()
 
+    # Track and display views
+    total_views = _increment_views()
+    total_clicks = sum(clicks.values())
+
     st.markdown(
         '<div style="display:flex;align-items:baseline;gap:0.8rem;margin-bottom:1.2rem;">'
         '<h3 style="margin:0;color:#f8fafc;font-size:1.4rem;font-weight:900;">COMMON QUESTIONS & ANSWERS</h3>'
         '<span style="color:#64748b;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Information Center // Sorted by Popularity</span>'
         '</div>',
+        unsafe_allow_html=True,
+    )
+
+    # Views and interaction stats
+    st.markdown(
+        f'<div style="background:rgba(74,222,128,0.05);border:1px solid rgba(74,222,128,0.2);'
+        f'border-radius:8px;padding:0.6rem;margin-bottom:1rem;display:flex;justify-content:space-between;">'
+        f'<span style="color:#4ade80;font-size:0.7rem;font-weight:700;">📊 FAQ ANALYTICS</span>'
+        f'<div style="display:flex;gap:1rem;">'
+        f'<span style="color:#e2e8f0;font-size:0.7rem;">{total_views} views</span>'
+        f'<span style="color:#e2e8f0;font-size:0.7rem;">{total_clicks} interactions</span>'
+        f'</div></div>',
         unsafe_allow_html=True,
     )
 
