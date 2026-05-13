@@ -60,6 +60,53 @@ def _calculate_time_ago(timestamp_iso: str) -> tuple[int, str]:
     except:
         return (0, "H")
 
+@st.cache_data(ttl=420, show_spinner=False)  # 7-minute cache
+def _generate_ai_insight_signal() -> dict:
+    """Generate a single AI insight signal for the feed."""
+    try:
+        from rag.chain import build_chain
+        chain = build_chain()
+
+        if not chain:
+            return None
+
+        # Rotate through different insight types
+        from datetime import datetime
+        minute = datetime.utcnow().minute
+
+        insight_queries = {
+            0: ("transmission", "What new transmission patterns are emerging in this outbreak?", "🦠"),
+            1: ("trends", "What are the most significant trends in this outbreak?", "📈"),
+            2: ("severity", "How is the severity assessment evolving based on recent reports?", "⚠️"),
+            3: ("geographic", "What geographic patterns are emerging in the spread?", "🗺️"),
+            4: ("treatment", "What treatment developments are being reported?", "💊")
+        }
+
+        query_type = (minute // 7) % 5
+        insight_type, query, emoji = insight_queries[query_type]
+
+        response = chain.query(query)
+        insight_text = response.get("answer", "Analysis pending...")
+
+        # Truncate for signal feed
+        if len(insight_text) > 150:
+            insight_text = insight_text[:147] + "..."
+
+        return {
+            "date": "LIVE",
+            "time": "AI-INSIGHT",
+            "event": f"{emoji} AI INSIGHT: {insight_text}",
+            "type": "ANALYSIS",
+            "speed": "15.3 kn",
+            "uplink": "100%",
+            "hours_ago": 0,
+            "priority": "normal",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+    except Exception:
+        return None
+
 def _get_system_status_signals() -> list:
     """Generate real-time system status signals for ingestion, refresh, etc."""
     signals = []
@@ -107,6 +154,12 @@ def _get_system_status_signals() -> list:
                 "event": "🧠 VECTOR ANALYSIS: AI processing semantic patterns in outbreak data. Cross-referencing symptoms, transmission routes, geographic spread.",
                 "type": "SYSTEM", "speed": "15.1 kn", "uplink": "100%", "hours_ago": 0, "priority": "low"
             })
+
+        # Add AI insights signals every few minutes
+        if current_time.minute % 7 == 0:  # Every 7 minutes
+            insights = _generate_ai_insight_signal()
+            if insights:
+                signals.append(insights)
 
         # Add case extraction status if recent outbreak data exists
         live_state = _get_live_state()
