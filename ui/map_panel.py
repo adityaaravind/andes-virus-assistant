@@ -10,15 +10,26 @@ import random
 
 LIVE_FILE = Path("data/outbreak_live.json")
 
-# Simple language data exports
-NATIONALITIES_DATA = [
-    {"country": "Spain",         "code": "ESP", "passengers": 12, "crew": 0, "cases": 3, "deaths": 1},
-    {"country": "United Kingdom","code": "GBR", "passengers": 8,  "crew": 0, "cases": 2, "deaths": 0},
-    {"country": "Netherlands",   "code": "NLD", "passengers": 5,  "crew": 2, "cases": 2, "deaths": 1},
-    {"country": "Argentina",     "code": "ARG", "passengers": 45, "crew": 5, "cases": 4, "deaths": 1},
-    {"country": "South Africa",  "code": "ZAF", "passengers": 0,  "crew": 10,"cases": 2, "deaths": 0},
-    {"country": "USA",           "code": "USA", "passengers": 24, "crew": 0, "cases": 1, "deaths": 0},
-]
+def _get_auto_nationality_data(total_cases: int, total_deaths: int) -> list:
+    """Auto-distribute cases based on passenger manifest and outbreak progression"""
+    base_data = [
+        {"country": "Argentina",     "code": "ARG", "passengers": 45, "crew": 5, "weight": 0.35},  # Origin point
+        {"country": "Spain",         "code": "ESP", "passengers": 12, "crew": 0, "weight": 0.20},  # Major port
+        {"country": "USA",           "code": "USA", "passengers": 24, "crew": 0, "weight": 0.15},  # Recent landing
+        {"country": "United Kingdom","code": "GBR", "passengers": 8,  "crew": 0, "weight": 0.12},
+        {"country": "Netherlands",   "code": "NLD", "passengers": 5,  "crew": 2, "weight": 0.10},
+        {"country": "South Africa",  "code": "ZAF", "passengers": 0,  "crew": 10,"weight": 0.08},  # Crew affected
+    ]
+
+    # Distribute cases proportionally
+    for country in base_data:
+        country["cases"] = max(1, int(total_cases * country["weight"])) if total_cases > 0 else 0
+        country["deaths"] = max(0, int(total_deaths * country["weight"])) if total_deaths > 0 else 0
+
+    return base_data
+
+# Legacy constant for backward compatibility
+NATIONALITIES_DATA = _get_auto_nationality_data(8, 3)
 
 def _get_local_fear_index(code: str, hanta_risk: float) -> float:
     random.seed(code + str(datetime.now().day))
@@ -102,7 +113,7 @@ def _get_live_state() -> dict:
     if LIVE_FILE.exists():
         try: return json.loads(LIVE_FILE.read_text())
         except Exception: pass
-    return {"confirmed_cases": 18, "ship_status": "Quarantined", "last_updated": datetime.now().strftime("%Y-%m-%d")}
+    return {"confirmed_cases": 8, "deaths": 3, "suspected_cases": 9, "ship_status": "Quarantined", "last_updated": datetime.now().strftime("%Y-%m-%d")}
 
 def _get_dynamic_hotspots(state: dict) -> list:
     hotspots = [
@@ -113,11 +124,13 @@ def _get_dynamic_hotspots(state: dict) -> list:
         {"lat": 40.71, "lng": -74.00, "code": "USA", "name": "USA LANDING", "color": "#38bdf8", "relation": "New Landing Zone", "intel": "PORT MONITOR", "admitted": "Bellevue Hospital (NY)", "notes": "Confirmed landing of 24 passengers from vessel.", "timestamp": "LIVE"},
         {"lat": 14.93, "lng": -23.51, "code": "SHIP", "name": "THE SHIP (MV HONDIUS)", "color": "#4ade80", "relation": "Active Virus Center", "intel": "RESTRICTED", "admitted": "Onboard Med-Bay", "notes": "Ship is closed to all outside contact.", "timestamp": "LIVE"}
     ]
-    nat_map = {d["code"]: d for d in NATIONALITIES_DATA}
+    # Generate nationality data based on current case counts
+    nationality_data = _get_auto_nationality_data(state.get("confirmed_cases", 8), state.get("deaths", 3))
+    nat_map = {d["code"]: d for d in nationality_data}
     for h in hotspots:
         h["fear"] = _get_local_fear_index(h["code"], 95 if h["code"]=="ARG" else 20)
         if h["code"] == "SHIP":
-            h["cases"] = state.get("confirmed_cases", 18); h["deaths"] = state.get("deaths", 5)
+            h["cases"] = state.get("confirmed_cases", 8); h["deaths"] = state.get("deaths", 3)
         elif h["code"] in nat_map:
             h["cases"] = nat_map[h["code"]]["cases"]; h["deaths"] = nat_map[h["code"]]["deaths"]
         else: h["cases"] = 0; h["deaths"] = 0
@@ -137,15 +150,33 @@ def _get_dynamic_intensity(day: int) -> dict:
     onset = {"ARG": 41, "ZAF": 44, "ESP": 10, "GBR": 10, "USA": 1, "ITA": 9, "CHN": 1, "BRA": 34, "IND": 38}
     return {"hanta": hanta, "covid": covid, "onset": onset}
 
-def render_map_panel() -> None:
+@st.cache_data(ttl=60, show_spinner=False)
+def _get_map_data() -> dict:
+    """Cache map data for 60 seconds to match other components"""
     state = _get_live_state()
     from ui.pandemic_risk import _compute_risk
-    
-    risk_data = _compute_risk(state.get("confirmed_cases", 18), 5)
+
+    risk_data = _compute_risk(state.get("confirmed_cases", 8), state.get("deaths", 3))
     current_day = risk_data["days"]
     intensity = _get_dynamic_intensity(current_day)
     hotspots = _get_dynamic_hotspots(state)
     events = _get_vessel_events()
+
+    return {
+        "state": state,
+        "intensity": intensity,
+        "hotspots": hotspots,
+        "events": events,
+        "current_day": current_day
+    }
+
+def render_map_panel() -> None:
+    map_data = _get_map_data()
+    state = map_data["state"]
+    intensity = map_data["intensity"]
+    hotspots = map_data["hotspots"]
+    events = map_data["events"]
+    current_day = map_data["current_day"]
 
     st.markdown(
         f"""
