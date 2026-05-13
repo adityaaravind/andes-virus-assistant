@@ -60,7 +60,7 @@ def _calculate_time_ago(timestamp_iso: str) -> tuple[int, str]:
     except:
         return (0, "H")
 
-@st.cache_data(ttl=420, show_spinner=False)  # 7-minute cache
+@st.cache_data(ttl=120, show_spinner=False)  # 2-minute cache for testing
 def _generate_ai_insight_signal() -> dict:
     """Generate a single AI insight signal for the feed."""
     try:
@@ -82,7 +82,7 @@ def _generate_ai_insight_signal() -> dict:
             4: ("treatment", "What treatment developments are being reported?", "💊")
         }
 
-        query_type = (minute // 7) % 5
+        query_type = (minute // 2) % 5  # Rotate every 2 minutes
         insight_type, query, emoji = insight_queries[query_type]
 
         response = chain.query(query)
@@ -155,8 +155,8 @@ def _get_system_status_signals() -> list:
                 "type": "SYSTEM", "speed": "15.1 kn", "uplink": "100%", "hours_ago": 0, "priority": "low"
             })
 
-        # Add AI insights signals every few minutes
-        if current_time.minute % 7 == 0:  # Every 7 minutes
+        # Add AI insights signals every few minutes (frequent for testing)
+        if current_time.minute % 2 == 0:  # Every 2 minutes for easier testing
             insights = _generate_ai_insight_signal()
             if insights:
                 signals.append(insights)
