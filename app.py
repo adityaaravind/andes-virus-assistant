@@ -96,6 +96,9 @@ def _run_fast_news_poll() -> None:
         try:
             from alerts.alert_manager import check_and_fire
             from alerts.notifier import send_ntfy
+        except ImportError:
+            pass
+
         if chunks:
             add_documents(chunks)
             
