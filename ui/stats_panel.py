@@ -113,32 +113,6 @@ def get_outbreak_stats() -> dict[str, Any]:
     return data
 
 def render_stats_panel() -> None:
-    # Force refresh button for debugging
-    col1, col2 = st.columns([4, 1])
-    with col2:
-        if st.button("🔄 Force Refresh", key="force_refresh_stats", help="Force RSS refresh & case extraction"):
-            try:
-                # Clear cache and force refresh
-                get_outbreak_stats.clear()
-
-                # Trigger RSS refresh and case extraction
-                from ingestion.news_scraper import scrape_all_feeds
-                from ingestion.case_count_scraper import extract_and_save
-
-                st.info("Refreshing RSS feeds and extracting case counts...")
-                docs = scrape_all_feeds()
-                result = extract_and_save(docs)
-
-                if result:
-                    st.success(f"✅ Updated: {result}")
-                else:
-                    st.warning("No new case data found in latest articles")
-
-                st.rerun()
-
-            except Exception as e:
-                st.error(f"Refresh failed: {e}")
-
     stats = get_outbreak_stats()
     
     # CSS definitions for glows and definitions

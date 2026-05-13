@@ -64,29 +64,46 @@ CAT_COLORS = {
 
 
 def _load_clicks() -> dict[str, int]:
-    return get_persisted_value(_FAQ_CLICKS_KEY, {})
+    # Always read fresh from storage to see real-time updates
+    from alerts.persistent_kv import kv_get
+    return kv_get(_FAQ_CLICKS_KEY, {})
 
 
 def _get_total_views() -> int:
     """Get total FAQ page views."""
-    return get_persisted_value(_FAQ_VIEWS_KEY, 0)
+    # Always read fresh to ensure real-time updates
+    from alerts.persistent_kv import kv_get
+    return kv_get(_FAQ_VIEWS_KEY, 0)
 
 
 def _increment_views() -> int:
-    """Increment FAQ views if not already counted this session."""
-    if st.session_state.get("faq_view_counted"):
-        return _get_total_views()
-
-    # Mark as counted for this session
-    st.session_state["faq_view_counted"] = True
-
-    # Increment synchronously to ensure it works
+    """Increment FAQ views with time-based tracking."""
+    from datetime import datetime, timedelta
     from alerts.persistent_kv import kv_set, kv_get
-    current_views = kv_get(_FAQ_VIEWS_KEY, 0)
-    new_views = current_views + 1
-    kv_set(_FAQ_VIEWS_KEY, new_views)
 
-    return new_views
+    # Check last view time to prevent spam
+    last_view_key = f"{_FAQ_VIEWS_KEY}_last_time"
+    last_view_time = kv_get(last_view_key, None)
+
+    current_time = datetime.utcnow().isoformat()
+
+    # Only increment if more than 5 minutes since last view from this session
+    session_key = f"faq_last_view_{id(st.session_state)}"
+
+    if not st.session_state.get(session_key):
+        # New session, increment view count
+        current_views = kv_get(_FAQ_VIEWS_KEY, 0)
+        new_views = current_views + 1
+        kv_set(_FAQ_VIEWS_KEY, new_views)
+        kv_set(last_view_key, current_time)
+
+        # Mark this session
+        st.session_state[session_key] = True
+
+        return new_views
+    else:
+        # Return current count without incrementing
+        return kv_get(_FAQ_VIEWS_KEY, 0)
 
 
 def _save_click(key: str) -> None:
