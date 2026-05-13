@@ -596,27 +596,37 @@ def render_faq_panel(chain: Any) -> None:
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* Hide Streamlit button styling for card interaction */
+        /* Style question buttons to look like clickable cards */
         .stButton > button {
-            background: transparent !important;
-            border: none !important;
-            color: transparent !important;
-            box-shadow: none !important;
-            height: 40px !important;
-            font-size: 12px !important;
-            padding: 2px !important;
-            margin: 2px 0 !important;
+            background: linear-gradient(160deg, rgba(6,20,31,0.74), rgba(11,34,51,0.56)) !important;
+            border: 1px solid rgba(158,237,229,0.16) !important;
+            border-radius: 18px !important;
+            color: var(--ink) !important;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 16px 38px rgba(0,0,0,0.28) !important;
+            min-height: 80px !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            padding: 16px !important;
+            margin: 8px 0 !important;
+            text-align: left !important;
+            line-height: 1.3 !important;
+            transition: all 0.26s ease !important;
         }
 
         .stButton > button:hover {
-            background: rgba(0,180,216,0.1) !important;
-            border: 1px solid rgba(0,180,216,0.3) !important;
-            color: #00B4D8 !important;
+            background: rgba(15, 45, 64, 0.92) !important;
+            border-color: color-mix(in srgb, var(--accent) 52%, rgba(158,237,229,0.22)) !important;
+            transform: translateY(-3px) !important;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.13) inset, 0 26px 62px rgba(0, 7, 13, 0.55), 0 0 30px color-mix(in srgb, var(--accent) 11%, transparent) !important;
         }
 
         .stButton > button:focus {
             outline: 2px solid var(--accent) !important;
             outline-offset: 2px !important;
+        }
+
+        .stButton > button:active {
+            transform: translateY(-1px) scale(0.98) !important;
         }
 
         @media (max-width: 820px) {
@@ -674,34 +684,31 @@ def render_faq_panel(chain: Any) -> None:
     </section>
     """)
 
-    # Clickable FAQ cards with individual buttons
-    st.markdown("**💬 Click any FAQ card below to expand the answer**")
+    # Clickable FAQ cards - direct question interaction
+    st.markdown("**💬 Click any question below to expand the answer**")
 
-    # Create invisible buttons for each card
-    card_cols = st.columns(len(sorted_faqs))
+    # Create clickable question buttons styled as text
     clicked_faq_id = None
 
     for i, faq in enumerate(sorted_faqs):
-        with card_cols[i]:
-            is_open = st.session_state.faq_open_id == faq["id"]
-            status_icon = "🔽" if is_open else "▶️"
+        is_open = st.session_state.faq_open_id == faq["id"]
 
-            # Invisible button that spans the card area
-            if st.button(
-                f"{status_icon} #{i+1}",
-                key=f"card_click_{faq['id']}",
-                help=f"Click to expand: {faq['question']}",
-                use_container_width=True
-            ):
-                clicked_faq_id = faq["id"]
+        # Create button with question text as label
+        button_label = f"{'🔽' if is_open else '▶️'} {faq['question']}"
 
-    # Handle card clicks
+        if st.button(
+            button_label,
+            key=f"faq_question_{faq['id']}",
+            help=f"Views: {_format_views(faq['views'])} • {faq['readingTime']} read",
+            use_container_width=True
+        ):
+            clicked_faq_id = faq["id"]
+
+    # Handle question clicks
     if clicked_faq_id:
         if st.session_state.faq_open_id == clicked_faq_id:
-            # Close if already open
             st.session_state.faq_open_id = None
         else:
-            # Open new card and track click
             st.session_state.faq_open_id = clicked_faq_id
             _save_click(clicked_faq_id)
         st.rerun()
