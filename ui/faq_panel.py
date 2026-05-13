@@ -154,27 +154,11 @@ def render_faq_panel(chain: Any) -> None:
     questions = _sorted_questions()
     clicks    = _load_clicks()
 
-    # Track and display views
-    total_views = _increment_views()
-    total_clicks = sum(clicks.values())
-
     st.markdown(
         '<div style="display:flex;align-items:baseline;gap:0.8rem;margin-bottom:1.2rem;">'
         '<h3 style="margin:0;color:#f8fafc;font-size:1.4rem;font-weight:900;">COMMON QUESTIONS & ANSWERS</h3>'
         '<span style="color:#64748b;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Information Center // Sorted by Popularity</span>'
         '</div>',
-        unsafe_allow_html=True,
-    )
-
-    # Views and interaction stats
-    st.markdown(
-        f'<div style="background:rgba(74,222,128,0.05);border:1px solid rgba(74,222,128,0.2);'
-        f'border-radius:8px;padding:0.6rem;margin-bottom:1rem;display:flex;justify-content:space-between;">'
-        f'<span style="color:#4ade80;font-size:0.7rem;font-weight:700;">📊 FAQ ANALYTICS</span>'
-        f'<div style="display:flex;gap:1rem;">'
-        f'<span style="color:#e2e8f0;font-size:0.7rem;">{total_views} views</span>'
-        f'<span style="color:#e2e8f0;font-size:0.7rem;">{total_clicks} interactions</span>'
-        f'</div></div>',
         unsafe_allow_html=True,
     )
 
@@ -273,40 +257,48 @@ details:not([open]) summary::before { content: '▶'; font-size: 8px; }
         "Symptoms": "🌡️", "Official Response": "🛡️",
     }
 
-    faq_html = '<div class="faq-grid">'
-    for item in questions:
+    # Use grid layout with real Streamlit expanders for click tracking
+    cols = st.columns(2)
+
+    for i, item in enumerate(questions):
         key = item["key"]
         cat = item["cat"]
         click_count = clicks.get(key, 0)
         c_border, c_bg = CAT_COLORS.get(cat, ("#94a3b8", "rgba(148,163,184,0.10)"))
         icon = CAT_ICONS.get(cat, "❓")
         answer = STATIC_ANSWERS.get(key, "Strategic response pending...")
-        
-        # Unique glow for each card
-        accent_glow = c_border + "33" # 20% opacity
-        
+
         # Determine popularity badge
         popularity_badge = ""
         if click_count > 140:
-            popularity_badge = f'<span style="background:rgba(239,68,68,0.2); color:#f87171; padding:2px 8px; border-radius:6px; font-size:0.55rem; font-weight:950; border:1px solid #f8717144;">MOST VIEWED</span>'
-        
-        faq_html += f"""<div class="faq-card" style="--accent-color: {c_border}; --accent-glow: {accent_glow};">
-<div style="position:absolute; top:0; left:0; width:100%; height:4px; background:linear-gradient(90deg, {c_border}, transparent);"></div>
-<div class="faq-category">
-<span><span class="faq-icon">{icon}</span>{cat.upper()}</span>
-<div style="display:flex; gap:8px; align-items:center;">
-{popularity_badge}
-<span style="color:#475569; font-size:0.55rem;">{click_count} VIEWS</span>
-</div>
-</div>
-<div class="faq-question">{item['q']}</div>
-<details>
-<summary>VIEW ANSWER</summary>
-<div class="faq-answer-box">
-{answer}
-</div>
-</details>
-</div>"""
-    
-    faq_html += '</div>'
-    st.html(faq_html)
+            popularity_badge = "🔥 MOST VIEWED • "
+        elif click_count > 50:
+            popularity_badge = "📈 TRENDING • "
+
+        with cols[i % 2]:
+            # Custom styled container
+            st.markdown(f"""
+            <div style="background:rgba(15,23,42,0.7); border:1px solid {c_border}44; border-radius:12px; padding:1rem; margin-bottom:1rem; backdrop-filter:blur(10px);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+            <span style="color:{c_border}; font-size:0.65rem; font-weight:900; text-transform:uppercase;">{icon} {cat}</span>
+            <span style="color:#64748b; font-size:0.6rem;">{popularity_badge}{click_count} VIEWS</span>
+            </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            # Button-based FAQ with click tracking
+            button_label = f"📖 **{item['q']}**"
+            if st.button(button_label, key=f"faq_btn_{key}", use_container_width=True):
+                # Track click when button pressed
+                _save_click(key)
+                st.session_state[f"show_answer_{key}"] = True
+
+            # Show answer if button was clicked
+            if st.session_state.get(f"show_answer_{key}", False):
+                st.info(f"**Answer:** {answer}")
+                st.caption(f"Category: {cat} • Total views: {clicks.get(key, 0)}")
+
+                # Add hide button
+                if st.button("Hide Answer", key=f"hide_{key}"):
+                    st.session_state[f"show_answer_{key}"] = False
+                    st.rerun()
