@@ -30,9 +30,34 @@ def _get_covid_historical(day: int) -> int:
     if day <= 0: return 0
     return int(500 * math.exp(0.108 * day))
 
+def _extend_timeline_with_live_data() -> list[dict]:
+    """Extend hardcoded timeline with current live outbreak data."""
+    timeline = CASE_TIMELINE.copy()
+
+    # Get current live state
+    live_data = _load_live()
+    current_cases = live_data.get("confirmed_cases", 0)
+    last_updated = live_data.get("last_updated")
+
+    if last_updated and current_cases > 0:
+        # Check if we need to add today's data
+        last_timeline_date = timeline[-1]["date"]
+
+        # If live data is newer than last timeline entry, add it
+        if last_updated > last_timeline_date:
+            timeline.append({
+                "date": last_updated,
+                "cases": current_cases,
+                "label": f"LIVE UPDATE: {current_cases} confirmed cases ({live_data.get('source_type', 'auto-extracted')})"
+            })
+
+    return timeline
+
 def build_timeline_chart(current_day: int) -> go.Figure:
-    dates  = [datetime.strptime(r["date"], "%Y-%m-%d") for r in CASE_TIMELINE]
-    cases  = [r["cases"] for r in CASE_TIMELINE]
+    # Get extended timeline with live data
+    extended_timeline = _extend_timeline_with_live_data()
+    dates  = [datetime.strptime(r["date"], "%Y-%m-%d") for r in extended_timeline]
+    cases  = [r["cases"] for r in extended_timeline]
     
     covid_cases = []
     for i in range(len(dates)):
@@ -50,17 +75,36 @@ def build_timeline_chart(current_day: int) -> go.Figure:
         hovertemplate="<b>COVID-19 COMPARISON</b><br>Day since start: %{x|%b %d}<br>Historical Count: %{y:,}<extra></extra>",
     ))
 
-    # Hantavirus Case Progression (Solid Line)
+    # Separate baseline and live data for different styling
+    baseline_count = len(CASE_TIMELINE)
+    baseline_dates = dates[:baseline_count]
+    baseline_cases = cases[:baseline_count]
+
+    # Hantavirus Baseline Timeline (Historical Data)
     fig.add_trace(go.Scatter(
-        x=dates, y=cases,
+        x=baseline_dates, y=baseline_cases,
         mode="lines+markers",
-        name="Hantavirus (Current)",
+        name="Hantavirus (Baseline)",
         line=dict(color="#4ade80", width=3, shape="spline"),
         marker=dict(size=8, color="#4ade80", line=dict(color="#ffffff", width=1.5)),
-        hovertemplate="<b>HANTAVIRUS CURRENT</b><br>%{x|%b %d, %Y}<br>Cases: %{y}<extra></extra>",
+        hovertemplate="<b>HANTAVIRUS BASELINE</b><br>%{x|%b %d, %Y}<br>Cases: %{y}<extra></extra>",
         fill="tozeroy",
         fillcolor="rgba(74,222,128,0.05)",
     ))
+
+    # Live data points (if any)
+    if len(dates) > baseline_count:
+        live_dates = dates[baseline_count-1:]  # Include connection point
+        live_cases = cases[baseline_count-1:]  # Include connection point
+
+        fig.add_trace(go.Scatter(
+            x=live_dates, y=live_cases,
+            mode="lines+markers",
+            name="Live Updates",
+            line=dict(color="#f59e0b", width=3, dash="solid"),
+            marker=dict(size=10, color="#f59e0b", line=dict(color="#ffffff", width=2)),
+            hovertemplate="<b>LIVE UPDATE</b><br>%{x|%b %d, %Y}<br>Cases: %{y}<extra></extra>",
+        ))
 
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
