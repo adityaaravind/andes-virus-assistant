@@ -228,3 +228,43 @@ def get_alert_history(limit: int = 20) -> list[dict[str, Any]]:
         except Exception:
             continue
     return records
+
+
+def send_daily_status_report() -> None:
+    """Send daily status report with current outbreak statistics."""
+    try:
+        from ui.stats_panel import get_outbreak_stats
+        from ui.pandemic_risk import _compute_risk, _risk_meta
+        from alerts.notifier import send_ntfy
+
+        stats = get_outbreak_stats()
+        risk = _compute_risk(stats["confirmed_cases"], stats["nationalities"])
+        _, risk_label, _ = _risk_meta(risk["overall"])
+
+        title = f"📊 Daily Status Report"
+        message = (
+            f"ANDES VIRUS OUTBREAK STATUS\n"
+            f"═══════════════════════════\n"
+            f"🦠 Confirmed Cases: {stats['confirmed_cases']}\n"
+            f"💀 Deaths: {stats['deaths']}\n"
+            f"🌍 Countries Affected: {stats['nationalities']}\n"
+            f"📈 Risk Level: {risk_label}\n"
+            f"📊 Risk Score: {risk['overall']:.1f}\n\n"
+            f"Report generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}"
+        )
+
+        # Send to default topic
+        default_topic = os.getenv("NTFY_DEFAULT_TOPIC", "HANTAVIRUS")
+        if default_topic:
+            send_ntfy(default_topic, title, message, "info")
+            _log_alert(title, message)
+            logging.info("Daily status report sent")
+
+        # Send to all subscribers
+        subs = load_subscriptions()
+        for sub in subs:
+            if sub.get("alerts", {}).get("daily_status", True):  # Default enabled
+                dispatch(sub, title, message, "info")
+
+    except Exception as e:
+        logging.error("Failed to send daily status report: %s", e)

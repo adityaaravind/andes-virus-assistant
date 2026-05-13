@@ -104,6 +104,12 @@ def _run_fast_news_poll() -> None:
 
         logging.info("Fast news poll: %d new chunks", len(chunks))
 
+        # PERSIST NEWS POLL STATUS FOR SIGNAL FEED
+        from alerts.persistent_kv import kv_set
+        kv_set("last_news_poll_time", datetime.utcnow().isoformat())
+        kv_set("last_news_poll_chunks", len(chunks))
+        kv_set("last_news_poll_docs", len(docs))
+
 
         # Backup streamlit-analytics2 to Qdrant & Check size
         try:
@@ -261,6 +267,17 @@ def _start_scheduler() -> None:
                 trigger="interval",
                 minutes=30,
                 id="watchdog_cleanup",
+                max_instances=1,
+                coalesce=True,
+            )
+            # Add Daily Status Report at 12:00 UTC
+            from alerts.alert_manager import send_daily_status_report
+            scheduler.add_job(
+                send_daily_status_report,
+                trigger="cron",
+                hour=12,
+                minute=0,
+                id="daily_status_report",
                 max_instances=1,
                 coalesce=True,
             )

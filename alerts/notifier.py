@@ -133,6 +133,7 @@ def send_email(
         with smtplib.SMTP(smtp_host, smtp_port) as server:
             server.ehlo()
             server.starttls()
+            server.ehlo()  # Some servers need ehlo after starttls
             server.login(smtp_user, smtp_pass)
             server.sendmail(smtp_user, to_addr, msg.as_string())
         return True

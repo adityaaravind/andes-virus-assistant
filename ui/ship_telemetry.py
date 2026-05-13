@@ -3,9 +3,29 @@ from __future__ import annotations
 
 import streamlit as st
 
-def get_ship_bar_html(status: str) -> str:
+def get_ship_bar_html(status: str, ship_data: dict = None) -> str:
     """Returns a minimalist, mobile-friendly horizontal bar for Ship Telemetry."""
-    
+
+    # Extract dynamic coordinates from ship data if available
+    if ship_data:
+        lat = ship_data.get('lat', 14.93)
+        lng = ship_data.get('lng', -23.51)
+        cases = ship_data.get('cases', 0)
+        deaths = ship_data.get('deaths', 0)
+
+        # Format coordinates
+        lat_dir = 'N' if lat >= 0 else 'S'
+        lng_dir = 'E' if lng >= 0 else 'W'
+        coords = f"{abs(lat):.4f}° {lat_dir}, {abs(lng):.4f}° {lng_dir}"
+
+        # Add live timestamp
+        from datetime import datetime
+        timestamp = datetime.utcnow().strftime('%H:%M UTC')
+    else:
+        coords = "28.2916° N, 16.6291° W"  # Fallback to old static
+        cases = deaths = 0
+        timestamp = "STATIC"
+
     # Flattened high-contrast signal strip
     html = f"""
 <style>
@@ -61,16 +81,20 @@ def get_ship_bar_html(status: str) -> str:
         flex-direction: column;
         align-items: flex-start;
         padding: 12px;
-        gap: 10px;
+        gap: 12px;
     }}
     .signal-group {{
         width: 100%;
         border-bottom: 1px solid rgba(255,255,255,0.05);
-        padding-bottom: 8px;
+        padding-bottom: 10px;
     }}
     .signal-group:last-child {{
         border-bottom: none;
         padding-bottom: 0;
+    }}
+    .signal-value {{
+        font-size: 0.8rem;
+        line-height: 1.2;
     }}
 }}
 </style>
@@ -79,12 +103,13 @@ def get_ship_bar_html(status: str) -> str:
 <div class="signal-label">📡 MV HONDIUS STATUS</div>
 <div class="signal-value" style="color:#22c55e;"><span class="signal-live-dot"></span>{status.upper()}</div>
 </div>
-<div class="signal-group" style="flex:1; text-align:center; min-width: 50px;" class="mobile-hide">
-<div style="height:1px; background:rgba(0,180,216,0.1); width:100%;"></div>
+<div class="signal-group" style="text-align:center;">
+<div class="signal-label">🦠 ONBOARD OUTBREAK</div>
+<div class="signal-value" style="color:#ef4444;">{cases} CASES • {deaths} DEATHS</div>
 </div>
 <div class="signal-group" style="text-align: right;">
-<div class="signal-label">📍 GEOGRAPHIC COORDINATES</div>
-<div class="signal-value">28.2916° N, 16.6291° W</div>
+<div class="signal-label">📍 LIVE POSITION • {timestamp}</div>
+<div class="signal-value">{coords}</div>
 </div>
 </div>
 """.replace("\n", " ").strip()

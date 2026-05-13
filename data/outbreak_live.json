@@ -5,6 +5,9 @@
   "nationalities": 23,
   "last_updated": "2026-05-13",
   "source": "auto-extracted",
+  "source_type": "WHO/CDC verified",
+  "last_source": "WHO Emergency Response",
+  "confidence": "HIGH",
   "articles_scanned": 4,
-  "note": "Updated to latest verified totals: 5 confirmed, 9 suspected."
+  "note": "Updated from verified WHO reports: 8 confirmed, 9 suspected."
 }

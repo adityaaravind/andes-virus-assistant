@@ -113,6 +113,32 @@ def get_outbreak_stats() -> dict[str, Any]:
     return data
 
 def render_stats_panel() -> None:
+    # Force refresh button for debugging
+    col1, col2 = st.columns([4, 1])
+    with col2:
+        if st.button("🔄 Force Refresh", key="force_refresh_stats", help="Force RSS refresh & case extraction"):
+            try:
+                # Clear cache and force refresh
+                get_outbreak_stats.clear()
+
+                # Trigger RSS refresh and case extraction
+                from ingestion.news_scraper import scrape_all_feeds
+                from ingestion.case_count_scraper import extract_and_save
+
+                st.info("Refreshing RSS feeds and extracting case counts...")
+                docs = scrape_all_feeds()
+                result = extract_and_save(docs)
+
+                if result:
+                    st.success(f"✅ Updated: {result}")
+                else:
+                    st.warning("No new case data found in latest articles")
+
+                st.rerun()
+
+            except Exception as e:
+                st.error(f"Refresh failed: {e}")
+
     stats = get_outbreak_stats()
     
     # CSS definitions for glows and definitions
@@ -126,6 +152,20 @@ def render_stats_panel() -> None:
             .stat-value.glow-green { text-shadow: 0 0 10px rgba(74,222,128,0.5); }
             .stat-value.glow-amber { text-shadow: 0 0 10px rgba(251,191,36,0.5); }
             .stat-value.glow-red { text-shadow: 0 0 10px rgba(248,113,113,0.5); }
+            .live-indicator {
+                width: 8px;
+                height: 8px;
+                background: #22c55e;
+                border-radius: 50%;
+                display: inline-block;
+                margin-left: 8px;
+                animation: pulse-live 1.5s infinite;
+                box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+            }
+            @keyframes pulse-live {
+                0%, 100% { opacity: 1; transform: scale(1); }
+                50% { opacity: 0.4; transform: scale(0.8); }
+            }
             .stat-def { 
                 font-size: 0.55rem; 
                 font-weight: 700; 
@@ -151,7 +191,34 @@ def render_stats_panel() -> None:
         unsafe_allow_html=True
     )
 
-    # ── 2. GLOWING STAT CARDS ──
+    # ── 2. SOURCE VERIFICATION BAR ──
+    source_type = stats.get("source_type", "Unknown")
+    last_source = stats.get("last_source", "Unknown")
+    confidence = stats.get("confidence", "MEDIUM")
+
+    # Color based on confidence
+    if confidence == "HIGH":
+        source_color = "#22c55e"
+        confidence_text = "🔴 VERIFIED"
+    elif confidence == "MEDIUM":
+        source_color = "#f59e0b"
+        confidence_text = "🟡 CREDIBLE"
+    else:
+        source_color = "#94a3b8"
+        confidence_text = "⚪ UNVERIFIED"
+
+    st.markdown(
+        f'<div style="background:rgba(255,255,255,0.02);border:1px solid rgba({source_color[1:3]},{source_color[3:5]},{source_color[5:7]},0.3);'
+        f'border-radius:8px;padding:0.6rem;margin-bottom:1rem;">'
+        f'<div style="display:flex;justify-content:space-between;align-items:center;">'
+        f'<div><span style="color:{source_color};font-size:0.7rem;font-weight:800;text-transform:uppercase;">{confidence_text}</span>'
+        f'<span style="color:#e2e8f0;font-size:0.75rem;margin-left:8px;">Last Source: {last_source}</span></div>'
+        f'<span style="color:#94a3b8;font-size:0.65rem;">{source_type}</span>'
+        f'</div></div>',
+        unsafe_allow_html=True
+    )
+
+    # ── 3. GLOWING STAT CARDS ──
     def get_color(val: int, type: str) -> str:
         if type == "cases": return "var(--glow-amber)" if val < 20 else "var(--glow-red)"
         if type == "deaths": return "var(--glow-red)" if val > 0 else "var(--glow-green)"
@@ -162,11 +229,16 @@ def render_stats_panel() -> None:
         if type == "deaths": return "glow-red" if val > 0 else "glow-green"
         return "glow-green"
 
+    # Check if data is recent (updated today)
+    from datetime import datetime
+    is_recent = stats.get("last_updated") == datetime.now().strftime("%Y-%m-%d")
+    live_dot = '<span class="live-indicator"></span>' if is_recent else ''
+
     cards = [
-        (str(stats["confirmed_cases"]), "Confirmed Cases", "Confirmed by doctors through hospital lab results.", get_color(stats["confirmed_cases"], "cases"), get_glow_class(stats["confirmed_cases"], "cases")),
-        (str(stats["suspected_cases"]), "Suspected Cases", "Showing symptoms but waiting for final medical testing.", "var(--glow-amber)", "glow-amber"),
-        (str(stats["deaths"]), "Total Deaths", "Deaths directly linked to the current respiratory illness.", get_color(stats["deaths"], "deaths"), get_glow_class(stats["deaths"], "deaths")),
-        (str(stats["nationalities"]), "Countries Involved", "Home countries of people currently being monitored.", "var(--glow-green)", "glow-green"),
+        (str(stats["confirmed_cases"]) + live_dot, "Confirmed Cases", "Confirmed by doctors through hospital lab results.", get_color(stats["confirmed_cases"], "cases"), get_glow_class(stats["confirmed_cases"], "cases")),
+        (str(stats["suspected_cases"]) + live_dot, "Suspected Cases", "Showing symptoms but waiting for final medical testing.", "var(--glow-amber)", "glow-amber"),
+        (str(stats["deaths"]) + live_dot, "Total Deaths", "Deaths directly linked to the current respiratory illness.", get_color(stats["deaths"], "deaths"), get_glow_class(stats["deaths"], "deaths")),
+        (str(stats["nationalities"]) + live_dot, "Countries Involved", "Home countries of people currently being monitored.", "var(--glow-green)", "glow-green"),
     ]
 
     cards_html = ""
@@ -188,5 +260,23 @@ def render_stats_panel() -> None:
 
     # SHIP TELEMETRY BAR
     from ui.ship_telemetry import get_ship_bar_html
-    ship_status = stats.get("ship_status", "In Transit")
-    st.markdown(get_ship_bar_html(ship_status), unsafe_allow_html=True)
+    from ui.map_panel import _get_dynamic_hotspots
+
+    # Use dynamic ship status if not in live data
+    ship_status = stats.get("ship_status")
+    if not ship_status:
+        from ui.map_panel import _get_dynamic_ship_status
+        try:
+            ship_status = _get_dynamic_ship_status()
+        except Exception:
+            ship_status = "In Transit"
+
+    # Get live ship data from map
+    try:
+        live = _load_live()
+        hotspots = _get_dynamic_hotspots(live)
+        ship_data = next((h for h in hotspots if h.get("code") == "SHIP"), None)
+    except Exception:
+        ship_data = None
+
+    st.markdown(get_ship_bar_html(ship_status, ship_data), unsafe_allow_html=True)

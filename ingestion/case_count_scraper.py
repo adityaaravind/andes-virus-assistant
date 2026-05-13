@@ -31,6 +31,10 @@ CASE_PATTERNS = [
     r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+total\s+case",
     r"total\s+of\s+(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+case",
     r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+cases?\s+have\s+been\s+reported",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+cases?\s*(?:confirmed|reported|identified)",
+    r"(?:confirmed|reported|identified)\s+(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+cases?",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+people\s+(?:have\s+been\s+)?(?:confirmed|infected)",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+(?:infections?|patients?)\s+(?:confirmed|reported)",
 ]
 
 SUSPECTED_PATTERNS = [
@@ -141,8 +145,8 @@ def extract_and_save(articles: list[dict[str, Any]]) -> dict[str, Any]:
                for kw in OUTBREAK_KWS)
     ]
     
-    # Filter for high-credibility sources only for numerical extraction
-    trusted = [a for a in relevant if a.get("credibility", 0) >= 0.9]
+    # Filter for credible sources (lowered threshold to catch more updates)
+    trusted = [a for a in relevant if a.get("credibility", 0) >= 0.75]
     
     if not trusted:
         logging.info("No high-credibility articles found for case count extraction.")
@@ -191,12 +195,30 @@ def extract_and_save(articles: list[dict[str, Any]]) -> dict[str, Any]:
 
     if changed:
         # Generate signal for case count increases before saving
-        old_cases = existing.get("confirmed_cases", 0) if existing else 0
+        old_cases = stored.get("confirmed_cases", 0)
         new_cases = merged.get("confirmed_cases", 0)
         if new_cases > old_cases:
             _generate_case_update_signal(old_cases, new_cases)
 
         merged["last_updated"]     = datetime.utcnow().strftime("%Y-%m-%d")
+
+        # Add source verification info
+        highest_credibility_source = max(trusted, key=lambda x: x.get("credibility", 0)) if trusted else None
+        if highest_credibility_source:
+            source_name = highest_credibility_source.get("source", "Unknown")
+            credibility = highest_credibility_source.get("credibility", 0)
+
+            if credibility >= 0.9:
+                merged["source_type"] = "WHO/CDC verified"
+                merged["confidence"] = "HIGH"
+            elif credibility >= 0.8:
+                merged["source_type"] = "Medical authority"
+                merged["confidence"] = "MEDIUM"
+            else:
+                merged["source_type"] = "News source"
+                merged["confidence"] = "LOW"
+
+            merged["last_source"] = source_name
         merged["source"]           = "auto-extracted"
         merged["articles_scanned"] = len(relevant)
         LIVE_FILE.parent.mkdir(parents=True, exist_ok=True)

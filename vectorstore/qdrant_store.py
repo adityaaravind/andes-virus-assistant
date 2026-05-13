@@ -27,8 +27,18 @@ VERSION         = "1.1"
 
 
 def _client() -> QdrantClient:
-    url     = os.getenv("QDRANT_URL", "")
+    # Try environment first, then Streamlit secrets
+    url = os.getenv("QDRANT_URL", "")
     api_key = os.getenv("QDRANT_API_KEY", "")
+
+    if not url or not api_key:
+        try:
+            import streamlit as st
+            url = url or st.secrets.get("QDRANT_URL", "")
+            api_key = api_key or st.secrets.get("QDRANT_API_KEY", "")
+        except (ImportError, AttributeError, FileNotFoundError):
+            pass
+
     return QdrantClient(url=url, api_key=api_key, timeout=30)
 
 

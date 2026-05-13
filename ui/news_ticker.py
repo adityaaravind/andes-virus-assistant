@@ -66,6 +66,19 @@ SOURCE_CREDIBILITY = {
     "ScienceDaily": 0.8, "The Lancet": 0.97, "Google News": 0.65,
 }
 
+# Source name normalization for Google News extracted sources
+SOURCE_ALIASES = {
+    "Centers for Disease Control and Prevention": "CDC",
+    "Centers for Disease Control and Prevention | CDC (.gov)": "CDC",
+    "World Health Organization": "WHO",
+    "WHO | World Health Organization": "WHO",
+    "European Centre for Disease Prevention and Control": "ECDC",
+    "Pan American Health Organization": "PAHO",
+    "Reuters": "Reuters",
+    "BBC": "BBC Health",
+    "The New York Times": "The New York Times",
+}
+
 
 @st.cache_data(ttl=60, show_spinner=False)
 def fetch_headlines(max_per_feed: int = 12) -> list[dict[str, Any]]:
@@ -102,6 +115,9 @@ def fetch_headlines(max_per_feed: int = 12) -> list[dict[str, Any]]:
                     if len(parts) > 1:
                         title = parts[0].strip()
                         display_source = parts[1].strip()
+
+                        # Normalize source names using aliases
+                        display_source = SOURCE_ALIASES.get(display_source, display_source)
 
                 # If summary is empty or just a link, use title as context
                 display_summary = clean_summary if len(clean_summary) > 10 else "No additional summary available."
