@@ -162,7 +162,7 @@ def _get_dynamic_intensity(day: int) -> dict:
     onset = {"ARG": 41, "ZAF": 44, "ESP": 10, "GBR": 10, "USA": 1, "ITA": 9, "CHN": 1, "BRA": 34, "IND": 38}
     return {"hanta": hanta, "covid": covid, "onset": onset}
 
-@st.cache_data(ttl=60, show_spinner=False)
+@st.cache_data(ttl=30, show_spinner=False)
 def _get_map_data() -> dict:
     """Cache map data for 60 seconds to match other components"""
     state = _get_live_state()
@@ -183,12 +183,22 @@ def _get_map_data() -> dict:
     }
 
 def render_map_panel() -> None:
+    # Add cache clear button in debug mode
+    if st.session_state.get("debug_mode", False):
+        if st.button("🔄 Force Map Refresh", key="map_refresh"):
+            _get_map_data.clear()
+
     map_data = _get_map_data()
     state = map_data["state"]
     intensity = map_data["intensity"]
     hotspots = map_data["hotspots"]
     events = map_data["events"]
     current_day = map_data["current_day"]
+
+    # Debug info
+    if st.session_state.get("debug_mode", False):
+        usa_hotspots = [h for h in hotspots if "USA" in h.get("name", "")]
+        st.write(f"Debug: {len(usa_hotspots)} USA hotspots loaded")
 
     st.markdown(
         f"""
@@ -199,6 +209,7 @@ def render_map_panel() -> None:
             </div>
             <div style="background:rgba(74,222,128,0.1); border:1px solid #4ade8044; padding:1px 8px; border-radius:4px;">
                 <span style="color:#4ade80; font-size:8px; font-weight:900;">LIVE DATA SYNC</span>
+                <br><span style="color:#64748b; font-size:6px;">{datetime.utcnow().strftime('%H:%M UTC')}</span>
             </div>
         </div>
         """, unsafe_allow_html=True
@@ -387,4 +398,8 @@ def render_map_panel() -> None:
         map_html = map_template.replace("__HOTSPOTS__", json.dumps(hotspots))
         map_html = map_html.replace("__INTENSITY__", json.dumps(intensity))
         map_html = map_html.replace("__DAY__", str(current_day))
-        components.html(map_html, height=450)
+
+        # Force component refresh with unique key based on data hash
+        import hashlib
+        data_hash = hashlib.md5(json.dumps(hotspots, sort_keys=True).encode()).hexdigest()[:8]
+        components.html(map_html, height=450, key=f"outbreak_map_{data_hash}")
