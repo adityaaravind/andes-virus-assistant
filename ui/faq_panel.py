@@ -596,22 +596,28 @@ def render_faq_panel(chain: Any) -> None:
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* Hide radio button interface */
-        .stRadio {
-            display: none !important;
+        /* Style control buttons to be minimal */
+        .stButton > button {
+            background: rgba(0,180,216,0.1) !important;
+            border: 1px solid rgba(0,180,216,0.3) !important;
+            border-radius: 8px !important;
+            color: #00B4D8 !important;
+            font-size: 16px !important;
+            padding: 8px !important;
+            margin: 2px 0 !important;
+            min-height: 40px !important;
+            transition: all 0.2s ease !important;
         }
 
-        /* Make FAQ cards clickable with JavaScript */
-        .faq-card {
-            cursor: pointer;
+        .stButton > button:hover {
+            background: rgba(0,180,216,0.2) !important;
+            border-color: #00B4D8 !important;
+            transform: scale(1.05) !important;
         }
 
-        .faq-card:hover .faq-trigger {
-            background: rgba(255,255,255,0.02);
-        }
-
-        .faq-card:active {
-            transform: translateY(-1px) scale(0.98);
+        .stButton > button:focus {
+            outline: 2px solid var(--accent) !important;
+            outline-offset: 2px !important;
         }
 
         @media (max-width: 820px) {
@@ -669,27 +675,31 @@ def render_faq_panel(chain: Any) -> None:
     </section>
     """)
 
-    # FAQ Card Selection (hidden interface)
-    faq_ids = [faq["id"] for faq in sorted_faqs]
-    current_selection = st.session_state.faq_open_id if st.session_state.faq_open_id in faq_ids else None
+    # Simplified click handling with visible but styled interface
+    with st.container():
+        cols = st.columns(len(sorted_faqs))
+        clicked_id = None
 
-    selected_faq = st.radio(
-        "Select FAQ",
-        options=[None] + faq_ids,
-        index=0 if current_selection is None else faq_ids.index(current_selection) + 1,
-        format_func=lambda x: "None" if x is None else next(f["question"] for f in sorted_faqs if f["id"] == x),
-        key="faq_radio_selector",
-        label_visibility="hidden"
-    )
+        for i, faq in enumerate(sorted_faqs):
+            with cols[i]:
+                is_open = st.session_state.faq_open_id == faq["id"]
+                icon = "🔽" if is_open else "📖"
 
-    # Handle radio selection changes
-    if selected_faq != st.session_state.faq_open_id:
-        if selected_faq is None:
-            st.session_state.faq_open_id = None
-        else:
-            st.session_state.faq_open_id = selected_faq
-            _save_click(selected_faq)
-        st.rerun()
+                if st.button(
+                    f"{icon}",
+                    key=f"faq_{faq['id']}_btn",
+                    help=f"{faq['question']} ({_format_views(faq['views'])} views)",
+                    use_container_width=True
+                ):
+                    clicked_id = faq["id"]
+
+        if clicked_id:
+            if st.session_state.faq_open_id == clicked_id:
+                st.session_state.faq_open_id = None
+            else:
+                st.session_state.faq_open_id = clicked_id
+                _save_click(clicked_id)
+            st.rerun()
 
     # Display horizontal scrolling cards
     rail_html = '<div class="faq-rail">'
@@ -745,33 +755,3 @@ def render_faq_panel(chain: Any) -> None:
     rail_html += '</div>'
     st.html(rail_html)
 
-    # Add JavaScript to make cards clickable
-    st.html(f"""
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {{
-        // Wait for Streamlit to render radio buttons
-        setTimeout(function() {{
-            const faqCards = document.querySelectorAll('.faq-trigger');
-            const radioInputs = document.querySelectorAll('input[type="radio"]');
-
-            if (faqCards.length && radioInputs.length) {{
-                const faqIds = {[f"'{faq['id']}'" for faq in sorted_faqs]};
-
-                faqCards.forEach((card, index) => {{
-                    card.addEventListener('click', function(e) {{
-                        e.preventDefault();
-                        e.stopPropagation();
-
-                        // Find corresponding radio button
-                        const targetRadioIndex = index + 1; // +1 because first radio is "None"
-
-                        if (radioInputs[targetRadioIndex]) {{
-                            radioInputs[targetRadioIndex].click();
-                        }}
-                    }});
-                }});
-            }}
-        }}, 100);
-    }});
-    </script>
-    """)
