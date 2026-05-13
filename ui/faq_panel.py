@@ -106,24 +106,47 @@ def _format_views(value: int) -> str:
     return str(value)
 
 def _get_sorted_faqs() -> list[dict]:
-    """Sort FAQs by popularity (click count + base popularity)."""
+    """Sort FAQs by popularity using real click data."""
     clicks = _load_clicks()
 
-    # Add real click data to base popularity
+    # Map new FAQ IDs to old FAQ keys for legacy data
+    id_mapping = {
+        "what": "q_what",
+        "transmission": "q_p2p",
+        "cases": "q_cases",
+        "mortality": "q_cfr",
+        "treatment": "q_treat",
+        "symptoms": "q_symptoms",
+        "pandemic": "q_pandemic",
+        "countries": "q_countries"
+    }
+
+    # Add real click data from existing system
     for faq in FAQ_DATA:
-        real_clicks = clicks.get(faq["id"], 0)
-        faq["views"] = faq.get("views", 100) + real_clicks
-        faq["total_popularity"] = faq["popularity"] + (real_clicks * 0.1)  # Weight clicks
+        # Get legacy clicks if available
+        old_key = id_mapping.get(faq["id"])
+        legacy_clicks = clicks.get(old_key, 0) if old_key else 0
+        new_clicks = clicks.get(faq["id"], 0)
+
+        # Use total real clicks
+        total_clicks = legacy_clicks + new_clicks
+        faq["views"] = max(total_clicks, 1)  # Minimum 1 view
+        faq["total_popularity"] = faq["popularity"] + (total_clicks * 0.5)  # Weight real clicks higher
 
     return sorted(FAQ_DATA, key=lambda x: x["total_popularity"], reverse=True)
 
 def render_faq_panel(chain: Any) -> None:
     """Render horizontal scrolling FAQ cards inspired by React design."""
 
-    # Get FAQ data
+    # Get FAQ data with real click counts
     sorted_faqs = _get_sorted_faqs()
     clicks = _load_clicks()
-    total_views = sum(faq["views"] for faq in sorted_faqs)
+
+    # Calculate total views from all click data
+    all_legacy_clicks = sum(v for k, v in clicks.items() if k.startswith("q_"))
+    all_new_clicks = sum(v for k, v in clicks.items() if not k.startswith("q_"))
+    total_views = all_legacy_clicks + all_new_clicks
+
     top_faq = sorted_faqs[0]
 
     # Initialize open state
