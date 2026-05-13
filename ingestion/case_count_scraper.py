@@ -44,6 +44,13 @@ SUSPECTED_PATTERNS = [
     r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+total\s+cases?",
     r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+(?:passengers?|crew|people).{0,30}(?:infected|positive|ill|sick)",
     r"(?:infected|positive|ill|sick).{0,30}(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+(?:passengers?|crew|people)",
+    # Additional patterns to catch general case mentions
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+cases?\s+(?:of\s+)?(?:hanta|andes)",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+cases?\s+linked",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+cases?\s+on\s+(?:board|ship)",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+cases?\s+aboard",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+people\s+affected",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+individuals?\s+(?:infected|affected)",
 ]
 
 DEATH_PATTERNS = [
