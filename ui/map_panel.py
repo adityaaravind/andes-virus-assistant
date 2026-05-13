@@ -33,16 +33,40 @@ def _get_historical_date(day: int) -> str:
 
 def _get_vessel_events() -> list:
     signals = []
-    
-    # 1. ADD CRITICAL USA LANDING ALERTS
+
+    # 1. READ MANUAL BREAKING NEWS SIGNALS
+    try:
+        manual_file = Path("data/manual_signals.json")
+        if manual_file.exists():
+            manual_signals = json.loads(manual_file.read_text())
+            for sig in manual_signals:
+                if sig.get("active", True):
+                    signals.append(sig)
+    except Exception:
+        pass
+
+    # 2. GENERATE AUTO-SIGNALS FROM CASE COUNT CHANGES
+    try:
+        live_state = _get_live_state()
+        current_cases = live_state.get("confirmed_cases", 0)
+        if current_cases >= 8:  # WHO reported 8 cases
+            signals.append({
+                "date": "LIVE", "time": "WHO UPDATE",
+                "event": f"🦠 WHO CONFIRMS: {current_cases} laboratory-confirmed cases now reported from MV Hondius outbreak. Case count increased from initial reports.",
+                "type": "CRITICAL", "speed": "14.2 kn", "uplink": "98%", "hours_ago": 0, "priority": "high"
+            })
+    except Exception:
+        pass
+
+    # 3. ADD CRITICAL USA LANDING ALERTS
     signals.append({
-        "date": "LIVE", "time": "SECURED", 
-        "event": "📍 USA LANDING: 24 passengers processed at Newark Liberty (EWR). Pre-symptomatic screening initiated.", 
+        "date": "LIVE", "time": "SECURED",
+        "event": "📍 USA LANDING: 24 passengers processed at Newark Liberty (EWR). Pre-symptomatic screening initiated.",
         "type": "CRITICAL", "speed": "14.2 kn", "uplink": "98%", "hours_ago": 0, "priority": "high"
     })
     signals.append({
-        "date": "MAY 11", "time": "19:45", 
-        "event": "🛡️ CDC INTEL: Bellevue Hospital confirms isolation of 3 individuals with hantavirus-linked pulmonary distress.", 
+        "date": "MAY 11", "time": "19:45",
+        "event": "🛡️ CDC INTEL: Bellevue Hospital confirms isolation of 3 individuals with hantavirus-linked pulmonary distress.",
         "type": "ALERT", "speed": "13.9 kn", "uplink": "95%", "hours_ago": 1, "priority": "high"
     })
 

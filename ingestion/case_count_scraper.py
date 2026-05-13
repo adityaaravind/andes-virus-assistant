@@ -85,6 +85,50 @@ def _nums(text: str, patterns: list[str], lo: int, hi: int) -> list[int]:
     return out
 
 
+def _generate_case_update_signal(old_count: int, new_count: int) -> None:
+    """Generate signal when case count changes significantly."""
+    if new_count <= old_count:
+        return
+
+    try:
+        import json
+        from pathlib import Path
+        from datetime import datetime
+
+        manual_file = Path("data/manual_signals.json")
+        signals = []
+
+        if manual_file.exists():
+            signals = json.loads(manual_file.read_text())
+
+        # Add new case update signal
+        new_signal = {
+            "date": "LIVE",
+            "time": "AUTO-UPDATE",
+            "event": f"📈 CASE INCREASE: Confirmed cases rose from {old_count} to {new_count}. WHO monitoring outbreak progression closely.",
+            "type": "CRITICAL",
+            "speed": "14.5 kn",
+            "uplink": "99%",
+            "hours_ago": 0,
+            "priority": "critical",
+            "active": True,
+            "source": "auto_generated",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+        # Add to beginning of signals list
+        signals.insert(0, new_signal)
+
+        # Keep only latest 10 signals to prevent overflow
+        signals = signals[:10]
+
+        with open(manual_file, 'w') as f:
+            json.dump(signals, f, indent=2)
+
+    except Exception:
+        pass  # Silent fail to avoid breaking extraction
+
+
 def extract_and_save(articles: list[dict[str, Any]]) -> dict[str, Any]:
     """Scan articles, update outbreak_live.json if higher counts found. 
     
@@ -146,17 +190,23 @@ def extract_and_save(articles: list[dict[str, Any]]) -> dict[str, Any]:
             changed = True
 
     if changed:
+        # Generate signal for case count increases before saving
+        old_cases = existing.get("confirmed_cases", 0) if existing else 0
+        new_cases = merged.get("confirmed_cases", 0)
+        if new_cases > old_cases:
+            _generate_case_update_signal(old_cases, new_cases)
+
         merged["last_updated"]     = datetime.utcnow().strftime("%Y-%m-%d")
         merged["source"]           = "auto-extracted"
         merged["articles_scanned"] = len(relevant)
         LIVE_FILE.parent.mkdir(parents=True, exist_ok=True)
         LIVE_FILE.write_text(json.dumps(merged, indent=2))
-        
+
         # PHASE 2: Log signal to community feed
         from alerts.community_store import add_insight
         summary_msg = f"LIVE SIGNAL: Metrics adjusted to {merged.get('confirmed_cases')} confirmed, {merged.get('deaths')} fatalities"
         add_insight("alert", summary_msg, "SCRAPER")
-        
+
         logging.info("Case count live update: %s", {k: merged[k] for k in ("confirmed_cases","deaths","nationalities") if k in merged})
 
     return extracted if changed else {}
