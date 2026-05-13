@@ -181,15 +181,29 @@ def render_pandemic_risk_panel() -> None:
 
     score = risk["overall"]
 
+    # Determine glow class for status label
+    glow_class = ""
+    if score < 20:
+        glow_class = "glow-green"
+    elif score < 40:
+        glow_class = "glow-amber"
+    else:
+        glow_class = "glow-red"
+
     st.markdown(
-        f'<div style="border-left: 4px solid {color}; padding-left: 10px; margin-bottom: 1rem;">'
+        f'<div style="background:rgba(15, 23, 42, 0.6); border:1px solid rgba(255,255,255,0.05); padding:1rem; border-radius:12px; backdrop-filter:blur(10px); position:relative; overflow:hidden; margin-bottom:1rem;">'
+        f'<div style="position:absolute; top:0; left:0; width:100%; height:2px; background:{color}; opacity:0.6;"></div>'
         f'<div style="display:flex; justify-content:space-between; align-items:baseline;">'
-        f'<div><p style="color:#94a3b8; font-size:0.6rem; font-weight:800; letter-spacing:0.1em; margin:0; text-transform:uppercase;">Outbreak Status Check</p>'
-        f'<h2 style="margin:0; font-size:1.4rem; font-weight:900; color:white; letter-spacing:-0.02em; line-height:1.1;">{label.upper()}</h2></div>'
-        f'<div><span style="color:{color}; font-size:1.6rem; font-weight:900;">{score:.1f}</span>'
-        f'<span style="color:#94a3b8; font-size:0.6rem; font-weight:800; margin-left:4px;">SCORE</span></div>'
+        f'<div>'
+        f'<span style="display:block; font-size:0.6rem; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:0.05em;">Outbreak Status Check</span>'
+        f'<span class="stat-value {glow_class}" style="display:block; font-size:1.4rem; font-weight:900; color:white; line-height:1; margin-top:8px;">{label.upper()}</span>'
         f'</div>'
-        f'<p style="color:#cbd5e1; font-size:0.75rem; margin:4px 0 0; font-weight:500;">{desc}</p>'
+        f'<div style="text-align:right;">'
+        f'<span class="stat-value {glow_class}" style="display:block; font-size:2rem; font-weight:900; color:white; line-height:1;">{score:.1f}</span>'
+        f'<span style="display:block; font-size:0.6rem; font-weight:800; color:#94a3b8; margin-top:4px; text-transform:uppercase; letter-spacing:0.05em;">SCORE</span>'
+        f'</div>'
+        f'</div>'
+        f'<span style="color:#94a3b8; font-size:0.75rem; margin-top:8px; display:block; line-height:1.4;">{desc}</span>'
         f'</div>',
         unsafe_allow_html=True
     )
