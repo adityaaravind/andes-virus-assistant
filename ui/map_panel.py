@@ -400,13 +400,15 @@ def render_map_panel() -> None:
         map_html = map_html.replace("__INTENSITY__", json.dumps(intensity))
         map_html = map_html.replace("__DAY__", str(current_day))
 
-        # Force component refresh with unique key based on data hash
+        # Force component refresh by embedding unique data in HTML comment
         try:
             hotspot_str = json.dumps(hotspots, sort_keys=True)
             data_hash = hashlib.md5(hotspot_str.encode('utf-8')).hexdigest()[:8]
-            map_key = f"outbreak_map_{data_hash}"
+            refresh_comment = f"<!-- Map refresh: {data_hash} at {datetime.utcnow().isoformat()} -->"
+            map_html = refresh_comment + map_html
         except Exception:
-            # Fallback to timestamp-based key if hashing fails
-            map_key = f"outbreak_map_{int(datetime.utcnow().timestamp())}"
+            # Fallback to timestamp
+            refresh_comment = f"<!-- Map refresh: {int(datetime.utcnow().timestamp())} -->"
+            map_html = refresh_comment + map_html
 
-        components.html(map_html, height=450, key=map_key)
+        components.html(map_html, height=450)
