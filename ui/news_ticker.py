@@ -67,7 +67,7 @@ SOURCE_CREDIBILITY = {
 }
 
 
-@st.cache_data(ttl=600, show_spinner=False)
+@st.cache_data(ttl=60, show_spinner=False)
 def fetch_headlines(max_per_feed: int = 12) -> list[dict[str, Any]]:
     seen: set[str] = set()
     articles: list[dict[str, Any]] = []

@@ -69,7 +69,7 @@ def _save_fear_vote(level: int, user_id: str) -> None:
     except Exception as e:
         st.error(f"Persistence error: {str(e)}")
 
-@st.cache_data(ttl=900, show_spinner=False)
+@st.cache_data(ttl=60, show_spinner=False)
 def _calculate_web_sentiment() -> float:
     try:
         from ui.news_ticker import fetch_headlines

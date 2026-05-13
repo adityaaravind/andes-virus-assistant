@@ -74,7 +74,7 @@ def _risk_meta(score: float) -> tuple[str, str, str]:
     return "#dc2626", "EXTREME", "Global health alert"
 
 
-@st.cache_data(ttl=300, show_spinner=False)
+@st.cache_data(ttl=60, show_spinner=False)
 def _build_gauge(score: float, color: str) -> go.Figure:
     fig = go.Figure(go.Indicator(
         mode="gauge+number+delta",
@@ -113,7 +113,7 @@ def _build_gauge(score: float, color: str) -> go.Figure:
     return fig
 
 
-@st.cache_data(ttl=300, show_spinner=False)
+@st.cache_data(ttl=60, show_spinner=False)
 def _build_comparison_bars(risk: dict[str, Any]) -> go.Figure:
     metrics = ["How Easily it\nSpreads", "Where it has\nReached", "Speed of\nSpread", "Severity of\nSickness"]
     andes   = [risk["transmission"], risk["spread"], risk["growth"], risk["severity"]]

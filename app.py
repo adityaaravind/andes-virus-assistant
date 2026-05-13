@@ -480,7 +480,7 @@ def main() -> None:
 
         # REDUCED REFRESH: Every 30 mins instead of 15 to save RAM
         from streamlit_autorefresh import st_autorefresh
-        st_autorefresh(interval=30 * 60 * 1000, key="stats_refresh")
+        st_autorefresh(interval=2 * 60 * 1000, key="stats_refresh")
 
         # ── Mutation Observer for Forced Gauge Jitter ──
         st.markdown(
