@@ -403,6 +403,12 @@ def render_faq_panel(chain: Any) -> None:
             overflow: hidden;
             transition: all 0.26s ease;
             animation: cardIn 0.62s cubic-bezier(.2,.8,.2,1);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .faq-card:active {
+            transform: translateY(-1px) scale(0.98);
         }
 
         .faq-card:hover {
@@ -590,6 +596,29 @@ def render_faq_panel(chain: Any) -> None:
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
+        /* Hide Streamlit button styling for card interaction */
+        .stButton > button {
+            background: transparent !important;
+            border: none !important;
+            color: transparent !important;
+            box-shadow: none !important;
+            height: 40px !important;
+            font-size: 12px !important;
+            padding: 2px !important;
+            margin: 2px 0 !important;
+        }
+
+        .stButton > button:hover {
+            background: rgba(0,180,216,0.1) !important;
+            border: 1px solid rgba(0,180,216,0.3) !important;
+            color: #00B4D8 !important;
+        }
+
+        .stButton > button:focus {
+            outline: 2px solid var(--accent) !important;
+            outline-offset: 2px !important;
+        }
+
         @media (max-width: 820px) {
             .intro-grid { grid-template-columns: 1fr; }
             .intro-title { font-size: 2.5rem; max-width: 12ch; }
@@ -645,31 +674,37 @@ def render_faq_panel(chain: Any) -> None:
     </section>
     """)
 
-    # Interactive FAQ selection
-    faq_options = [f"#{i+1}: {faq['question']}" for i, faq in enumerate(sorted_faqs)]
-    faq_options.insert(0, "Click a question to expand...")
+    # Clickable FAQ cards with individual buttons
+    st.markdown("**💬 Click any FAQ card below to expand the answer**")
 
-    selected = st.selectbox(
-        "💬 **Select FAQ to expand:**",
-        options=faq_options,
-        index=0,
-        key="faq_selector"
-    )
+    # Create invisible buttons for each card
+    card_cols = st.columns(len(sorted_faqs))
+    clicked_faq_id = None
 
-    # Handle selection
-    if selected != "Click a question to expand...":
-        # Extract FAQ index from selection
-        selected_index = int(selected.split(":")[0].replace("#", "")) - 1
-        selected_faq = sorted_faqs[selected_index]
+    for i, faq in enumerate(sorted_faqs):
+        with card_cols[i]:
+            is_open = st.session_state.faq_open_id == faq["id"]
+            status_icon = "🔽" if is_open else "▶️"
 
-        if st.session_state.faq_open_id != selected_faq["id"]:
-            st.session_state.faq_open_id = selected_faq["id"]
-            _save_click(selected_faq["id"])
-            st.rerun()
-    else:
-        if st.session_state.faq_open_id is not None:
+            # Invisible button that spans the card area
+            if st.button(
+                f"{status_icon} #{i+1}",
+                key=f"card_click_{faq['id']}",
+                help=f"Click to expand: {faq['question']}",
+                use_container_width=True
+            ):
+                clicked_faq_id = faq["id"]
+
+    # Handle card clicks
+    if clicked_faq_id:
+        if st.session_state.faq_open_id == clicked_faq_id:
+            # Close if already open
             st.session_state.faq_open_id = None
-            st.rerun()
+        else:
+            # Open new card and track click
+            st.session_state.faq_open_id = clicked_faq_id
+            _save_click(clicked_faq_id)
+        st.rerun()
 
     # Display horizontal scrolling cards
     rail_html = '<div class="faq-rail">'
