@@ -1,0 +1,41 @@
+{
+  "Atlanta": {
+    "cases": 7,
+    "source": "CDC",
+    "credibility": 0.95,
+    "coordinates": {
+      "lat": 33.75,
+      "lng": -84.39,
+      "code": "USA",
+      "state": "GA"
+    },
+    "timestamp": "2026-05-13T12:00:00",
+    "raw_text": "7 cases reported in Atlanta"
+  },
+  "Miami": {
+    "cases": 4,
+    "source": "Florida Health Department",
+    "credibility": 0.85,
+    "coordinates": {
+      "lat": 25.76,
+      "lng": -80.19,
+      "code": "USA",
+      "state": "FL"
+    },
+    "timestamp": "2026-05-13T11:30:00",
+    "raw_text": "4 cases in Miami connected to outbreak"
+  },
+  "Boston": {
+    "cases": 3,
+    "source": "Boston Globe",
+    "credibility": 0.75,
+    "coordinates": {
+      "lat": 42.36,
+      "lng": -71.06,
+      "code": "USA",
+      "state": "MA"
+    },
+    "timestamp": "2026-05-13T10:45:00",
+    "raw_text": "Boston health officials confirm 3 patients"
+  }
+}
