@@ -43,6 +43,23 @@ def _get_historical_date(day: int) -> str:
     target = base + timedelta(days=day)
     return target.strftime("%b %d, 2020")
 
+def _calculate_time_ago(timestamp_iso: str) -> tuple[int, str]:
+    """Calculate dynamic time ago from ISO timestamp. Returns (value, unit)."""
+    try:
+        from datetime import datetime
+        timestamp = datetime.fromisoformat(timestamp_iso.replace('Z', '+00:00'))
+        diff = datetime.utcnow() - timestamp
+        total_seconds = diff.total_seconds()
+
+        if total_seconds < 60:
+            return (int(total_seconds), "SEC")
+        elif total_seconds < 3600:
+            return (int(total_seconds / 60), "MIN")
+        else:
+            return (int(total_seconds / 3600), "H")
+    except:
+        return (0, "H")
+
 def _get_system_status_signals() -> list:
     """Generate real-time system status signals for ingestion, refresh, etc."""
     signals = []
@@ -392,18 +409,27 @@ def render_map_panel() -> None:
     with col_vessel:
         events_html = ""
         for ev in events:
+            # Calculate dynamic timing if timestamp available
+            if ev.get('timestamp'):
+                time_value, time_unit = _calculate_time_ago(ev['timestamp'])
+                time_display = f"{time_value}{time_unit} AGO"
+                hours_ago_calc = 0 if time_unit in ["SEC", "MIN"] else time_value
+            else:
+                time_display = f"{ev['hours_ago']}H AGO"
+                hours_ago_calc = ev['hours_ago']
+
             # Signal Hub Color: High Priority RED, else Green/Yellow based on age
             if ev.get('priority') == 'high':
                 sig_color = "#f87171"
             else:
-                sig_color = "#4ade80" if ev['hours_ago'] <= 6 else "#fde047"
-            
+                sig_color = "#4ade80" if hours_ago_calc <= 6 else "#fde047"
+
             # Bullet styling
             events_html += f"""
                 <div style="border-left: 3px solid {sig_color}; padding-left: 12px; margin-bottom: 12px; animation: slideIn 0.4s ease-out; background: rgba({(248,113,113) if sig_color=="#f87171" else (74,222,128) if sig_color=="#4ade80" else (253,224,71)}, 0.05); padding-top: 6px; padding-bottom: 6px; border-radius: 0 6px 6px 0;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px; padding-right:8px;">
                         <div style="color: {sig_color}; font-size: 8px; font-weight: 950; letter-spacing: 0.8px;">{ev['date']} @ {ev['time']}</div>
-                        <div style="color: #475569; font-size: 7px; font-weight: 800;">{ev['hours_ago']}H AGO</div>
+                        <div style="color: #475569; font-size: 7px; font-weight: 800;">{time_display}</div>
                     </div>
                     <div style="color: #ffffff; font-size: 10px; line-height: 1.2; font-weight: 600;">{ev['event']}</div>
                 </div>
