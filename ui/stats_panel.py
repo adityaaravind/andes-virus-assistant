@@ -165,34 +165,8 @@ def render_stats_panel() -> None:
         unsafe_allow_html=True
     )
 
-    # ── 2. SOURCE VERIFICATION BAR ──
-    source_type = stats.get("source_type", "Unknown")
-    last_source = stats.get("last_source", "Unknown")
-    confidence = stats.get("confidence", "MEDIUM")
 
-    # Color based on confidence
-    if confidence == "HIGH":
-        source_color = "#22c55e"
-        confidence_text = "🔴 VERIFIED"
-    elif confidence == "MEDIUM":
-        source_color = "#f59e0b"
-        confidence_text = "🟡 CREDIBLE"
-    else:
-        source_color = "#94a3b8"
-        confidence_text = "⚪ UNVERIFIED"
-
-    st.markdown(
-        f'<div style="background:rgba(255,255,255,0.02);border:1px solid rgba({source_color[1:3]},{source_color[3:5]},{source_color[5:7]},0.3);'
-        f'border-radius:8px;padding:0.6rem;margin-bottom:1rem;">'
-        f'<div style="display:flex;justify-content:space-between;align-items:center;">'
-        f'<div><span style="color:{source_color};font-size:0.7rem;font-weight:800;text-transform:uppercase;">{confidence_text}</span>'
-        f'<span style="color:#e2e8f0;font-size:0.75rem;margin-left:8px;">Last Source: {last_source}</span></div>'
-        f'<span style="color:#94a3b8;font-size:0.65rem;">{source_type}</span>'
-        f'</div></div>',
-        unsafe_allow_html=True
-    )
-
-    # ── 3. GLOWING STAT CARDS ──
+    # ── 2. GLOWING STAT CARDS ──
     def get_color(val: int, type: str) -> str:
         if type == "cases": return "var(--glow-amber)" if val < 20 else "var(--glow-red)"
         if type == "deaths": return "var(--glow-red)" if val > 0 else "var(--glow-green)"

@@ -292,6 +292,7 @@ details:not([open]) summary::before { content: '▶'; font-size: 8px; }
                 # Track click when button pressed
                 _save_click(key)
                 st.session_state[f"show_answer_{key}"] = True
+                st.rerun()  # Refresh page to show updated view count
 
             # Show answer if button was clicked
             if st.session_state.get(f"show_answer_{key}", False):
