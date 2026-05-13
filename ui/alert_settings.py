@@ -276,22 +276,22 @@ def render_alert_settings() -> None:
         # Clear the flag
         st.session_state.auto_subscribed = False
 
-    # Handle Streamlit button fallback for when JavaScript is disabled
-    if st.button("🔄 Fallback: Manual Setup", key="manual_fallback"):
-        st.session_state.alert_ntfy_topic = "HANTAVIRUS"
-        sub = {
-            "ntfy_topic": "HANTAVIRUS",
-            "email": "",
-            "alerts": {
-                "any_case_increase": True,
-                "death_increase": True,
-                "new_country": True,
-                "risk_level_change": True,
-                "case_threshold": 0,
-            },
-            "last_known": {},
-        }
-        add_subscription(sub)
+    # Handle Streamlit button fallback for when JavaScript is disabled (disabled for analytics compatibility)
+    # if st.button("🔄 Fallback: Manual Setup", key="manual_fallback"):
+    #     st.session_state.alert_ntfy_topic = "HANTAVIRUS"
+    #     sub = {
+    #         "ntfy_topic": "HANTAVIRUS",
+    #         "email": "",
+    #         "alerts": {
+    #             "any_case_increase": True,
+    #             "death_increase": True,
+    #             "new_country": True,
+    #             "risk_level_change": True,
+    #             "case_threshold": 0,
+    #         },
+    #         "last_known": {},
+    #     }
+    #     add_subscription(sub)
         _send_welcome_ping("HANTAVIRUS")
 
         st.markdown(
