@@ -596,37 +596,22 @@ def render_faq_panel(chain: Any) -> None:
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* Style question buttons to look like clickable cards */
-        .stButton > button {
-            background: linear-gradient(160deg, rgba(6,20,31,0.74), rgba(11,34,51,0.56)) !important;
-            border: 1px solid rgba(158,237,229,0.16) !important;
-            border-radius: 18px !important;
-            color: var(--ink) !important;
-            box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 16px 38px rgba(0,0,0,0.28) !important;
-            min-height: 80px !important;
-            font-size: 14px !important;
-            font-weight: 600 !important;
-            padding: 16px !important;
-            margin: 8px 0 !important;
-            text-align: left !important;
-            line-height: 1.3 !important;
-            transition: all 0.26s ease !important;
+        /* Hide radio button interface */
+        .stRadio {
+            display: none !important;
         }
 
-        .stButton > button:hover {
-            background: rgba(15, 45, 64, 0.92) !important;
-            border-color: color-mix(in srgb, var(--accent) 52%, rgba(158,237,229,0.22)) !important;
-            transform: translateY(-3px) !important;
-            box-shadow: 0 1px 0 rgba(255,255,255,0.13) inset, 0 26px 62px rgba(0, 7, 13, 0.55), 0 0 30px color-mix(in srgb, var(--accent) 11%, transparent) !important;
+        /* Make FAQ cards clickable with JavaScript */
+        .faq-card {
+            cursor: pointer;
         }
 
-        .stButton > button:focus {
-            outline: 2px solid var(--accent) !important;
-            outline-offset: 2px !important;
+        .faq-card:hover .faq-trigger {
+            background: rgba(255,255,255,0.02);
         }
 
-        .stButton > button:active {
-            transform: translateY(-1px) scale(0.98) !important;
+        .faq-card:active {
+            transform: translateY(-1px) scale(0.98);
         }
 
         @media (max-width: 820px) {
@@ -684,33 +669,26 @@ def render_faq_panel(chain: Any) -> None:
     </section>
     """)
 
-    # Clickable FAQ cards - direct question interaction
-    st.markdown("**💬 Click any question below to expand the answer**")
+    # FAQ Card Selection (hidden interface)
+    faq_ids = [faq["id"] for faq in sorted_faqs]
+    current_selection = st.session_state.faq_open_id if st.session_state.faq_open_id in faq_ids else None
 
-    # Create clickable question buttons styled as text
-    clicked_faq_id = None
+    selected_faq = st.radio(
+        "Select FAQ",
+        options=[None] + faq_ids,
+        index=0 if current_selection is None else faq_ids.index(current_selection) + 1,
+        format_func=lambda x: "None" if x is None else next(f["question"] for f in sorted_faqs if f["id"] == x),
+        key="faq_radio_selector",
+        label_visibility="hidden"
+    )
 
-    for i, faq in enumerate(sorted_faqs):
-        is_open = st.session_state.faq_open_id == faq["id"]
-
-        # Create button with question text as label
-        button_label = f"{'🔽' if is_open else '▶️'} {faq['question']}"
-
-        if st.button(
-            button_label,
-            key=f"faq_question_{faq['id']}",
-            help=f"Views: {_format_views(faq['views'])} • {faq['readingTime']} read",
-            use_container_width=True
-        ):
-            clicked_faq_id = faq["id"]
-
-    # Handle question clicks
-    if clicked_faq_id:
-        if st.session_state.faq_open_id == clicked_faq_id:
+    # Handle radio selection changes
+    if selected_faq != st.session_state.faq_open_id:
+        if selected_faq is None:
             st.session_state.faq_open_id = None
         else:
-            st.session_state.faq_open_id = clicked_faq_id
-            _save_click(clicked_faq_id)
+            st.session_state.faq_open_id = selected_faq
+            _save_click(selected_faq)
         st.rerun()
 
     # Display horizontal scrolling cards
@@ -766,3 +744,34 @@ def render_faq_panel(chain: Any) -> None:
 
     rail_html += '</div>'
     st.html(rail_html)
+
+    # Add JavaScript to make cards clickable
+    st.html(f"""
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {{
+        // Wait for Streamlit to render radio buttons
+        setTimeout(function() {{
+            const faqCards = document.querySelectorAll('.faq-trigger');
+            const radioInputs = document.querySelectorAll('input[type="radio"]');
+
+            if (faqCards.length && radioInputs.length) {{
+                const faqIds = {[f"'{faq['id']}'" for faq in sorted_faqs]};
+
+                faqCards.forEach((card, index) => {{
+                    card.addEventListener('click', function(e) {{
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        // Find corresponding radio button
+                        const targetRadioIndex = index + 1; // +1 because first radio is "None"
+
+                        if (radioInputs[targetRadioIndex]) {{
+                            radioInputs[targetRadioIndex].click();
+                        }}
+                    }});
+                }});
+            }}
+        }}, 100);
+    }});
+    </script>
+    """)
