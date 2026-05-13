@@ -220,8 +220,17 @@ def render_alert_settings() -> None:
     """, unsafe_allow_html=True)
 
     # Check for query parameter from JavaScript redirect
-    query_params = st.experimental_get_query_params()
-    if query_params.get('subscribe_alerts') == ['true'] and not st.session_state.get('auto_subscribed_done', False):
+    try:
+        # Use newer API if available, fallback to experimental
+        if hasattr(st, 'query_params'):
+            subscribe_requested = st.query_params.get('subscribe_alerts') == 'true'
+        else:
+            query_params = st.experimental_get_query_params()
+            subscribe_requested = query_params.get('subscribe_alerts') == ['true']
+    except Exception:
+        subscribe_requested = False
+
+    if subscribe_requested and not st.session_state.get('auto_subscribed_done', False):
         sub = {
             "ntfy_topic": "HANTAVIRUS",
             "email": "",
@@ -242,9 +251,14 @@ def render_alert_settings() -> None:
         # Clear query param and refresh
         st.markdown("""
         <script>
-        const url = new URL(window.location);
-        url.searchParams.delete('subscribe_alerts');
-        window.history.replaceState({}, '', url.toString());
+        try {
+            const url = new URL(window.location);
+            url.searchParams.delete('subscribe_alerts');
+            window.history.replaceState({}, '', url.toString());
+        } catch (e) {
+            // Fallback for URL manipulation issues
+            console.log('URL cleanup failed:', e);
+        }
         </script>
         """, unsafe_allow_html=True)
 
