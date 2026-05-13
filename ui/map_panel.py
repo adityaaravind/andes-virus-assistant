@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import streamlit as st
 import streamlit.components.v1 as components
 from pathlib import Path
@@ -400,6 +401,12 @@ def render_map_panel() -> None:
         map_html = map_html.replace("__DAY__", str(current_day))
 
         # Force component refresh with unique key based on data hash
-        import hashlib
-        data_hash = hashlib.md5(json.dumps(hotspots, sort_keys=True).encode()).hexdigest()[:8]
-        components.html(map_html, height=450, key=f"outbreak_map_{data_hash}")
+        try:
+            hotspot_str = json.dumps(hotspots, sort_keys=True)
+            data_hash = hashlib.md5(hotspot_str.encode('utf-8')).hexdigest()[:8]
+            map_key = f"outbreak_map_{data_hash}"
+        except Exception:
+            # Fallback to timestamp-based key if hashing fails
+            map_key = f"outbreak_map_{int(datetime.utcnow().timestamp())}"
+
+        components.html(map_html, height=450, key=map_key)
