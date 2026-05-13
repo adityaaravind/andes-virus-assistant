@@ -94,7 +94,7 @@ def _load_live() -> dict[str, Any]:
         except Exception: pass
     return {}
 
-@st.cache_data(ttl=600, show_spinner=False)
+@st.cache_data(ttl=60, show_spinner=False)
 def get_outbreak_stats() -> dict[str, Any]:
     live = _load_live()
     data = {

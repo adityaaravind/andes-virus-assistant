@@ -30,6 +30,7 @@ CASE_PATTERNS = [
     r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+(?:of the\s+\d+|total)\s+cases?\s+(?:have\s+been\s+)?confirmed",
     r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+total\s+case",
     r"total\s+of\s+(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+case",
+    r"(\d+|" + "|".join(WORD_TO_NUM.keys()) + r")\s+cases?\s+have\s+been\s+reported",
 ]
 
 SUSPECTED_PATTERNS = [

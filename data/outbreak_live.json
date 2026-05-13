@@ -1,10 +1,10 @@
 {
-  "confirmed_cases": 5,
+  "confirmed_cases": 8,
   "suspected_cases": 9,
   "deaths": 3,
   "nationalities": 23,
-  "last_updated": "2026-05-08",
-  "source": "manual-correction",
-  "articles_scanned": 252,
+  "last_updated": "2026-05-13",
+  "source": "auto-extracted",
+  "articles_scanned": 4,
   "note": "Updated to latest verified totals: 5 confirmed, 9 suspected."
 }
