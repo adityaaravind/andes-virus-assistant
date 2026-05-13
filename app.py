@@ -672,6 +672,12 @@ def main() -> None:
         render_faq_panel(chain)
         st.divider()
 
+        # ── 7. LIVE SIGNAL FEED (REAL-TIME ACTIVITY) ──────────────────────────────
+        st.markdown("<div id='live_feed'></div>", unsafe_allow_html=True)
+        from ui.community_feed import render_community_feed
+        render_community_feed()
+        st.divider()
+
 
 
         def update_sources(cards: list[dict[str, Any]]) -> None:
