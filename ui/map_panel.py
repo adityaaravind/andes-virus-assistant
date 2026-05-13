@@ -63,17 +63,90 @@ def _calculate_time_ago(timestamp_iso: str) -> tuple[int, str]:
 @st.cache_data(ttl=120, show_spinner=False)  # 2-minute cache for testing
 def _generate_ai_insight_signal() -> dict:
     """Generate a single AI insight signal for the feed."""
+    from datetime import datetime
+    minute = datetime.utcnow().minute
+
+    # Check dependencies first
+    missing_deps = []
+    try:
+        import chromadb
+    except ImportError:
+        missing_deps.append("chromadb")
+
+    try:
+        import sentence_transformers
+    except ImportError:
+        missing_deps.append("sentence_transformers")
+
+    try:
+        from langchain_openai import ChatOpenAI
+    except ImportError:
+        missing_deps.append("langchain_openai")
+
+    # If key dependencies missing, provide fallback insights based on available data
+    if missing_deps:
+        # Get live state for data-driven insights
+        try:
+            live_state = _get_live_state()
+            cases = live_state.get("confirmed_cases", 8)
+            deaths = live_state.get("deaths", 3)
+            fatality_rate = round((deaths / cases) * 100, 1) if cases > 0 else 0
+
+            # Rotate through available data insights
+            fallback_insights = {
+                0: f"🦠 DATA INSIGHT: {cases} confirmed Andes virus cases show human-to-human transmission on cruise ship.",
+                1: f"📈 TREND INSIGHT: Case fatality rate at {fatality_rate}%, higher than typical Andes virus outbreaks.",
+                2: f"⚠️ RISK INSIGHT: Confined cruise ship environment enables rapid spread among {live_state.get('nationalities', 23)} nationalities.",
+                3: f"🗺️ GEO INSIGHT: MV Hondius outbreak near Canary Islands demonstrates Andes virus can spread globally.",
+                4: f"💊 CLINICAL INSIGHT: No specific treatment available; supportive care only option for {cases} patients."
+            }
+
+            insight_idx = (minute // 2) % 5
+            insight_text = fallback_insights[insight_idx]
+
+            return {
+                "date": "LIVE",
+                "time": "DATA-AI",
+                "event": f"{insight_text} [Using available outbreak data - RAG deps: {', '.join(missing_deps)} missing]",
+                "type": "ANALYSIS",
+                "speed": "12.0 kn",
+                "uplink": "75%",
+                "hours_ago": 0,
+                "priority": "normal",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        except Exception:
+            return {
+                "date": "LIVE",
+                "time": "AI-ERROR",
+                "event": f"🚫 SYSTEM: RAG dependencies missing ({', '.join(missing_deps)}) and fallback data unavailable.",
+                "type": "ANALYSIS",
+                "speed": "0.0 kn",
+                "uplink": "25%",
+                "hours_ago": 0,
+                "priority": "normal",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+
+    # Full RAG available - try to use it
     try:
         from rag.chain import build_chain
         chain = build_chain()
 
         if not chain:
-            return None
+            return {
+                "date": "LIVE",
+                "time": "AI-ERROR",
+                "event": "🚫 RAG CHAIN: Unable to build RAG chain. Vector store may be empty.",
+                "type": "ANALYSIS",
+                "speed": "0.0 kn",
+                "uplink": "50%",
+                "hours_ago": 0,
+                "priority": "normal",
+                "timestamp": datetime.utcnow().isoformat()
+            }
 
         # Rotate through different insight types
-        from datetime import datetime
-        minute = datetime.utcnow().minute
-
         insight_queries = {
             0: ("transmission", "What new transmission patterns are emerging in this outbreak?", "🦠"),
             1: ("trends", "What are the most significant trends in this outbreak?", "📈"),
@@ -94,7 +167,7 @@ def _generate_ai_insight_signal() -> dict:
 
         return {
             "date": "LIVE",
-            "time": "AI-INSIGHT",
+            "time": "RAG-AI",
             "event": f"{emoji} AI INSIGHT: {insight_text}",
             "type": "ANALYSIS",
             "speed": "15.3 kn",
@@ -104,8 +177,18 @@ def _generate_ai_insight_signal() -> dict:
             "timestamp": datetime.utcnow().isoformat()
         }
 
-    except Exception:
-        return None
+    except Exception as e:
+        return {
+            "date": "LIVE",
+            "time": "AI-ERROR",
+            "event": f"🚫 RAG ERROR: {str(e)[:80]}...",
+            "type": "ANALYSIS",
+            "speed": "0.0 kn",
+            "uplink": "25%",
+            "hours_ago": 0,
+            "priority": "normal",
+            "timestamp": datetime.utcnow().isoformat()
+        }
 
 def _get_system_status_signals() -> list:
     """Generate real-time system status signals for ingestion, refresh, etc."""

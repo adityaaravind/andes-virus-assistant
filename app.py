@@ -94,32 +94,32 @@ def _run_fast_news_poll() -> None:
             pass  # Skip if vector store fails
 
         try:
-            from alerts.alert_manager import check_and_fire
+            from alerts.alert_manager import check_and_fire, check_semantic_alerts
             from alerts.notifier import send_ntfy
+
+            if chunks:
+                add_documents(chunks)
+
+                # v1.1 Semantic Alerting
+                concerns_found = set()
+                for c in chunks:
+                    if "embedding" in c:
+                        found = check_semantic_alerts(c["embedding"])
+                        concerns_found.update(found)
+
+                for concern in concerns_found:
+                    send_ntfy(
+                        os.getenv("NTFY_DEFAULT_TOPIC", "HANTAVIRUS"),
+                        "🚨 SEMANTIC ALERT DETECTED",
+                        f"Research match found for: {concern}",
+                        "critical"
+                    )
+                    logging.warning("Semantic alert fired: %s", concern)
+
+            logging.info("Fast news poll: %d new chunks", len(chunks))
         except ImportError:
-            pass
-
-        if chunks:
-            add_documents(chunks)
-            
-            # v1.1 Semantic Alerting
-            from alerts.alert_manager import check_semantic_alerts
-            concerns_found = set()
-            for c in chunks:
-                if "embedding" in c:
-                    found = check_semantic_alerts(c["embedding"])
-                    concerns_found.update(found)
-            
-            for concern in concerns_found:
-                send_ntfy(
-                    os.getenv("NTFY_DEFAULT_TOPIC", "HANTAVIRUS"),
-                    "🚨 SEMANTIC ALERT DETECTED",
-                    f"Research match found for: {concern}",
-                    "critical"
-                )
-                logging.warning("Semantic alert fired: %s", concern)
-
-        logging.info("Fast news poll: %d new chunks", len(chunks))
+            logging.info("Alert system not available, skipping notifications")
+            logging.info("Fast news poll: %d new chunks", len(chunks))
 
         # PERSIST NEWS POLL STATUS FOR SIGNAL FEED
         from alerts.persistent_kv import kv_set
