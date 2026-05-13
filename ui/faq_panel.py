@@ -596,28 +596,35 @@ def render_faq_panel(chain: Any) -> None:
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* Style control buttons to be minimal */
+        /* Create card-sized clickable areas */
         .stButton > button {
-            background: rgba(0,180,216,0.1) !important;
-            border: 1px solid rgba(0,180,216,0.3) !important;
-            border-radius: 8px !important;
-            color: #00B4D8 !important;
-            font-size: 16px !important;
-            padding: 8px !important;
-            margin: 2px 0 !important;
-            min-height: 40px !important;
+            background: rgba(255,255,255,0.01) !important;
+            border: 2px solid transparent !important;
+            border-radius: 18px !important;
+            color: transparent !important;
+            font-size: 0 !important;
+            padding: 0 !important;
+            margin: 8px 0 !important;
+            min-height: 250px !important;
+            width: 380px !important;
+            cursor: pointer !important;
             transition: all 0.2s ease !important;
         }
 
         .stButton > button:hover {
-            background: rgba(0,180,216,0.2) !important;
-            border-color: #00B4D8 !important;
-            transform: scale(1.05) !important;
+            background: rgba(0,180,216,0.08) !important;
+            border-color: rgba(0,180,216,0.3) !important;
+            box-shadow: 0 0 20px rgba(0,180,216,0.15) !important;
         }
 
         .stButton > button:focus {
             outline: 2px solid var(--accent) !important;
             outline-offset: 2px !important;
+        }
+
+        .stButton > button:active {
+            background: rgba(0,180,216,0.15) !important;
+            transform: scale(0.98) !important;
         }
 
         @media (max-width: 820px) {
@@ -675,31 +682,33 @@ def render_faq_panel(chain: Any) -> None:
     </section>
     """)
 
-    # Simplified click handling with visible but styled interface
-    with st.container():
-        cols = st.columns(len(sorted_faqs))
-        clicked_id = None
+    # Card-based interaction with overlay buttons
+    clicked_id = None
+
+    # Create invisible buttons that overlay the card areas
+    button_container = st.container()
+    with button_container:
+        # Create a grid of invisible buttons matching the card layout
+        button_cols = st.columns(len(sorted_faqs))
 
         for i, faq in enumerate(sorted_faqs):
-            with cols[i]:
-                is_open = st.session_state.faq_open_id == faq["id"]
-                icon = "🔽" if is_open else "📖"
-
+            with button_cols[i]:
+                # Large invisible button that will overlay the card
                 if st.button(
-                    f"{icon}",
-                    key=f"faq_{faq['id']}_btn",
-                    help=f"{faq['question']} ({_format_views(faq['views'])} views)",
+                    "​",  # Invisible character
+                    key=f"card_overlay_{faq['id']}",
+                    help=f"Click to expand: {faq['question'][:50]}...",
                     use_container_width=True
                 ):
                     clicked_id = faq["id"]
 
-        if clicked_id:
-            if st.session_state.faq_open_id == clicked_id:
-                st.session_state.faq_open_id = None
-            else:
-                st.session_state.faq_open_id = clicked_id
-                _save_click(clicked_id)
-            st.rerun()
+    if clicked_id:
+        if st.session_state.faq_open_id == clicked_id:
+            st.session_state.faq_open_id = None
+        else:
+            st.session_state.faq_open_id = clicked_id
+            _save_click(clicked_id)
+        st.rerun()
 
     # Display horizontal scrolling cards
     rail_html = '<div class="faq-rail">'
