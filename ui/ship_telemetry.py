@@ -10,8 +10,6 @@ def get_ship_bar_html(status: str, ship_data: dict = None) -> str:
     if ship_data:
         lat = ship_data.get('lat', 14.93)
         lng = ship_data.get('lng', -23.51)
-        cases = ship_data.get('cases', 0)
-        deaths = ship_data.get('deaths', 0)
 
         # Format coordinates
         lat_dir = 'N' if lat >= 0 else 'S'
@@ -23,7 +21,6 @@ def get_ship_bar_html(status: str, ship_data: dict = None) -> str:
         timestamp = datetime.utcnow().strftime('%H:%M UTC')
     else:
         coords = "28.2916° N, 16.6291° W"  # Fallback to old static
-        cases = deaths = 0
         timestamp = "STATIC"
 
     # Flattened high-contrast signal strip
@@ -103,9 +100,8 @@ def get_ship_bar_html(status: str, ship_data: dict = None) -> str:
 <div class="signal-label">📡 MV HONDIUS STATUS</div>
 <div class="signal-value" style="color:#22c55e;"><span class="signal-live-dot"></span>{status.upper()}</div>
 </div>
-<div class="signal-group" style="text-align:center;">
-<div class="signal-label">🦠 ONBOARD OUTBREAK</div>
-<div class="signal-value" style="color:#ef4444;">{cases} CASES • {deaths} DEATHS</div>
+<div class="signal-group" style="flex:1; text-align:center; min-width: 50px;">
+<div style="height:1px; background:rgba(0,180,216,0.1); width:100%;"></div>
 </div>
 <div class="signal-group" style="text-align: right;">
 <div class="signal-label">📍 LIVE POSITION • {timestamp}</div>
