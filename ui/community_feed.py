@@ -16,16 +16,28 @@ def render_community_feed() -> None:
     feed = data.get("feed", [])
     trending = get_trending_topics(limit=5)
     
-    # 1. HEADER
+    # 1. HEADER with Ship Status
     st.markdown(
         """
-        <div class="cyber-header" title="Real-time tactical intelligence: user research trends, verified citations, and system alerts.">
-            <div style='display:flex; align-items:center; gap:12px; background:rgba(0,180,216,0.03); padding:10px; border-radius:8px; border-left:4px solid #00b4d8; cursor:help;'>
-                <h3 style='margin:0; font-size:0.85rem !important; letter-spacing:0.12em; color:#ffffff; text-shadow:0 0 10px rgba(0,180,216,0.4);'>📡 TACTICAL INTEL</h3>
-                <span class="live-dot" style="width:6px; height:6px; background:#22c55e; box-shadow:0 0 10px #22c55e;"></span>
-                <span style='color:#00b4d8; font-size:0.6rem; font-weight:900; opacity:0.6; border:1px solid #00b4d844; padding:1px 5px; border-radius:4px;'>LIVE_FEED</span>
+        <div class="cyber-header" title="Real-time tactical intelligence and ship tracking">
+            <div style='display:flex; justify-content:space-between; align-items:center; background:rgba(74,222,128,0.03); padding:12px; border-radius:8px; border-left:4px solid #4ade80;'>
+                <div style='display:flex; align-items:center; gap:10px;'>
+                    <h3 style='margin:0; font-size:0.85rem !important; letter-spacing:0.12em; color:#4ade80; text-shadow:0 0 10px rgba(74,222,128,0.4); font-weight:900;'>📡 LIVE UPDATES FEED</h3>
+                </div>
+                <div style="background:rgba(74,222,128,0.1); padding:2px 8px; border-radius:4px; border:1px solid rgba(74,222,128,0.3); color:#4ade80; font-size:0.6rem; font-weight:900; animation: pulse 2s infinite;">LIVE FEED ACTIVE</div>
+            </div>
+            <div style='margin-top:8px; padding:0 12px;'>
+                <p style='margin:0; color:#4ade80; font-size:0.65rem; font-weight:800; text-transform:uppercase;'>NIGHT WATCH — RESTRICTED MOVEMENT</p>
+                <p style='margin:0; color:#4ade80; font-size:0.65rem; font-weight:800; text-transform:uppercase;'>MV HONDIUS // POS: MID-ATLANTIC</p>
             </div>
         </div>
+        <style>
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+        </style>
         """,
         unsafe_allow_html=True
     )

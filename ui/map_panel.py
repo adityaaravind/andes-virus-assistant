@@ -663,13 +663,13 @@ def render_map_panel() -> None:
             .scroll-container::-webkit-scrollbar-thumb {{ background: #4ade80; border-radius: 1px; }}
         </style>
         <div style="font-family: sans-serif; background: rgba(15, 23, 42, 0.95); border: 2px solid #4ade80; box-shadow: 0 0 20px rgba(74,222,128,0.1); padding: 1.2rem; border-radius: 12px; height: 440px; display: flex; flex-direction: column; color: #fff; overflow: hidden;">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                <div style="color: #4ade80; font-size: 9px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">📡 LIVE UPDATES FEED</div>
-                <div style="background:rgba(74,222,128,0.1); padding:1px 6px; border-radius:3px; border:1px solid #4ade8033; color:#4ade80; font-size:7px; font-weight:900; animation: pulse 2s infinite;">LIVE FEED ACTIVE</div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 16px;">
+                <div style="color: #4ade80; font-size: 9px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">🚢 SHIP TRACKER</div>
+                <div style="background:rgba(74,222,128,0.1); padding:1px 6px; border-radius:3px; border:1px solid #4ade8033; color:#4ade80; font-size:7px; font-weight:900;">TRACKING ACTIVE</div>
             </div>
-            <div style="margin: 10px 0;">
-                <h2 style="margin:0; font-size:1.6rem; font-weight:900; line-height: 1; color:#ffffff;">{state.get('ship_status', 'Quarantined').upper()}</h2>
-                <p style="color:#4ade80; font-size:0.65rem; font-weight:800; margin-top:4px; text-transform:uppercase;">MV HONDIUS // POS: MID-ATLANTIC</p>
+            <div style="margin: 0 0 16px 0;">
+                <h2 style="margin:0; font-size:1.4rem; font-weight:900; line-height: 1; color:#ffffff;">{state.get('ship_status', 'Quarantined').upper()}</h2>
+                <p style="color:#4ade80; font-size:0.6rem; font-weight:800; margin-top:4px; text-transform:uppercase;">VESSEL ID: MV HONDIUS</p>
             </div>
             
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:12px;">
