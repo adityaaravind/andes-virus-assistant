@@ -526,6 +526,104 @@ def _bootstrap_if_empty() -> None:
 
 
 
+def _render_ingestion_countdown_timer() -> None:
+    """Display countdown timer for auto-ingestion and trigger when countdown reaches 0."""
+    try:
+        from alerts.persistent_kv import kv_get, kv_set
+        import time
+
+        # Get ingestion interval (default 1 hour = 3600 seconds)
+        interval_hours = int(os.getenv("NEWS_REFRESH_INTERVAL_HOURS", "1"))
+        interval_seconds = interval_hours * 3600
+
+        # Initialize session state for timer
+        if "last_timer_update" not in st.session_state:
+            st.session_state.last_timer_update = 0
+
+        # Get last ingestion time
+        last_ingest = kv_get("last_ingestion_time")
+        current_time = time.time()
+
+        if not last_ingest:
+            # No previous ingestion - set timer to trigger immediately
+            time_remaining = 0
+        else:
+            try:
+                last_ingest_dt = datetime.fromisoformat(last_ingest.replace('Z', '+00:00') if 'Z' in last_ingest else last_ingest)
+                elapsed = current_time - last_ingest_dt.timestamp()
+                time_remaining = max(0, interval_seconds - elapsed)
+            except:
+                time_remaining = 0
+
+        # Check if ingestion should trigger
+        if time_remaining <= 0:
+            # Check if we haven't triggered recently (prevent duplicate triggers)
+            if not st.session_state.get("ingestion_triggered", False):
+                st.session_state.ingestion_triggered = True
+
+                st.markdown(
+                    f"<p style='color:#4ade80;font-size:0.72rem;margin-top:0.6rem;'>"
+                    f"🔄 Triggering ingestion...</p>",
+                    unsafe_allow_html=True,
+                )
+
+                # Trigger ingestion in background
+                try:
+                    _run_ingestion_job()
+                    st.success("✅ Ingestion completed!", icon="🔄")
+                    st.session_state.ingestion_triggered = False  # Reset trigger flag
+                    st.rerun()  # Refresh to show new timer
+                except Exception as e:
+                    st.error(f"❌ Ingestion failed: {e}")
+                    st.session_state.ingestion_triggered = False  # Reset trigger flag
+            else:
+                st.markdown(
+                    f"<p style='color:#fbbf24;font-size:0.72rem;margin-top:0.6rem;'>"
+                    f"🔄 Ingestion in progress...</p>",
+                    unsafe_allow_html=True,
+                )
+        else:
+            # Reset trigger flag when timer is active
+            st.session_state.ingestion_triggered = False
+
+            # Display countdown
+            hours = int(time_remaining // 3600)
+            minutes = int((time_remaining % 3600) // 60)
+            seconds = int(time_remaining % 60)
+
+            if hours > 0:
+                time_str = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+            else:
+                time_str = f"{minutes:02d}:{seconds:02d}"
+
+            # Color coding: green if >30min, amber if 10-30min, red if <10min
+            if time_remaining > 1800:  # >30 min
+                color = "#4ade80"
+            elif time_remaining > 600:  # >10 min
+                color = "#fbbf24"
+            else:  # <10 min
+                color = "#f87171"
+
+            st.markdown(
+                f"<p style='color:{color};font-size:0.72rem;margin-top:0.6rem;'>"
+                f"🔄 Next ingest in: <strong>{time_str}</strong></p>",
+                unsafe_allow_html=True,
+            )
+
+            # Auto-refresh every 30 seconds when timer is active (less aggressive)
+            if current_time - st.session_state.last_timer_update > 30:
+                st.session_state.last_timer_update = current_time
+                st.rerun()
+
+    except Exception as e:
+        # Fallback display if timer fails
+        st.markdown(
+            f"<p style='color:#64748b;font-size:0.72rem;margin-top:0.6rem;'>"
+            f"🔄 Automated Ingest: Every {os.getenv('NEWS_REFRESH_INTERVAL_HOURS', '1')}h</p>",
+            unsafe_allow_html=True,
+        )
+
+
 def _render_header() -> None:
     from ui.author_card import render_author_card
     header_col, author_col = st.columns([3, 1])
@@ -618,11 +716,8 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
         except Exception:
             st.markdown("<span style='color:#ef4444;'>● DB unreachable</span>", unsafe_allow_html=True)
 
-        st.markdown(
-            f"<p style='color:#64748b;font-size:0.72rem;margin-top:0.6rem;'>"
-            f"🔄 Automated Ingest: Hourly</p>",
-            unsafe_allow_html=True,
-        )
+        # Countdown timer for auto-ingestion
+        _render_ingestion_countdown_timer()
 
         st.divider()
         st.markdown(
