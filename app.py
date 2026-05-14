@@ -574,44 +574,6 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
         render_tile_menu()
         st.divider()
 
-        # ── User Registration/Profile Section ──
-        # Note: Registration/gamification features disabled for production deployment
-        try:
-            st.markdown(
-                "<h2 style='color:#00b4d8;font-size:1.1rem;margin-bottom:0.5rem;'>"
-                "👤 Tracker Profile</h2>",
-                unsafe_allow_html=True,
-            )
-            from ui.secure_registration import render_enhanced_user_section
-            render_enhanced_user_section()
-            st.divider()
-
-            # ── Gamification Dashboard Section ──
-            from ui.gamification_dashboard import render_mission_board, render_live_leaderboard
-            from ui.secure_registration import get_current_user
-
-            current_user = get_current_user()
-            if current_user:
-                st.markdown(
-                    "<h2 style='color:#f59e0b;font-size:1.1rem;margin-bottom:0.5rem;'>"
-                    "🎯 Guardian Missions</h2>",
-                    unsafe_allow_html=True,
-                )
-                with st.expander("Daily Missions", expanded=False):
-                    render_mission_board()
-
-                st.markdown(
-                    "<h2 style='color:#dc2626;font-size:1.1rem;margin-bottom:0.5rem;'>"
-                    "🏆 Leaderboard</h2>",
-                    unsafe_allow_html=True,
-                )
-                with st.expander("Top Guardians", expanded=False):
-                    render_live_leaderboard()
-
-                st.divider()
-        except ImportError:
-            # Skip registration/gamification features if modules not available
-            pass
 
         st.markdown(
             "<h2 style='color:#00b4d8;font-size:1.1rem;margin-bottom:0.5rem;'>"
@@ -625,13 +587,6 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
         st.divider()
         st.markdown("#### System Health")
 
-        # Manual refresh button
-        if st.button("🔄 Force Refresh Data", help="Manually trigger data ingestion"):
-            with st.spinner("Refreshing data sources..."):
-                _run_ingestion_job()
-                _run_fast_news_poll()
-            st.success("✅ Data refreshed!", icon="🔄")
-            st.rerun()
 
         try:
             from alerts.persistent_kv import kv_get
