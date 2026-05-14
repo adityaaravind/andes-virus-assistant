@@ -61,6 +61,29 @@ def fire_map_signal(country: str, cases: int, action: str = "update") -> None:
     )
 
 
+def fire_hotspot_signal(location: str, cases: int, severity: int, is_glowing: bool = False) -> None:
+    """Signal for new glowing hotspots detected from news."""
+    severity_levels = ["monitoring", "suspected", "confirmed", "critical"]
+    severity_text = severity_levels[min(severity - 1, 3)] if severity > 0 else "unknown"
+
+    glow_text = " ✨ GLOWING HOTSPOT" if is_glowing else ""
+
+    fire_signal(
+        "map",
+        f"🗺️ {location}: {cases} {severity_text} cases detected{glow_text}",
+        "HOTSPOT_DETECTOR"
+    )
+
+
+def fire_connection_signal(source_location: str, target_location: str = "MV Hondius") -> None:
+    """Signal for new connection lines drawn on map."""
+    fire_signal(
+        "map",
+        f"📡 Connection established: {source_location} ↔ {target_location}",
+        "MAP_CONNECTIONS"
+    )
+
+
 def fire_news_signal(articles_count: int, keywords: list[str] | None = None) -> None:
     """Signal for new news articles processed."""
     kw_text = f" matching {', '.join(keywords[:2])}" if keywords else ""

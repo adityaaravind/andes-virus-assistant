@@ -134,6 +134,23 @@ def _run_fast_news_poll() -> None:
         if chunks:
             fire_ingestion_signal("Fast News Poll", len(docs), len(chunks))
 
+        # UPDATE MAP WITH NEW LOCATION DATA FROM NEWS
+        try:
+            from ui.news_location_extractor import update_map_from_news_ingestion
+            if chunks:
+                update_map_from_news_ingestion(chunks)
+        except Exception:
+            pass  # Don't break news polling if map update fails
+
+        # NEW: Award community bonuses for active users during news updates
+        try:
+            from alerts.gamification_hooks import trigger_community_bonus, auto_award_engagement_points
+            if chunks and len(chunks) > 5:  # Significant news update
+                trigger_community_bonus("outbreak_update", impact_multiplier=1.0)
+            auto_award_engagement_points()
+        except Exception:
+            pass  # Don't break news polling if gamification fails
+
 
         # Backup streamlit-analytics2 to Qdrant & Check size
         try:
@@ -209,6 +226,15 @@ def _run_ingestion_job() -> None:
         # PERSIST SUCCESS TIMESTAMP
         from alerts.persistent_kv import kv_set
         kv_set("last_ingestion_time", datetime.utcnow().isoformat())
+
+        # UPDATE MAP WITH ALL INDEXED CONTENT
+        try:
+            from ui.news_location_extractor import update_map_from_news_ingestion
+            # Trigger map refresh after full ingestion
+            from alerts.persistent_kv import kv_set
+            kv_set("last_map_update", datetime.utcnow().isoformat())
+        except Exception:
+            pass  # Don't break ingestion if map update fails
 
         # FIRE REAL-TIME SIGNAL FOR FULL INGESTION
         from alerts.signal_dispatcher import fire_ingestion_signal
@@ -332,6 +358,17 @@ def _start_scheduler() -> None:
                 max_instances=1,
                 coalesce=True,
             )
+
+            # Add Gamification Backup job (every 6 hours)
+            from alerts.gamification_backup import backup_manager
+            scheduler.add_job(
+                backup_manager.auto_backup_scheduler,
+                trigger="interval",
+                hours=6,
+                id="gamification_backup",
+                max_instances=1,
+                coalesce=True,
+            )
             scheduler.start()
             _SCHEDULER_STARTED = True
             logging.info("Auto-ingestion scheduler started (every %dh)", interval_hours)
@@ -408,6 +445,58 @@ def _check_vectorstore() -> bool:
         return stats.get("total_chunks", 0) > 0
     except Exception:
         return False
+
+
+def _check_and_refresh_data() -> None:
+    """Check if data is stale and auto-trigger real-time ingestion."""
+    if st.session_state.get("ingestion_check_done"):
+        return
+
+    try:
+        from alerts.persistent_kv import kv_get
+        from datetime import datetime, timedelta
+
+        last_ingest = kv_get("last_ingestion_time")
+        last_news = kv_get("last_news_poll_time")
+
+        now = datetime.utcnow()
+        should_refresh = False
+
+        # Check if full ingestion is stale (>2 hours)
+        if not last_ingest:
+            should_refresh = True
+            reason = "No previous ingestion found"
+        else:
+            ingest_dt = datetime.fromisoformat(last_ingest.replace('Z', '+00:00') if 'Z' in last_ingest else last_ingest)
+            hours_since = (now - ingest_dt).total_seconds() / 3600
+            if hours_since > 2.0:
+                should_refresh = True
+                reason = f"Data stale ({hours_since:.1f} hours old)"
+
+        # Check if news polling is stale (>20 minutes)
+        if not last_news or not should_refresh:
+            if not last_news:
+                _run_fast_news_poll()
+                st.session_state["ingestion_check_done"] = True
+                return
+            else:
+                news_dt = datetime.fromisoformat(last_news.replace('Z', '+00:00') if 'Z' in last_news else last_news)
+                minutes_since = (now - news_dt).total_seconds() / 60
+                if minutes_since > 20:
+                    _run_fast_news_poll()
+
+        if should_refresh:
+            st.info(f"🔄 **Data refresh needed**: {reason}. Updating knowledge base...", icon="⚙️")
+            with st.spinner("Refreshing data sources..."):
+                _run_ingestion_job()
+                st.success("✅ Data refreshed successfully!", icon="🔄")
+                st.rerun()
+
+        st.session_state["ingestion_check_done"] = True
+
+    except Exception as exc:
+        logging.exception("Data refresh check failed")
+        st.session_state["ingestion_check_done"] = True
 
 
 def _bootstrap_if_empty() -> None:
@@ -487,9 +576,33 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
             "👤 Tracker Profile</h2>",
             unsafe_allow_html=True,
         )
-        from ui.user_registration import render_user_section
-        render_user_section()
+        from ui.secure_registration import render_enhanced_user_section
+        render_enhanced_user_section()
         st.divider()
+
+        # ── Gamification Dashboard Section ──
+        from ui.gamification_dashboard import render_mission_board, render_live_leaderboard
+        from ui.secure_registration import get_current_user
+
+        current_user = get_current_user()
+        if current_user:
+            st.markdown(
+                "<h2 style='color:#f59e0b;font-size:1.1rem;margin-bottom:0.5rem;'>"
+                "🎯 Guardian Missions</h2>",
+                unsafe_allow_html=True,
+            )
+            with st.expander("Daily Missions", expanded=False):
+                render_mission_board()
+
+            st.markdown(
+                "<h2 style='color:#dc2626;font-size:1.1rem;margin-bottom:0.5rem;'>"
+                "🏆 Leaderboard</h2>",
+                unsafe_allow_html=True,
+            )
+            with st.expander("Top Guardians", expanded=False):
+                render_live_leaderboard()
+
+            st.divider()
 
         st.markdown(
             "<h2 style='color:#00b4d8;font-size:1.1rem;margin-bottom:0.5rem;'>"
@@ -502,6 +615,15 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
 
         st.divider()
         st.markdown("#### System Health")
+
+        # Manual refresh button
+        if st.button("🔄 Force Refresh Data", help="Manually trigger data ingestion"):
+            with st.spinner("Refreshing data sources..."):
+                _run_ingestion_job()
+                _run_fast_news_poll()
+            st.success("✅ Data refreshed!", icon="🔄")
+            st.rerun()
+
         try:
             from alerts.persistent_kv import kv_get
             last_ingest = kv_get("last_ingestion_time")
@@ -557,9 +679,13 @@ def main() -> None:
 
         _render_sidebar(st.session_state.citation_cards)
 
-        # REDUCED REFRESH: Every 30 mins instead of 15 to save RAM (disabled for testing)
-        # from streamlit_autorefresh import st_autorefresh
-        # st_autorefresh(interval=2 * 60 * 1000, key="stats_refresh")
+        # Auto-refresh every 10 minutes to trigger data freshness checks
+        from streamlit_autorefresh import st_autorefresh
+        refresh_count = st_autorefresh(interval=10 * 60 * 1000, key="data_refresh_trigger")
+
+        # Clear ingestion check flag on auto-refresh to allow re-checking
+        if refresh_count > 0 and "ingestion_check_done" in st.session_state:
+            del st.session_state["ingestion_check_done"]
 
         # ── Mutation Observer for Forced Gauge Jitter ──
         st.markdown(
@@ -605,6 +731,11 @@ def main() -> None:
 
         # ── Branding & Header ──
         _render_header()
+
+        # ── Gamification Hero Dashboard ──
+        from ui.gamification_dashboard import render_hero_dashboard
+        render_hero_dashboard()
+        st.divider()
 
         # ── Sidebar Scroll Guide ──
         st.markdown(
@@ -666,6 +797,7 @@ def main() -> None:
         st.warning("⚠️ **NOT MEDICAL ADVICE** • For emergencies contact local health authorities")
 
         _bootstrap_if_empty()
+        _check_and_refresh_data()
 
         chain = _init_rag_chain()
 

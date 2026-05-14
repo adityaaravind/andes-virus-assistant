@@ -471,29 +471,43 @@ def _get_dynamic_hotspots(state: dict) -> list:
     nationality_data = _get_auto_nationality_data(state.get("confirmed_cases", 8), state.get("deaths", 3))
     nat_map = {d["code"]: d for d in nationality_data}
 
-    # Load dynamic location-specific case data
-    location_cases = _load_location_cases()
+    # Load dynamic hotspots from news content
+    try:
+        from ui.news_location_extractor import get_dynamic_map_hotspots
+        news_hotspots = get_dynamic_map_hotspots()
 
-    # Add new hotspots from extracted location data
-    for location_name, data in location_cases.items():
-        coords = data.get("coordinates", {})
-        if coords:
-            # Check if this location already exists in hotspots
-            existing = next((h for h in hotspots if h["name"] == location_name.upper()), None)
+        # Add news-based hotspots that don't already exist
+        for news_spot in news_hotspots:
+            # Skip the ship hotspot from news extractor (we have our own)
+            if news_spot.get("id") == "mv_hondius":
+                continue
+
+            # Check if this location already exists
+            existing = next((h for h in hotspots if
+                           abs(h["lat"] - news_spot["lat"]) < 0.1 and
+                           abs(h["lng"] - news_spot["lon"]) < 0.1), None)
+
             if not existing:
-                # Add new hotspot
+                # Add new hotspot with glowing effects
                 hotspots.append({
-                    "lat": coords["lat"],
-                    "lng": coords["lng"],
-                    "code": coords["code"],
-                    "name": location_name.upper(),
-                    "color": "#ff6b35",  # Orange for new locations
-                    "relation": "Extracted Case Location",
-                    "intel": "NEWS REPORT",
-                    "admitted": f"Local Hospital ({coords.get('state', 'Unknown')})",
-                    "notes": f"{data['cases']} cases reported. Source: {data['source']} (credibility: {data['credibility']:.1f})",
-                    "timestamp": "EXTRACTED"
+                    "lat": news_spot["lat"],
+                    "lng": news_spot["lon"],
+                    "code": news_spot["code"],
+                    "name": news_spot["name"].upper() + " (NEWS)",
+                    "color": news_spot["color"],
+                    "relation": "Real-time News Analysis",
+                    "intel": "LIVE NEWS",
+                    "admitted": "Local Medical Facility",
+                    "notes": f"{news_spot['cases']} cases detected in news. Severity: {news_spot['severity']}/4. Auto-detected from indexed articles.",
+                    "timestamp": "LIVE",
+                    "glow": True,
+                    "glowIntensity": news_spot["intensity"],
+                    "pulseSpeed": news_spot.get("pulseSpeed", 1.0),
+                    "connectToShip": news_spot.get("connectToShip", False),
                 })
+    except Exception as e:
+        # Don't break map if news extraction fails
+        pass
 
     # Fallback city-specific case assignments for USA (if no extracted data)
     usa_city_cases = {"NYC LANDING": 1, "ATLANTA ALERT": 2, "SEATTLE MONITOR": 3}
@@ -643,6 +657,45 @@ def render_map_panel() -> None:
                 .ring-marker { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ffffff; position: relative; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); }
                 .blink-active { animation: marker-blink 1.5s infinite ease-in-out; }
                 @keyframes marker-blink { 0%, 100% { opacity: 1; box-shadow: 0 0 8px currentColor; } 50% { opacity: 0.6; box-shadow: 0 0 25px currentColor; } }
+
+                /* Enhanced glowing effects for news-based hotspots */
+                .glow-marker {
+                    animation: pulse-glow 2s infinite ease-in-out;
+                    border-width: 3px;
+                    background: rgba(0,0,0,0.9);
+                }
+                @keyframes pulse-glow {
+                    0%, 100% {
+                        opacity: 1;
+                        transform: scale(1);
+                        box-shadow: 0 0 15px currentColor, 0 0 30px currentColor, 0 0 45px currentColor;
+                    }
+                    50% {
+                        opacity: 0.8;
+                        transform: scale(1.1);
+                        box-shadow: 0 0 25px currentColor, 0 0 50px currentColor, 0 0 75px currentColor;
+                    }
+                }
+                .glow-badge {
+                    background: currentColor !important;
+                    color: #000 !important;
+                    box-shadow: 0 0 10px currentColor;
+                    animation: badge-pulse 1.5s infinite;
+                }
+                @keyframes badge-pulse {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.2); }
+                }
+
+                /* Connection line animations */
+                .connection-line {
+                    animation: dash-flow 2s linear infinite;
+                }
+                @keyframes dash-flow {
+                    0% { stroke-dashoffset: 0; }
+                    100% { stroke-dashoffset: 20; }
+                }
+
                 .badge { position: absolute; top: -10px; right: -10px; background: #ffffff; color: #000; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center; border: 2px solid #000; }
                 .intel-label { color: #94a3b8; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
             </style>
@@ -713,15 +766,56 @@ def render_map_panel() -> None:
                             }
                         }).addTo(map);
                     });
+                // Find ship position for connection lines
+                const shipHotspot = hotspots.find(h => h.code === 'SHIP');
+                const shipPos = shipHotspot ? [shipHotspot.lat, shipHotspot.lng] : [28.5, -15.0];
+
                 hotspots.forEach(h => {
                     const isShip = h.code === 'SHIP';
-                    const icon = L.divIcon({ 
-                        className: '', 
-                        html: '<div class="ring-marker blink-active" style="border-color:' + h.color + '; color:' + h.color + ';"><div class="badge">' + h.cases + '</div></div>', 
-                        iconSize: [24, 24], 
-                        iconAnchor: [12, 12] 
+                    const isNewsHotspot = h.glow === true;
+
+                    // Enhanced icon for news-based hotspots with glowing effects
+                    let iconHtml = '';
+                    if (isNewsHotspot) {
+                        const glowIntensity = h.glowIntensity || 50;
+                        const pulseSpeed = h.pulseSpeed || 1.0;
+                        iconHtml = '<div class="ring-marker glow-marker" style="' +
+                            'border-color:' + h.color + '; color:' + h.color + ';' +
+                            'box-shadow: 0 0 ' + (glowIntensity/5) + 'px ' + h.color + ', 0 0 ' + (glowIntensity/3) + 'px ' + h.color + ';' +
+                            'animation: pulse-glow ' + pulseSpeed + 's infinite;' +
+                            '"><div class="badge glow-badge">' + h.cases + '</div></div>';
+                    } else {
+                        iconHtml = '<div class="ring-marker blink-active" style="border-color:' + h.color + '; color:' + h.color + ';"><div class="badge">' + h.cases + '</div></div>';
+                    }
+
+                    const icon = L.divIcon({
+                        className: '',
+                        html: iconHtml,
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12]
                     });
                     const marker = L.marker([h.lat, h.lng], { icon: icon }).addTo(map);
+
+                    // Add glowing connection line to ship for news hotspots
+                    if (isNewsHotspot && h.connectToShip && !isShip) {
+                        const connectionLine = L.polyline([
+                            [h.lat, h.lng],
+                            shipPos
+                        ], {
+                            color: h.color,
+                            weight: 2,
+                            opacity: 0.7,
+                            dashArray: '5, 10',
+                            className: 'connection-line'
+                        }).addTo(map);
+
+                        // Animate the dash pattern
+                        let dashOffset = 0;
+                        setInterval(() => {
+                            dashOffset += 1;
+                            connectionLine.setStyle({ dashOffset: dashOffset + 'px' });
+                        }, 100);
+                    }
                     let popupHtml = '<div style="padding:15px; min-width:260px; font-family:sans-serif;">' +
                         '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">' +
                         '<b style="color:' + h.color + '; font-size:14px;">📡 ' + h.name + '</b>' +
