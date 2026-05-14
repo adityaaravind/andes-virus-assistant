@@ -36,7 +36,31 @@ def chunk_documents(documents: list[dict[str, Any]]) -> list[dict[str, Any]]:
             }
             chunks.append(chunk)
 
+    # Add embeddings to chunks
+    chunks = _add_embeddings(chunks)
     return chunks
+
+
+def _add_embeddings(chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Add OpenAI embeddings to chunks for vector storage."""
+    try:
+        from rag.retriever import _embed_query
+
+        for chunk in chunks:
+            text = chunk.get("text", "")
+            if text:
+                # Generate embedding
+                embedding = _embed_query(text)
+                chunk["embedding"] = embedding
+                # Use same embedding for summary for now
+                chunk["summary_embedding"] = embedding
+
+        return chunks
+    except Exception as e:
+        # Return chunks without embeddings if embedding fails
+        import logging
+        logging.warning(f"Failed to generate embeddings: {e}")
+        return chunks
 
 
 def _extract_text(doc: dict[str, Any]) -> str:

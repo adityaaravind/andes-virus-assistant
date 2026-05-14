@@ -108,8 +108,15 @@ def add_documents(chunks: list[dict[str, Any]]) -> int:
     added = 0
     for i in range(0, len(points), BATCH_SIZE):
         batch = points[i : i + BATCH_SIZE]
-        client.upsert(collection_name=COLLECTION_NAME, points=batch)
-        added += len(batch)
+        try:
+            logging.info(f"Qdrant: upserting batch of {len(batch)} points...")
+            client.upsert(collection_name=COLLECTION_NAME, points=batch)
+            added += len(batch)
+            logging.info(f"Qdrant: batch upsert successful, added {len(batch)} points")
+        except Exception as e:
+            logging.error(f"Qdrant: batch upsert failed: {e}")
+            # Continue with remaining batches
+            continue
 
     logging.info("Qdrant: upserted %d points to %s", added, COLLECTION_NAME)
     return added
