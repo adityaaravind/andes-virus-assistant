@@ -10,49 +10,57 @@ from typing import Any
 _COLLECTION = "alert_kv"
 _VECTOR_DIM = 4  # stub — Qdrant requires vectors; we only use payload
 
-
-def _hash_id(key: str) -> int:
-    return int(hashlib.md5(key.encode()).hexdigest(), 16) % (2 ** 63)
-
+_CACHED_CLIENT = None
+_CHECKED_COLLECTIONS = set()
 
 def _client():
+    global _CACHED_CLIENT
     try:
         from qdrant_client import QdrantClient
         from qdrant_client.models import Distance, VectorParams
-        c = QdrantClient(url=os.getenv("QDRANT_URL"), api_key=os.getenv("QDRANT_API_KEY"))
-        names = [col.name for col in c.get_collections().collections]
-        if _COLLECTION not in names:
-            c.create_collection(
-                _COLLECTION,
-                vectors_config=VectorParams(size=_VECTOR_DIM, distance=Distance.COSINE),
-            )
-        return c
-    except ImportError:
-        raise RuntimeError("qdrant_client not available - using local JSON fallback")
+        
+        if _CACHED_CLIENT is None:
+            url = os.getenv("QDRANT_URL")
+            api_key = os.getenv("QDRANT_API_KEY")
+            if not url:
+                raise RuntimeError("QDRANT_URL not set")
+            _CACHED_CLIENT = QdrantClient(url=url, api_key=api_key, timeout=10)
+        
+        if _COLLECTION not in _CHECKED_COLLECTIONS:
+            names = [col.name for col in _CACHED_CLIENT.get_collections().collections]
+            if _COLLECTION not in names:
+                _CACHED_CLIENT.create_collection(
+                    _COLLECTION,
+                    vectors_config=VectorParams(size=_VECTOR_DIM, distance=Distance.COSINE),
+                )
+            _CHECKED_COLLECTIONS.add(_COLLECTION)
+            
+        return _CACHED_CLIENT
+    except Exception as e:
+        # Clear cache on error to allow retry
+        _CACHED_CLIENT = None
+        raise RuntimeError(f"Qdrant client error: {str(e)}")
 
 
 def _qdrant_available() -> bool:
     """Check if Qdrant is configured and client is available."""
     if not os.getenv("QDRANT_URL"):
         return False
-    try:
-        import qdrant_client
-        return True
-    except ImportError:
-        return False
+    return True
 
 def kv_get(key: str, default: Any = None) -> Any:
     if _qdrant_available():
         try:
-            result = _client().retrieve(_COLLECTION, ids=[_hash_id(key)], with_payload=True)
+            client = _client()
+            result = client.retrieve(_COLLECTION, ids=[_hash_id(key)], with_payload=True)
             if result:
                 return result[0].payload.get("value", default)
             return default # Key not found in Qdrant, return default
         except Exception as e:
-            # Check if we should use graceful fallback for development
+            # Check if we should use graceful fallback (enabled by default)
             import os
-            if os.getenv("QDRANT_GRACEFUL_FALLBACK", "false").lower() == "true":
-                print(f"Warning: Qdrant connection failed, falling back to local storage for {key}")
+            fallback = os.getenv("QDRANT_GRACEFUL_FALLBACK", "true").lower() == "true"
+            if fallback:
                 # Fall back to local JSON
                 path = Path(f"data/kv_{key}.json")
                 if path.exists():

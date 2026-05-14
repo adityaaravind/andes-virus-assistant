@@ -5,6 +5,7 @@ from __future__ import annotations
 # Fixes crash on Python 3.14 where protobuf C extension is incompatible.
 import os
 os.environ.setdefault("PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION", "python")
+os.environ.setdefault("QDRANT_GRACEFUL_FALLBACK", "true")
 
 import logging
 import threading
@@ -56,8 +57,6 @@ def _restore_analytics_backup() -> None:
         logging.exception("Failed to restore analytics backup")
 
 
-_ensure_data_dirs()
-_restore_analytics_backup()
 
 # ---------------------------------------------------------------------------
 # Background ingestion scheduler (runs once per process, not per Streamlit
@@ -744,6 +743,10 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
         )
 
 def main() -> None:
+    _ensure_data_dirs()
+    # defer analytics restoration to avoid blocking initial load
+    threading.Thread(target=_restore_analytics_backup, daemon=True).start()
+
     import gc
     gc.collect() # Immediate cleanup on reload
     
