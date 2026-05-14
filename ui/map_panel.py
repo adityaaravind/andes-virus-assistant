@@ -699,24 +699,247 @@ def _load_location_cases() -> dict:
         pass
     return {}
 
+@st.cache_data(ttl=300, show_spinner=False)  # Cache for 5 minutes
+def _extract_hotspots_from_rag() -> list:
+    """Extract all outbreak locations from RAG vectorstore."""
+    try:
+        from vectorstore.store import similarity_search
+        import re
+        import signal
+        from datetime import datetime
+
+        # Timeout handler
+        def timeout_handler(signum, frame):
+            raise TimeoutError("RAG hotspot extraction timeout")
+
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(6)
+
+        hotspots = []
+
+        # Query for outbreak locations with hospitals/facilities
+        location_queries = [
+            "hospital isolation hantavirus patients location city country",
+            "outbreak cases confirmed location coordinates latitude longitude",
+            "medical facility emergency evacuation hantavirus treatment",
+            "port landing passengers crew location hospital admitted",
+            "quarantine isolation medical center hantavirus outbreak"
+        ]
+
+        extracted_locations = {}
+
+        for query in location_queries:
+            results = similarity_search(query, k=10)
+
+            for result in results:
+                text = result.get("text", "")
+                metadata = result.get("metadata", {})
+
+                # Extract location names, hospitals, coordinates
+                location_patterns = {
+                    r'([A-Z][a-z]+ ?[A-Z]*[a-z]*)\s+(?:hospital|medical center|clinic)': 'hospital',
+                    r'(?:in|at|from)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*),?\s+(?:argentina|spain|usa|uk|south africa)': 'location',
+                    r'(\d{1,2}\.?\d*)[°\s]*[NS][,\s]*(\d{1,2}\.?\d*)[°\s]*[EW]': 'coordinates',
+                    r'(\d+)\s+(?:cases?|patients?|confirmed).*?(?:in|at)\s+([A-Z][a-z]+)': 'cases_location'
+                }
+
+                for pattern, data_type in location_patterns.items():
+                    matches = re.findall(pattern, text, re.IGNORECASE)
+
+                    if data_type == 'coordinates' and matches:
+                        for match in matches:
+                            lat, lng = float(match[0]), float(match[1])
+                            if 'W' in text: lng = -lng
+                            if 'S' in text: lat = -lat
+
+                            # Find nearby location name in text
+                            location_name = "Unknown Location"
+                            for loc_match in re.findall(r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\b', text):
+                                if any(country in loc_match.lower() for country in ['hospital', 'medical', 'center']):
+                                    continue
+                                location_name = loc_match
+                                break
+
+                            hotspots.append({
+                                "lat": lat,
+                                "lng": lng,
+                                "name": f"{location_name.upper()} (RAG)",
+                                "code": _get_country_code_from_text(text),
+                                "color": _get_color_from_severity(text),
+                                "relation": _extract_relation_from_text(text),
+                                "intel": "RAG EXTRACTED",
+                                "admitted": _extract_hospital_from_text(text),
+                                "notes": f"Auto-extracted from: {text[:100]}...",
+                                "timestamp": datetime.now().strftime("%b %d"),
+                                "source": "RAG",
+                                "cases": _extract_cases_from_text(text),
+                                "deaths": _extract_deaths_from_text(text)
+                            })
+
+                    elif data_type == 'cases_location' and matches:
+                        for match in matches:
+                            cases, location = match
+                            # Map location to coordinates using known mappings
+                            coords = _get_coordinates_for_location(location.lower())
+                            if coords:
+                                hotspots.append({
+                                    "lat": coords[0],
+                                    "lng": coords[1],
+                                    "name": f"{location.upper()} CASES (RAG)",
+                                    "code": _get_country_code_from_location(location),
+                                    "color": _get_color_from_cases(int(cases)),
+                                    "relation": f"{cases} confirmed cases",
+                                    "intel": "CASE COUNT",
+                                    "admitted": _extract_hospital_from_text(text),
+                                    "notes": f"RAG extracted: {cases} cases in {location}",
+                                    "timestamp": "LIVE",
+                                    "source": "RAG",
+                                    "cases": int(cases),
+                                    "deaths": 0
+                                })
+
+        return hotspots[:20]  # Limit to 20 hotspots
+
+    except (TimeoutError, Exception):
+        return []  # Return empty list to use fallback
+    finally:
+        signal.alarm(0)
+
+
+def _get_country_code_from_text(text: str) -> str:
+    """Extract country code from text content."""
+    text_lower = text.lower()
+    if 'argentina' in text_lower: return 'ARG'
+    elif 'spain' in text_lower: return 'ESP'
+    elif 'south africa' in text_lower: return 'ZAF'
+    elif 'usa' in text_lower or 'united states' in text_lower: return 'USA'
+    elif 'uk' in text_lower or 'united kingdom' in text_lower: return 'GBR'
+    else: return 'UNK'
+
+
+def _get_color_from_severity(text: str) -> str:
+    """Determine marker color based on text severity."""
+    text_lower = text.lower()
+    if any(word in text_lower for word in ['critical', 'emergency', 'death', 'icu']):
+        return '#ef4444'  # Red
+    elif any(word in text_lower for word in ['isolation', 'quarantine', 'monitor']):
+        return '#f97316'  # Orange
+    elif any(word in text_lower for word in ['suspected', 'contact', 'watch']):
+        return '#eab308'  # Yellow
+    else:
+        return '#06b6d4'  # Cyan
+
+
+def _extract_relation_from_text(text: str) -> str:
+    """Extract relationship/status from text."""
+    text_lower = text.lower()
+    if 'emergency' in text_lower and 'evacuation' in text_lower:
+        return 'Emergency Evacuation'
+    elif 'isolation' in text_lower:
+        return 'Medical Isolation'
+    elif 'quarantine' in text_lower:
+        return 'Quarantine Protocol'
+    elif 'monitor' in text_lower:
+        return 'Health Monitoring'
+    else:
+        return 'Outbreak Location'
+
+
+def _extract_hospital_from_text(text: str) -> str:
+    """Extract hospital/facility name from text."""
+    hospital_patterns = [
+        r'([A-Z][a-z]+ ?[A-Z]*[a-z]*)\s+(?:hospital|medical center|clinic)',
+        r'(?:hospital|medical center|clinic)\s+([A-Z][a-z]+ ?[A-Z]*[a-z]*)',
+    ]
+
+    for pattern in hospital_patterns:
+        matches = re.findall(pattern, text, re.IGNORECASE)
+        if matches:
+            return matches[0] + " Medical Center"
+
+    return "Local Medical Facility"
+
+
+def _extract_cases_from_text(text: str) -> int:
+    """Extract case count from text."""
+    matches = re.findall(r'(\d+)\s*(?:cases?|patients?|confirmed)', text.lower())
+    return max([int(x) for x in matches]) if matches else 0
+
+
+def _extract_deaths_from_text(text: str) -> int:
+    """Extract death count from text."""
+    matches = re.findall(r'(\d+)\s*(?:deaths?|fatalities|died)', text.lower())
+    return max([int(x) for x in matches]) if matches else 0
+
+
+def _get_coordinates_for_location(location: str) -> tuple[float, float] | None:
+    """Map location names to coordinates."""
+    location_map = {
+        'argentina': (-34.60, -58.38),
+        'buenos aires': (-34.60, -58.38),
+        'spain': (40.41, -3.70),
+        'madrid': (40.41, -3.70),
+        'south africa': (-26.20, 28.04),
+        'johannesburg': (-26.20, 28.04),
+        'usa': (40.71, -74.00),
+        'new york': (40.71, -74.00),
+        'atlanta': (33.75, -84.39),
+        'seattle': (47.61, -122.33),
+        'uk': (51.50, -0.12),
+        'london': (51.50, -0.12),
+    }
+    return location_map.get(location.lower())
+
+
+def _get_country_code_from_location(location: str) -> str:
+    """Map location to country code."""
+    location_lower = location.lower()
+    if location_lower in ['argentina', 'buenos aires']: return 'ARG'
+    elif location_lower in ['spain', 'madrid']: return 'ESP'
+    elif location_lower in ['south africa', 'johannesburg']: return 'ZAF'
+    elif location_lower in ['usa', 'new york', 'atlanta', 'seattle']: return 'USA'
+    elif location_lower in ['uk', 'london']: return 'GBR'
+    else: return 'UNK'
+
+
+def _get_color_from_cases(cases: int) -> str:
+    """Determine color based on case count."""
+    if cases >= 10: return '#ef4444'  # Red
+    elif cases >= 5: return '#f97316'  # Orange
+    elif cases >= 1: return '#eab308'  # Yellow
+    else: return '#06b6d4'  # Cyan
+
+
 def _get_dynamic_hotspots(state: dict) -> list:
     # Get dynamic ship position
     ship_lat, ship_lng = _get_ship_position()
 
-    hotspots = [
-        {"lat": -34.60, "lng": -58.38, "code": "ARG", "name": "ARGENTINA SOURCE", "color": "#ff0055", "relation": "Primary Outbreak Center", "intel": "PORT AREA", "admitted": "Hospital Muñiz (isolation)", "notes": "Virus first detected in crew members here.", "timestamp": "APR 28"},
-        {"lat": -26.20, "lng": 28.04,  "code": "ZAF", "name": "S. AFRICA STOP", "color": "#00ffcc", "relation": "Emergency Evacuation", "intel": "HEALTH HUB", "admitted": "Netcare Milpark", "notes": "Critically ill crew members taken for help.", "timestamp": "MAY 08"},
-        {"lat": 40.41, "lng": -3.70,  "code": "ESP", "name": "SPAIN MONITOR", "color": "#ffaa00", "relation": "Repatriation Monitoring", "intel": "QUARANTINE", "admitted": "Tenerife Isolation Ward", "notes": "Close monitoring for returning passengers.", "timestamp": "MAY 09"},
-        {"lat": 51.50, "lng": -0.12,  "code": "GBR", "name": "UK MONITOR", "color": "#cc00ff", "relation": "Repatriation Monitoring", "intel": "ISOLATION", "admitted": "Royal London Hospital", "notes": "Patients kept in secure isolation wards.", "timestamp": "MAY 11"},
+    # Extract hotspots from RAG first
+    rag_hotspots = _extract_hotspots_from_rag()
 
-        # USA city-specific hotspots
-        {"lat": 40.71, "lng": -74.00, "code": "USA", "name": "NYC LANDING", "color": "#38bdf8", "relation": "Passenger Landing Zone", "intel": "PORT MONITOR", "admitted": "Bellevue Hospital (NY)", "notes": "24 passengers from vessel landed here.", "timestamp": "LIVE"},
-        {"lat": 33.75, "lng": -84.39, "code": "USA", "name": "ATLANTA ALERT", "color": "#ef4444", "relation": "Suspected Exposure", "intel": "ISOLATION", "admitted": "Emory University Hospital", "notes": "Two individuals with suspected hantavirus exposure in specialized isolation.", "timestamp": "MAY 13"},
-        {"lat": 47.61, "lng": -122.33, "code": "USA", "name": "SEATTLE MONITOR", "color": "#fbbf24", "relation": "Contact Monitoring", "intel": "HEALTH WATCH", "admitted": "King County Health", "notes": "3 King County residents being monitored for hantavirus.", "timestamp": "MAY 12"},
+    # Start with RAG-extracted hotspots if available
+    hotspots = rag_hotspots if rag_hotspots else []
 
-        # Ship location (dynamic position)
-        {"lat": ship_lat, "lng": ship_lng, "code": "SHIP", "name": "THE SHIP (MV HONDIUS)", "color": "#4ade80", "relation": "Active Virus Center", "intel": "RESTRICTED", "admitted": "Onboard Med-Bay", "notes": "Ship position updates every hour. Medical isolation protocols active.", "timestamp": "LIVE"}
-    ]
+    # Always add ship position (this is dynamic)
+    hotspots.append({
+        "lat": ship_lat, "lng": ship_lng, "code": "SHIP",
+        "name": "THE SHIP (MV HONDIUS)", "color": "#4ade80",
+        "relation": "Active Virus Center", "intel": "RESTRICTED",
+        "admitted": "Onboard Med-Bay",
+        "notes": "Ship position updates every hour. Medical isolation protocols active.",
+        "timestamp": "LIVE",
+        "source": "dynamic",
+        "cases": state.get("confirmed_cases", 8),
+        "deaths": state.get("deaths", 3)
+    })
+
+    # Add minimal fallback hotspots only if RAG extraction failed completely
+    if not rag_hotspots:
+        fallback_hotspots = [
+            {"lat": -34.60, "lng": -58.38, "code": "ARG", "name": "ARGENTINA FALLBACK", "color": "#ff0055", "relation": "RAG Unavailable", "intel": "FALLBACK", "admitted": "Unknown", "notes": "Static fallback - RAG extraction failed.", "timestamp": "STATIC", "cases": 5, "deaths": 2},
+            {"lat": 40.71, "lng": -74.00, "code": "USA", "name": "USA FALLBACK", "color": "#38bdf8", "relation": "RAG Unavailable", "intel": "FALLBACK", "admitted": "Unknown", "notes": "Static fallback - RAG extraction failed.", "timestamp": "STATIC", "cases": 3, "deaths": 1}
+        ]
+        hotspots.extend(fallback_hotspots)
     # Generate nationality data based on current case counts
     nationality_data = _get_auto_nationality_data(state.get("confirmed_cases", 8), state.get("deaths", 3))
     nat_map = {d["code"]: d for d in nationality_data}
@@ -794,19 +1017,159 @@ def _get_dynamic_hotspots(state: dict) -> list:
                 h["cases"] = 0; h["deaths"] = 0
     return hotspots
 
+@st.cache_data(ttl=300, show_spinner=False)  # Cache for 5 minutes
+def _extract_risk_data_from_rag() -> dict:
+    """Extract hantavirus and COVID risk percentages from RAG vectorstore."""
+    try:
+        from vectorstore.store import similarity_search
+        import re
+        import signal
+
+        # Timeout handler
+        def timeout_handler(signum, frame):
+            raise TimeoutError("RAG risk extraction timeout")
+
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(6)
+
+        risk_queries = [
+            "hantavirus risk percentage mortality rate country",
+            "covid coronavirus risk comparison baseline country",
+            "outbreak mortality fatality rate hantavirus vs coronavirus",
+            "risk assessment comparison hantavirus covid country wise"
+        ]
+
+        hanta_risk = {}
+        covid_risk = {}
+        onset_days = {}
+
+        countries = ['ARG', 'ESP', 'ZAF', 'USA', 'GBR', 'CHN', 'ITA', 'BRA', 'IND']
+
+        for query in risk_queries:
+            results = similarity_search(query, k=8)
+
+            for result in results:
+                text = result.get("text", "").lower()
+
+                # Extract hantavirus risk percentages
+                hanta_patterns = [
+                    r'hantavirus.*?(\d+\.?\d*)(?:%|percent).*?(?:mortality|fatality|risk)',
+                    r'(?:mortality|fatality|risk).*?hantavirus.*?(\d+\.?\d*)(?:%|percent)',
+                    r'andes.*?virus.*?(\d+\.?\d*)(?:%|percent).*?(?:fatal|death)'
+                ]
+
+                for pattern in hanta_patterns:
+                    matches = re.findall(pattern, text)
+                    for match in matches:
+                        risk_val = float(match)
+                        if 10 <= risk_val <= 100:  # Reasonable range for mortality %
+                            # Try to associate with a country mentioned in same text
+                            for country_name, code in [
+                                ('argentina', 'ARG'), ('spain', 'ESP'), ('south africa', 'ZAF'),
+                                ('usa', 'USA'), ('united states', 'USA'), ('uk', 'GBR'),
+                                ('united kingdom', 'GBR')
+                            ]:
+                                if country_name in text:
+                                    hanta_risk[code] = risk_val
+                                    break
+
+                # Extract COVID risk percentages
+                covid_patterns = [
+                    r'covid.*?(\d+\.?\d*)(?:%|percent).*?(?:mortality|fatality|risk)',
+                    r'coronavirus.*?(\d+\.?\d*)(?:%|percent).*?(?:mortality|fatality)',
+                    r'(?:mortality|fatality|risk).*?covid.*?(\d+\.?\d*)(?:%|percent)'
+                ]
+
+                for pattern in covid_patterns:
+                    matches = re.findall(pattern, text)
+                    for match in matches:
+                        risk_val = float(match)
+                        if 0.1 <= risk_val <= 20:  # Reasonable range for COVID mortality %
+                            for country_name, code in [
+                                ('china', 'CHN'), ('italy', 'ITA'), ('spain', 'ESP'),
+                                ('usa', 'USA'), ('uk', 'GBR'), ('brazil', 'BRA')
+                            ]:
+                                if country_name in text:
+                                    covid_risk[code] = risk_val
+                                    break
+
+                # Extract outbreak onset information
+                onset_patterns = [
+                    r'(?:day|since|after)\s*(\d+).*?(?:outbreak|first case|onset)',
+                    r'(\d+)\s*days?\s*(?:since|after).*?(?:outbreak|case)'
+                ]
+
+                for pattern in onset_patterns:
+                    matches = re.findall(pattern, text)
+                    for match in matches:
+                        days = int(match)
+                        if 1 <= days <= 100:  # Reasonable outbreak timeline
+                            for country_name, code in [
+                                ('argentina', 'ARG'), ('spain', 'ESP'), ('south africa', 'ZAF')
+                            ]:
+                                if country_name in text:
+                                    onset_days[code] = days
+                                    break
+
+        return {"hanta": hanta_risk, "covid": covid_risk, "onset": onset_days}
+
+    except (TimeoutError, Exception):
+        return {"hanta": {}, "covid": {}, "onset": {}}
+    finally:
+        signal.alarm(0)
+
+
 def _get_dynamic_intensity(day: int) -> dict:
-    phase = min(day / 65.0, 1.0)
-    covid = {
-        "CHN": 99.8, "ITA": min(phase * 82, 100), "ESP": min(phase * 64, 100),
-        "GBR": min(phase * 42, 100), "USA": min(phase * 34, 100),
-        "ARG": min(day * 0.1, 5) if day > 41 else 0.0, 
-        "ZAF": min(day * 0.1, 5) if day > 44 else 0.0, 
-        "EGY": min(day * 0.2, 10) if day > 23 else 0.0,
-        "BRA": min(day * 0.1, 5) if day > 34 else 0.0
-    }
-    hanta = {"ARG": 95.0, "ZAF": min(55.0 + (day * 0.55), 100), "ESP": min(45.0 + (day * 0.65), 100)}
-    onset = {"ARG": 41, "ZAF": 44, "ESP": 10, "GBR": 10, "USA": 1, "ITA": 9, "CHN": 1, "BRA": 34, "IND": 38}
-    return {"hanta": hanta, "covid": covid, "onset": onset}
+    # First try to get risk data from RAG
+    rag_risk = _extract_risk_data_from_rag()
+
+    # If RAG extraction successful, use that data
+    if rag_risk["hanta"] or rag_risk["covid"]:
+        # Fill in missing countries with calculated values
+        hanta = rag_risk["hanta"].copy()
+        covid = rag_risk["covid"].copy()
+        onset = rag_risk["onset"].copy()
+
+        # Calculate dynamic values for countries not found in RAG
+        phase = min(day / 65.0, 1.0)
+
+        # Fill missing hantavirus risks with outbreak progression
+        for code in ['ARG', 'ESP', 'ZAF']:
+            if code not in hanta:
+                if code == 'ARG':
+                    hanta[code] = min(80.0 + (day * 0.3), 95.0)  # Argentina high risk
+                elif code == 'ESP':
+                    hanta[code] = min(20.0 + (day * 0.65), 75.0)  # Spain growing
+                elif code == 'ZAF':
+                    hanta[code] = min(30.0 + (day * 0.55), 85.0)  # South Africa growing
+
+        # Fill missing COVID baselines with historical data
+        for code, base_risk in [('CHN', 3.4), ('ITA', 7.2), ('ESP', 6.8), ('GBR', 2.3), ('USA', 1.8)]:
+            if code not in covid:
+                covid[code] = base_risk
+
+        # Fill missing onset days
+        for code, default_day in [('ARG', 41), ('ZAF', 44), ('ESP', 10)]:
+            if code not in onset:
+                onset[code] = default_day
+
+        return {"hanta": hanta, "covid": covid, "onset": onset}
+
+    else:
+        # Fallback to minimal calculated values if RAG fails
+        phase = min(day / 65.0, 1.0)
+        covid_fallback = {
+            "USA": min(phase * 5, 10), "ESP": min(phase * 8, 15),
+            "ARG": min(day * 0.1, 3), "ZAF": min(day * 0.1, 3)
+        }
+        hanta_fallback = {
+            "ARG": min(60.0 + (day * 0.5), 90.0),
+            "ZAF": min(25.0 + (day * 0.4), 70.0),
+            "ESP": min(15.0 + (day * 0.3), 60.0)
+        }
+        onset_fallback = {"ARG": 41, "ZAF": 44, "ESP": 10}
+
+        return {"hanta": hanta_fallback, "covid": covid_fallback, "onset": onset_fallback}
 
 @st.cache_data(ttl=30, show_spinner=False)
 def _get_map_data() -> dict:
