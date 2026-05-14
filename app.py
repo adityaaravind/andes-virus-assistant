@@ -693,11 +693,8 @@ def main() -> None:
 
         _render_sidebar(st.session_state.citation_cards)
 
-        # Auto-refresh every 10 minutes to trigger data freshness checks
         # Auto-refresh disabled to prevent ingestion loops
         # Background scheduler handles timed ingestion
-        if refresh_count > 0 and "ingestion_check_done" in st.session_state:
-            del st.session_state["ingestion_check_done"]
 
         # ── Mutation Observer for Forced Gauge Jitter ──
         st.markdown(
