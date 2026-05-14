@@ -1233,6 +1233,7 @@ def render_map_panel() -> None:
             _get_map_data.clear()
 
     map_data = _get_map_data()
+    from alerts.persistent_kv import kv_get
     state = map_data["state"]
     intensity = map_data["intensity"]
     hotspots = map_data["hotspots"]

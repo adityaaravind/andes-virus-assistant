@@ -800,15 +800,6 @@ def main() -> None:
         # ── Branding & Header ──
         _render_header()
 
-        # ── Gamification Hero Dashboard ──
-        try:
-            from ui.gamification_dashboard import render_hero_dashboard
-            render_hero_dashboard()
-            st.divider()
-        except ImportError:
-            # Skip gamification hero dashboard if module not available
-            pass
-
         # ── Sidebar Scroll Guide ──
         st.markdown(
             """
