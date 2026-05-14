@@ -75,6 +75,23 @@ def _save_fear_vote(level: int, user_id: str) -> None:
         from alerts.signal_dispatcher import fire_vote_signal
         fire_vote_signal(level, avg_fear, new_count, label)
 
+        # NEW: Trigger gamification for fear index vote
+        try:
+            from alerts.gamification_hooks import hook_fear_index_vote
+            result = hook_fear_index_vote(float(level), user_confidence=0.8)
+
+            if result.get("success"):
+                st.session_state.gamification_result = result
+                # Show achievement notifications if any
+                if result.get("achievements"):
+                    for achievement in result["achievements"]:
+                        st.session_state.new_achievements = st.session_state.get("new_achievements", [])
+                        st.session_state.new_achievements.append(achievement)
+        except Exception as e:
+            # Don't break the voting system if gamification fails
+            import logging
+            logging.error(f"Gamification hook error: {e}")
+
     except Exception as e:
         st.error(f"Persistence error: {str(e)}")
 
@@ -255,15 +272,45 @@ def render_fear_index() -> None:
     if is_locked:
         hours = lockout_sec // 3600
         mins = (lockout_sec % 3600) // 60
-        # If they just voted, show a simpler thank you
+        # If they just voted, show a simpler thank you with gamification results
         if st.session_state.get("just_voted"):
-             st.markdown(
-                """
-                <div style="background:rgba(34,197,94,0.1); border-left:4px solid #22c55e; padding:0.8rem; margin-top:1rem; border-radius:4px;">
-                    <p style="color:#22c55e; font-size:0.75rem; font-weight:900; margin:0;">✓ STATUS UPDATED</p>
-                    <p style="color:#94a3b8; font-size:0.6rem; margin:2px 0 0;">Your feedback has been successfully recorded.</p>
-                </div>
-                """, unsafe_allow_html=True)
+            # Check for gamification result
+            gamification_result = st.session_state.get("gamification_result")
+            if gamification_result and gamification_result.get("success"):
+                impact = gamification_result.get("impact", 0)
+                new_total = gamification_result.get("new_total", 0)
+                rank = gamification_result.get("rank", "civilian").replace("_", " ").title()
+
+                st.markdown(
+                    f"""
+                    <div style="background:linear-gradient(135deg, rgba(34,197,94,0.1), rgba(74,222,128,0.1));
+                               border-left:4px solid #22c55e; padding:1rem; margin-top:1rem; border-radius:8px;">
+                        <p style="color:#22c55e; font-size:0.8rem; font-weight:900; margin:0;">🌿 CRISIS HERO ACTION!</p>
+                        <p style="color:#4ade80; font-size:0.7rem; margin:4px 0 0; font-weight:800;">
+                            +{impact} Lives Protected • Total: {new_total:,} • Rank: {rank}
+                        </p>
+                        <p style="color:#94a3b8; font-size:0.6rem; margin:4px 0 0;">Your vote helps protect communities worldwide.</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                # Show achievements if any
+                achievements = st.session_state.get("new_achievements", [])
+                if achievements:
+                    for achievement in achievements:
+                        st.success(f"🏆 Achievement Unlocked: {achievement}")
+                    st.session_state.new_achievements = []  # Clear after showing
+
+                # Clear the result so it doesn't show again
+                if "gamification_result" in st.session_state:
+                    del st.session_state.gamification_result
+            else:
+                st.markdown(
+                    """
+                    <div style="background:rgba(34,197,94,0.1); border-left:4px solid #22c55e; padding:0.8rem; margin-top:1rem; border-radius:4px;">
+                        <p style="color:#22c55e; font-size:0.75rem; font-weight:900; margin:0;">✓ STATUS UPDATED</p>
+                        <p style="color:#94a3b8; font-size:0.6rem; margin:2px 0 0;">Your feedback has been successfully recorded.</p>
+                    </div>
+                    """, unsafe_allow_html=True)
         else:
             st.markdown(
                 f"""

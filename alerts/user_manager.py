@@ -53,7 +53,8 @@ def create_user(
     display_name: str,
     email: str = "",
     location: str = "",
-    role: str = "public"
+    role: str = "public",
+    avatar: str = "scientist"
 ) -> dict[str, Any]:
     """
     Create a new user profile with validation.
@@ -88,19 +89,29 @@ def create_user(
         "email": email.strip(),
         "location": location.strip(),
         "role": role,
+        "avatar": avatar,
         "created": now,
         "last_active": now,
         "stats": {
+            # Legacy stats (keeping for compatibility)
             "total_shares": 0,
             "fear_votes": 0,
             "streak_days": 0,
             "badges": ["new_tracker"],
-            "predictions": {"correct": 0, "total": 0}
+            "predictions": {"correct": 0, "total": 0},
+            # New gamification stats
+            "lives_protected": 0,
+            "communities_warned": 0,
+            "research_contributions": 0,
+            "prediction_accuracy": 0.0,
+            "max_streak": 0
         },
         "preferences": {
             "email_alerts": bool(email),
-            "leaderboard_visible": True
-        }
+            "leaderboard_visible": True,
+            "use_passkey": False
+        },
+        "game_rank": "civilian"
     }
 
     # Save to database

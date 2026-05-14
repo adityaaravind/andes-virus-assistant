@@ -995,6 +995,10 @@ def _get_dynamic_hotspots(state: dict) -> list:
         if h["code"] == "SHIP":
             h["cases"] = state.get("confirmed_cases", 8); h["deaths"] = state.get("deaths", 3)
         else:
+            # Check if cases already set (e.g. from news extraction)
+            if h.get("cases", 0) > 0:
+                continue
+
             # Check for extracted location data first
             location_match = None
             for location_name, data in location_cases.items():
@@ -1249,7 +1253,7 @@ def render_map_panel() -> None:
             </div>
             <div style="background:rgba(74,222,128,0.1); border:1px solid #4ade8044; padding:1px 8px; border-radius:4px;">
                 <span style="color:#4ade80; font-size:8px; font-weight:900;">LIVE DATA SYNC</span>
-                <br><span style="color:#64748b; font-size:6px;">{datetime.utcnow().strftime('%H:%M UTC')}</span>
+                <br><span style="color:#64748b; font-size:6px;">{kv_get("last_map_update", datetime.utcnow().strftime('%H:%M UTC'))}</span>
             </div>
         </div>
         """, unsafe_allow_html=True
@@ -1396,8 +1400,8 @@ def render_map_panel() -> None:
 
                             // Risk-based marker size and opacity
                             const riskLevel = Math.max(hantaRisk, covidRisk);
-                            const markerSize = Math.max(24, 18 + (riskLevel / 10));
-                            const riskOpacity = Math.max(0.7, 0.5 + (riskLevel / 200));
+                            const markerSize = Math.max(24, 20 + (h.cases || 0) + (riskLevel / 5));
+                            const riskOpacity = Math.max(0.7, 0.5 + (riskLevel / 100));
 
                             const iconHtml = `
                                 <div class="ring-marker ${glowClass}"
@@ -1472,8 +1476,8 @@ def render_map_panel() -> None:
                                 L.polyline([[h.lat, h.lng], shipPos], {
                                     color: h.color,
                                     weight: 1,
-                                    opacity: 0.6,
-                                    dashArray: '4, 6'
+                                    opacity: 0.5,
+                                    dashArray: '1, 8'
                                 }).addTo(map);
                             }
 

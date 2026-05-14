@@ -13,6 +13,13 @@
   --red-alert:    #ef4444;
   --green-ok:     #22c55e;
   --amber:        #f59e0b;
+
+  /* Gamification Color Palette */
+  --hero-green:   #4ade80;
+  --hero-blue:    #3b82f6;
+  --hero-purple:  #a855f7;
+  --hero-gold:    #f59e0b;
+  --hero-red:     #dc2626;
 }
 
 /* ── Global Layout & Reset ── */
@@ -684,4 +691,260 @@ section[data-testid="stSidebar"] button[data-testid="stSidebarCollapseButton"] {
     letter-spacing: 0.05em !important;
     text-align: center !important;
     line-height: 1.2 !important;
+}
+
+/* ── GAMIFICATION STYLES ── */
+
+/* Hero Dashboard Cards */
+.impact-card {
+    background: linear-gradient(135deg, rgba(74,222,128,0.1), rgba(34,197,94,0.1));
+    border: 1px solid rgba(74,222,128,0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.impact-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(74,222,128,0.2);
+    border-color: var(--hero-green);
+}
+
+.hero-counter {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--hero-green);
+    text-shadow: 0 0 20px rgba(74,222,128,0.5);
+    margin-bottom: 0.5rem;
+}
+
+.hero-label {
+    color: var(--hero-green);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.progress-bar {
+    height: 8px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 1rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--hero-green), var(--hero-blue));
+    transition: width 1s ease;
+    box-shadow: 0 0 15px rgba(74,222,128,0.5);
+}
+
+/* Leaderboard Styles */
+.leaderboard-live {
+    background: rgba(15,23,42,0.6);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    backdrop-filter: blur(10px);
+}
+
+.rank-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.rank-item:hover {
+    background: rgba(168,85,247,0.1);
+    border-color: var(--hero-purple);
+}
+
+.rank {
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: var(--hero-gold);
+    min-width: 3rem;
+}
+
+.rank-score {
+    color: var(--hero-green);
+    font-weight: 900;
+    font-size: 1.1rem;
+}
+
+/* Mission Cards */
+.mission-card {
+    background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(251,191,36,0.1));
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.mission-card:hover {
+    border-color: var(--hero-gold);
+    box-shadow: 0 4px 20px rgba(245,158,11,0.2);
+}
+
+.mission-icon {
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.mission-title {
+    color: var(--hero-gold);
+    font-weight: 800;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.mission-description {
+    color: var(--gray-300);
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.mission-reward {
+    color: var(--hero-green);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+/* Achievement Badges */
+.achievement-badge {
+    background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(168,85,247,0.1));
+    border: 1px solid rgba(139,92,246,0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.achievement-badge:hover {
+    transform: scale(1.05);
+    border-color: var(--hero-purple);
+    box-shadow: 0 8px 25px rgba(139,92,246,0.3);
+}
+
+.achievement-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.achievement-name {
+    color: var(--hero-purple);
+    font-weight: 800;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.achievement-description {
+    color: var(--gray-300);
+    font-size: 0.8rem;
+}
+
+/* Rank Progression */
+.rank-progress {
+    background: rgba(0,0,0,0.1);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.rank-progress-bar {
+    background: rgba(0,0,0,0.2);
+    height: 12px;
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 0.5rem 0;
+}
+
+.rank-progress-fill {
+    background: linear-gradient(90deg, var(--hero-green), var(--hero-gold));
+    height: 100%;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 12px rgba(74,222,128,0.5);
+}
+
+/* Global Stats Counter */
+.global-counter {
+    background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(0,180,216,0.1));
+    border: 1px solid rgba(168,85,247,0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.global-counter h3 {
+    color: var(--hero-purple);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.global-stat {
+    color: var(--hero-purple);
+    font-size: 1.5rem;
+    font-weight: 900;
+    margin-bottom: 0.25rem;
+}
+
+.global-label {
+    color: var(--hero-purple);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* Gamification Animations */
+@keyframes pulse-hero {
+    0% { box-shadow: 0 0 0 0 rgba(74,222,128,0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(74,222,128,0); }
+    100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); }
+}
+
+@keyframes glow-hero {
+    0%, 100% { text-shadow: 0 0 20px rgba(74,222,128,0.5); }
+    50% { text-shadow: 0 0 30px rgba(74,222,128,0.8), 0 0 40px rgba(74,222,128,0.4); }
+}
+
+.pulse-hero {
+    animation: pulse-hero 2s infinite;
+}
+
+.glow-hero {
+    animation: glow-hero 3s ease-in-out infinite;
+}
+
+/* Mobile Responsiveness for Gamification */
+@media (max-width: 768px) {
+    .hero-counter {
+        font-size: 2rem;
+    }
+
+    .impact-card {
+        padding: 1rem;
+    }
+
+    .mission-card {
+        padding: 0.8rem;
+    }
+
+    .achievement-badge {
+        padding: 1rem;
+    }
+
+    .rank-item {
+        padding: 0.4rem;
+        font-size: 0.9rem;
+    }
 }

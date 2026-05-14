@@ -1,0 +1,90 @@
+{
+  "timestamp": "2026-05-14T14:55:44.490996",
+  "version": "1.0",
+  "data": {
+    "game_global_stats": {
+      "total_lives_protected": 75,
+      "total_communities_warned": 1,
+      "active_guardians_today": 1,
+      "last_updated": "2026-05-14T14:55:44.489031"
+    },
+    "game_leaderboard": {
+      "test_hero": {
+        "lives_protected": 75,
+        "communities_warned": 1,
+        "last_updated": "2026-05-14T14:55:44.489918"
+      }
+    },
+    "game_user_actions": [
+      {
+        "action_id": "test_hero_2026-05-14T14:55:44.486456",
+        "user_id": "test_hero",
+        "action_type": "fear_index_vote",
+        "action_data": {
+          "vote": 3,
+          "confidence": 0.8,
+          "fear_level": 3.0
+        },
+        "impact": 15,
+        "timestamp": "2026-05-14T14:55:44.486461"
+      },
+      {
+        "action_id": "test_hero_2026-05-14T14:55:44.487969",
+        "user_id": "test_hero",
+        "action_type": "share_update",
+        "action_data": {
+          "content_type": "news",
+          "content_id": "outbreak_alert",
+          "urgency_level": "high"
+        },
+        "impact": 50,
+        "timestamp": "2026-05-14T14:55:44.487973"
+      },
+      {
+        "action_id": "test_hero_2026-05-14T14:55:44.489659",
+        "user_id": "test_hero",
+        "action_type": "daily_check_in",
+        "action_data": {
+          "type": "daily_health_check"
+        },
+        "impact": 10,
+        "timestamp": "2026-05-14T14:55:44.489663"
+      }
+    ],
+    "user_profiles": {
+      "test_hero": {
+        "username": "test_hero",
+        "display_name": "Test Hero",
+        "email": "test@example.com",
+        "location": "USA",
+        "role": "researcher",
+        "avatar": "guardian",
+        "created": "2026-05-14T14:55:44.484646",
+        "last_active": "2026-05-14T14:55:44.489374",
+        "stats": {
+          "total_shares": 0,
+          "fear_votes": 0,
+          "streak_days": 1,
+          "badges": [
+            "new_tracker"
+          ],
+          "predictions": {
+            "correct": 0,
+            "total": 0
+          },
+          "lives_protected": 75,
+          "communities_warned": 1,
+          "research_contributions": 0,
+          "prediction_accuracy": 0.0,
+          "max_streak": 0
+        },
+        "preferences": {
+          "email_alerts": true,
+          "leaderboard_visible": true,
+          "use_passkey": false
+        },
+        "game_rank": "civilian"
+      }
+    }
+  }
+}
