@@ -359,16 +359,20 @@ def _start_scheduler() -> None:
                 coalesce=True,
             )
 
-            # Add Gamification Backup job (every 6 hours)
-            from alerts.gamification_backup import backup_manager
-            scheduler.add_job(
-                backup_manager.auto_backup_scheduler,
-                trigger="interval",
-                hours=6,
-                id="gamification_backup",
-                max_instances=1,
-                coalesce=True,
-            )
+            # Add Gamification Backup job (every 6 hours) - skip if not available
+            try:
+                from alerts.gamification_backup import backup_manager
+                scheduler.add_job(
+                    backup_manager.auto_backup_scheduler,
+                    trigger="interval",
+                    hours=6,
+                    id="gamification_backup",
+                    max_instances=1,
+                    coalesce=True,
+                )
+            except ImportError:
+                # Skip gamification backup if module not available
+                pass
             scheduler.start()
             _SCHEDULER_STARTED = True
             logging.info("Auto-ingestion scheduler started (every %dh)", interval_hours)
@@ -571,38 +575,43 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
         st.divider()
 
         # ── User Registration/Profile Section ──
-        st.markdown(
-            "<h2 style='color:#00b4d8;font-size:1.1rem;margin-bottom:0.5rem;'>"
-            "👤 Tracker Profile</h2>",
-            unsafe_allow_html=True,
-        )
-        from ui.secure_registration import render_enhanced_user_section
-        render_enhanced_user_section()
-        st.divider()
-
-        # ── Gamification Dashboard Section ──
-        from ui.gamification_dashboard import render_mission_board, render_live_leaderboard
-        from ui.secure_registration import get_current_user
-
-        current_user = get_current_user()
-        if current_user:
+        # Note: Registration/gamification features disabled for production deployment
+        try:
             st.markdown(
-                "<h2 style='color:#f59e0b;font-size:1.1rem;margin-bottom:0.5rem;'>"
-                "🎯 Guardian Missions</h2>",
+                "<h2 style='color:#00b4d8;font-size:1.1rem;margin-bottom:0.5rem;'>"
+                "👤 Tracker Profile</h2>",
                 unsafe_allow_html=True,
             )
-            with st.expander("Daily Missions", expanded=False):
-                render_mission_board()
-
-            st.markdown(
-                "<h2 style='color:#dc2626;font-size:1.1rem;margin-bottom:0.5rem;'>"
-                "🏆 Leaderboard</h2>",
-                unsafe_allow_html=True,
-            )
-            with st.expander("Top Guardians", expanded=False):
-                render_live_leaderboard()
-
+            from ui.secure_registration import render_enhanced_user_section
+            render_enhanced_user_section()
             st.divider()
+
+            # ── Gamification Dashboard Section ──
+            from ui.gamification_dashboard import render_mission_board, render_live_leaderboard
+            from ui.secure_registration import get_current_user
+
+            current_user = get_current_user()
+            if current_user:
+                st.markdown(
+                    "<h2 style='color:#f59e0b;font-size:1.1rem;margin-bottom:0.5rem;'>"
+                    "🎯 Guardian Missions</h2>",
+                    unsafe_allow_html=True,
+                )
+                with st.expander("Daily Missions", expanded=False):
+                    render_mission_board()
+
+                st.markdown(
+                    "<h2 style='color:#dc2626;font-size:1.1rem;margin-bottom:0.5rem;'>"
+                    "🏆 Leaderboard</h2>",
+                    unsafe_allow_html=True,
+                )
+                with st.expander("Top Guardians", expanded=False):
+                    render_live_leaderboard()
+
+                st.divider()
+        except ImportError:
+            # Skip registration/gamification features if modules not available
+            pass
 
         st.markdown(
             "<h2 style='color:#00b4d8;font-size:1.1rem;margin-bottom:0.5rem;'>"
@@ -733,9 +742,13 @@ def main() -> None:
         _render_header()
 
         # ── Gamification Hero Dashboard ──
-        from ui.gamification_dashboard import render_hero_dashboard
-        render_hero_dashboard()
-        st.divider()
+        try:
+            from ui.gamification_dashboard import render_hero_dashboard
+            render_hero_dashboard()
+            st.divider()
+        except ImportError:
+            # Skip gamification hero dashboard if module not available
+            pass
 
         # ── Sidebar Scroll Guide ──
         st.markdown(
