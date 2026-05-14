@@ -910,7 +910,20 @@ def render_map_panel() -> None:
                 .leaflet-popup-content-wrapper { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(74, 222, 128, 0.4) !important; border-radius: 12px !important; }
                 .ring-marker { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ffffff; position: relative; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); }
                 .blink-active { animation: marker-blink 1.5s infinite ease-in-out; }
+                .enhanced-glow { animation: enhanced-pulse 2s infinite ease-in-out; }
                 @keyframes marker-blink { 0%, 100% { opacity: 1; box-shadow: 0 0 8px currentColor; } 50% { opacity: 0.6; box-shadow: 0 0 25px currentColor; } }
+                @keyframes enhanced-pulse {
+                    0%, 100% {
+                        opacity: 1;
+                        transform: scale(1);
+                        box-shadow: 0 0 15px currentColor, 0 0 25px rgba(255,255,255,0.3);
+                    }
+                    50% {
+                        opacity: 0.7;
+                        transform: scale(1.1);
+                        box-shadow: 0 0 30px currentColor, 0 0 45px rgba(255,255,255,0.5);
+                    }
+                }
                 .badge { position: absolute; top: -10px; right: -10px; background: #ffffff; color: #000; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center; border: 2px solid #000; }
                 .intel-label { color: #94a3b8; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
             </style>
@@ -946,19 +959,39 @@ def render_map_panel() -> None:
                     ];
 
                     affectedCountries.forEach(country => {
+                        // Get risk data for country
+                        const countryCode = country.name === 'Argentina' ? 'ARG' :
+                                          country.name === 'Spain' ? 'ESP' :
+                                          country.name === 'South Africa' ? 'ZAF' :
+                                          country.name === 'USA' ? 'USA' :
+                                          country.name === 'UK' ? 'GBR' : '';
+
+                        const hantaRisk = intensity.hanta[countryCode] || 0;
+                        const covidRisk = intensity.covid[countryCode] || 0;
+
+                        // Risk-based opacity and border intensity
+                        const maxRisk = Math.max(hantaRisk, covidRisk);
+                        const riskOpacity = Math.max(0.1, 0.05 + (maxRisk / 200));
+                        const borderOpacity = Math.max(0.3, 0.2 + (maxRisk / 100));
+
                         const countryRect = L.rectangle(country.bounds, {
                             fillColor: country.color,
-                            fillOpacity: 0.1,
+                            fillOpacity: riskOpacity,
                             color: country.color,
-                            weight: 1,
-                            opacity: 0.3
+                            weight: hantaRisk > covidRisk ? 2 : 1,
+                            opacity: borderOpacity
                         }).addTo(map);
 
-                        // Add hover tooltip for countries
+                        // Enhanced hover tooltip with risk info for countries
+                        const riskInfo = hantaRisk > 0 || covidRisk > 0 ? `<br>
+                            <span style="color:#f87171;">🦠 Hantavirus: ${hantaRisk.toFixed(1)}%</span><br>
+                            <span style="color:#60a5fa;">😷 COVID baseline: ${covidRisk.toFixed(1)}%</span>
+                        ` : '';
+
                         const countryTooltip = `
                             <div style="font-size:11px;line-height:1.3;">
-                                <b style="color:${country.color};">🌍 ${country.name.toUpperCase()}</b><br>
-                                <span style="color:#94a3b8;">Affected region - Click markers for details</span>
+                                <b style="color:${country.color};">🌍 ${country.name.toUpperCase()}</b>${riskInfo}<br>
+                                <span style="color:#94a3b8;">Click markers for detailed outbreak info</span>
                             </div>
                         `;
                         countryRect.bindTooltip(countryTooltip, {
@@ -976,25 +1009,74 @@ def render_map_panel() -> None:
                     hotspots.forEach(h => {
                         try {
                             const isShip = h.code === 'SHIP';
-                            const iconHtml = `<div class="ring-marker blink-active" style="border-color:${h.color}; color:${h.color};"><div class="badge">${h.cases}</div></div>`;
+
+                            // Get risk data for this location
+                            const hantaRisk = intensity.hanta[h.code] || 0;
+                            const covidRisk = intensity.covid[h.code] || 0;
+                            const fearIndex = h.fear || 0;
+
+                            // Enhanced glow effects based on intensity
+                            let glowClass = 'blink-active';
+                            let glowStyles = '';
+
+                            if (h.glow) {
+                                const glowIntensity = h.glowIntensity || 1.0;
+                                const pulseSpeed = h.pulseSpeed || 1.0;
+                                glowClass = 'enhanced-glow';
+                                glowStyles = `
+                                    animation: enhanced-pulse ${2/pulseSpeed}s infinite ease-in-out;
+                                    box-shadow: 0 0 ${15 * glowIntensity}px ${h.color},
+                                               0 0 ${25 * glowIntensity}px ${h.color}40;
+                                `;
+                            }
+
+                            // Risk-based marker size and opacity
+                            const riskLevel = Math.max(hantaRisk, covidRisk);
+                            const markerSize = Math.max(24, 18 + (riskLevel / 10));
+                            const riskOpacity = Math.max(0.7, 0.5 + (riskLevel / 200));
+
+                            const iconHtml = `
+                                <div class="ring-marker ${glowClass}"
+                                     style="border-color:${h.color};
+                                            color:${h.color};
+                                            width:${markerSize}px;
+                                            height:${markerSize}px;
+                                            opacity:${riskOpacity};
+                                            ${glowStyles}">
+                                    <div class="badge">${h.cases}</div>
+                                </div>
+                            `;
 
                             const icon = L.divIcon({
                                 className: '',
                                 html: iconHtml,
-                                iconSize: [24, 24],
-                                iconAnchor: [12, 12]
+                                iconSize: [markerSize, markerSize],
+                                iconAnchor: [markerSize/2, markerSize/2]
                             });
 
                             const marker = L.marker([h.lat, h.lng], { icon: icon }).addTo(map);
 
+                            // Enhanced popup with risk information
+                            const riskComparison = hantaRisk > 0 || covidRisk > 0 ? `
+                                <div style="margin:8px 0; padding:8px; background:rgba(0,0,0,0.3); border-radius:4px;">
+                                    <div style="font-size:10px; font-weight:bold; color:#94a3b8;">RISK ANALYSIS</div>
+                                    <div style="font-size:11px;">
+                                        <span style="color:#f87171;">🦠 Hantavirus Risk: ${hantaRisk.toFixed(1)}%</span><br>
+                                        <span style="color:#60a5fa;">😷 COVID Baseline: ${covidRisk.toFixed(1)}%</span><br>
+                                        <span style="color:#fbbf24;">😰 Fear Index: ${fearIndex.toFixed(1)}</span>
+                                    </div>
+                                </div>
+                            ` : '';
+
                             const popupHtml = `
-                                <div style="padding:15px; min-width:200px;">
+                                <div style="padding:15px; min-width:220px;">
                                     <b style="color:${h.color};">📡 ${h.name}</b><br>
                                     <div style="margin:8px 0;">
-                                        <strong>Cases:</strong> ${h.cases}<br>
+                                        <strong>Cases:</strong> ${h.cases} | <strong>Deaths:</strong> ${h.deaths || 0}<br>
                                         <strong>Status:</strong> ${h.relation}<br>
                                         <strong>Location:</strong> ${h.lat}, ${h.lng}
                                     </div>
+                                    ${riskComparison}
                                     <div style="font-size:11px; color:#94a3b8;">
                                         ${h.notes}
                                     </div>
@@ -1002,11 +1084,16 @@ def render_map_panel() -> None:
                             `;
                             marker.bindPopup(popupHtml);
 
-                            // Add hover tooltip
+                            // Enhanced hover tooltip with risk info
+                            const riskIndicator = hantaRisk > covidRisk ?
+                                `🦠 ${hantaRisk.toFixed(1)}% risk` :
+                                covidRisk > 0 ? `😷 ${covidRisk.toFixed(1)}% baseline` : '';
+
                             const tooltipHtml = `
                                 <div style="font-size:11px;line-height:1.3;">
                                     <b style="color:${h.color};">${h.name}</b><br>
                                     <strong>Cases:</strong> ${h.cases} | <strong>Status:</strong> ${h.relation}<br>
+                                    ${riskIndicator ? `<span style="color:#fbbf24;">${riskIndicator}</span><br>` : ''}
                                     <span style="color:#94a3b8;">${h.timestamp}</span>
                                 </div>
                             `;
