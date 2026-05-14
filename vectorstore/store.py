@@ -20,7 +20,7 @@ if _use_qdrant:
     from vectorstore.qdrant_store import (   # noqa: F401
         add_documents,
         upsert_chunks,
-        similarity_search,
+        similarity_search as _similarity_search,
         recommend_similar_chunks,
         get_stats,
         get_existing_ids,
@@ -29,10 +29,22 @@ if _use_qdrant:
 else:
     from vectorstore.chroma_store import (   # noqa: F401
         add_documents,
-        similarity_search,
+        similarity_search as _similarity_search,
         get_stats,
         get_existing_ids,
         _chunk_id,
     )
     upsert_chunks = add_documents            # noqa: F811
     def recommend_similar_chunks(*args, **kwargs): return []
+
+
+def similarity_search(query, k: int = 6, **kwargs):
+    """Search with text query (auto-generates embeddings) or embedding vector."""
+    if isinstance(query, str):
+        # Generate embedding from text query
+        from rag.retriever import _embed_query
+        query_embedding = _embed_query(query)
+        return _similarity_search(query_embedding, k=k, **kwargs)
+    else:
+        # Assume it's already an embedding
+        return _similarity_search(query, k=k, **kwargs)

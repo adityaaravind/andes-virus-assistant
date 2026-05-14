@@ -170,9 +170,10 @@ def similarity_search(
         return []
 
     try:
-        results = client.search(
+        results = client.query_points(
             collection_name=COLLECTION_NAME,
-            query_vector=(vector_name, query_embedding),
+            query=query_embedding,
+            using=vector_name,  # Specify which vector field to use
             limit=min(k, count),
             query_filter=qdrant_filter,
             with_payload=True,

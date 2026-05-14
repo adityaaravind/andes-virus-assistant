@@ -471,6 +471,9 @@ def _get_dynamic_hotspots(state: dict) -> list:
     nationality_data = _get_auto_nationality_data(state.get("confirmed_cases", 8), state.get("deaths", 3))
     nat_map = {d["code"]: d for d in nationality_data}
 
+    # Initialize location_cases for legacy compatibility
+    location_cases = {}
+
     # Load dynamic hotspots from news content
     try:
         from ui.news_location_extractor import get_dynamic_map_hotspots
