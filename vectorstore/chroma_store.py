@@ -57,6 +57,12 @@ def add_documents(chunks: list[dict[str, Any]]) -> int:
         return 0
 
     ids = [_chunk_id(c) for c in new_chunks]
+    
+    # Ensure embeddings exist for all chunks
+    if any("embedding" not in c for c in new_chunks):
+        from processing.embedder import embed_chunks
+        new_chunks = embed_chunks(new_chunks)
+        
     embeddings = [c["embedding"] for c in new_chunks]
     documents = [c["text"] for c in new_chunks]
     metadatas = [_build_metadata(c) for c in new_chunks]

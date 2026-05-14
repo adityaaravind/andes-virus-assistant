@@ -89,8 +89,15 @@ def _run_fast_news_poll() -> None:
 
         try:
             from vectorstore.store import add_documents
-            add_documents(chunks)
-        except Exception:
+            from processing.metadata_tagger import tag_chunks
+            from processing.embedder import embed_chunks
+
+            if chunks:
+                tagged = tag_chunks(chunks)
+                embedded = embed_chunks(tagged)
+                add_documents(embedded)
+        except Exception as e:
+            logging.error(f"Failed to add documents to vector store: {e}")
             pass  # Skip if vector store fails
 
         try:
