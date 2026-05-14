@@ -1275,6 +1275,23 @@ def render_map_panel() -> None:
                 html, body { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; font-family: sans-serif; }
                 #map { width: 100%; height: 100%; background: #050505; border-radius: 12px; }
                 #status { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: #4ade80; padding: 8px; border-radius: 4px; z-index: 1000; font-size: 12px; max-width: 300px; }
+
+                /* Mobile responsiveness */
+                @media (max-width: 768px) {
+                    #status { font-size: 10px; padding: 6px; max-width: 200px; top: 5px; left: 5px; }
+                    .leaflet-popup-content-wrapper { max-width: 250px !important; }
+                    .leaflet-tooltip { font-size: 10px !important; max-width: 180px !important; }
+                    .ring-marker { width: 20px !important; height: 20px !important; }
+                    .badge { width: 14px !important; height: 14px !important; font-size: 8px !important; }
+                }
+
+                /* Better touch targets for mobile */
+                .leaflet-control-zoom a { width: 36px; height: 36px; line-height: 36px; }
+
+                /* Reduced motion for better performance */
+                @media (prefers-reduced-motion: reduce) {
+                    .blink-active, .enhanced-glow { animation: none !important; }
+                }
                 .leaflet-tooltip { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(74, 222, 128, 0.4) !important; border-radius: 8px !important; padding: 15px !important; z-index: 1000; }
                 .leaflet-popup-content-wrapper { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(74, 222, 128, 0.4) !important; border-radius: 12px !important; }
                 .ring-marker { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ffffff; position: relative; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); }
@@ -1299,24 +1316,149 @@ def render_map_panel() -> None:
         </head>
         <body>
             <div id="status">🗺️ Loading map...</div>
-            <div id="map"></div>
+            <div id="map">
+                <!-- Loading skeleton -->
+                <div id="loading-skeleton" style="display:flex;align-items:center;justify-content:center;height:100%;background:#050505;color:#4ade80;text-align:center;">
+                    <div>
+                        <div style="font-size:28px;margin-bottom:15px;animation:pulse 2s infinite;">🌍</div>
+                        <div style="font-size:16px;margin-bottom:10px;">Initializing Outbreak Map</div>
+                        <div style="font-size:12px;color:#64748b;">Loading ${__HOTSPOTS__.length} hotspots...</div>
+                        <div style="margin-top:20px;">
+                            <div style="width:200px;height:4px;background:#1a1a1a;border-radius:2px;margin:0 auto;overflow:hidden;">
+                                <div style="width:100%;height:100%;background:linear-gradient(90deg,#4ade80,#22c55e);animation:loading-bar 2s infinite;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <style>
+                @keyframes pulse {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0.5; }
+                }
+                @keyframes loading-bar {
+                    0% { transform: translateX(-100%); }
+                    100% { transform: translateX(100%); }
+                }
+            </style>
             <script>
                 const status = document.getElementById('status');
 
                 try {
+                    // Hide loading skeleton
+                    const skeleton = document.getElementById('loading-skeleton');
+                    if (skeleton) skeleton.style.display = 'none';
+
                     status.innerHTML = '🗺️ Initializing map...';
-                    const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([15, -25], 2.8);
+                    const map = L.map('map', {
+                        zoomControl: false,
+                        attributionControl: false,
+                        minZoom: 2,
+                        maxZoom: 12,
+                        worldCopyJump: true
+                    }).setView([15, -25], 2.8);
+
+                    // Add better zoom controls
+                    L.control.zoom({
+                        position: 'bottomright',
+                        zoomInTitle: 'Zoom in to see outbreak details',
+                        zoomOutTitle: 'Zoom out for global view'
+                    }).addTo(map);
+
+                    // Quick navigation buttons
+                    const quickNav = L.control({ position: 'topright' });
+                    quickNav.onAdd = function() {
+                        const div = L.DomUtil.create('div', 'quick-nav');
+                        div.innerHTML = `
+                            <button onclick="map.setView([15, -25], 2.8)" title="Global View"
+                                    style="background:#1a1a1a;color:#4ade80;border:1px solid #4ade80;padding:6px;margin:2px;border-radius:4px;cursor:pointer;">🌍</button>
+                            <button onclick="map.setView([${shipPos[0]}, ${shipPos[1]}], 6)" title="Focus on Ship"
+                                    style="background:#1a1a1a;color:#ff6b6b;border:1px solid #ff6b6b;padding:6px;margin:2px;border-radius:4px;cursor:pointer;">🚢</button>
+                        `;
+                        return div;
+                    };
+                    quickNav.addTo(map);
 
                     status.innerHTML = '🌍 Loading world tiles...';
-                    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                        maxZoom: 19,
-                        errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
-                    }).addTo(map);
+                    // Multiple tile layer fallbacks for reliability
+                    const tileLayers = [
+                        'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+                        'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
+                        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+                    ];
+
+                    let layerLoaded = false;
+                    tileLayers.forEach((url, index) => {
+                        if (!layerLoaded) {
+                            try {
+                                const layer = L.tileLayer(url, {
+                                    maxZoom: 19,
+                                    errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
+                                });
+                                layer.addTo(map);
+                                layerLoaded = true;
+                            } catch(e) {
+                                console.warn(`Tile layer ${index} failed:`, e);
+                            }
+                        }
+                    });
 
                     const hotspots = __HOTSPOTS__;
                     const intensity = __INTENSITY__;
 
                     status.innerHTML = `📍 Loading ${hotspots.length} outbreak markers...`;
+
+                    // Clustering function to group nearby markers
+                    function clusterNearbyHotspots(spots, threshold) {
+                        if (spots.length <= 1) return spots;
+
+                        const clustered = [];
+                        const processed = new Set();
+
+                        spots.forEach((spot, i) => {
+                            if (processed.has(i)) return;
+
+                            const cluster = [spot];
+                            const clusterCases = spot.cases || 0;
+                            let clusterDeaths = spot.deaths || 0;
+
+                            // Find nearby spots to cluster
+                            spots.forEach((other, j) => {
+                                if (i !== j && !processed.has(j)) {
+                                    const distance = Math.sqrt(
+                                        Math.pow(spot.lat - other.lat, 2) +
+                                        Math.pow(spot.lng - other.lng, 2)
+                                    );
+
+                                    if (distance < threshold && spot.code === other.code) {
+                                        cluster.push(other);
+                                        clusterCases += (other.cases || 0);
+                                        clusterDeaths += (other.deaths || 0);
+                                        processed.add(j);
+                                    }
+                                }
+                            });
+
+                            // Create clustered hotspot
+                            if (cluster.length > 1) {
+                                clustered.push({
+                                    ...spot,
+                                    name: `${spot.code} CLUSTER (${cluster.length} sites)`,
+                                    cases: clusterCases,
+                                    deaths: clusterDeaths,
+                                    notes: `Cluster of ${cluster.length} nearby outbreak sites. Combined data: ${clusterCases} cases, ${clusterDeaths} deaths.`,
+                                    clustered: true,
+                                    clusterSize: cluster.length
+                                });
+                            } else {
+                                clustered.push(spot);
+                            }
+
+                            processed.add(i);
+                        });
+
+                        return clustered;
+                    }
 
                     // Add basic country borders without complex GeoJSON
                     const affectedCountries = [
@@ -1373,9 +1515,12 @@ def render_map_panel() -> None:
                     const shipHotspot = hotspots.find(h => h.code === 'SHIP');
                     const shipPos = shipHotspot ? [shipHotspot.lat, shipHotspot.lng] : [15, -25];
 
+                    // Smart clustering: group nearby markers to reduce visual clutter
+                    const clusteredHotspots = clusterNearbyHotspots(hotspots, 1.0); // 1 degree clustering
+
                     // Add hotspot markers
                     let markerCount = 0;
-                    hotspots.forEach(h => {
+                    clusteredHotspots.forEach(h => {
                         try {
                             const isShip = h.code === 'SHIP';
 
@@ -1488,9 +1633,31 @@ def render_map_panel() -> None:
                         }
                     });
 
-                    status.innerHTML = `✅ Map loaded: ${markerCount} markers active`;
+                    // Add real-time data freshness indicator
+                    const dataAge = Math.floor((Date.now() - new Date(__TIMESTAMP__).getTime()) / 1000);
+                    const freshnessColor = dataAge < 60 ? '#4ade80' : dataAge < 300 ? '#f59e0b' : '#ef4444';
+                    const freshnessText = dataAge < 60 ? 'LIVE' : dataAge < 300 ? `${Math.floor(dataAge/60)}m old` : 'STALE';
+
+                    status.innerHTML = `
+                        ✅ Map loaded: ${markerCount} markers active<br>
+                        <span style="color:${freshnessColor};font-size:10px;">📡 Data: ${freshnessText}</span>
+                    `;
+
+                    // Auto-refresh data indicator every 30 seconds
+                    setInterval(() => {
+                        const currentAge = Math.floor((Date.now() - new Date(__TIMESTAMP__).getTime()) / 1000);
+                        const color = currentAge < 60 ? '#4ade80' : currentAge < 300 ? '#f59e0b' : '#ef4444';
+                        const text = currentAge < 60 ? 'LIVE' : currentAge < 300 ? `${Math.floor(currentAge/60)}m old` : 'STALE';
+
+                        const indicator = status.querySelector('span');
+                        if (indicator) {
+                            indicator.style.color = color;
+                            indicator.innerHTML = `📡 Data: ${text}`;
+                        }
+                    }, 30000);
+
                     setTimeout(() => {
-                        status.style.opacity = '0.7';
+                        status.style.opacity = '0.8';
                         status.style.fontSize = '10px';
                     }, 3000);
 
@@ -1499,18 +1666,37 @@ def render_map_panel() -> None:
                     status.style.background = 'rgba(239,68,68,0.8)';
                     console.error('Map initialization error:', error);
 
-                    // Fallback: show basic info
-                    document.getElementById('map').innerHTML = `
-                        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:white;text-align:center;">
-                            <div>
-                                <div style="font-size:24px;margin-bottom:10px;">🗺️</div>
-                                <div>Map temporarily unavailable</div>
-                                <div style="font-size:12px;color:#888;margin-top:10px;">
-                                    ${__HOTSPOTS__.length} outbreak locations being tracked
+                    // Enhanced fallback with interactive hotspot list
+                    const fallbackHtml = `
+                        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:white;text-align:center;padding:20px;box-sizing:border-box;">
+                            <div style="max-width:400px;">
+                                <div style="font-size:32px;margin-bottom:15px;">🗺️</div>
+                                <div style="font-size:18px;margin-bottom:10px;">Map temporarily unavailable</div>
+                                <div style="font-size:14px;color:#94a3b8;margin-bottom:20px;">
+                                    Tracking ${__HOTSPOTS__.length} outbreak locations
+                                </div>
+                                <div style="text-align:left;max-height:200px;overflow-y:auto;background:rgba(0,0,0,0.3);padding:15px;border-radius:8px;">
+                                    ${__HOTSPOTS__.slice(0, 6).map(h => `
+                                        <div style="margin:8px 0;padding:8px;background:rgba(255,255,255,0.05);border-radius:4px;border-left:3px solid ${h.color};">
+                                            <strong style="color:${h.color};">${h.name}</strong><br>
+                                            <span style="font-size:12px;color:#94a3b8;">
+                                                📍 ${h.lat.toFixed(2)}, ${h.lng.toFixed(2)} •
+                                                🦠 ${h.cases} cases •
+                                                ${h.relation || 'Outbreak location'}
+                                            </span>
+                                        </div>
+                                    `).join('')}
+                                    ${__HOTSPOTS__.length > 6 ? `<div style="text-align:center;color:#64748b;font-size:12px;margin-top:10px;">...and ${__HOTSPOTS__.length - 6} more locations</div>` : ''}
+                                </div>
+                                <div style="margin-top:15px;">
+                                    <button onclick="location.reload()" style="background:#4ade80;color:#000;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;">
+                                        🔄 Retry Map Load
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     `;
+                    document.getElementById('map').innerHTML = fallbackHtml;
                 }
             </script>
         </body>
@@ -1519,6 +1705,7 @@ def render_map_panel() -> None:
     map_html = map_template.replace("__HOTSPOTS__", json.dumps(hotspots))
     map_html = map_html.replace("__INTENSITY__", json.dumps(intensity))
     map_html = map_html.replace("__DAY__", str(current_day))
+    map_html = map_html.replace("__TIMESTAMP__", datetime.utcnow().isoformat())
 
     # Force component refresh by embedding unique data in HTML comment
     try:
