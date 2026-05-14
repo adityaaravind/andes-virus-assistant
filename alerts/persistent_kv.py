@@ -13,6 +13,10 @@ _VECTOR_DIM = 4  # stub — Qdrant requires vectors; we only use payload
 _CACHED_CLIENT = None
 _CHECKED_COLLECTIONS = set()
 
+def _hash_id(key: str) -> int:
+    """Convert key to 63-bit integer for Qdrant point ID."""
+    return int(hashlib.md5(key.encode()).hexdigest(), 16) % (2**63)
+
 def _client():
     global _CACHED_CLIENT
     try:

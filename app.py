@@ -455,16 +455,25 @@ def _check_vectorstore() -> bool:
 
 def _check_and_refresh_data() -> None:
     """Check if data is stale and handle auto-rerun on map updates."""
-    # Check for background map updates
+    # Check for background map updates with cooldown
     try:
         from alerts.persistent_kv import kv_get
+        import time
+
         last_map_update = kv_get("last_map_update")
         if last_map_update:
             if "last_seen_map_update" not in st.session_state:
                 st.session_state.last_seen_map_update = last_map_update
             elif st.session_state.last_seen_map_update != last_map_update:
-                st.session_state.last_seen_map_update = last_map_update
-                st.rerun()
+                # Add 5-second cooldown to prevent excessive reruns
+                now = time.time()
+                if "last_map_rerun" not in st.session_state:
+                    st.session_state.last_map_rerun = 0
+
+                if now - st.session_state.last_map_rerun > 5:
+                    st.session_state.last_seen_map_update = last_map_update
+                    st.session_state.last_map_rerun = now
+                    st.rerun()
     except:
         pass
 
@@ -553,10 +562,9 @@ def _render_ingestion_countdown_timer() -> None:
                 unsafe_allow_html=True,
             )
 
-            # Auto-refresh every 30 seconds when timer is active (less aggressive)
+            # Update timer display every 30 seconds (no rerun to prevent loops)
             if current_time - st.session_state.last_timer_update > 30:
                 st.session_state.last_timer_update = current_time
-                st.rerun()
 
     except Exception as e:
         # Fallback display if timer fails
@@ -686,10 +694,8 @@ def main() -> None:
         _render_sidebar(st.session_state.citation_cards)
 
         # Auto-refresh every 10 minutes to trigger data freshness checks
-        from streamlit_autorefresh import st_autorefresh
-        refresh_count = st_autorefresh(interval=10 * 60 * 1000, key="data_refresh_trigger")
-
-        # Clear ingestion check flag on auto-refresh to allow re-checking
+        # Auto-refresh disabled to prevent ingestion loops
+        # Background scheduler handles timed ingestion
         if refresh_count > 0 and "ingestion_check_done" in st.session_state:
             del st.session_state["ingestion_check_done"]
 

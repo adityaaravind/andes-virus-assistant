@@ -4,7 +4,8 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timedelta
 from typing import Any
-from alerts.persist_helper import bg_kv_set, get_persisted_value
+from alerts.persist_helper import get_persisted_value
+from alerts.persistent_kv import kv_set
 
 SENTIMENT_HISTORY_KEY = "community_sentiment_history"
 INSIGHTS_FEED_KEY = "community_insights_feed"
@@ -33,7 +34,7 @@ def log_sentiment_snapshot(user_score: float, web_score: float) -> None:
     
     # Keep rolling window
     history = history[-MAX_HISTORY_POINTS:]
-    bg_kv_set(SENTIMENT_HISTORY_KEY, history)
+    kv_set(SENTIMENT_HISTORY_KEY, history)
 
 def add_insight(insight_type: str, content: str, user_id: str = "anon") -> None:
     """Add a new community insight/activity to the live feed."""
@@ -48,7 +49,7 @@ def add_insight(insight_type: str, content: str, user_id: str = "anon") -> None:
     
     # Keep rolling window
     feed = feed[:MAX_FEED_ITEMS]
-    bg_kv_set(INSIGHTS_FEED_KEY, feed)
+    kv_set(INSIGHTS_FEED_KEY, feed)
 
 def get_community_data() -> dict[str, Any]:
     """Retrieve all Phase 2 data for UI rendering with fallback defaults."""
