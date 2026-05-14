@@ -946,13 +946,25 @@ def render_map_panel() -> None:
                     ];
 
                     affectedCountries.forEach(country => {
-                        L.rectangle(country.bounds, {
+                        const countryRect = L.rectangle(country.bounds, {
                             fillColor: country.color,
                             fillOpacity: 0.1,
                             color: country.color,
                             weight: 1,
                             opacity: 0.3
                         }).addTo(map);
+
+                        // Add hover tooltip for countries
+                        const countryTooltip = `
+                            <div style="font-size:11px;line-height:1.3;">
+                                <b style="color:${country.color};">🌍 ${country.name.toUpperCase()}</b><br>
+                                <span style="color:#94a3b8;">Affected region - Click markers for details</span>
+                            </div>
+                        `;
+                        countryRect.bindTooltip(countryTooltip, {
+                            permanent: false,
+                            direction: 'center'
+                        });
                     });
 
                     // Find ship position
@@ -989,6 +1001,20 @@ def render_map_panel() -> None:
                                 </div>
                             `;
                             marker.bindPopup(popupHtml);
+
+                            // Add hover tooltip
+                            const tooltipHtml = `
+                                <div style="font-size:11px;line-height:1.3;">
+                                    <b style="color:${h.color};">${h.name}</b><br>
+                                    <strong>Cases:</strong> ${h.cases} | <strong>Status:</strong> ${h.relation}<br>
+                                    <span style="color:#94a3b8;">${h.timestamp}</span>
+                                </div>
+                            `;
+                            marker.bindTooltip(tooltipHtml, {
+                                permanent: false,
+                                direction: 'top',
+                                offset: [0, -10]
+                            });
 
                             // Connection line to ship
                             if (!isShip) {
