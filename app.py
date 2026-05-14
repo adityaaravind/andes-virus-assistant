@@ -142,35 +142,6 @@ def _run_fast_news_poll() -> None:
         except Exception:
             pass  # Don't break news polling if map update fails
 
-        # NEW: Award community bonuses for active users during news updates
-        try:
-            from alerts.gamification_hooks import trigger_community_bonus, auto_award_engagement_points
-            if chunks and len(chunks) > 5:  # Significant news update
-                trigger_community_bonus("outbreak_update", impact_multiplier=1.0)
-            auto_award_engagement_points()
-        except Exception:
-            pass  # Don't break news polling if gamification fails
-
-
-        # HOPE GARDEN: Analyze news sentiment and update garden state
-        try:
-            from game.sentiment_analyzer import sentiment_analyzer
-            from game.garden_state import garden_state
-
-            if chunks:
-                # Analyze sentiment of news chunks
-                sentiment_data = sentiment_analyzer.analyze_news_batch(chunks)
-
-                # Update garden state based on sentiment
-                garden_state.update_from_sentiment(sentiment_data)
-
-                logging.info(f"Hope Garden updated: {sentiment_data['sentiment_type']} sentiment from {len(chunks)} news chunks")
-
-        except Exception as e:
-            logging.warning(f"Hope Garden update failed: {e}")
-            pass  # Don't break news polling if garden update fails
-
-
         # Backup streamlit-analytics2 to Qdrant & Check size
         try:
             import json
@@ -881,23 +852,6 @@ def main() -> None:
         st.markdown("<div id='fear'></div>", unsafe_allow_html=True)
         from ui.fear_index import render_fear_index
         render_fear_index()
-        st.divider()
-
-        # ── 2.5. HOPE GARDEN (COMMUNITY HEALING) ─────────────────────────────────
-        st.markdown("<div id='hope_garden'></div>", unsafe_allow_html=True)
-        from ui.hope_garden import render_hope_garden_card, render_garden_debug_info
-        render_hope_garden_card()
-
-        # Debug info for development
-        if st.session_state.get("debug_mode", False):
-            render_garden_debug_info()
-
-        st.divider()
-
-        # ── 2.6. GAMIFICATION DASHBOARD ─────────────────────────────────────────
-        st.markdown("<div id='gamification'></div>", unsafe_allow_html=True)
-        from ui.gamification_dashboard import render_gamification_dashboard
-        render_gamification_dashboard()
         st.divider()
 
         # ── 3. CHANCE OF SPREAD MONITOR (DETECTION BASELINE) ────────────────────────
