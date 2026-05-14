@@ -42,12 +42,22 @@ def _get_auto_nationality_data(total_cases: int, total_deaths: int) -> list:
     return base_data
 
 
+@st.cache_data(ttl=300, show_spinner=False)  # Cache for 5 minutes
 def _extract_countries_from_rag() -> list:
     """Extract country-specific case data from RAG vectorstore."""
     try:
         from vectorstore.store import similarity_search
         from ui.news_location_extractor import LOCATION_PATTERNS
         import re
+        import signal
+
+        # Timeout handler
+        def timeout_handler(signum, frame):
+            raise TimeoutError("RAG country extraction timeout")
+
+        # Set 6-second timeout for RAG operations
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(6)
 
         # Search for country-specific case reports
         country_queries = [
@@ -111,8 +121,11 @@ def _extract_countries_from_rag() -> list:
 
         return country_list
 
-    except Exception:
+    except (TimeoutError, Exception):
         return []  # Return empty list to trigger fallback
+    finally:
+        # Clear timeout alarm
+        signal.alarm(0)
 
 # Legacy constant for backward compatibility
 NATIONALITIES_DATA = _get_auto_nationality_data(8, 3)
@@ -510,11 +523,21 @@ def _get_ship_position() -> tuple[float, float]:
     return round(final_lat, 4), round(final_lng, 4)
 
 
+@st.cache_data(ttl=300, show_spinner=False)  # Cache for 5 minutes
 def _extract_ship_position_from_rag() -> tuple[float, float] | None:
     """Extract ship coordinates from news reports using RAG."""
     try:
         from vectorstore.store import similarity_search
         import re
+        import signal
+
+        # Timeout handler
+        def timeout_handler(signum, frame):
+            raise TimeoutError("RAG ship position extraction timeout")
+
+        # Set 6-second timeout for RAG operations
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(6)
 
         # Search for ship location reports
         position_queries = [
@@ -571,14 +594,27 @@ def _extract_ship_position_from_rag() -> tuple[float, float] | None:
 
         return None
 
-    except Exception:
+    except (TimeoutError, Exception):
         return None
+    finally:
+        # Clear timeout alarm
+        signal.alarm(0)
 
 
+@st.cache_data(ttl=300, show_spinner=False)  # Cache for 5 minutes
 def _extract_ship_status_from_rag() -> str | None:
     """Extract ship status from news reports using RAG."""
     try:
         from vectorstore.store import similarity_search
+        import signal
+
+        # Timeout handler
+        def timeout_handler(signum, frame):
+            raise TimeoutError("RAG ship status extraction timeout")
+
+        # Set 6-second timeout for RAG operations
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(6)
 
         # Search for ship status reports
         status_queries = [
@@ -613,8 +649,11 @@ def _extract_ship_status_from_rag() -> str | None:
 
         return None
 
-    except Exception:
+    except (TimeoutError, Exception):
         return None
+    finally:
+        # Clear timeout alarm
+        signal.alarm(0)
 
 
 def _get_dynamic_ship_status() -> str:

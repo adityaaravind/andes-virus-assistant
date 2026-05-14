@@ -186,12 +186,14 @@ def get_outbreak_stats() -> dict[str, Any]:
     return stats
 
 
+@st.cache_data(ttl=300, show_spinner=False)  # Cache for 5 minutes
 def _extract_stats_from_rag() -> dict[str, Any]:
     """Extract outbreak statistics from RAG vectorstore using similarity search."""
     try:
         from vectorstore.store import similarity_search
         import re
         from datetime import datetime
+        import signal
 
         # Initialize with fallback values
         stats = {
@@ -203,6 +205,14 @@ def _extract_stats_from_rag() -> dict[str, Any]:
             "last_updated": datetime.now().strftime("%Y-%m-%d"),
             "case_fatality_rate": 37.5,
         }
+
+        # Timeout handler
+        def timeout_handler(signum, frame):
+            raise TimeoutError("RAG extraction timeout")
+
+        # Set 8-second timeout for RAG operations
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(8)
 
         # Query for latest case numbers
         case_queries = [
@@ -284,10 +294,9 @@ def _extract_stats_from_rag() -> dict[str, Any]:
 
         return stats
 
-    except Exception as e:
+    except TimeoutError:
         import logging
-        logging.warning(f"RAG stats extraction failed: {e}")
-        # Return fallback hardcoded stats if RAG fails
+        logging.warning("RAG stats extraction timed out after 8 seconds")
         return {
             "confirmed_cases": 8,
             "suspected_cases": 9,
@@ -297,6 +306,21 @@ def _extract_stats_from_rag() -> dict[str, Any]:
             "last_updated": datetime.now().strftime("%Y-%m-%d"),
             "case_fatality_rate": 37.5,
         }
+    except Exception as e:
+        import logging
+        logging.warning(f"RAG stats extraction failed: {e}")
+        return {
+            "confirmed_cases": 8,
+            "suspected_cases": 9,
+            "deaths": 3,
+            "nationalities": 23,
+            "ship_status": "Transit — Near Canary Islands",
+            "last_updated": datetime.now().strftime("%Y-%m-%d"),
+            "case_fatality_rate": 37.5,
+        }
+    finally:
+        # Clear timeout alarm
+        signal.alarm(0)
 
 def render_stats_panel() -> None:
     stats = get_outbreak_stats()
