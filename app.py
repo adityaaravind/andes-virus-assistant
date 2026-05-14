@@ -657,11 +657,11 @@ def main() -> None:
         render_pandemic_risk_panel()
         st.divider()
 
-        # ── 4. Global News Ticker (disabled for testing) ────────────────────────────────────────────────────
-        # st.markdown("<div id='news'></div>", unsafe_allow_html=True)
-        # from ui.news_ticker import render_news_ticker
-        # render_news_ticker()
-        # st.divider()
+        # ── 4. Global News Ticker ─────────────────────────────────────────────────
+        st.markdown("<div id='news'></div>", unsafe_allow_html=True)
+        from ui.news_ticker import render_news_ticker
+        render_news_ticker()
+        st.divider()
 
         st.warning("⚠️ **NOT MEDICAL ADVICE** • For emergencies contact local health authorities")
 
