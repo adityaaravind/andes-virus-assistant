@@ -644,7 +644,7 @@ def render_map_panel() -> None:
     # Remove vessel tracker to avoid duplicate feed appearance
     # Ship tracking info now shown in main Live Updates Feed
 
-    # Render map at full width
+    # Render map at full width - FIXED VERSION with error handling
     map_template = """
         <!DOCTYPE html>
         <html>
@@ -655,186 +655,131 @@ def render_map_panel() -> None:
             <style>
                 html, body { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; font-family: sans-serif; }
                 #map { width: 100%; height: 100%; background: #050505; border-radius: 12px; }
+                #status { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: #4ade80; padding: 8px; border-radius: 4px; z-index: 1000; font-size: 12px; max-width: 300px; }
                 .leaflet-tooltip { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(74, 222, 128, 0.4) !important; border-radius: 8px !important; padding: 15px !important; z-index: 1000; }
                 .leaflet-popup-content-wrapper { background: rgba(13, 27, 42, 0.98) !important; color: #fff !important; border: 1px solid rgba(74, 222, 128, 0.4) !important; border-radius: 12px !important; }
                 .ring-marker { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ffffff; position: relative; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); }
                 .blink-active { animation: marker-blink 1.5s infinite ease-in-out; }
                 @keyframes marker-blink { 0%, 100% { opacity: 1; box-shadow: 0 0 8px currentColor; } 50% { opacity: 0.6; box-shadow: 0 0 25px currentColor; } }
-
-                /* Enhanced glowing effects for news-based hotspots */
-                .glow-marker {
-                    animation: pulse-glow 2s infinite ease-in-out;
-                    border-width: 3px;
-                    background: rgba(0,0,0,0.9);
-                }
-                @keyframes pulse-glow {
-                    0%, 100% {
-                        opacity: 1;
-                        transform: scale(1);
-                        box-shadow: 0 0 15px currentColor, 0 0 30px currentColor, 0 0 45px currentColor;
-                    }
-                    50% {
-                        opacity: 0.8;
-                        transform: scale(1.1);
-                        box-shadow: 0 0 25px currentColor, 0 0 50px currentColor, 0 0 75px currentColor;
-                    }
-                }
-                .glow-badge {
-                    background: currentColor !important;
-                    color: #000 !important;
-                    box-shadow: 0 0 10px currentColor;
-                    animation: badge-pulse 1.5s infinite;
-                }
-                @keyframes badge-pulse {
-                    0%, 100% { transform: scale(1); }
-                    50% { transform: scale(1.2); }
-                }
-
-                /* Connection line animations */
-                .connection-line {
-                    animation: dash-flow 2s linear infinite;
-                }
-                @keyframes dash-flow {
-                    0% { stroke-dashoffset: 0; }
-                    100% { stroke-dashoffset: 20; }
-                }
-
                 .badge { position: absolute; top: -10px; right: -10px; background: #ffffff; color: #000; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center; border: 2px solid #000; }
                 .intel-label { color: #94a3b8; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
             </style>
         </head>
         <body>
+            <div id="status">🗺️ Loading map...</div>
             <div id="map"></div>
             <script>
-                const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([12, -25], 2.8);
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
-                const hotspots = __HOTSPOTS__;
-                const intensity = __INTENSITY__;
-                const shipPos = [14.93, -23.51];
-                fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
-                    .then(res => res.json())
-                    .then(geojson => {
-                        L.geoJSON(geojson, {
-                            style: feature => {
-                                const code = feature.id || feature.properties.ISO_A3;
-                                const isAffected = ["ARG", "ESP", "GBR", "NLD", "ZAF", "USA"].includes(code);
-                                if (isAffected) return { fillColor: '#6b001a', fillOpacity: 0.6, color: '#ff0055', weight: 2 };
-                                return { fillOpacity: 0, weight: 0.2, color: 'rgba(255,255,255,0.05)', fillColor: '#000' };
-                            },
-                            onEachFeature: function(feature, layer) {
-                                const code = feature.id || feature.properties.ISO_A3;
-                                const name = feature.properties.name || "AREA";
-                                const hantaRisk = (intensity.hanta[code] || 0.1).toFixed(1);
-                                const covidRisk = parseFloat(intensity.covid[code] || 0.0);
-                                const onsetDay = intensity.onset[code] || 0;
-                                const fear = Math.min(Math.max((hantaRisk * 0.7) + (Math.random() * 20), 10), 98).toFixed(1);
+                const status = document.getElementById('status');
 
-                                function getProofDate(day) {
-                                    const base = new Date(2020, 0, 22);
-                                    base.setDate(base.getDate() + day);
-                                    return base.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                                }
+                try {
+                    status.innerHTML = '🗺️ Initializing map...';
+                    const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([15, -25], 2.8);
 
-                                let tooltipHtml = '<div><b style="color:#4ade80; font-size:13px; letter-spacing:1px;">📡 ' + name + ' SAFETY CHECK</b><br/>';
-                                tooltipHtml += '<div style="display:flex; justify-content:space-between; gap:25px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px; margin-bottom:10px;">';
-                                tooltipHtml += '<div><div style="color:#94a3b8; font-size:9px;">OUTBREAK RISK</div><div style="color:#fff; font-size:14px; font-weight:900;">' + hantaRisk + '%</div></div>';
-                                tooltipHtml += '<div><div style="color:#94a3b8; font-size:9px;">COVID ESTIMATE (DAY ' + __DAY__ + ')</div><div style="color:#fff; font-size:14px; font-weight:900;">' + covidRisk.toFixed(2) + '%</div></div></div>';
-                                
-                                tooltipHtml += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">';
-                                tooltipHtml += '<div><div style="color:#ef4444; font-size:9px; font-weight:800;">PUBLIC WORRY INDEX</div><div style="color:#ef4444; font-size:14px; font-weight:900;">' + fear + '%</div></div>';
-                                tooltipHtml += '<div style="text-align:right;"><div style="color:#64748b; font-size:8px;">VERIFIED BY</div><div style="color:#cbd5e1; font-size:10px;">OFFICIAL SOURCE</div></div></div>';
+                    status.innerHTML = '🌍 Loading world tiles...';
+                    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                        maxZoom: 19,
+                        errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
+                    }).addTo(map);
 
-                                if (covidRisk === 0) {
-                                    if (onsetDay > 0) {
-                                        const proofDate = getProofDate(onsetDay);
-                                        tooltipHtml += `<div style="background:rgba(253,224,71,0.1); padding:6px; border-radius:4px; border-left: 3px solid #fde047; margin-top:8px;">
-                                            <p style="color:#fde047; font-size:9px; font-weight:800; margin:0; letter-spacing:0.5px;">📌 PROOF OF ZERO RISK:</p>
-                                            <p style="color:#fef08a; font-size:9px; font-style:italic; margin:2px 0 0;">Historical WHO data confirms COVID-19 risk was 0.00% here till Day ${onsetDay} (${proofDate}).</p>
-                                        </div>`;
-                                    } else {
-                                        tooltipHtml += `<div style="background:rgba(253,224,71,0.1); padding:6px; border-radius:4px; border-left: 3px solid #fde047; margin-top:8px;">
-                                            <p style="color:#fde047; font-size:9px; font-weight:800; margin:0; letter-spacing:0.5px;">📌 PROOF OF ZERO RISK:</p>
-                                            <p style="color:#fef08a; font-size:9px; font-style:italic; margin:2px 0 0;">Historical WHO data confirms COVID-19 risk was 0.00% here till a much later date.</p>
-                                        </div>`;
-                                    }
-                                } else {
-                                    const proofDate = onsetDay > 0 ? getProofDate(onsetDay) : "Jan 2020";
-                                    tooltipHtml += `<div style="background:rgba(239,68,68,0.15); padding:6px; border-radius:4px; border-left: 3px solid #ef4444; margin-top:8px;">
-                                        <p style="color:#ef4444; font-size:9px; font-weight:800; margin:0; letter-spacing:0.5px;">⚠️ HISTORICAL PROOF:</p>
-                                        <p style="color:#fca5a5; font-size:9px; margin:2px 0 0; line-height:1.2;">WHO confirmed initial COVID-19 spread in this region began on Day ${onsetDay} (${proofDate}).</p>
-                                    </div>`;
-                                }
-                                tooltipHtml += `</div></div>`;
-                                layer.bindTooltip(tooltipHtml, { sticky: true });
+                    const hotspots = __HOTSPOTS__;
+                    const intensity = __INTENSITY__;
+
+                    status.innerHTML = `📍 Loading ${hotspots.length} outbreak markers...`;
+
+                    // Add basic country borders without complex GeoJSON
+                    const affectedCountries = [
+                        { name: 'Argentina', bounds: [[-55, -73], [-22, -53]], color: '#ff0055' },
+                        { name: 'Spain', bounds: [[36, -9], [44, 4]], color: '#ffaa00' },
+                        { name: 'South Africa', bounds: [[-35, 16], [-22, 33]], color: '#00ffcc' },
+                        { name: 'USA', bounds: [[25, -125], [49, -66]], color: '#38bdf8' },
+                        { name: 'UK', bounds: [[50, -8], [61, 2]], color: '#cc00ff' }
+                    ];
+
+                    affectedCountries.forEach(country => {
+                        L.rectangle(country.bounds, {
+                            fillColor: country.color,
+                            fillOpacity: 0.1,
+                            color: country.color,
+                            weight: 1,
+                            opacity: 0.3
+                        }).addTo(map);
+                    });
+
+                    // Find ship position
+                    const shipHotspot = hotspots.find(h => h.code === 'SHIP');
+                    const shipPos = shipHotspot ? [shipHotspot.lat, shipHotspot.lng] : [15, -25];
+
+                    // Add hotspot markers
+                    let markerCount = 0;
+                    hotspots.forEach(h => {
+                        try {
+                            const isShip = h.code === 'SHIP';
+                            const iconHtml = `<div class="ring-marker blink-active" style="border-color:${h.color}; color:${h.color};"><div class="badge">${h.cases}</div></div>`;
+
+                            const icon = L.divIcon({
+                                className: '',
+                                html: iconHtml,
+                                iconSize: [24, 24],
+                                iconAnchor: [12, 12]
+                            });
+
+                            const marker = L.marker([h.lat, h.lng], { icon: icon }).addTo(map);
+
+                            const popupHtml = `
+                                <div style="padding:15px; min-width:200px;">
+                                    <b style="color:${h.color};">📡 ${h.name}</b><br>
+                                    <div style="margin:8px 0;">
+                                        <strong>Cases:</strong> ${h.cases}<br>
+                                        <strong>Status:</strong> ${h.relation}<br>
+                                        <strong>Location:</strong> ${h.lat}, ${h.lng}
+                                    </div>
+                                    <div style="font-size:11px; color:#94a3b8;">
+                                        ${h.notes}
+                                    </div>
+                                </div>
+                            `;
+                            marker.bindPopup(popupHtml);
+
+                            // Connection line to ship
+                            if (!isShip) {
+                                L.polyline([[h.lat, h.lng], shipPos], {
+                                    color: h.color,
+                                    weight: 1,
+                                    opacity: 0.6,
+                                    dashArray: '4, 6'
+                                }).addTo(map);
                             }
-                        }).addTo(map);
+
+                            markerCount++;
+                        } catch (e) {
+                            console.warn('Error adding marker:', h.name, e);
+                        }
                     });
-                // Find ship position for connection lines
-                const shipHotspot = hotspots.find(h => h.code === 'SHIP');
-                const shipPos = shipHotspot ? [shipHotspot.lat, shipHotspot.lng] : [28.5, -15.0];
 
-                hotspots.forEach(h => {
-                    const isShip = h.code === 'SHIP';
-                    const isNewsHotspot = h.glow === true;
+                    status.innerHTML = `✅ Map loaded: ${markerCount} markers active`;
+                    setTimeout(() => {
+                        status.style.opacity = '0.7';
+                        status.style.fontSize = '10px';
+                    }, 3000);
 
-                    // Enhanced icon for news-based hotspots with glowing effects
-                    let iconHtml = '';
-                    if (isNewsHotspot) {
-                        const glowIntensity = h.glowIntensity || 50;
-                        const pulseSpeed = h.pulseSpeed || 1.0;
-                        iconHtml = '<div class="ring-marker glow-marker" style="' +
-                            'border-color:' + h.color + '; color:' + h.color + ';' +
-                            'box-shadow: 0 0 ' + (glowIntensity/5) + 'px ' + h.color + ', 0 0 ' + (glowIntensity/3) + 'px ' + h.color + ';' +
-                            'animation: pulse-glow ' + pulseSpeed + 's infinite;' +
-                            '"><div class="badge glow-badge">' + h.cases + '</div></div>';
-                    } else {
-                        iconHtml = '<div class="ring-marker blink-active" style="border-color:' + h.color + '; color:' + h.color + ';"><div class="badge">' + h.cases + '</div></div>';
-                    }
+                } catch (error) {
+                    status.innerHTML = `❌ Map Error: ${error.message}`;
+                    status.style.background = 'rgba(239,68,68,0.8)';
+                    console.error('Map initialization error:', error);
 
-                    const icon = L.divIcon({
-                        className: '',
-                        html: iconHtml,
-                        iconSize: [24, 24],
-                        iconAnchor: [12, 12]
-                    });
-                    const marker = L.marker([h.lat, h.lng], { icon: icon }).addTo(map);
-
-                    // Add glowing connection line to ship for news hotspots
-                    if (isNewsHotspot && h.connectToShip && !isShip) {
-                        const connectionLine = L.polyline([
-                            [h.lat, h.lng],
-                            shipPos
-                        ], {
-                            color: h.color,
-                            weight: 2,
-                            opacity: 0.7,
-                            dashArray: '5, 10',
-                            className: 'connection-line'
-                        }).addTo(map);
-
-                        // Animate the dash pattern
-                        let dashOffset = 0;
-                        setInterval(() => {
-                            dashOffset += 1;
-                            connectionLine.setStyle({ dashOffset: dashOffset + 'px' });
-                        }, 100);
-                    }
-                    let popupHtml = '<div style="padding:15px; min-width:260px; font-family:sans-serif;">' +
-                        '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">' +
-                        '<b style="color:' + h.color + '; font-size:14px;">📡 ' + h.name + '</b>' +
-                        '<span style="color:#94a3b8; font-size:9px;">' + h.timestamp + '</span></div>' +
-                        '<div style="color:#ffffff; font-size:11px; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; font-weight:600;">' + h.relation + '</div>' +
-                        '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:12px;">' +
-                        '<div><div class="intel-label">PUBLIC WORRY</div><div style="color:#ef4444; font-size:18px; font-weight:900;">' + h.fear + '%</div></div>' +
-                        '<div><div class="intel-label">TOTAL CASES</div><div style="color:#fff; font-size:18px; font-weight:900;">' + h.cases + '</div></div></div>' +
-                        '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;">' +
-                        '<div><div class="intel-label">HOSPITAL / CLINIC</div><div style="color:#4ade80; font-size:10px; font-weight:900;">' + h.admitted + '</div></div>' +
-                        '<div><div class="intel-label">LATEST NOTES</div><div style="color:#cbd5e1; font-size:9px; font-style:italic; line-height:1.2;">' + h.notes + '</div></div></div></div>';
-                    marker.bindPopup(popupHtml, { closeButton: false, offset: [0, -10] });
-                    marker.on('mouseover', function() { this.openPopup(); });
-                    marker.on('mouseout', function() { this.closePopup(); });
-                    if (!isShip) L.polyline([[h.lat, h.lng], shipPos], { color: h.color, weight: 1.5, opacity: 0.8, dashArray: '4, 6' }).addTo(map);
-                });
+                    // Fallback: show basic info
+                    document.getElementById('map').innerHTML = `
+                        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:white;text-align:center;">
+                            <div>
+                                <div style="font-size:24px;margin-bottom:10px;">🗺️</div>
+                                <div>Map temporarily unavailable</div>
+                                <div style="font-size:12px;color:#888;margin-top:10px;">
+                                    ${__HOTSPOTS__.length} outbreak locations being tracked
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
             </script>
         </body>
         </html>
