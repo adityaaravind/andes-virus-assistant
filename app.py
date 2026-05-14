@@ -221,7 +221,7 @@ def _run_ingestion_job() -> None:
         import gc
         sys.path.insert(0, str(Path(__file__).parent))
         from scripts.ingest_all import run_ingestion
-        run_ingestion()
+        new_chunks = run_ingestion()
 
         # PERSIST SUCCESS TIMESTAMP
         from alerts.persistent_kv import kv_set
@@ -230,8 +230,14 @@ def _run_ingestion_job() -> None:
         # UPDATE MAP WITH ALL INDEXED CONTENT
         try:
             from ui.news_location_extractor import update_map_from_news_ingestion
+            if new_chunks:
+                update_map_from_news_ingestion(new_chunks)
+            
+            # Clear internal streamlit caches to ensure map shows new data
+            import streamlit as st
+            st.cache_data.clear()
+            
             # Trigger map refresh after full ingestion
-            from alerts.persistent_kv import kv_set
             kv_set("last_map_update", datetime.utcnow().isoformat())
         except Exception:
             pass  # Don't break ingestion if map update fails
@@ -453,6 +459,19 @@ def _check_vectorstore() -> bool:
 
 def _check_and_refresh_data() -> None:
     """Check if data is stale and auto-trigger real-time ingestion."""
+    # Check for background map updates regardless of ingestion_check_done
+    try:
+        from alerts.persistent_kv import kv_get
+        last_map_update = kv_get("last_map_update")
+        if last_map_update:
+            if "last_seen_map_update" not in st.session_state:
+                st.session_state.last_seen_map_update = last_map_update
+            elif st.session_state.last_seen_map_update != last_map_update:
+                st.session_state.last_seen_map_update = last_map_update
+                st.rerun()
+    except:
+        pass
+
     if st.session_state.get("ingestion_check_done"):
         return
 

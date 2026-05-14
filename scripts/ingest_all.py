@@ -26,9 +26,10 @@ from vectorstore.store import add_documents, get_stats, get_existing_ids, _chunk
 console = Console()
 
 
-def run_ingestion(fast: bool = False) -> None:
+def run_ingestion(fast: bool = False) -> list[dict[str, Any]]:
     import gc
     import os
+    all_new_chunks = []
     console.rule("[bold blue]Andes Virus Research Assistant — Incremental Ingestion Pipeline")
     if fast:
         console.print("[bold yellow]⚡ FAST MODE ACTIVE: Reducing scrape depth[/bold yellow]")
@@ -65,6 +66,9 @@ def run_ingestion(fast: bool = False) -> None:
                 new_chunks = embed_chunks(new_chunks)
                 added = add_documents(new_chunks)
                 console.print(f"  [green]✓ {source_name} batch complete:[/green] {added} new chunks stored")
+                
+                # Add to total new chunks for map updates
+                all_new_chunks.extend(new_chunks)
 
                 # FIRE REAL-TIME SIGNAL FOR EACH SOURCE
                 try:
@@ -115,6 +119,8 @@ def run_ingestion(fast: bool = False) -> None:
             _process_batch("Wikipedia", wiki_docs)
     except Exception as exc:
         console.print(f"  [yellow]⚠ Wikipedia failed:[/yellow] {exc}")
+
+    return all_new_chunks
 
 
 if __name__ == "__main__":

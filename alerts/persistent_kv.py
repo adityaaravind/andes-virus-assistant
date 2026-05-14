@@ -49,10 +49,23 @@ def kv_get(key: str, default: Any = None) -> Any:
                 return result[0].payload.get("value", default)
             return default # Key not found in Qdrant, return default
         except Exception as e:
-            # DO NOT fall back to local JSON if Qdrant is configured but failing.
-            # This prevents overwriting remote data with empty local data.
-            raise RuntimeError(f"Qdrant persistence failure: {str(e)}") from e
-    
+            # Check if we should use graceful fallback for development
+            import os
+            if os.getenv("QDRANT_GRACEFUL_FALLBACK", "false").lower() == "true":
+                print(f"Warning: Qdrant connection failed, falling back to local storage for {key}")
+                # Fall back to local JSON
+                path = Path(f"data/kv_{key}.json")
+                if path.exists():
+                    try:
+                        return json.loads(path.read_text())
+                    except Exception:
+                        pass
+                return default
+            else:
+                # DO NOT fall back to local JSON if Qdrant is configured but failing.
+                # This prevents overwriting remote data with empty local data.
+                raise RuntimeError(f"Qdrant persistence failure: {str(e)}") from e
+
     path = Path(f"data/kv_{key}.json")
     if path.exists():
         try:

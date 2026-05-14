@@ -945,7 +945,7 @@ def _get_dynamic_hotspots(state: dict) -> list:
     nat_map = {d["code"]: d for d in nationality_data}
 
     # Initialize location_cases for legacy compatibility
-    location_cases = {}
+    location_cases = _load_location_cases()
 
     # Load dynamic hotspots from news content
     try:
@@ -974,10 +974,11 @@ def _get_dynamic_hotspots(state: dict) -> list:
                     "relation": "Real-time News Analysis",
                     "intel": "LIVE NEWS",
                     "admitted": "Local Medical Facility",
+                    "cases": news_spot.get("cases", 0),
                     "notes": f"{news_spot['cases']} cases detected in news. Severity: {news_spot['severity']}/4. Auto-detected from indexed articles.",
                     "timestamp": "LIVE",
                     "glow": True,
-                    "glowIntensity": news_spot["intensity"],
+                    "glowIntensity": news_spot["intensity"] / 50.0, # Normalize intensity for JS shadow
                     "pulseSpeed": news_spot.get("pulseSpeed", 1.0),
                     "connectToShip": news_spot.get("connectToShip", False),
                 })
@@ -1203,9 +1204,9 @@ def _fire_map_refresh_signal(hotspots: list, state: dict, current_day: int) -> N
         # Fire map signal for each country with cases
         affected_countries = []
         for hotspot in hotspots:
-            if hotspot.get("confirmed_cases", 0) > 0:
-                country = hotspot.get("location", "Unknown")
-                cases = hotspot.get("confirmed_cases", 0)
+            if hotspot.get("cases", 0) > 0:
+                country = hotspot.get("location", hotspot.get("name", "Unknown"))
+                cases = hotspot.get("cases", 0)
                 affected_countries.append(country)
                 # Fire individual country signal
                 fire_map_signal(country, cases, "update")
