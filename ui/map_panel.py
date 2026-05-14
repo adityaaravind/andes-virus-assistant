@@ -12,7 +12,19 @@ import random
 LIVE_FILE = Path("data/outbreak_live.json")
 
 def _get_auto_nationality_data(total_cases: int, total_deaths: int) -> list:
-    """Auto-distribute cases based on passenger manifest and outbreak progression"""
+    """Extract nationality/country data from RAG vectorstore based on news reports."""
+    try:
+        # Try RAG-based extraction first
+        country_data = _extract_countries_from_rag()
+
+        # If RAG extraction successful, return that data
+        if country_data and len(country_data) > 0:
+            return country_data
+
+    except Exception:
+        pass  # Fall back to hardcoded data if RAG fails
+
+    # Fallback: hardcoded distribution for reliability
     base_data = [
         {"country": "Argentina",     "code": "ARG", "passengers": 45, "crew": 5, "weight": 0.35},  # Origin point
         {"country": "Spain",         "code": "ESP", "passengers": 12, "crew": 0, "weight": 0.20},  # Major port
@@ -28,6 +40,79 @@ def _get_auto_nationality_data(total_cases: int, total_deaths: int) -> list:
         country["deaths"] = max(0, int(total_deaths * country["weight"])) if total_deaths > 0 else 0
 
     return base_data
+
+
+def _extract_countries_from_rag() -> list:
+    """Extract country-specific case data from RAG vectorstore."""
+    try:
+        from vectorstore.store import similarity_search
+        from ui.news_location_extractor import LOCATION_PATTERNS
+        import re
+
+        # Search for country-specific case reports
+        country_queries = [
+            "cases patients country nationality argentina spain usa",
+            "passengers crew affected countries nationalities",
+            "confirmed cases deaths by country location",
+        ]
+
+        # Track extracted country data
+        country_cases = {}
+
+        for query in country_queries:
+            results = similarity_search(query, k=8)
+
+            for result in results:
+                text = result.get("text", "").lower()
+
+                # Look for each known location in the text
+                for location_name, coords in LOCATION_PATTERNS.items():
+                    if location_name in text:
+                        # Extract case numbers near this location
+                        location_pattern = rf'{re.escape(location_name)}[^.]*?(\d+)[^.]*?(?:cases?|patients?|confirmed)'
+                        matches = re.findall(location_pattern, text, re.IGNORECASE)
+
+                        if matches:
+                            cases = max([int(x) for x in matches])
+                            country_name = location_name.replace("_", " ").title()
+
+                            # Map to country names for consistency
+                            if location_name == "usa" or location_name == "united states":
+                                country_name = "USA"
+                            elif location_name == "united kingdom" or location_name == "uk":
+                                country_name = "United Kingdom"
+
+                            if country_name not in country_cases:
+                                country_cases[country_name] = {
+                                    "country": country_name,
+                                    "code": coords["code"],
+                                    "cases": 0,
+                                    "deaths": 0,
+                                    "passengers": 0,
+                                    "crew": 0,
+                                    "weight": 0.0
+                                }
+
+                            # Take the maximum cases found for this country
+                            country_cases[country_name]["cases"] = max(
+                                country_cases[country_name]["cases"],
+                                cases
+                            )
+
+        # Convert to list format
+        country_list = list(country_cases.values())
+
+        # If we found country data, calculate weights
+        if country_list:
+            total_found_cases = sum(c["cases"] for c in country_list)
+            if total_found_cases > 0:
+                for country in country_list:
+                    country["weight"] = country["cases"] / total_found_cases
+
+        return country_list
+
+    except Exception:
+        return []  # Return empty list to trigger fallback
 
 # Legacy constant for backward compatibility
 NATIONALITIES_DATA = _get_auto_nationality_data(8, 3)
@@ -388,7 +473,16 @@ def _get_live_state() -> dict:
     }
 
 def _get_ship_position() -> tuple[float, float]:
-    """Calculate realistic ship position based on time progression."""
+    """Extract ship position from RAG vectorstore or calculate from time progression."""
+    try:
+        # Try to extract position from news reports first
+        rag_position = _extract_ship_position_from_rag()
+        if rag_position:
+            return rag_position
+    except Exception:
+        pass
+
+    # Fallback: Calculate realistic position based on time progression
     from datetime import datetime
     import math
 
@@ -415,8 +509,125 @@ def _get_ship_position() -> tuple[float, float]:
 
     return round(final_lat, 4), round(final_lng, 4)
 
+
+def _extract_ship_position_from_rag() -> tuple[float, float] | None:
+    """Extract ship coordinates from news reports using RAG."""
+    try:
+        from vectorstore.store import similarity_search
+        import re
+
+        # Search for ship location reports
+        position_queries = [
+            "mv hondius position coordinates latitude longitude",
+            "ship location canary islands cape verde waters",
+            "vessel coordinates position current location"
+        ]
+
+        for query in position_queries:
+            results = similarity_search(query, k=5)
+
+            for result in results:
+                text = result.get("text", "")
+
+                # Look for coordinate patterns
+                # Pattern: latitude longitude (various formats)
+                coord_patterns = [
+                    r'(\d+\.?\d*)[°\s]*N[,\s]*(\d+\.?\d*)[°\s]*W',  # 28.5°N, 15.4°W
+                    r'latitude[:\s]*(\d+\.?\d*)[,\s]*longitude[:\s]*(\d+\.?\d*)',
+                    r'(\d+\.\d+)[,\s]*(-?\d+\.\d+)',  # Decimal coordinates
+                ]
+
+                for pattern in coord_patterns:
+                    matches = re.findall(pattern, text, re.IGNORECASE)
+                    if matches:
+                        for match in matches:
+                            try:
+                                lat = float(match[0])
+                                lng = float(match[1])
+
+                                # Make longitude negative for west (if not already)
+                                if lng > 0 and "W" in text:
+                                    lng = -lng
+
+                                # Validate reasonable coordinates (Atlantic Ocean area)
+                                if 10 <= lat <= 35 and -30 <= lng <= -10:
+                                    return round(lat, 4), round(lng, 4)
+                            except (ValueError, IndexError):
+                                continue
+
+                # Look for named locations and map to coordinates
+                location_mappings = {
+                    "canary islands": (28.1, -15.4),
+                    "cape verde": (14.93, -23.51),
+                    "tenerife": (28.3, -16.6),
+                    "las palmas": (28.1, -15.4),
+                    "mid-atlantic": (20.0, -20.0)
+                }
+
+                text_lower = text.lower()
+                for location, coords in location_mappings.items():
+                    if location in text_lower:
+                        return coords
+
+        return None
+
+    except Exception:
+        return None
+
+
+def _extract_ship_status_from_rag() -> str | None:
+    """Extract ship status from news reports using RAG."""
+    try:
+        from vectorstore.store import similarity_search
+
+        # Search for ship status reports
+        status_queries = [
+            "mv hondius ship status quarantine isolation",
+            "vessel condition medical emergency evacuation",
+            "ship docked anchored movement restriction"
+        ]
+
+        for query in status_queries:
+            results = similarity_search(query, k=3)
+
+            for result in results:
+                text = result.get("text", "").lower()
+
+                # Map keywords to status descriptions
+                if "quarantine" in text and ("canary" in text or "island" in text):
+                    return "Quarantined — Near Canary Islands"
+                elif "quarantine" in text:
+                    return "Quarantine Anchor — Cape Verde Waters"
+                elif "isolation" in text and "medical" in text:
+                    return "Medical Isolation — International Waters"
+                elif "emergency" in text and "evacuation" in text:
+                    return "Emergency Evacuation — Medical Crisis"
+                elif "docked" in text or "port" in text:
+                    return "Docked — Emergency Port"
+                elif "anchor" in text or "anchored" in text:
+                    return "Anchored — Emergency Position"
+                elif "restricted" in text and "movement" in text:
+                    return "Night Watch — Restricted Movement"
+                elif "monitoring" in text and "medical" in text:
+                    return "Medical Monitoring — Canary Islands Approach"
+
+        return None
+
+    except Exception:
+        return None
+
+
 def _get_dynamic_ship_status() -> str:
-    """Generate dynamic ship status based on current conditions."""
+    """Extract ship status from RAG vectorstore or generate based on current conditions."""
+    try:
+        # Try to extract status from news reports first
+        rag_status = _extract_ship_status_from_rag()
+        if rag_status:
+            return rag_status
+    except Exception:
+        pass
+
+    # Fallback: Generate dynamic status based on current conditions
     from datetime import datetime
 
     day_num = (datetime.utcnow() - datetime(2026, 4, 6)).days

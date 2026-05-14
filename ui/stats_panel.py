@@ -170,21 +170,133 @@ def get_outbreak_stats() -> dict[str, Any]:
     # Log refresh signal when cache refreshes
     _log_stats_refresh_signal()
 
+    # RAG-based stats extraction from latest news/reports
+    stats = _extract_stats_from_rag()
+
+    # Load any manual overrides from live file
     live = _load_live()
-    data = {
-        "confirmed_cases": 18,
-        "suspected_cases": 24,
-        "deaths": 5,
-        "nationalities": 28,
-        "ship_status": "Transit — Near Canary Islands",
-        "last_updated": datetime.now().strftime("%Y-%m-%d"),
-        "case_fatality_rate": 27.7,
-    }
     for k in ("confirmed_cases", "suspected_cases", "deaths", "nationalities", "last_updated", "ship_status"):
-        if k in live: data[k] = live[k]
-    if data["confirmed_cases"] and data["deaths"]:
-        data["case_fatality_rate"] = round(data["deaths"] / data["confirmed_cases"] * 100, 1)
-    return data
+        if k in live:
+            stats[k] = live[k]
+
+    # Calculate derived metrics
+    if stats["confirmed_cases"] and stats["deaths"]:
+        stats["case_fatality_rate"] = round(stats["deaths"] / stats["confirmed_cases"] * 100, 1)
+
+    return stats
+
+
+def _extract_stats_from_rag() -> dict[str, Any]:
+    """Extract outbreak statistics from RAG vectorstore using similarity search."""
+    try:
+        from vectorstore.store import similarity_search
+        import re
+        from datetime import datetime
+
+        # Initialize with fallback values
+        stats = {
+            "confirmed_cases": 8,
+            "suspected_cases": 9,
+            "deaths": 3,
+            "nationalities": 23,
+            "ship_status": "Transit — Near Canary Islands",
+            "last_updated": datetime.now().strftime("%Y-%m-%d"),
+            "case_fatality_rate": 37.5,
+        }
+
+        # Query for latest case numbers
+        case_queries = [
+            "confirmed cases hantavirus outbreak total number",
+            "deaths fatalities andes virus mv hondius",
+            "suspected cases passengers crew ship",
+            "countries nationalities affected outbreak"
+        ]
+
+        # Extract numbers from search results
+        case_counts = {"confirmed": [], "deaths": [], "suspected": [], "countries": []}
+
+        for query in case_queries:
+            results = similarity_search(query, k=5)
+            for result in results:
+                text = result.get("text", "").lower()
+
+                # Extract confirmed cases
+                confirmed_matches = re.findall(r'(\d+)\s*(?:confirmed|laboratory.confirmed)\s*cases?', text)
+                case_counts["confirmed"].extend([int(x) for x in confirmed_matches])
+
+                # Extract deaths
+                death_matches = re.findall(r'(\d+)\s*(?:deaths?|fatalities|died)', text)
+                case_counts["deaths"].extend([int(x) for x in death_matches])
+
+                # Extract suspected cases
+                suspected_matches = re.findall(r'(\d+)\s*suspected\s*cases?', text)
+                case_counts["suspected"].extend([int(x) for x in suspected_matches])
+
+                # Extract country/nationality counts
+                country_matches = re.findall(r'(\d+)\s*(?:countries|nationalities)', text)
+                case_counts["countries"].extend([int(x) for x in country_matches])
+
+        # Use the highest reliable numbers found (most recent reports tend to have cumulative totals)
+        if case_counts["confirmed"]:
+            stats["confirmed_cases"] = max(case_counts["confirmed"])
+        if case_counts["deaths"]:
+            stats["deaths"] = max(case_counts["deaths"])
+        if case_counts["suspected"]:
+            stats["suspected_cases"] = max(case_counts["suspected"])
+        if case_counts["countries"]:
+            stats["nationalities"] = max(case_counts["countries"])
+
+        # Get ship status from latest reports
+        ship_results = similarity_search("mv hondius ship status location canary islands", k=3)
+        ship_status = "Transit — Near Canary Islands"  # Default
+
+        for result in ship_results:
+            text = result.get("text", "")
+            if "quarantine" in text.lower():
+                ship_status = "Quarantined — Near Canary Islands"
+                break
+            elif "isolation" in text.lower():
+                ship_status = "Medical Isolation — Near Canary Islands"
+                break
+            elif "dock" in text.lower() or "port" in text.lower():
+                ship_status = "Docked — Emergency Port"
+                break
+
+        stats["ship_status"] = ship_status
+
+        # Get latest date from search results
+        date_results = similarity_search("latest report update 2026", k=2)
+        latest_dates = []
+
+        for result in date_results:
+            text = result.get("text", "")
+            # Extract 2026 dates
+            date_matches = re.findall(r'2026[-/](\d{1,2})[-/](\d{1,2})', text)
+            for month, day in date_matches:
+                try:
+                    date_str = f"2026-{month.zfill(2)}-{day.zfill(2)}"
+                    latest_dates.append(date_str)
+                except:
+                    continue
+
+        if latest_dates:
+            stats["last_updated"] = max(latest_dates)
+
+        return stats
+
+    except Exception as e:
+        import logging
+        logging.warning(f"RAG stats extraction failed: {e}")
+        # Return fallback hardcoded stats if RAG fails
+        return {
+            "confirmed_cases": 8,
+            "suspected_cases": 9,
+            "deaths": 3,
+            "nationalities": 23,
+            "ship_status": "Transit — Near Canary Islands",
+            "last_updated": datetime.now().strftime("%Y-%m-%d"),
+            "case_fatality_rate": 37.5,
+        }
 
 def render_stats_panel() -> None:
     stats = get_outbreak_stats()
