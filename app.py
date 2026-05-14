@@ -454,8 +454,8 @@ def _check_vectorstore() -> bool:
 
 
 def _check_and_refresh_data() -> None:
-    """Check if data is stale and auto-trigger real-time ingestion."""
-    # Check for background map updates regardless of ingestion_check_done
+    """Check if data is stale and handle auto-rerun on map updates."""
+    # Check for background map updates
     try:
         from alerts.persistent_kv import kv_get
         last_map_update = kv_get("last_map_update")
@@ -468,76 +468,22 @@ def _check_and_refresh_data() -> None:
     except:
         pass
 
-    if st.session_state.get("ingestion_check_done"):
-        return
-
-    try:
-        from alerts.persistent_kv import kv_get
-        from datetime import datetime, timedelta
-
-        last_ingest = kv_get("last_ingestion_time")
-        last_news = kv_get("last_news_poll_time")
-
-        now = datetime.utcnow()
-        should_refresh = False
-
-        # Check if full ingestion is stale (>2 hours)
-        if not last_ingest:
-            should_refresh = True
-            reason = "No previous ingestion found"
-        else:
-            ingest_dt = datetime.fromisoformat(last_ingest.replace('Z', '+00:00') if 'Z' in last_ingest else last_ingest)
-            hours_since = (now - ingest_dt).total_seconds() / 3600
-            if hours_since > 2.0:
-                should_refresh = True
-                reason = f"Data stale ({hours_since:.1f} hours old)"
-
-        # Check if news polling is stale (>20 minutes)
-        if not last_news or not should_refresh:
-            if not last_news:
-                _run_fast_news_poll()
-                st.session_state["ingestion_check_done"] = True
-                return
-            else:
-                news_dt = datetime.fromisoformat(last_news.replace('Z', '+00:00') if 'Z' in last_news else last_news)
-                minutes_since = (now - news_dt).total_seconds() / 60
-                if minutes_since > 20:
-                    _run_fast_news_poll()
-
-        if should_refresh:
-            st.info(f"🔄 **Data refresh needed**: {reason}. Updating knowledge base...", icon="⚙️")
-            with st.spinner("Refreshing data sources..."):
-                _run_ingestion_job()
-                st.success("✅ Data refreshed successfully!", icon="🔄")
-                st.rerun()
-
-        st.session_state["ingestion_check_done"] = True
-
-    except Exception as exc:
-        logging.exception("Data refresh check failed")
-        st.session_state["ingestion_check_done"] = True
+    # INGESTION NOW HANDLED BY BACKGROUND SCHEDULER ONLY
+    # Manual refresh button in sidebar if user really wants it
+    st.session_state["ingestion_check_done"] = True
 
 
 def _bootstrap_if_empty() -> None:
-    """On cold start (Streamlit Cloud) run full ingestion if DB is empty."""
+    """Only bootstrap if DB is absolutely empty and no ingestion is in progress."""
     if st.session_state.get("bootstrap_done"):
         return
     st.session_state["bootstrap_done"] = True
+    
     if _check_vectorstore():
         return
-    st.info(
-        "**First run — building knowledge base.** "
-        "Fetching PubMed, WHO, and live news (~3–5 min). App loads after.",
-        icon="⚙️",
-    )
-    with st.spinner("Ingesting sources… runs once per cold start."):
-        try:
-            from scripts.ingest_all import run_ingestion
-            run_ingestion()
-            st.rerun()
-        except Exception as exc:
-            logging.exception("Bootstrap ingestion failed")
-            st.warning(f"Ingestion error: {exc}. App runs with limited RAG.", icon="⚠️")
+
+    # If empty, just show a message instead of auto-triggering
+    st.warning("📊 Knowledge base is currently empty. Data will populate automatically via background scheduler.", icon="⏳")
 
 
 
@@ -572,35 +518,17 @@ def _render_ingestion_countdown_timer() -> None:
 
         # Check if ingestion should trigger
         if time_remaining <= 0:
-            # Check if we haven't triggered recently (prevent duplicate triggers)
-            if not st.session_state.get("ingestion_triggered", False):
-                st.session_state.ingestion_triggered = True
-
-                st.markdown(
-                    f"<p style='color:#4ade80;font-size:0.72rem;margin-top:0.6rem;'>"
-                    f"🔄 Triggering ingestion...</p>",
-                    unsafe_allow_html=True,
-                )
-
-                # Trigger ingestion in background
-                try:
+            st.markdown(
+                f"<p style='color:#fbbf24;font-size:0.72rem;margin-top:0.6rem;'>"
+                f"🔄 Ingestion ready. Please trigger manually if needed.</p>",
+                unsafe_allow_html=True,
+            )
+            if st.button("🚀 FORCE REFRESH NOW", use_container_width=True):
+                with st.spinner("Manually refreshing data..."):
                     _run_ingestion_job()
-                    st.success("✅ Ingestion completed!", icon="🔄")
-                    st.session_state.ingestion_triggered = False  # Reset trigger flag
-                    st.rerun()  # Refresh to show new timer
-                except Exception as e:
-                    st.error(f"❌ Ingestion failed: {e}")
-                    st.session_state.ingestion_triggered = False  # Reset trigger flag
-            else:
-                st.markdown(
-                    f"<p style='color:#fbbf24;font-size:0.72rem;margin-top:0.6rem;'>"
-                    f"🔄 Ingestion in progress...</p>",
-                    unsafe_allow_html=True,
-                )
+                    st.success("Data Refreshed!")
+                    st.rerun()
         else:
-            # Reset trigger flag when timer is active
-            st.session_state.ingestion_triggered = False
-
             # Display countdown
             hours = int(time_remaining // 3600)
             minutes = int((time_remaining % 3600) // 60)
