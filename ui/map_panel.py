@@ -624,81 +624,8 @@ def render_map_panel() -> None:
         """, unsafe_allow_html=True
     )
 
-    col_map, col_vessel = st.columns([2.2, 1])
-    
-    with col_vessel:
-        events_html = ""
-        for ev in events:
-            # Calculate dynamic timing if timestamp available
-            if ev.get('timestamp'):
-                time_value, time_unit = _calculate_time_ago(ev['timestamp'])
-                time_display = f"{time_value}{time_unit} AGO"
-                hours_ago_calc = 0 if time_unit in ["SEC", "MIN"] else time_value
-            else:
-                time_display = f"{ev['hours_ago']}H AGO"
-                hours_ago_calc = ev['hours_ago']
-
-            # Signal Hub Color: High Priority RED, else Green/Yellow based on age
-            if ev.get('priority') == 'high':
-                sig_color = "#f87171"
-            else:
-                sig_color = "#4ade80" if hours_ago_calc <= 6 else "#fde047"
-
-            # Bullet styling
-            events_html += f"""
-                <div style="border-left: 3px solid {sig_color}; padding-left: 12px; margin-bottom: 12px; animation: slideIn 0.4s ease-out; background: rgba({(248,113,113) if sig_color=="#f87171" else (74,222,128) if sig_color=="#4ade80" else (253,224,71)}, 0.05); padding-top: 6px; padding-bottom: 6px; border-radius: 0 6px 6px 0;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px; padding-right:8px;">
-                        <div style="color: {sig_color}; font-size: 8px; font-weight: 950; letter-spacing: 0.8px;">{ev['date']} @ {ev['time']}</div>
-                        <div style="color: #475569; font-size: 7px; font-weight: 800;">{time_display}</div>
-                    </div>
-                    <div style="color: #ffffff; font-size: 10px; line-height: 1.2; font-weight: 600;">{ev['event']}</div>
-                </div>
-            """
-
-        vessel_card_html = f"""
-        <style>
-            @keyframes slideIn {{ from {{ opacity: 0; transform: translateX(-10px); }} to {{ opacity: 1; transform: translateX(0); }} }}
-            @keyframes pulse {{ 0% {{ opacity: 1; }} 50% {{ opacity: 0.4; }} 100% {{ opacity: 1; }} }}
-            .scroll-container::-webkit-scrollbar {{ width: 2px; }}
-            .scroll-container::-webkit-scrollbar-thumb {{ background: #4ade80; border-radius: 1px; }}
-        </style>
-        <div style="font-family: sans-serif; background: rgba(15, 23, 42, 0.95); border: 2px solid #4ade80; box-shadow: 0 0 20px rgba(74,222,128,0.1); padding: 1.2rem; border-radius: 12px; height: 440px; display: flex; flex-direction: column; color: #fff; overflow: hidden;">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 16px;">
-                <div style="color: #4ade80; font-size: 9px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">🚢 SHIP TRACKER</div>
-                <div style="background:rgba(74,222,128,0.1); padding:1px 6px; border-radius:3px; border:1px solid #4ade8033; color:#4ade80; font-size:7px; font-weight:900;">TRACKING ACTIVE</div>
-            </div>
-            <div style="margin: 0 0 16px 0;">
-                <h2 style="margin:0; font-size:1.4rem; font-weight:900; line-height: 1; color:#ffffff;">{state.get('ship_status', 'Quarantined').upper()}</h2>
-                <p style="color:#4ade80; font-size:0.6rem; font-weight:800; margin-top:4px; text-transform:uppercase;">VESSEL ID: MV HONDIUS</p>
-            </div>
-            
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:12px;">
-                <div style="background:rgba(255,255,255,0.03); border-radius:6px; padding:6px; border:1px solid rgba(255,255,255,0.05);">
-                    <p style="color:#94a3b8; font-size:7px; font-weight:800; margin:0;">CURRENT SPEED</p>
-                    <p style="color:#ffffff; font-size:11px; font-weight:900; margin:0;">{events[0]['speed']}</p>
-                </div>
-                <div style="background:rgba(255,255,255,0.03); border-radius:6px; padding:6px; border:1px solid rgba(255,255,255,0.05);">
-                    <p style="color:#94a3b8; font-size:7px; font-weight:800; margin:0;">SIGNAL QUALITY</p>
-                    <p style="color:#ffffff; font-size:11px; font-weight:900; margin:0;">{events[0]['uplink']}</p>
-                </div>
-            </div>
-
-            <div style="color: #64748b; font-size: 9px; font-weight: 900; margin-bottom: 10px; text-transform: uppercase; letter-spacing:0.5px; display:flex; align-items:center;">
-                <span style="width:6px; height:6px; background:#4ade80; border-radius:50%; margin-right:6px; display:inline-block; animation: pulse 1s infinite;"></span>
-                LATEST NEWS BULLETINS
-            </div>
-            <div class="scroll-container" style="flex: 1; overflow-y: auto; padding-right: 5px; scroll-behavior: smooth;">
-                {events_html}
-            </div>
-            <div style="margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.05); color:#475569; font-size:7px; font-weight:800; display:flex; justify-content:space-between;">
-                <span>SCROLL FOR RECENT INTEL</span>
-                <span>UPLINK: ACTIVE</span>
-            </div>
-        </div>
-        """
-        components.html(vessel_card_html, height=450)
-
-    with col_map:
+    # Remove vessel tracker to avoid duplicate feed appearance
+    # Ship tracking info now shown in main Live Updates Feed
         map_template = """
         <!DOCTYPE html>
         <html>

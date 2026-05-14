@@ -29,6 +29,11 @@ def render_community_feed() -> None:
             <div style='margin-top:8px; padding:0 12px;'>
                 <p style='margin:0; color:#4ade80; font-size:0.65rem; font-weight:800; text-transform:uppercase;'>NIGHT WATCH — RESTRICTED MOVEMENT</p>
                 <p style='margin:0; color:#4ade80; font-size:0.65rem; font-weight:800; text-transform:uppercase;'>MV HONDIUS // POS: MID-ATLANTIC</p>
+                <div style='display:flex; gap:16px; margin-top:6px;'>
+                    <span style='color:#94a3b8; font-size:0.55rem; font-weight:800;'>SPEED: <span style='color:#4ade80;'>5.2 kn</span></span>
+                    <span style='color:#94a3b8; font-size:0.55rem; font-weight:800;'>SIGNAL: <span style='color:#4ade80;'>85%</span></span>
+                    <span style='color:#94a3b8; font-size:0.55rem; font-weight:800;'>STATUS: <span style='color:#4ade80;'>QUARANTINED</span></span>
+                </div>
             </div>
         </div>
         <style>
