@@ -481,6 +481,16 @@ def _render_sidebar(citation_cards_ref: list[dict[str, Any]]) -> None:
         render_tile_menu()
         st.divider()
 
+        # ── User Registration/Profile Section ──
+        st.markdown(
+            "<h2 style='color:#00b4d8;font-size:1.1rem;margin-bottom:0.5rem;'>"
+            "👤 Tracker Profile</h2>",
+            unsafe_allow_html=True,
+        )
+        from ui.user_registration import render_user_section
+        render_user_section()
+        st.divider()
+
         st.markdown(
             "<h2 style='color:#00b4d8;font-size:1.1rem;margin-bottom:0.5rem;'>"
             "📚 Source Panel</h2>",
