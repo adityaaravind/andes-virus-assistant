@@ -626,7 +626,9 @@ def render_map_panel() -> None:
 
     # Remove vessel tracker to avoid duplicate feed appearance
     # Ship tracking info now shown in main Live Updates Feed
-        map_template = """
+
+    # Render map at full width
+    map_template = """
         <!DOCTYPE html>
         <html>
         <head>
@@ -740,19 +742,19 @@ def render_map_panel() -> None:
         </body>
         </html>
         """
-        map_html = map_template.replace("__HOTSPOTS__", json.dumps(hotspots))
-        map_html = map_html.replace("__INTENSITY__", json.dumps(intensity))
-        map_html = map_html.replace("__DAY__", str(current_day))
+    map_html = map_template.replace("__HOTSPOTS__", json.dumps(hotspots))
+    map_html = map_html.replace("__INTENSITY__", json.dumps(intensity))
+    map_html = map_html.replace("__DAY__", str(current_day))
 
-        # Force component refresh by embedding unique data in HTML comment
-        try:
-            hotspot_str = json.dumps(hotspots, sort_keys=True)
-            data_hash = hashlib.md5(hotspot_str.encode('utf-8')).hexdigest()[:8]
-            refresh_comment = f"<!-- Map refresh: {data_hash} at {datetime.utcnow().isoformat()} -->"
-            map_html = refresh_comment + map_html
-        except Exception:
-            # Fallback to timestamp
-            refresh_comment = f"<!-- Map refresh: {int(datetime.utcnow().timestamp())} -->"
-            map_html = refresh_comment + map_html
+    # Force component refresh by embedding unique data in HTML comment
+    try:
+        hotspot_str = json.dumps(hotspots, sort_keys=True)
+        data_hash = hashlib.md5(hotspot_str.encode('utf-8')).hexdigest()[:8]
+        refresh_comment = f"<!-- Map refresh: {data_hash} at {datetime.utcnow().isoformat()} -->"
+        map_html = refresh_comment + map_html
+    except Exception:
+        # Fallback to timestamp
+        refresh_comment = f"<!-- Map refresh: {int(datetime.utcnow().timestamp())} -->"
+        map_html = refresh_comment + map_html
 
-        components.html(map_html, height=450)
+    components.html(map_html, height=450)
