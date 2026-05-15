@@ -852,7 +852,7 @@ def render_outbreak_map() -> None:
                                 ` : ''}}
 
                                 <div style="font-size: 10px; color: #64748b; margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(74, 222, 128, 0.2);">
-                                    Last updated: {current_day.replace('{{}}', current_day)} • Data: WHO/CDC verified
+                                    Day {current_day} of outbreak • Data: WHO/CDC verified
                                 </div>
                             </div>
                         `;
