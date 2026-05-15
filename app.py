@@ -809,9 +809,9 @@ def main() -> None:
 
         # ── 5. Global Health Monitor (Map) ───────────────────────────────────────
         st.markdown("<div id='map'></div>", unsafe_allow_html=True)
-        from ui.map_panel import render_map_panel
+        from ui.map_panel import render_outbreak_map
         from ui.stats_panel import render_timeline_chart
-        render_map_panel()
+        render_outbreak_map()
         render_timeline_chart()
         st.divider()
 
