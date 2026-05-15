@@ -13,8 +13,8 @@ st.title("🗺️ Actual Map Component Test")
 try:
     map_data = _get_map_data()
     hotspots = map_data["hotspots"]
-    intensity = map_data["intensity"]
     current_day = map_data["current_day"]
+    state = map_data["state"]
 
     st.success(f"✅ Map data loaded: {len(hotspots)} hotspots, day {current_day}")
 
@@ -23,7 +23,8 @@ try:
         st.json({
             "hotspots_count": len(hotspots),
             "current_day": current_day,
-            "sample_hotspot": hotspots[0] if hotspots else None
+            "sample_hotspot": hotspots[0] if hotspots else None,
+            "state": state
         })
 
     # Minimal working map template
