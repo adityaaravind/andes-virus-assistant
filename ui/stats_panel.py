@@ -165,7 +165,7 @@ def _log_stats_refresh_signal() -> None:
     except Exception:
         pass  # Silent fail
 
-@st.cache_data(ttl=60, show_spinner=False)
+@st.cache_data(ttl=30, show_spinner=False)
 def get_outbreak_stats() -> dict[str, Any]:
     # Log refresh signal when cache refreshes
     _log_stats_refresh_signal()
@@ -186,7 +186,7 @@ def get_outbreak_stats() -> dict[str, Any]:
     return stats
 
 
-@st.cache_data(ttl=300, show_spinner=False)  # Cache for 5 minutes
+@st.cache_data(ttl=60, show_spinner=False)  # Cache for 1 minute
 def _extract_stats_from_rag() -> dict[str, Any]:
     """Extract outbreak statistics from RAG vectorstore using similarity search."""
     try:

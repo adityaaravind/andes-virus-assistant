@@ -42,7 +42,7 @@ def _get_auto_nationality_data(total_cases: int, total_deaths: int) -> list:
     return base_data
 
 
-@st.cache_data(ttl=300, show_spinner=False)  # Cache for 5 minutes
+@st.cache_data(ttl=30, show_spinner=False)  # Cache for 30 seconds - real-time updates
 def _extract_countries_from_rag() -> list:
     """Extract country-specific case data from RAG vectorstore."""
     try:
@@ -127,7 +127,7 @@ def _extract_countries_from_rag() -> list:
         # Clear timeout alarm
         signal.alarm(0)
 
-# Legacy constant for backward compatibility
+# Legacy constant for backward compatibility - will be updated dynamically
 NATIONALITIES_DATA = _get_auto_nationality_data(8, 3)
 
 def _get_local_fear_index(code: str, hanta_risk: float) -> float:
@@ -158,7 +158,7 @@ def _calculate_time_ago(timestamp_iso: str) -> tuple[int, str]:
     except:
         return (0, "H")
 
-@st.cache_data(ttl=120, show_spinner=False)  # 2-minute cache for testing
+@st.cache_data(ttl=30, show_spinner=False)  # 30-second cache for real-time updates
 def _generate_ai_insight_signal() -> dict:
     """Generate a single AI insight signal for the feed."""
     from datetime import datetime
@@ -484,6 +484,14 @@ def _get_live_state() -> dict:
         "ship_status": _get_dynamic_ship_status(),
         "last_updated": datetime.now().strftime("%Y-%m-%d")
     }
+
+def get_nationalities_data():
+    """Get nationality data based on current live state."""
+    state = _get_live_state()
+    return _get_auto_nationality_data(
+        state.get("confirmed_cases", 8),
+        state.get("deaths", 3)
+    )
 
 def _get_ship_position() -> tuple[float, float]:
     """Extract ship position from RAG vectorstore or calculate from time progression."""
@@ -1176,9 +1184,9 @@ def _get_dynamic_intensity(day: int) -> dict:
 
         return {"hanta": hanta_fallback, "covid": covid_fallback, "onset": onset_fallback}
 
-@st.cache_data(ttl=30, show_spinner=False)
+@st.cache_data(ttl=15, show_spinner=False)
 def _get_map_data() -> dict:
-    """Cache map data for 60 seconds to match other components"""
+    """Cache map data for 15 seconds for real-time updates"""
     state = _get_live_state()
     from ui.pandemic_risk import _compute_risk
 

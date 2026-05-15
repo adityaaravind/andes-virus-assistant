@@ -1,13 +1,14 @@
 {
-  "confirmed_cases": 8,
-  "suspected_cases": 9,
-  "deaths": 3,
-  "nationalities": 23,
-  "last_updated": "2026-05-13",
+  "confirmed_cases": 11,
+  "suspected_cases": 12,
+  "deaths": 4,
+  "nationalities": 28,
+  "last_updated": "2026-05-15",
   "source": "auto-extracted",
   "source_type": "WHO/CDC verified",
   "last_source": "WHO Emergency Response",
   "confidence": "HIGH",
-  "articles_scanned": 4,
-  "note": "Updated from verified WHO reports: 8 confirmed, 9 suspected."
+  "articles_scanned": 6,
+  "note": "Updated from latest WHO reports: 11 confirmed cases with 4 fatalities. Human-to-human transmission confirmed aboard MV Hondius.",
+  "update_reason": "Real-time data refresh - progressive outbreak monitoring"
 }

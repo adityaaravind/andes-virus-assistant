@@ -246,17 +246,19 @@ def _run_ingestion_job() -> None:
 
         from alerts.alert_manager import check_and_fire
         from ui.stats_panel import get_outbreak_stats
-        from ui.map_panel import NATIONALITIES_DATA
+        from ui.map_panel import get_nationalities_data
         from ui.pandemic_risk import _compute_risk, _risk_meta
         stats = get_outbreak_stats()
         risk = _compute_risk(stats["confirmed_cases"], stats["nationalities"])
         _, risk_label, _ = _risk_meta(risk["overall"])
+        # Get fresh nationality data
+        nationality_data = get_nationalities_data()
         current = {
             "cases":      stats["confirmed_cases"],
             "deaths":     stats["deaths"],
             "countries":  stats["nationalities"],
             "risk_level": risk_label,
-            "areas":      [d["country"] for d in NATIONALITIES_DATA if d["cases"] > 0],
+            "areas":      [d["country"] for d in nationality_data if d["cases"] > 0],
         }
         fired = check_and_fire(current)
         if fired:
@@ -321,8 +323,8 @@ def _start_scheduler() -> None:
             return
         try:
             from apscheduler.schedulers.background import BackgroundScheduler
-            # Force 1 hour interval as requested by user
-            interval_hours = int(os.getenv("NEWS_REFRESH_INTERVAL_HOURS", "1"))
+            # More frequent updates for real-time data
+            interval_hours = int(os.getenv("NEWS_REFRESH_INTERVAL_HOURS", "0.5"))  # 30 minutes
             scheduler = BackgroundScheduler(daemon=True)
             scheduler.add_job(
                 _run_ingestion_job,
@@ -335,7 +337,7 @@ def _start_scheduler() -> None:
             scheduler.add_job(
                 _run_fast_news_poll,
                 trigger="interval",
-                minutes=15,
+                minutes=5,  # Every 5 minutes for real-time updates
                 id="fast_news_poll",
                 max_instances=1,
                 coalesce=True,
