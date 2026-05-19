@@ -57,6 +57,30 @@ def _restore_analytics_backup() -> None:
         logging.exception("Failed to restore analytics backup")
 
 
+def _restore_outbreak_live() -> None:
+    """Restore outbreak_live.json from Qdrant if Qdrant has newer data (survives restarts)."""
+    try:
+        import json
+        from alerts.persistent_kv import kv_get
+        live_file = Path("data/outbreak_live.json")
+        kv_data = kv_get("outbreak_live_data")
+        if not kv_data:
+            return
+        kv_updated = kv_data.get("last_updated", "")
+        file_updated = ""
+        if live_file.exists():
+            try:
+                file_updated = json.loads(live_file.read_text()).get("last_updated", "")
+            except Exception:
+                pass
+        if kv_updated >= file_updated:
+            live_file.parent.mkdir(parents=True, exist_ok=True)
+            live_file.write_text(json.dumps(kv_data, indent=2))
+            logging.info("Restored outbreak_live.json from Qdrant (kv_updated=%s)", kv_updated)
+    except Exception:
+        logging.exception("Failed to restore outbreak_live.json")
+
+
 
 # ---------------------------------------------------------------------------
 # Background ingestion scheduler (runs once per process, not per Streamlit
@@ -212,38 +236,48 @@ def _system_watchdog_cleanup() -> None:
 
 
 def _run_ingestion_job() -> None:
+    import gc
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent))
+    new_chunks = []
     try:
-        import sys
-        import gc
-        sys.path.insert(0, str(Path(__file__).parent))
         from scripts.ingest_all import run_ingestion
         new_chunks = run_ingestion()
+    except Exception:
+        logging.exception("Background ingestion job failed")
 
-        # PERSIST SUCCESS TIMESTAMP
+    # Write timestamp regardless of success/failure so health check clears "missing"
+    try:
         from alerts.persistent_kv import kv_set
         kv_set("last_ingestion_time", datetime.utcnow().isoformat())
+    except Exception:
+        pass
 
-        # UPDATE MAP WITH ALL INDEXED CONTENT
-        try:
-            from ui.news_location_extractor import update_map_from_news_ingestion
-            if new_chunks:
-                update_map_from_news_ingestion(new_chunks)
-            
-            # Clear internal streamlit caches to ensure map shows new data
-            import streamlit as st
-            st.cache_data.clear()
-            
-            # Trigger map refresh after full ingestion
-            kv_set("last_map_update", datetime.utcnow().isoformat())
-        except Exception:
-            pass  # Don't break ingestion if map update fails
+    # UPDATE MAP WITH ALL INDEXED CONTENT
+    try:
+        from alerts.persistent_kv import kv_set
+        from ui.news_location_extractor import update_map_from_news_ingestion
+        if new_chunks:
+            update_map_from_news_ingestion(new_chunks)
 
-        # FIRE REAL-TIME SIGNAL FOR FULL INGESTION
+        # Clear internal streamlit caches to ensure map shows new data
+        import streamlit as st
+        st.cache_data.clear()
+
+        # Trigger map refresh after full ingestion
+        kv_set("last_map_update", datetime.utcnow().isoformat())
+    except Exception:
+        pass  # Don't break ingestion if map update fails
+
+    # FIRE REAL-TIME SIGNAL FOR FULL INGESTION
+    try:
         from alerts.signal_dispatcher import fire_ingestion_signal
-        fire_ingestion_signal("Full Pipeline", 0, 0)  # Will be overridden by actual counts in run_ingestion
+        fire_ingestion_signal("Full Pipeline", 0, 0)
+    except Exception:
+        pass
 
-        # Check alert thresholds after every ingestion
-
+    # Check alert thresholds after every ingestion
+    try:
         from alerts.alert_manager import check_and_fire
         from ui.stats_panel import get_outbreak_stats
         from ui.map_panel import get_nationalities_data
@@ -251,7 +285,6 @@ def _run_ingestion_job() -> None:
         stats = get_outbreak_stats()
         risk = _compute_risk(stats["confirmed_cases"], stats["nationalities"])
         _, risk_label, _ = _risk_meta(risk["overall"])
-        # Get fresh nationality data
         nationality_data = get_nationalities_data()
         current = {
             "cases":      stats["confirmed_cases"],
@@ -263,10 +296,10 @@ def _run_ingestion_job() -> None:
         fired = check_and_fire(current)
         if fired:
             logging.info("Dispatched %d alert(s)", fired)
-        
-        gc.collect() # Force cleanup
     except Exception:
-        logging.exception("Background ingestion job failed")
+        pass
+
+    gc.collect()
 
 
 def _create_sample_outbreak_docs() -> list[dict]:
@@ -380,6 +413,8 @@ def _start_scheduler() -> None:
             scheduler.start()
             _SCHEDULER_STARTED = True
             logging.info("Auto-ingestion scheduler started (every %dh)", interval_hours)
+            # Immediate first poll on cold start — don't wait 5 minutes
+            threading.Thread(target=_run_fast_news_poll, daemon=True, name="initial_fast_poll").start()
         except Exception:
             logging.exception("Failed to start ingestion scheduler")
 
@@ -684,6 +719,8 @@ def main() -> None:
     _ensure_data_dirs()
     # defer analytics restoration to avoid blocking initial load
     threading.Thread(target=_restore_analytics_backup, daemon=True).start()
+    # restore latest outbreak counts from Qdrant (survives Streamlit Cloud restarts)
+    threading.Thread(target=_restore_outbreak_live, daemon=True).start()
 
     import gc
     gc.collect() # Immediate cleanup on reload

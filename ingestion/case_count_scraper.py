@@ -377,6 +377,13 @@ def extract_and_save(articles: list[dict[str, Any]]) -> dict[str, Any]:
         LIVE_FILE.parent.mkdir(parents=True, exist_ok=True)
         LIVE_FILE.write_text(json.dumps(merged, indent=2))
 
+        # Persist to Qdrant so data survives Streamlit Cloud restarts
+        try:
+            from alerts.persistent_kv import kv_set
+            kv_set("outbreak_live_data", merged)
+        except Exception:
+            pass
+
         # PHASE 2: Log signal to community feed
         from alerts.community_store import add_insight
         summary_msg = f"LIVE SIGNAL: Metrics adjusted to {merged.get('confirmed_cases')} confirmed, {merged.get('deaths')} fatalities"
